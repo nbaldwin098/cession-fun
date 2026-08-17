@@ -1,193 +1,180 @@
 /**
- * Cession Pro Trading Terminal Controller
- * Handles orderbook depth rendering, instant swap execution,
- * pair switching, and real-time trade tape updates.
+ * Cession.fun — Pump.fun Exact Trade Controller
  */
 
-class CessionTradingManager {
+class PumpTradingManager {
   constructor() {
-    this.currentPair = 'BTC/USD';
-    this.currentPrice = 65420.50;
-    this.currentTradeSide = 'BUY'; // 'BUY' or 'SELL'
-    this.pairSelect = document.getElementById('pairSelect');
-    this.payInput = document.getElementById('tradePayAmount');
-    this.receiveInput = document.getElementById('tradeReceiveAmount');
-    this.tabBuy = document.getElementById('tradeTabBuy');
-    this.tabSell = document.getElementById('tradeTabSell');
-    this.btnExecute = document.getElementById('btnExecuteTrade');
+    this.activeToken = null;
+    this.side = 'buy'; // 'buy' or 'sell'
+    this.slippagePercent = 1.0;
+    this.isCoinUnit = false; // toggle between SOL and Token
+
+    this.btnBuy = document.getElementById('btnToggleBuy');
+    this.btnSell = document.getElementById('btnToggleSell');
+    this.amountInput = document.getElementById('tradeAmountInput');
+    this.unitLabel = document.getElementById('tradeUnitLabel');
+    this.outputQuote = document.getElementById('tradeOutputQuote');
+    this.btnPlaceTrade = document.getElementById('btnPlaceTrade');
+    this.btnSlippage = document.getElementById('btnSetSlippage');
+    this.slippageVal = document.getElementById('currentSlippageVal');
 
     this.init();
   }
 
   init() {
-    if (this.pairSelect) {
-      this.pairSelect.addEventListener('change', (e) => this.switchPair(e.target.value));
+    if (this.btnBuy && this.btnSell) {
+      this.btnBuy.addEventListener('click', () => this.setSide('buy'));
+      this.btnSell.addEventListener('click', () => this.setSide('sell'));
     }
 
-    if (this.tabBuy && this.tabSell) {
-      this.tabBuy.addEventListener('click', () => this.setSide('BUY'));
-      this.tabSell.addEventListener('click', () => this.setSide('SELL'));
+    if (this.amountInput) {
+      this.amountInput.addEventListener('input', () => this.calculateQuote());
     }
 
-    if (this.payInput) {
-      this.payInput.addEventListener('input', () => this.calculateReceive());
+    if (this.btnPlaceTrade) {
+      this.btnPlaceTrade.addEventListener('click', () => this.executeTrade());
     }
 
-    if (this.btnExecute) {
-      this.btnExecute.addEventListener('click', () => this.executeOrder());
+    if (this.btnSlippage) {
+      this.btnSlippage.addEventListener('click', () => this.promptSlippage());
     }
-
-    this.renderOrderbook();
   }
 
-  switchPair(newPair) {
-    this.currentPair = newPair;
-    const [base, quote] = newPair.split('/');
-    
-    // Update chart
-    if (window.chartController) {
-      window.chartController.loadCandles(newPair.replace('/', '-'));
-    }
-
-    // Update labels
-    const paySym = document.getElementById('paySymbolTag');
-    const receiveSym = document.getElementById('receiveSymbolTag');
-    if (this.currentTradeSide === 'BUY') {
-      if (paySym) paySym.textContent = quote;
-      if (receiveSym) receiveSym.textContent = base;
-    } else {
-      if (paySym) paySym.textContent = base;
-      if (receiveSym) receiveSym.textContent = quote;
-    }
-
-    this.calculateReceive();
-    if (window.showToast) window.showToast(`Switched market pair to ${newPair}`, 'success');
+  setActiveToken(token) {
+    this.activeToken = token;
+    if (this.amountInput) this.amountInput.value = '';
+    this.calculateQuote();
   }
 
   setSide(side) {
-    this.currentTradeSide = side;
-    const [base, quote] = this.currentPair.split('/');
-    const paySym = document.getElementById('paySymbolTag');
-    const receiveSym = document.getElementById('receiveSymbolTag');
-
-    if (side === 'BUY') {
-      if (this.tabBuy) this.tabBuy.classList.add('active');
-      if (this.tabSell) this.tabSell.classList.remove('active');
-      if (this.btnExecute) {
-        this.btnExecute.textContent = `Buy ${base}`;
-        this.btnExecute.className = 'btn btn-action-buy';
+    this.side = side;
+    if (this.btnBuy && this.btnSell && this.btnPlaceTrade) {
+      if (side === 'buy') {
+        this.btnBuy.classList.add('active');
+        this.btnSell.classList.remove('active');
+        this.btnPlaceTrade.classList.remove('sell');
+        this.btnPlaceTrade.textContent = 'place trade';
+        if (this.unitLabel) this.unitLabel.textContent = 'SOL';
+      } else {
+        this.btnSell.classList.add('active');
+        this.btnBuy.classList.remove('active');
+        this.btnPlaceTrade.classList.add('sell');
+        this.btnPlaceTrade.textContent = 'place trade (sell)';
+        if (this.unitLabel) this.unitLabel.textContent = this.activeToken ? `$${this.activeToken.symbol}` : 'TOKENS';
       }
-      if (paySym) paySym.textContent = quote;
-      if (receiveSym) receiveSym.textContent = base;
-    } else {
-      if (this.tabBuy) this.tabBuy.classList.remove('active');
-      if (this.tabSell) this.tabSell.classList.add('active');
-      if (this.btnExecute) {
-        this.btnExecute.textContent = `Sell ${base}`;
-        this.btnExecute.className = 'btn btn-action-sell';
-      }
-      if (paySym) paySym.textContent = base;
-      if (receiveSym) receiveSym.textContent = quote;
     }
-    this.calculateReceive();
+    this.calculateQuote();
   }
 
-  calculateReceive() {
-    if (!this.payInput || !this.receiveInput) return;
-    const amt = parseFloat(this.payInput.value) || 0;
-    
-    if (this.currentTradeSide === 'BUY') {
-      const out = amt / (this.currentPrice || 65000);
-      this.receiveInput.value = amt > 0 ? out.toFixed(6) : '';
+  setPreset(preset) {
+    if (!this.amountInput) return;
+    if (preset === 0) {
+      this.amountInput.value = '';
+    } else if (preset === 'max') {
+      this.amountInput.value = this.side === 'buy' ? '10' : '1000000';
     } else {
-      const out = amt * (this.currentPrice || 65000);
-      this.receiveInput.value = amt > 0 ? out.toFixed(2) : '';
+      this.amountInput.value = preset;
     }
+    this.calculateQuote();
   }
 
-  executeOrder() {
-    const amt = parseFloat(this.payInput.value);
-    if (!amt || amt <= 0) {
-      if (window.showToast) window.showToast('Please enter an amount to trade.', 'error');
+  calculateQuote() {
+    if (!this.outputQuote) return;
+    const val = parseFloat(this.amountInput ? this.amountInput.value : 0) || 0;
+    if (!this.activeToken || val <= 0) {
+      this.outputQuote.textContent = this.side === 'buy' ? 'you receive: 0 tokens' : 'you receive: 0 SOL';
       return;
     }
 
-    const [base, quote] = this.currentPair.split('/');
-    const msg = this.currentTradeSide === 'BUY'
-      ? `Purchased ${(amt / this.currentPrice).toFixed(4)} ${base} for $${amt.toFixed(2)} USD (0.20% sovereign routing fee)`
-      : `Sold ${amt} ${base} for $${(amt * this.currentPrice).toFixed(2)} USD`;
+    const priceSol = this.activeToken.currentPriceSol || 0.000000025;
 
-    if (window.showToast) window.showToast(msg, 'success');
-    this.payInput.value = '';
-    this.receiveInput.value = '';
-
-    // Push to trade tape
-    this.addTradeToTape({
-      time: new Date().toLocaleTimeString(),
-      price: this.currentPrice.toFixed(2),
-      size: (amt / this.currentPrice).toFixed(4),
-      side: this.currentTradeSide
-    });
-  }
-
-  addTradeToTape(trade) {
-    const tbody = document.getElementById('tradeTapeBody');
-    if (!tbody) return;
-
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td style="color: var(--text-muted);">${trade.time}</td>
-      <td style="color: ${trade.side === 'BUY' ? 'var(--accent-emerald)' : 'var(--accent-rose)'}; font-weight: 700;">$${trade.price}</td>
-      <td>${trade.size}</td>
-    `;
-    tbody.insertBefore(row, tbody.firstChild);
-    if (tbody.children.length > 20) {
-      tbody.removeChild(tbody.lastChild);
+    if (this.side === 'buy') {
+      const tokensOut = Math.floor(val / priceSol);
+      this.outputQuote.textContent = `you receive: ~${tokensOut.toLocaleString()} $${this.activeToken.symbol}`;
+    } else {
+      const solOut = (val * priceSol * 0.995).toFixed(4);
+      this.outputQuote.textContent = `you receive: ~${solOut} SOL`;
     }
   }
 
-  renderOrderbook() {
-    const asksEl = document.getElementById('orderbookAsks');
-    const bidsEl = document.getElementById('orderbookBids');
-    if (!asksEl || !bidsEl) return;
-
-    const basePrice = this.currentPrice;
-    
-    // Asks (above price)
-    let asksHtml = '';
-    for (let i = 5; i >= 1; i--) {
-      const p = (basePrice * (1 + (i * 0.0003))).toFixed(2);
-      const s = (Math.random() * 0.8 + 0.1).toFixed(4);
-      const width = Math.min(100, Math.floor(Math.random() * 60 + 20));
-      asksHtml += `
-        <div class="ob-row ask">
-          <div class="ob-bar ask" style="width: ${width}%;"></div>
-          <span class="p">$${p}</span>
-          <span class="s">${s}</span>
-        </div>
-      `;
+  promptSlippage() {
+    const input = prompt('Enter max slippage percentage (%):', this.slippagePercent);
+    if (input !== null) {
+      const parsed = parseFloat(input);
+      if (!isNaN(parsed) && parsed >= 0.1 && parsed <= 50) {
+        this.slippagePercent = parsed;
+        if (this.slippageVal) this.slippageVal.textContent = `${parsed}%`;
+      } else {
+        alert('Please enter a valid slippage between 0.1% and 50%.');
+      }
     }
-    asksEl.innerHTML = asksHtml;
+  }
 
-    // Bids (below price)
-    let bidsHtml = '';
-    for (let i = 1; i <= 5; i++) {
-      const p = (basePrice * (1 - (i * 0.0003))).toFixed(2);
-      const s = (Math.random() * 0.8 + 0.1).toFixed(4);
-      const width = Math.min(100, Math.floor(Math.random() * 60 + 20));
-      bidsHtml += `
-        <div class="ob-row bid">
-          <div class="ob-bar bid" style="width: ${width}%;"></div>
-          <span class="p">$${p}</span>
-          <span class="s">${s}</span>
-        </div>
-      `;
+  async executeTrade() {
+    if (!this.activeToken) {
+      if (window.launchpadManager) window.launchpadManager.toast('No token selected', 'error');
+      return;
     }
-    bidsEl.innerHTML = bidsHtml;
+
+    const amount = parseFloat(this.amountInput ? this.amountInput.value : 0);
+    if (!amount || amount <= 0) {
+      if (window.launchpadManager) window.launchpadManager.toast('Please enter a valid trade amount', 'error');
+      return;
+    }
+
+    const trader = window.walletEngine && window.walletEngine.activeAddress
+      ? window.walletEngine.activeAddress
+      : '0x' + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
+
+    const endpoint = this.side === 'buy' 
+      ? `/api/tokens/${this.activeToken.symbol}/buy`
+      : `/api/tokens/${this.activeToken.symbol}/sell`;
+
+    const payload = this.side === 'buy'
+      ? { solAmount: amount, buyer: trader, slippageTolerancePercent: this.slippagePercent }
+      : { tokenAmount: amount, seller: trader, slippageTolerancePercent: this.slippagePercent };
+
+    try {
+      if (this.btnPlaceTrade) this.btnPlaceTrade.textContent = 'processing on-chain...';
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (window.launchpadManager) {
+          window.launchpadManager.toast(
+            `Successfully ${this.side === 'buy' ? 'bought' : 'sold'} on bonding curve!`,
+            'success'
+          );
+          // Refresh token data & UI
+          await window.launchpadManager.fetchTokens(false);
+          window.launchpadManager.openTokenDetail(this.activeToken.symbol);
+        }
+        if (this.amountInput) this.amountInput.value = '';
+        this.calculateQuote();
+      } else {
+        if (window.launchpadManager) {
+          window.launchpadManager.toast(data.error || 'Trade failed', 'error');
+        }
+      }
+    } catch (e) {
+      if (window.launchpadManager) {
+        window.launchpadManager.toast('Network error executing trade', 'error');
+      }
+    } finally {
+      if (this.btnPlaceTrade) {
+        this.btnPlaceTrade.textContent = this.side === 'buy' ? 'place trade' : 'place trade (sell)';
+      }
+    }
   }
 }
 
 window.tradingManager = null;
+window.PumpTradingManager = PumpTradingManager;
 document.addEventListener('DOMContentLoaded', () => {
-  window.tradingManager = new CessionTradingManager();
+  window.tradingManager = new PumpTradingManager();
 });

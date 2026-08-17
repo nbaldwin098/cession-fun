@@ -516,50 +516,24 @@ class CessionWalletEngine {
   }
 
   renderState() {
-    const btnOpenAuth = document.getElementById('btnOpenAuthModal');
-    const btnOpenWallet = document.getElementById('btnOpenWalletModal');
-    const navUserLoggedIn = document.getElementById('navUserLoggedIn');
-    const profileNav = document.getElementById('profileUsernameNav');
+    const btnConnect = document.getElementById('btnConnectWallet');
+    const pill = document.getElementById('walletConnectedPill');
+    const navBal = document.getElementById('navWalletBalance');
+    const navAddr = document.getElementById('navWalletAddress');
 
     if (this.isAuthenticated && this.activeAddress) {
-      if (btnOpenAuth) btnOpenAuth.style.display = 'none';
-      if (btnOpenWallet) btnOpenWallet.style.display = 'none';
-      if (navUserLoggedIn) navUserLoggedIn.style.display = 'flex';
+      if (btnConnect) btnConnect.style.display = 'none';
+      if (pill) pill.style.display = 'flex';
 
       const shortAddr = this.activeAddress.length > 10
-        ? `${this.activeAddress.substring(0, 6)}...${this.activeAddress.substring(this.activeAddress.length - 4)}`
+        ? `${this.activeAddress.substring(0, 5)}...${this.activeAddress.substring(this.activeAddress.length - 4)}`
         : this.activeAddress;
 
-      if (profileNav) {
-        profileNav.textContent = this.userProfile?.username || shortAddr;
-      }
-
-      // Update Profile Modal Details
-      const pUsername = document.getElementById('profileUsernameDisplay');
-      const pAddr = document.getElementById('profileWalletAddress');
-      const pBadge = document.getElementById('profileBadgeDisplay');
-      const pSeed = document.getElementById('seedPhraseDisplay');
-
-      if (pUsername) pUsername.textContent = this.userProfile?.username || 'SovereignTrader';
-      if (pAddr) pAddr.textContent = this.activeAddress;
-      if (pBadge) pBadge.textContent = this.userProfile?.badge || 'VERIFIED TRADER';
-      if (pSeed) pSeed.textContent = this.vaultData?.mnemonic || this.userProfile?.mnemonic || 'Connected via External Injected Web3 Provider';
-
-      // Update balances in Trade panels
-      const detailBal = document.getElementById('detailUserBalance');
-      if (detailBal) {
-        detailBal.textContent = this.activeChain === 'Solana'
-          ? `Balance: ${this.balances.sol} SOL`
-          : `Balance: ${this.balances.eth} ETH`;
-      }
+      if (navAddr) navAddr.textContent = shortAddr;
+      if (navBal) navBal.textContent = `${(this.balances.sol || 6.2).toFixed(2)} SOL`;
     } else {
-      // Disconnected state
-      if (btnOpenAuth) btnOpenAuth.style.display = 'inline-flex';
-      if (btnOpenWallet) btnOpenWallet.style.display = 'inline-flex';
-      if (navUserLoggedIn) navUserLoggedIn.style.display = 'none';
-
-      const detailBal = document.getElementById('detailUserBalance');
-      if (detailBal) detailBal.textContent = 'Vault: Disconnected';
+      if (btnConnect) btnConnect.style.display = 'inline-flex';
+      if (pill) pill.style.display = 'none';
     }
   }
 }
