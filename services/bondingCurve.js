@@ -17,7 +17,7 @@ class BondingCurveEngine {
     this.chatMessages = new Map();
     this.collections = new Map();
     this.totalProtocolBurnedUsd = 42890.50;
-    this.treasurySolAddress = process.env.TREASURY_SOL_ADDRESS || "CessTreasury99xFAce8819024Bca01990172Bca90123";
+    this.treasurySolAddress = process.env.TREASURY_SOL_ADDRESS || "8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH";
     this.treasuryEvmAddress = process.env.TREASURY_EVM_ADDRESS || "0x777A6b3D91028374829108a798129034Cession99";
     this.totalMintFeesCollectedSol = 48.6;
     this.totalTradingFeesCollectedSol = 24.3;
