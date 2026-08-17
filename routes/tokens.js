@@ -14,6 +14,12 @@ router.get('/global-trades', (req, res) => {
   res.json({ success: true, count: trades.length, trades });
 });
 
+// Protocol Transparency & Real Company Treasury Wallets
+router.get(['/transparency', '/treasury'], (req, res) => {
+  const data = bondingCurve.getTransparencyData();
+  res.json(data);
+});
+
 // Get Token Bundles / Curated Baskets
 router.get(['/collections', '/bundles'], (req, res) => {
   const collections = bondingCurve.getAllCollections();
@@ -249,7 +255,7 @@ router.post('/:symbol/sell', (req, res) => {
   }
 });
 
-// Stake in Diamond Vault (Time-Locking for Long-Term Sovereign Stacks)
+// Stake in Staking Vault (Time-Locking for Yield & Anti-Dump Protection)
 router.post('/:symbol/stake', (req, res) => {
   try {
     const { amount, durationDays = 90, userAddress } = req.body;

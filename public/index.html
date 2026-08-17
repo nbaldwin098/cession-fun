@@ -441,6 +441,305 @@
         </section>
       </main>
 
+      <!-- =========================================================
+           VIEW: STAKING (Yield & Community Lock Vaults)
+      ========================================================= -->
+      <main class="page-view" id="viewStaking">
+        <section class="explore-section">
+          <div class="section-header-row">
+            <div>
+              <h2 class="section-title">🥩 Staking & Yield Vaults</h2>
+              <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                Stake $CESS and verified sovereign tokens to earn continuous AMM swap rewards and anti-dump staking yields.
+              </div>
+            </div>
+          </div>
+
+          <!-- Staking Metric Overview Cards -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 20px 0;">
+            <div class="transparency-card">
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total Staked Value</div>
+              <div style="font-size: 22px; font-weight: 800; color: #fff; font-family: var(--font-mono); margin-top: 6px;">$1,480,200</div>
+              <div style="font-size: 11px; color: var(--pump-mint); margin-top: 4px;">+14.2% this month</div>
+            </div>
+            <div class="transparency-card">
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Highest APY Tier</div>
+              <div style="font-size: 22px; font-weight: 800; color: var(--pump-mint); font-family: var(--font-mono); margin-top: 6px;">36.0% APY</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">365-day sovereign lock</div>
+            </div>
+            <div class="transparency-card">
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Yield Distributed</div>
+              <div style="font-size: 22px; font-weight: 800; color: #fff; font-family: var(--font-mono); margin-top: 6px;">42.85 SOL</div>
+              <div style="font-size: 11px; color: var(--pump-mint); margin-top: 4px;">Direct to stakers</div>
+            </div>
+            <div class="transparency-card">
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Active Stakers</div>
+              <div style="font-size: 22px; font-weight: 800; color: #fff; font-family: var(--font-mono); margin-top: 6px;">1,248 Wallets</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Non-custodial vaults</div>
+            </div>
+          </div>
+
+          <!-- Staking Interaction Card -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px;">
+            <div class="transparency-card">
+              <h3 style="font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 16px;">Deposit & Stake Tokens</h3>
+              
+              <div class="form-group-pump">
+                <label class="form-label-pump">Select Token to Stake</label>
+                <select id="stakeTokenSelect" class="form-input-pump" style="cursor: pointer;">
+                  <option value="CESS">$CESS — Cession Sovereign Engine (24.5% APY)</option>
+                  <option value="USER">$USER — The Random Bull (22.5% APY)</option>
+                  <option value="BILLY">$BILLY — Billycoin (18.0% APY)</option>
+                </select>
+              </div>
+
+              <div class="form-group-pump">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                  <span class="form-label-pump" style="margin: 0;">Amount to Stake</span>
+                  <span style="color: var(--text-muted);">Available: <strong id="stakeMaxTokens" style="color: var(--pump-mint);">250,000 $CESS</strong></span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <input type="number" id="stakeAmountInput" class="form-input-pump" placeholder="e.g. 50000" style="flex: 1;" step="any">
+                  <button class="cat-pill-btn" style="padding: 0 12px;" onclick="document.getElementById('stakeAmountInput').value='250000'">MAX</button>
+                </div>
+              </div>
+
+              <div class="form-group-pump">
+                <label class="form-label-pump">Lock Duration & APY</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                  <button class="cat-pill-btn" id="lockTier30" onclick="window.launchpadManager.setStakeTier(30)" style="flex-direction: column; padding: 10px; font-size: 12px;">
+                    <strong>30 Days</strong>
+                    <span style="color: var(--pump-mint); font-size: 11px;">14.0% APY</span>
+                  </button>
+                  <button class="cat-pill-btn active" id="lockTier90" onclick="window.launchpadManager.setStakeTier(90)" style="flex-direction: column; padding: 10px; font-size: 12px;">
+                    <strong>90 Days</strong>
+                    <span style="color: var(--pump-mint); font-size: 11px;">22.5% APY</span>
+                  </button>
+                  <button class="cat-pill-btn" id="lockTier365" onclick="window.launchpadManager.setStakeTier(365)" style="flex-direction: column; padding: 10px; font-size: 12px;">
+                    <strong>365 Days</strong>
+                    <span style="color: var(--pump-mint); font-size: 11px;">36.0% APY</span>
+                  </button>
+                </div>
+              </div>
+
+              <button class="btn-signin-mint" id="btnExecuteStake" style="width: 100%; padding: 12px; margin-top: 10px;">
+                Stake Tokens & Lock Yield
+              </button>
+            </div>
+
+            <div class="transparency-card">
+              <h3 style="font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 16px;">Your Active Staking Vaults</h3>
+              <div id="activeStakesList" style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="background: var(--bg-input); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; color: #fff;">100,000 $CESS</span>
+                    <span style="color: var(--pump-mint); font-size: 12px; font-weight: 700; background: rgba(134, 239, 172, 0.1); padding: 2px 8px; border-radius: 12px;">22.5% APY</span>
+                  </div>
+                  <div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">
+                    Unlock: <strong>72 days remaining</strong> • Accrued Rewards: <strong style="color: var(--pump-mint);">1.42 SOL</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- =========================================================
+           VIEW: TRANSPARENCY & COMPANY PROTOCOL WALLETS
+      ========================================================= -->
+      <main class="page-view" id="viewTransparency">
+        <section class="explore-section">
+          <div class="section-header-row">
+            <div>
+              <h2 class="section-title">🛡️ Protocol Transparency & Verified Company Wallets</h2>
+              <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                100% on-chain proof of reserves, official protocol fee collection wallets, and real-time fee distribution metrics.
+              </div>
+            </div>
+            <button class="cat-pill-btn" onclick="window.launchpadManager.refreshTransparency()" style="display: flex; align-items: center; gap: 6px;">
+              <span>↻ Refresh On-Chain Data</span>
+            </button>
+          </div>
+
+          <!-- Official Company Treasury Crypto Wallets -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin: 24px 0;">
+            
+            <!-- Solana Treasury Wallet -->
+            <div class="transparency-card" style="border: 1px solid rgba(134, 239, 172, 0.3);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 18px;">🟣</span>
+                  <strong style="font-size: 15px; color: #fff;">Solana Company Treasury</strong>
+                </div>
+                <span style="font-size: 11px; background: rgba(134, 239, 172, 0.15); color: var(--pump-mint); font-weight: 700; padding: 3px 8px; border-radius: 12px;">0.1 SOL MINT FEE AGGREGATOR</span>
+              </div>
+              
+              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Official Fee Receiver & AMM LP Reserve Address:</div>
+              <div class="wallet-address-box" style="margin-bottom: 12px;">
+                <span id="solTreasuryDisplay">CessTreasury99xFAce8819024Bca01990172Bca90123</span>
+                <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="navigator.clipboard.writeText('CessTreasury99xFAce8819024Bca01990172Bca90123'); window.launchpadManager.toast('Solana Treasury copied', 'success');">copy</button>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 13px; border-top: 1px solid var(--border-card); padding-top: 12px;">
+                <span>Live Treasury Balance: <strong id="solTreasuryBal" style="color: var(--pump-mint); font-size: 15px;">48.60 SOL</strong></span>
+                <a href="https://solscan.io" target="_blank" rel="noopener noreferrer" style="color: var(--pump-mint); font-size: 12px; text-decoration: underline;">Verify on Solscan ↗</a>
+              </div>
+            </div>
+
+            <!-- Base / EVM Treasury Wallet -->
+            <div class="transparency-card" style="border: 1px solid rgba(192, 132, 252, 0.3);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 18px;">🔵</span>
+                  <strong style="font-size: 15px; color: #fff;">Base L2 Protocol Treasury</strong>
+                </div>
+                <span style="font-size: 11px; background: rgba(192, 132, 252, 0.15); color: var(--accent-purple); font-weight: 700; padding: 3px 8px; border-radius: 12px;">EVM LP & DUAL-CHAIN VAULT</span>
+              </div>
+              
+              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Multi-Sig Contract & Uniswap v3 Pool Custody:</div>
+              <div class="wallet-address-box" style="margin-bottom: 12px;">
+                <span id="evmTreasuryDisplay">0x777A6b3D91028374829108a798129034Cession99</span>
+                <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="navigator.clipboard.writeText('0x777A6b3D91028374829108a798129034Cession99'); window.launchpadManager.toast('Base Treasury copied', 'success');">copy</button>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 13px; border-top: 1px solid var(--border-card); padding-top: 12px;">
+                <span>Live Treasury Balance: <strong id="evmTreasuryBal" style="color: var(--accent-purple); font-size: 15px;">14.28 ETH</strong></span>
+                <a href="https://basescan.org" target="_blank" rel="noopener noreferrer" style="color: var(--accent-purple); font-size: 12px; text-decoration: underline;">Verify on BaseScan ↗</a>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Protocol Fee Breakdown & Flow Architecture -->
+          <div class="transparency-card" style="margin-top: 24px;">
+            <h3 style="font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 14px;">Protocol Fee Routing Architecture</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+              <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 14px; border-left: 3px solid var(--pump-mint);">
+                <div style="font-weight: 700; color: #fff; font-size: 14px;">0.1 SOL Mint Fee</div>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4;">
+                  Every newly created coin pays exactly 0.1 SOL at creation. 100% of this fee is immediately settled and credited to the company treasury wallet.
+                </div>
+              </div>
+
+              <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 14px; border-left: 3px solid var(--accent-purple);">
+                <div style="font-weight: 700; color: #fff; font-size: 14px;">1.0% AMM Trading Swap Fee</div>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4;">
+                  Every buy and sell trade on the bonding curve incurs a 1.0% swap fee. Automatically split between protocol growth and liquidity stability.
+                </div>
+              </div>
+
+              <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 14px; border-left: 3px solid var(--accent-orange);">
+                <div style="font-weight: 700; color: #fff; font-size: 14px;">Automatic DEX Graduation ($69,420 Cap)</div>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4;">
+                  Upon reaching 100% bonding curve fill, accumulated SOL reserves are migrated to Raydium / Uniswap with LP tokens burned permanently.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- =========================================================
+           VIEW: TERMS & RISK DISCLOSURES
+      ========================================================= -->
+      <main class="page-view" id="viewTerms">
+        <section class="explore-section">
+          <div class="transparency-card">
+            <h2 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 12px;">Terms of Service & Risk Disclosures</h2>
+            <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; display: flex; flex-direction: column; gap: 12px;">
+              <p>Cession.fun is a decentralized, non-custodial digital asset protocol. All tokens launched on Cession are community-created smart contracts and bonding curves.</p>
+              <p>Cryptocurrency trading and meme asset launches involve substantial financial risk. You are solely responsible for verifying token parameters, developer lock status, and liquidity metrics before trading.</p>
+              <p>By connecting a wallet, you agree that Cession is provided "as-is" with no guarantee of financial return.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- =========================================================
+           STANDARD SITE FOOTER WITH LOGO & ALL PAGES
+      ========================================================= -->
+      <footer class="site-footer-pump">
+        <div class="footer-top-grid">
+          
+          <!-- Column 1: Brand & Mission -->
+          <div class="footer-brand-col">
+            <div class="footer-logo-row">
+              <img src="images/cession-logo.png" class="footer-logo-img" alt="Cession">
+              <span class="footer-brand-name">cession.fun</span>
+            </div>
+            <p class="footer-brand-tagline">
+              The sovereign fair launch bonding curve and non-custodial decentralized exchange on Solana & Base.
+            </p>
+            <div class="footer-social-row">
+              <a href="https://x.com" target="_blank" rel="noopener" class="footer-social-link">𝕏 Twitter</a>
+              <a href="https://telegram.org" target="_blank" rel="noopener" class="footer-social-link">✈ Telegram</a>
+              <a href="https://github.com/nbaldwin098/cession-fun" target="_blank" rel="noopener" class="footer-social-link">⌨ GitHub</a>
+              <a href="https://discord.com" target="_blank" rel="noopener" class="footer-social-link">💬 Discord</a>
+            </div>
+          </div>
+
+          <!-- Column 2: Markets & Launchpad -->
+          <div>
+            <div class="footer-col-title">Markets & Trade</div>
+            <ul class="footer-links-list">
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('board')">Coins Board</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.openDeployModal()">+ Create a Coin (0.1 SOL)</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('bundles')">Bundles & Baskets</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('board')">King of the Hill</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('board')">Top 24h Gainers</button></li>
+            </ul>
+          </div>
+
+          <!-- Column 3: Ecosystem & Yield -->
+          <div>
+            <div class="footer-col-title">Ecosystem</div>
+            <ul class="footer-links-list">
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('staking')">Staking & Yield</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('leaderboard')">Leaderboard & Hall of Fame</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('profile')">Profile & Portfolio</button></li>
+              <li class="footer-link-item"><button onclick="window.walletEngine.openAuthModal()">Connect Wallet</button></li>
+            </ul>
+          </div>
+
+          <!-- Column 4: Transparency & Trust -->
+          <div>
+            <div class="footer-col-title">Transparency</div>
+            <ul class="footer-links-list">
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('transparency')">Protocol Transparency</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('transparency')">Company Treasury Wallets</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('transparency')">0.1 SOL Fee Breakdown</button></li>
+              <li class="footer-link-item"><a href="https://solscan.io" target="_blank" rel="noopener">Solscan Explorer ↗</a></li>
+              <li class="footer-link-item"><a href="https://basescan.org" target="_blank" rel="noopener">BaseScan Explorer ↗</a></li>
+            </ul>
+          </div>
+
+          <!-- Column 5: Legal & System -->
+          <div>
+            <div class="footer-col-title">Legal & Security</div>
+            <ul class="footer-links-list">
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('terms')">Terms of Service</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('terms')">Risk Disclosures</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('terms')">Privacy Policy</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.toast('Bug bounty active via GitHub', 'info')">Bug Bounty</button></li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- Bottom Status Bar -->
+        <div class="footer-bottom-bar">
+          <div>
+            &copy; 2026 Cession Protocol Inc. All rights reserved. Non-custodial sovereign software.
+          </div>
+          <div class="footer-node-status">
+            <span class="status-dot-pulse"></span>
+            <span>Solana Mainnet & Base L2 Nodes Live • Block Height #289,142,098</span>
+          </div>
+        </div>
+      </footer>
+
     </div>
   </div>
 

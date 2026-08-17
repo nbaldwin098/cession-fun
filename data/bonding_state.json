@@ -1,5 +1,5 @@
 {
-  "totalProtocolBurnedUsd": 42960.85000000003,
+  "totalProtocolBurnedUsd": 42961.37500000002,
   "tokens": [
     {
       "name": "Cession Sovereign Network",
@@ -789,6 +789,196 @@
           "mevShielded": true
         }
       ]
+    },
+    {
+      "name": "Pepe Bull Run",
+      "symbol": "PEPEBULL_39",
+      "chain": "Solana",
+      "tokenType": "sprint",
+      "isPrivate": false,
+      "inviteCode": null,
+      "antiDumpEnabled": false,
+      "avgHoldDays": 1,
+      "timeLockedPercent": 5,
+      "stakingApy": 12,
+      "stakingPool": {
+        "totalStakedTokens": 0,
+        "stakers": []
+      },
+      "description": "The greenest sovereign bull on Solana curve.",
+      "imageUrl": "https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200",
+      "creator": "0x88f4b23a99102837482910",
+      "devLockedPercent": 100,
+      "devTokensLocked": 50000000,
+      "createdAt": 1786978805005,
+      "mintFeeSol": 0.1,
+      "virtualSolReserves": 10.790732567,
+      "virtualTokenReserves": 935988351,
+      "realSolRaised": 0.7907325669999992,
+      "tokensSold": 65011649,
+      "totalBurnedTokens": 161278,
+      "currentPriceSol": 1.1528703915461443e-8,
+      "currentPriceUsd": 0.0017293055873192167,
+      "openPrice24hUsd": 0.0000015,
+      "marketCapUsd": 5000,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 120.86511495000012,
+      "high24hUsd": 0.0000015,
+      "low24hUsd": 0.0000015,
+      "isGraduated": false,
+      "curveProgressPercent": 9,
+      "feePool": {
+        "totalGenerated": 0.0035,
+        "holderRewardsDistributed": 0.00175
+      },
+      "holdersCount": 1,
+      "holders": [
+        {
+          "address": "0x88f4... (Dev Locked)",
+          "balance": 50000000,
+          "percentage": 5,
+          "isDev": true,
+          "locked": true
+        }
+      ],
+      "safetyAudit": {
+        "score": 98,
+        "grade": "A+",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 5,
+        "warnings": []
+      },
+      "twitter": null,
+      "telegram": null,
+      "website": null,
+      "lastBumpTime": 1786978805005,
+      "recentTrades": [
+        {
+          "id": "tx_msxd1ijj",
+          "type": "SELL",
+          "amountSol": 0.005738595835000817,
+          "amountTokens": 500000,
+          "usdVal": "0.86",
+          "user": "0xTrad...m991",
+          "time": "Just now",
+          "mevShielded": true
+        },
+        {
+          "id": "tx_msxd1ije",
+          "type": "BUY",
+          "amountSol": 0.2,
+          "amountTokens": 17566614,
+          "usdVal": "30.00",
+          "user": "0xTrad...m991",
+          "time": "Just now",
+          "mevShielded": true
+        },
+        {
+          "id": "tx_msxd1ij2",
+          "type": "BUY",
+          "amountSol": 0.5,
+          "amountTokens": 46945035,
+          "usdVal": "75.00",
+          "user": "0x88f4...2910",
+          "time": "Just now",
+          "mevShielded": true
+        }
+      ]
+    },
+    {
+      "name": "Pepe Bull Run",
+      "symbol": "PEPEBULL_830",
+      "chain": "Solana",
+      "tokenType": "sprint",
+      "antiDumpEnabled": false,
+      "avgHoldDays": 1,
+      "timeLockedPercent": 5,
+      "stakingApy": 12,
+      "stakingPool": {
+        "totalStakedTokens": 0,
+        "stakers": []
+      },
+      "description": "The greenest sovereign bull on Solana curve.",
+      "imageUrl": "https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200",
+      "creator": "0x88f4b23a99102837482910",
+      "devLockedPercent": 100,
+      "devTokensLocked": 50000000,
+      "createdAt": 1786978842926,
+      "mintFeeSol": 0.1,
+      "virtualSolReserves": 10.790732567,
+      "virtualTokenReserves": 935988351,
+      "realSolRaised": 0.7907325669999992,
+      "tokensSold": 65011649,
+      "totalBurnedTokens": 161278,
+      "currentPriceSol": 1.1528703915461443e-8,
+      "currentPriceUsd": 0.0017293055873192167,
+      "openPrice24hUsd": 0.0000015,
+      "marketCapUsd": 5000,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 120.86511495000012,
+      "high24hUsd": 0.0000015,
+      "low24hUsd": 0.0000015,
+      "isGraduated": false,
+      "curveProgressPercent": 9,
+      "feePool": {
+        "totalGenerated": 0.0035,
+        "holderRewardsDistributed": 0.00175
+      },
+      "holdersCount": 1,
+      "holders": [
+        {
+          "address": "0x88f4... (Dev Locked)",
+          "balance": 50000000,
+          "percentage": 5,
+          "isDev": true,
+          "locked": true
+        }
+      ],
+      "safetyAudit": {
+        "score": 98,
+        "grade": "A+",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 5,
+        "warnings": []
+      },
+      "twitter": null,
+      "telegram": null,
+      "website": null,
+      "lastBumpTime": 1786978842926,
+      "recentTrades": [
+        {
+          "id": "tx_msxd2btk",
+          "type": "SELL",
+          "amountSol": 0.005738595835000817,
+          "amountTokens": 500000,
+          "usdVal": "0.86",
+          "user": "0xTrad...m991",
+          "time": "Just now",
+          "mevShielded": true
+        },
+        {
+          "id": "tx_msxd2bss",
+          "type": "BUY",
+          "amountSol": 0.2,
+          "amountTokens": 17566614,
+          "usdVal": "30.00",
+          "user": "0xTrad...m991",
+          "time": "Just now",
+          "mevShielded": true
+        },
+        {
+          "id": "tx_msxd2bsf",
+          "type": "BUY",
+          "amountSol": 0.5,
+          "amountTokens": 46945035,
+          "usdVal": "75.00",
+          "user": "0x88f4...2910",
+          "time": "Just now",
+          "mevShielded": true
+        }
+      ]
     }
   ],
   "collections": [
@@ -799,7 +989,7 @@
       "description": "Curated portfolio of high-velocity AI agent tokens and sovereign liquidity engines.",
       "creator": "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
       "imageUrl": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=200",
-      "createdAt": 1786891480236,
+      "createdAt": 1786892430423,
       "roi24h": 185.2,
       "isTopPerformer": true,
       "tokens": [
@@ -826,10 +1016,10 @@
       "id": "col_generational_stacks",
       "name": "Baldwin Sovereign Family Stack",
       "symbol": "FAMBASKET",
-      "description": "Curated long-term micro-endowments with 1% Anti-Dump protection and Diamond Staking yield.",
+      "description": "Curated long-term micro-endowments with 1% Anti-Dump protection and Staking yield.",
       "creator": "0x091A4B8290CC189108a798129034",
       "imageUrl": "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200",
-      "createdAt": 1786805080236,
+      "createdAt": 1786806030423,
       "roi24h": 42.5,
       "isTopPerformer": false,
       "tokens": [
@@ -877,7 +1067,7 @@
       "description": "The top trending alpha meme coins on Solana & Base with verified anti-rug parameters.",
       "creator": "0x88f4b23a109823",
       "imageUrl": "https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?w=500",
-      "createdAt": 1786805080236,
+      "createdAt": 1786806030423,
       "roi24h": 342.8,
       "isTopPerformer": true,
       "tokens": [
@@ -907,7 +1097,7 @@
       "description": "The internet's favorite viral animal mascots combined into a single 1-click swap basket.",
       "creator": "topfloor_b",
       "imageUrl": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500",
-      "createdAt": 1786718680236,
+      "createdAt": 1786719630423,
       "roi24h": 94.6,
       "isTopPerformer": true,
       "tokens": [
@@ -932,7 +1122,7 @@
       "description": "Deep discount basket of temporarily oversold meme coins for aggressive dip-buyers seeking 10x mean reversion.",
       "creator": "fltnarwhal",
       "imageUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500",
-      "createdAt": 1786632280236,
+      "createdAt": 1786633230423,
       "roi24h": -48.2,
       "isWorstPerformer": true,
       "tokens": [
@@ -962,7 +1152,7 @@
       "description": "Extreme drawdown coins at historical curve support. High risk, high reward bottom hunting.",
       "creator": "botfn",
       "imageUrl": "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500",
-      "createdAt": 1786545880236,
+      "createdAt": 1786546830423,
       "roi24h": -31,
       "isWorstPerformer": true,
       "tokens": [
