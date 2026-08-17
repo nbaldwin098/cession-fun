@@ -1,0 +1,717 @@
+{
+  "totalProtocolBurnedUsd": 42905.6875,
+  "tokens": [
+    {
+      "name": "Cession Sovereign Network",
+      "symbol": "CESS",
+      "chain": "Base",
+      "tokenType": "sprint",
+      "isPrivate": false,
+      "description": "The native zero-knowledge governance & fee-redistribution token powering cession.fun launchpad.",
+      "imageUrl": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=200",
+      "creator": "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
+      "devLockedPercent": 100,
+      "devTokensLocked": 50000000,
+      "createdAt": 1786882627105,
+      "virtualSolReserves": 28.5,
+      "virtualTokenReserves": 720000000,
+      "realSolRaised": 7.8,
+      "tokensSold": 280000000,
+      "currentPriceSol": 4.5e-8,
+      "currentPriceUsd": 0.00000675,
+      "openPrice24hUsd": 0.00000375,
+      "marketCapUsd": 58240,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 148500,
+      "high24hUsd": 0.0000072,
+      "low24hUsd": 0.0000036,
+      "isGraduated": false,
+      "curveProgressPercent": 96,
+      "totalBurnedTokens": 4200000,
+      "holdersCount": 382,
+      "avgHoldDays": 12,
+      "timeLockedPercent": 25,
+      "antiDumpEnabled": false,
+      "stakingApy": 14,
+      "holders": [
+        {
+          "address": "0x777A...6b3D (Dev)",
+          "balance": 50000000,
+          "percentage": 5,
+          "isDev": true,
+          "locked": true
+        },
+        {
+          "address": "0x9182...4421 (Whale)",
+          "balance": 42000000,
+          "percentage": 4.2,
+          "isDev": false,
+          "locked": false
+        },
+        {
+          "address": "0x1209...8812 (Diamond)",
+          "balance": 28000000,
+          "percentage": 2.8,
+          "isDev": false,
+          "locked": false
+        }
+      ],
+      "safetyAudit": {
+        "score": 98,
+        "grade": "A+",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 18.2,
+        "warnings": []
+      },
+      "recentTrades": [
+        {
+          "id": "tx_1",
+          "type": "BUY",
+          "amountSol": 1.5,
+          "amountTokens": 42857142,
+          "usdVal": "225.00",
+          "user": "0x88f...1a2",
+          "time": "2m ago",
+          "mevShielded": true
+        },
+        {
+          "id": "tx_2",
+          "type": "BUY",
+          "amountSol": 0.8,
+          "amountTokens": 22857142,
+          "usdVal": "120.00",
+          "user": "0x19c...99e",
+          "time": "5m ago",
+          "mevShielded": true
+        }
+      ]
+    },
+    {
+      "name": "Baldwin Sovereign Family Stack",
+      "symbol": "FAMSTACK",
+      "chain": "Base",
+      "tokenType": "stack",
+      "isPrivate": false,
+      "description": "Grassroots generational micro-endowment for friends & family. 86% time-locked in Diamond Vault with 1% max daily sell anti-dump protection.",
+      "imageUrl": "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200",
+      "creator": "0x091A4B8290CC189108a798129034",
+      "devLockedPercent": 100,
+      "devTokensLocked": 50000000,
+      "createdAt": 1785759427105,
+      "virtualSolReserves": 28,
+      "virtualTokenReserves": 750000000,
+      "realSolRaised": 18.5,
+      "tokensSold": 250000000,
+      "currentPriceSol": 4.5e-8,
+      "currentPriceUsd": 0.00000675,
+      "openPrice24hUsd": 0.0000055,
+      "marketCapUsd": 22500,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 64200,
+      "high24hUsd": 0.000007,
+      "low24hUsd": 0.0000054,
+      "isGraduated": false,
+      "curveProgressPercent": 90,
+      "totalBurnedTokens": 8900000,
+      "holdersCount": 88,
+      "avgHoldDays": 142,
+      "timeLockedPercent": 86,
+      "antiDumpEnabled": true,
+      "stakingApy": 28.5,
+      "stakingPool": {
+        "totalStakedTokens": 645000000,
+        "stakers": [
+          {
+            "id": "stk_1",
+            "user": "0x091A...9034",
+            "amount": 200000000,
+            "durationDays": 365,
+            "apy": 36
+          }
+        ]
+      },
+      "holders": [
+        {
+          "address": "0x091A...9034 (Family Trust Lead)",
+          "balance": 200000000,
+          "percentage": 20,
+          "isDev": true,
+          "locked": true
+        },
+        {
+          "address": "0x4491...1812 (Circle Member)",
+          "balance": 80000000,
+          "percentage": 8,
+          "isDev": false,
+          "locked": true
+        }
+      ],
+      "safetyAudit": {
+        "score": 99,
+        "grade": "A+",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 28,
+        "warnings": []
+      },
+      "recentTrades": [
+        {
+          "id": "tx_fam1",
+          "type": "BUY",
+          "amountSol": 1,
+          "amountTokens": 25000000,
+          "usdVal": "150.00",
+          "user": "0x449...812",
+          "time": "18m ago",
+          "mevShielded": true
+        }
+      ]
+    },
+    {
+      "name": "Genesis Alpha Founders Circle",
+      "symbol": "TEAMONE",
+      "chain": "Base",
+      "tokenType": "stack",
+      "isPrivate": true,
+      "inviteCode": "fam_trust_2026",
+      "description": "Private invite-only startup & co-worker sovereign stack. Password protected with automatic fee compounding.",
+      "imageUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200",
+      "creator": "0x98bA...2214",
+      "devLockedPercent": 100,
+      "devTokensLocked": 40000000,
+      "createdAt": 1786364227105,
+      "virtualSolReserves": 21,
+      "virtualTokenReserves": 840000000,
+      "realSolRaised": 11,
+      "tokensSold": 160000000,
+      "currentPriceSol": 2.8e-8,
+      "currentPriceUsd": 0.0000042,
+      "openPrice24hUsd": 0.0000035,
+      "marketCapUsd": 14000,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 38500,
+      "high24hUsd": 0.0000044,
+      "low24hUsd": 0.0000034,
+      "isGraduated": false,
+      "curveProgressPercent": 55,
+      "totalBurnedTokens": 3100000,
+      "holdersCount": 24,
+      "avgHoldDays": 95,
+      "timeLockedPercent": 92,
+      "antiDumpEnabled": true,
+      "stakingApy": 32,
+      "stakingPool": {
+        "totalStakedTokens": 720000000,
+        "stakers": []
+      },
+      "holders": [
+        {
+          "address": "0x98bA...2214 (Founder)",
+          "balance": 150000000,
+          "percentage": 15,
+          "isDev": true,
+          "locked": true
+        }
+      ],
+      "safetyAudit": {
+        "score": 98,
+        "grade": "A+",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 35,
+        "warnings": []
+      },
+      "recentTrades": []
+    },
+    {
+      "name": "Quantum Pepe",
+      "symbol": "QPEPE",
+      "chain": "Solana",
+      "tokenType": "sprint",
+      "isPrivate": false,
+      "description": "Superconducting green frog riding on high-frequency Solana bonding curves with 100% dev locked.",
+      "imageUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200",
+      "creator": "SoLDev99xFaCe8721990172Bca9012377a0",
+      "devLockedPercent": 100,
+      "devTokensLocked": 30000000,
+      "createdAt": 1786925827105,
+      "virtualSolReserves": 18.2,
+      "virtualTokenReserves": 910000000,
+      "realSolRaised": 9.6,
+      "tokensSold": 90000000,
+      "currentPriceSol": 2.2e-8,
+      "currentPriceUsd": 0.0000033,
+      "openPrice24hUsd": 0.0000025,
+      "marketCapUsd": 12000,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 92400,
+      "high24hUsd": 0.0000035,
+      "low24hUsd": 0.0000024,
+      "isGraduated": false,
+      "curveProgressPercent": 48,
+      "totalBurnedTokens": 2100000,
+      "holdersCount": 219,
+      "avgHoldDays": 3,
+      "timeLockedPercent": 10,
+      "antiDumpEnabled": false,
+      "stakingApy": 12,
+      "holders": [
+        {
+          "address": "SoLDev...7a0 (Dev)",
+          "balance": 30000000,
+          "percentage": 3,
+          "isDev": true,
+          "locked": true
+        },
+        {
+          "address": "9xKq...110p",
+          "balance": 19000000,
+          "percentage": 1.9,
+          "isDev": false,
+          "locked": false
+        }
+      ],
+      "safetyAudit": {
+        "score": 95,
+        "grade": "A",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 12,
+        "warnings": []
+      },
+      "recentTrades": [
+        {
+          "id": "tx_3",
+          "type": "BUY",
+          "amountSol": 2,
+          "amountTokens": 60606060,
+          "usdVal": "300.00",
+          "user": "4hJ...99a",
+          "time": "1m ago",
+          "mevShielded": true
+        }
+      ]
+    },
+    {
+      "name": "Based Doge",
+      "symbol": "BDOGE",
+      "chain": "Base",
+      "tokenType": "sprint",
+      "isPrivate": false,
+      "description": "The friendliest sovereign Shiba on Base L2. Zero tax, zero rug, 100% fair.",
+      "imageUrl": "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=200",
+      "creator": "0xBaseDev7718910019230912",
+      "devLockedPercent": 80,
+      "devTokensLocked": 20000000,
+      "createdAt": 1786954627105,
+      "virtualSolReserves": 12,
+      "virtualTokenReserves": 980000000,
+      "realSolRaised": 6.4,
+      "tokensSold": 20000000,
+      "currentPriceSol": 1.5e-8,
+      "currentPriceUsd": 0.00000225,
+      "openPrice24hUsd": 0.000002,
+      "marketCapUsd": 8000,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 41200,
+      "high24hUsd": 0.0000024,
+      "low24hUsd": 0.0000019,
+      "isGraduated": false,
+      "curveProgressPercent": 32,
+      "totalBurnedTokens": 850000,
+      "holdersCount": 144,
+      "avgHoldDays": 2,
+      "timeLockedPercent": 5,
+      "antiDumpEnabled": false,
+      "stakingApy": 10,
+      "holders": [
+        {
+          "address": "0xBase...0912 (Dev)",
+          "balance": 20000000,
+          "percentage": 2,
+          "isDev": true,
+          "locked": true
+        }
+      ],
+      "safetyAudit": {
+        "score": 92,
+        "grade": "A",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 14.5,
+        "warnings": []
+      },
+      "recentTrades": []
+    },
+    {
+      "name": "Test Doge",
+      "symbol": "TDOGE",
+      "chain": "Base",
+      "tokenType": "sprint",
+      "isPrivate": false,
+      "inviteCode": null,
+      "antiDumpEnabled": false,
+      "avgHoldDays": 1,
+      "timeLockedPercent": 5,
+      "stakingApy": 12,
+      "stakingPool": {
+        "totalStakedTokens": 0,
+        "stakers": []
+      },
+      "description": "Community fair launch token on cession.fun",
+      "imageUrl": "https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200",
+      "creator": "0xDevTestAddress",
+      "devLockedPercent": 100,
+      "devTokensLocked": 50000000,
+      "createdAt": 1786969027108,
+      "virtualSolReserves": 11.918548302,
+      "virtualTokenReserves": 839028356,
+      "realSolRaised": 1.9185483019999994,
+      "tokensSold": 160971644,
+      "totalBurnedTokens": 414929,
+      "currentPriceSol": 1.4205179380135276e-8,
+      "currentPriceUsd": 0.0021307769070202914,
+      "openPrice24hUsd": 0.0000015,
+      "marketCapUsd": 5995.463443749998,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 310.7177547000001,
+      "high24hUsd": 0.0000015,
+      "low24hUsd": 0.0000015,
+      "isGraduated": false,
+      "curveProgressPercent": 23,
+      "feePool": {
+        "totalGenerated": 0.01,
+        "holderRewardsDistributed": 0.005
+      },
+      "holdersCount": 1,
+      "holders": [
+        {
+          "address": "0xDevT... (Dev Locked)",
+          "balance": 50000000,
+          "percentage": 5,
+          "isDev": true,
+          "locked": true
+        }
+      ],
+      "safetyAudit": {
+        "score": 98,
+        "grade": "A+",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 5,
+        "warnings": []
+      },
+      "recentTrades": [
+        {
+          "id": "tx_msx77xuv",
+          "type": "SELL",
+          "amountSol": 0.07109443951000062,
+          "amountTokens": 5000000,
+          "usdVal": "10.66",
+          "user": "0xSell...ress",
+          "time": "Just now",
+          "mevShielded": true
+        },
+        {
+          "id": "tx_msx77xuu",
+          "type": "BUY",
+          "amountSol": 2,
+          "amountTokens": 165971644,
+          "usdVal": "300.00",
+          "user": "0xBuye...ress",
+          "time": "Just now",
+          "mevShielded": true
+        }
+      ]
+    },
+    {
+      "name": "Graduation Token",
+      "symbol": "GRAD",
+      "chain": "Solana",
+      "tokenType": "sprint",
+      "isPrivate": false,
+      "inviteCode": null,
+      "antiDumpEnabled": false,
+      "avgHoldDays": 1,
+      "timeLockedPercent": 5,
+      "stakingApy": 12,
+      "stakingPool": {
+        "totalStakedTokens": 0,
+        "stakers": []
+      },
+      "description": "Community fair launch token on cession.fun",
+      "imageUrl": "https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200",
+      "creator": "0xDevGrad",
+      "devLockedPercent": 100,
+      "devTokensLocked": 50000000,
+      "createdAt": 1786969027118,
+      "virtualSolReserves": 19.95,
+      "virtualTokenReserves": 501253132,
+      "realSolRaised": 9.95,
+      "tokensSold": 498746868,
+      "totalBurnedTokens": 1246867,
+      "currentPriceSol": 3.980025006606841e-8,
+      "currentPriceUsd": 0.005970037509910262,
+      "openPrice24hUsd": 0.0000015,
+      "marketCapUsd": 31093.749999999996,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 1500,
+      "high24hUsd": 0.0000015,
+      "low24hUsd": 0.0000015,
+      "isGraduated": true,
+      "curveProgressPercent": 100,
+      "feePool": {
+        "totalGenerated": 0.05,
+        "holderRewardsDistributed": 0.025
+      },
+      "holdersCount": 1,
+      "holders": [
+        {
+          "address": "0xDevG... (Dev Locked)",
+          "balance": 50000000,
+          "percentage": 5,
+          "isDev": true,
+          "locked": true
+        }
+      ],
+      "safetyAudit": {
+        "score": 98,
+        "grade": "A+",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 5,
+        "warnings": []
+      },
+      "recentTrades": [
+        {
+          "id": "tx_msx77xv3",
+          "type": "BUY",
+          "amountSol": 10,
+          "amountTokens": 498746868,
+          "usdVal": "1500.00",
+          "user": "0xWhal...uyer",
+          "time": "Just now",
+          "mevShielded": true
+        }
+      ],
+      "graduationData": {
+        "dexName": "Raydium CPMM",
+        "liquiditySolSeeded": 9.95,
+        "lpBurnTx": "0xdead9hkmh3hsiu0000dead",
+        "timestamp": 1786969027119
+      }
+    },
+    {
+      "name": "Apex Bull",
+      "symbol": "ABULL",
+      "chain": "Base",
+      "tokenType": "sprint",
+      "isPrivate": false,
+      "inviteCode": null,
+      "antiDumpEnabled": false,
+      "avgHoldDays": 1,
+      "timeLockedPercent": 5,
+      "stakingApy": 12,
+      "stakingPool": {
+        "totalStakedTokens": 0,
+        "stakers": []
+      },
+      "description": "Community fair launch token on cession.fun",
+      "imageUrl": "https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200",
+      "creator": "0x78fa5f27a423adfaed2699e3f1fa7b91f910c57d",
+      "devLockedPercent": 100,
+      "devTokensLocked": 50000000,
+      "createdAt": 1786969027129,
+      "virtualSolReserves": 11.479307405,
+      "virtualTokenReserves": 871132695,
+      "realSolRaised": 1.4793074050000004,
+      "tokensSold": 128867305,
+      "totalBurnedTokens": 324668,
+      "currentPriceSol": 1.317744985452532e-8,
+      "currentPriceUsd": 0.001976617478178798,
+      "openPrice24hUsd": 0.0000015,
+      "marketCapUsd": 5000,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 226.97888924999995,
+      "high24hUsd": 0.0000015,
+      "low24hUsd": 0.0000015,
+      "isGraduated": false,
+      "curveProgressPercent": 18,
+      "feePool": {
+        "totalGenerated": 0.0075,
+        "holderRewardsDistributed": 0.00375
+      },
+      "holdersCount": 1,
+      "holders": [
+        {
+          "address": "0x78fa... (Dev Locked)",
+          "balance": 50000000,
+          "percentage": 5,
+          "isDev": true,
+          "locked": true
+        }
+      ],
+      "safetyAudit": {
+        "score": 98,
+        "grade": "A+",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 5,
+        "warnings": []
+      },
+      "recentTrades": [
+        {
+          "id": "tx_msx77xvf",
+          "type": "SELL",
+          "amountSol": 0.013126632024999587,
+          "amountTokens": 1000000,
+          "usdVal": "1.97",
+          "user": "0x78fa...c57d",
+          "time": "Just now",
+          "mevShielded": true
+        },
+        {
+          "id": "tx_msx77xve",
+          "type": "BUY",
+          "amountSol": 1.5,
+          "amountTokens": 129867305,
+          "usdVal": "225.00",
+          "user": "0x78fa...c57d",
+          "time": "Just now",
+          "mevShielded": true
+        }
+      ]
+    },
+    {
+      "name": "Baldwin Family Trust Stack",
+      "symbol": "BFT",
+      "chain": "Base",
+      "tokenType": "stack",
+      "isPrivate": false,
+      "inviteCode": null,
+      "antiDumpEnabled": true,
+      "avgHoldDays": 30,
+      "timeLockedPercent": 95,
+      "stakingApy": 24.5,
+      "stakingPool": {
+        "totalStakedTokens": 750250000,
+        "stakers": [
+          {
+            "id": "stake_msx77xvn",
+            "user": "0xFamMember",
+            "amount": 250000,
+            "durationDays": 90,
+            "stakedAt": 1786969027139,
+            "unlockTime": 1794745027139,
+            "apy": 22.5
+          }
+        ]
+      },
+      "description": "Long-term community sovereign stack on cession.fun",
+      "imageUrl": "https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200",
+      "creator": "0xFamCreator",
+      "devLockedPercent": 100,
+      "devTokensLocked": 50000000,
+      "createdAt": 1786969027135,
+      "virtualSolReserves": 10,
+      "virtualTokenReserves": 1000000000,
+      "realSolRaised": 0,
+      "tokensSold": 0,
+      "totalBurnedTokens": 0,
+      "currentPriceSol": 1e-8,
+      "currentPriceUsd": 0.0000015,
+      "openPrice24hUsd": 0.0000015,
+      "marketCapUsd": 10000,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 0,
+      "high24hUsd": 0.0000015,
+      "low24hUsd": 0.0000015,
+      "isGraduated": false,
+      "curveProgressPercent": 5,
+      "feePool": {
+        "totalGenerated": 0,
+        "holderRewardsDistributed": 0
+      },
+      "holdersCount": 1,
+      "holders": [
+        {
+          "address": "0xFamC... (Dev Locked)",
+          "balance": 50000000,
+          "percentage": 5,
+          "isDev": true,
+          "locked": true
+        }
+      ],
+      "safetyAudit": {
+        "score": 98,
+        "grade": "A+",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 5,
+        "warnings": []
+      },
+      "recentTrades": []
+    },
+    {
+      "name": "Secret Syndicate",
+      "symbol": "SSYN",
+      "chain": "Solana",
+      "tokenType": "stack",
+      "isPrivate": true,
+      "inviteCode": "secret_syndicate_2026",
+      "antiDumpEnabled": true,
+      "avgHoldDays": 30,
+      "timeLockedPercent": 75,
+      "stakingApy": 24.5,
+      "stakingPool": {
+        "totalStakedTokens": 750000000,
+        "stakers": []
+      },
+      "description": "Long-term community sovereign stack on cession.fun",
+      "imageUrl": "https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200",
+      "creator": "0xSyndicateDev",
+      "devLockedPercent": 100,
+      "devTokensLocked": 50000000,
+      "createdAt": 1786969027138,
+      "virtualSolReserves": 10,
+      "virtualTokenReserves": 1000000000,
+      "realSolRaised": 0,
+      "tokensSold": 0,
+      "totalBurnedTokens": 0,
+      "currentPriceSol": 1e-8,
+      "currentPriceUsd": 0.0000015,
+      "openPrice24hUsd": 0.0000015,
+      "marketCapUsd": 10000,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 0,
+      "high24hUsd": 0.0000015,
+      "low24hUsd": 0.0000015,
+      "isGraduated": false,
+      "curveProgressPercent": 5,
+      "feePool": {
+        "totalGenerated": 0,
+        "holderRewardsDistributed": 0
+      },
+      "holdersCount": 1,
+      "holders": [
+        {
+          "address": "0xSynd... (Dev Locked)",
+          "balance": 50000000,
+          "percentage": 5,
+          "isDev": true,
+          "locked": true
+        }
+      ],
+      "safetyAudit": {
+        "score": 98,
+        "grade": "A+",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 5,
+        "warnings": []
+      },
+      "recentTrades": []
+    }
+  ]
+}

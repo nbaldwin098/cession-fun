@@ -1,31 +1,22 @@
 /**
- * Calabi.fun Sovereign Fair Launch Bonding Curve Engine
- * Mathematical Invariant: Constant Product (x * y = k) Virtual AMM
- * 
- * Features:
- * 1. Proof-of-Skin: Dev token vesting lock (80-100% locked until DEX graduation).
- * 2. 0.50% Total Swap Fee:
- *    - 0.25% Protocol Treasury
- *    - 0.25% Algorithmic Buyback & Burn (Burned to 0xdead)
- * 3. Multi-Chain Native: Solana (SPL) + Base L2 (EVM).
- * 4. Sovereign MEV Protection: In-memory private transaction batching.
- * 5. Calabi Guardian AI: Real-time anti-rug safety score (0-100).
- * 6. DEX Graduation Threshold: $69,420 Market Cap (~20 ETH / 400 SOL).
- * 7. Real-Time Leaderboards & Daily PnL Tracker for Traders and Coins.
+ * Calabi Sovereign Bonding Curve & Proof-of-Skin Automated Market Maker Engine
+ * Dual Architecture:
+ * 1. ⚡ Meme Sprint: High-velocity fair launch with $25,000 sprint cap & automated DEX burn.
+ * 2. 🏛️ Sovereign Stack: Grassroots long-term community assets with Diamond Vault staking,
+ *    Public vs. Private Circle passcodes, and 1% Anti-Dump Protection.
  */
 
 const fs = require('fs');
 const path = require('path');
-const DATA_FILE = path.join(__dirname, '..', 'data', 'tokens.json');
+const DATA_FILE = path.join(__dirname, '..', 'data', 'bonding_state.json');
 
 class BondingCurveEngine {
   constructor() {
     this.tokens = new Map();
-    this.chatMessages = new Map();
     this.traders = new Map();
-    this.totalProtocolBurnedUsd = 4850.25;
+    this.chatMessages = new Map();
+    this.totalProtocolBurnedUsd = 42890.50;
     this.loadStateFromDisk();
-    this.initSampleTraders();
   }
 
   loadStateFromDisk() {
@@ -33,23 +24,31 @@ class BondingCurveEngine {
       if (fs.existsSync(DATA_FILE)) {
         const raw = fs.readFileSync(DATA_FILE, 'utf8');
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed.tokens) && parsed.tokens.length > 0) {
-          parsed.tokens.forEach(t => this.tokens.set(t.symbol.toUpperCase(), t));
-          if (parsed.totalProtocolBurnedUsd) this.totalProtocolBurnedUsd = parsed.totalProtocolBurnedUsd;
-          return;
+        if (parsed.tokens && Array.isArray(parsed.tokens)) {
+          parsed.tokens.forEach(t => this.tokens.set(t.symbol, t));
+        }
+        if (parsed.totalProtocolBurnedUsd) {
+          this.totalProtocolBurnedUsd = parsed.totalProtocolBurnedUsd;
         }
       }
     } catch (e) {
-      console.warn('Could not load tokens from disk, initializing defaults:', e.message);
+      console.warn('Error reading bonding state from disk, initializing defaults:', e.message);
     }
+
+    if (this.tokens.size === 0) {
+      this.initSampleTokens();
+    }
+    this.initSampleTraders();
+  }
+
+  resetToCleanDefaults() {
+    this.tokens.clear();
     this.initSampleTokens();
     this.saveStateToDisk();
   }
 
   resetToDefaults() {
-    this.tokens.clear();
-    this.initSampleTokens();
-    this.saveStateToDisk();
+    this.resetToCleanDefaults();
   }
 
   saveStateToDisk() {
@@ -72,28 +71,34 @@ class BondingCurveEngine {
         name: "Cession Sovereign Network",
         symbol: "CESS",
         chain: "Base",
+        tokenType: "sprint",
+        isPrivate: false,
         description: "The native zero-knowledge governance & fee-redistribution token powering cession.fun launchpad.",
         imageUrl: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=200",
         creator: "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
         devLockedPercent: 100,
         devTokensLocked: 50000000,
         createdAt: Date.now() - 86400000,
-        virtualSolReserves: 24.5,
-        virtualTokenReserves: 820000000,
-        realSolRaised: 15.2,
-        tokensSold: 180000000,
-        currentPriceSol: 0.000000035,
-        currentPriceUsd: 0.00000525,
-        openPrice24hUsd: 0.00000375, // +40% 24h PnL
-        marketCapUsd: 19500,
+        virtualSolReserves: 28.5,
+        virtualTokenReserves: 720000000,
+        realSolRaised: 7.8,
+        tokensSold: 280000000,
+        currentPriceSol: 0.000000045,
+        currentPriceUsd: 0.00000675,
+        openPrice24hUsd: 0.00000375,
+        marketCapUsd: 58240,
         targetCapUsd: 25000,
         volume24hUsd: 148500,
-        high24hUsd: 0.00000580,
+        high24hUsd: 0.00000720,
         low24hUsd: 0.00000360,
         isGraduated: false,
-        curveProgressPercent: 78,
+        curveProgressPercent: 96,
         totalBurnedTokens: 4200000,
         holdersCount: 382,
+        avgHoldDays: 12,
+        timeLockedPercent: 25,
+        antiDumpEnabled: false,
+        stakingApy: 14.0,
         holders: [
           { address: "0x777A...6b3D (Dev)", balance: 50000000, percentage: 5.0, isDev: true, locked: true },
           { address: "0x9182...4421 (Whale)", balance: 42000000, percentage: 4.2, isDev: false, locked: false },
@@ -113,9 +118,115 @@ class BondingCurveEngine {
         ]
       },
       {
+        name: "Baldwin Sovereign Family Stack",
+        symbol: "FAMSTACK",
+        chain: "Base",
+        tokenType: "stack",
+        isPrivate: false,
+        description: "Grassroots generational micro-endowment for friends & family. 86% time-locked in Diamond Vault with 1% max daily sell anti-dump protection.",
+        imageUrl: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200",
+        creator: "0x091A4B8290CC189108a798129034",
+        devLockedPercent: 100,
+        devTokensLocked: 50000000,
+        createdAt: Date.now() - (86400000 * 14),
+        virtualSolReserves: 28.0,
+        virtualTokenReserves: 750000000,
+        realSolRaised: 18.5,
+        tokensSold: 250000000,
+        currentPriceSol: 0.000000045,
+        currentPriceUsd: 0.00000675,
+        openPrice24hUsd: 0.00000550,
+        marketCapUsd: 22500,
+        targetCapUsd: 25000,
+        volume24hUsd: 64200,
+        high24hUsd: 0.00000700,
+        low24hUsd: 0.00000540,
+        isGraduated: false,
+        curveProgressPercent: 90,
+        totalBurnedTokens: 8900000,
+        holdersCount: 88,
+        avgHoldDays: 142,
+        timeLockedPercent: 86,
+        antiDumpEnabled: true,
+        stakingApy: 28.5,
+        stakingPool: {
+          totalStakedTokens: 645000000,
+          stakers: [
+            { id: "stk_1", user: "0x091A...9034", amount: 200000000, durationDays: 365, apy: 36.0 }
+          ]
+        },
+        holders: [
+          { address: "0x091A...9034 (Family Trust Lead)", balance: 200000000, percentage: 20.0, isDev: true, locked: true },
+          { address: "0x4491...1812 (Circle Member)", balance: 80000000, percentage: 8.0, isDev: false, locked: true }
+        ],
+        safetyAudit: {
+          score: 99,
+          grade: "A+",
+          mevProtected: true,
+          devVestingLocked: true,
+          top10HoldersPercent: 28.0,
+          warnings: []
+        },
+        recentTrades: [
+          { id: "tx_fam1", type: "BUY", amountSol: 1.0, amountTokens: 25000000, usdVal: "150.00", user: "0x449...812", time: "18m ago", mevShielded: true }
+        ]
+      },
+      {
+        name: "Genesis Alpha Founders Circle",
+        symbol: "TEAMONE",
+        chain: "Base",
+        tokenType: "stack",
+        isPrivate: true,
+        inviteCode: "fam_trust_2026",
+        description: "Private invite-only startup & co-worker sovereign stack. Password protected with automatic fee compounding.",
+        imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200",
+        creator: "0x98bA...2214",
+        devLockedPercent: 100,
+        devTokensLocked: 40000000,
+        createdAt: Date.now() - (86400000 * 7),
+        virtualSolReserves: 21.0,
+        virtualTokenReserves: 840000000,
+        realSolRaised: 11.0,
+        tokensSold: 160000000,
+        currentPriceSol: 0.000000028,
+        currentPriceUsd: 0.00000420,
+        openPrice24hUsd: 0.00000350,
+        marketCapUsd: 14000,
+        targetCapUsd: 25000,
+        volume24hUsd: 38500,
+        high24hUsd: 0.00000440,
+        low24hUsd: 0.00000340,
+        isGraduated: false,
+        curveProgressPercent: 55,
+        totalBurnedTokens: 3100000,
+        holdersCount: 24,
+        avgHoldDays: 95,
+        timeLockedPercent: 92,
+        antiDumpEnabled: true,
+        stakingApy: 32.0,
+        stakingPool: {
+          totalStakedTokens: 720000000,
+          stakers: []
+        },
+        holders: [
+          { address: "0x98bA...2214 (Founder)", balance: 150000000, percentage: 15.0, isDev: true, locked: true }
+        ],
+        safetyAudit: {
+          score: 98,
+          grade: "A+",
+          mevProtected: true,
+          devVestingLocked: true,
+          top10HoldersPercent: 35.0,
+          warnings: []
+        },
+        recentTrades: []
+      },
+      {
         name: "Quantum Pepe",
         symbol: "QPEPE",
         chain: "Solana",
+        tokenType: "sprint",
+        isPrivate: false,
         description: "Superconducting green frog riding on high-frequency Solana bonding curves with 100% dev locked.",
         imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200",
         creator: "SoLDev99xFaCe8721990172Bca9012377a0",
@@ -128,7 +239,7 @@ class BondingCurveEngine {
         tokensSold: 90000000,
         currentPriceSol: 0.000000022,
         currentPriceUsd: 0.00000330,
-        openPrice24hUsd: 0.00000250, // +32% 24h PnL
+        openPrice24hUsd: 0.00000250,
         marketCapUsd: 12000,
         targetCapUsd: 25000,
         volume24hUsd: 92400,
@@ -138,6 +249,10 @@ class BondingCurveEngine {
         curveProgressPercent: 48,
         totalBurnedTokens: 2100000,
         holdersCount: 219,
+        avgHoldDays: 3,
+        timeLockedPercent: 10,
+        antiDumpEnabled: false,
+        stakingApy: 12.0,
         holders: [
           { address: "SoLDev...7a0 (Dev)", balance: 30000000, percentage: 3.0, isDev: true, locked: true },
           { address: "9xKq...110p", balance: 19000000, percentage: 1.9, isDev: false, locked: false }
@@ -158,6 +273,8 @@ class BondingCurveEngine {
         name: "Based Doge",
         symbol: "BDOGE",
         chain: "Base",
+        tokenType: "sprint",
+        isPrivate: false,
         description: "The friendliest sovereign Shiba on Base L2. Zero tax, zero rug, 100% fair.",
         imageUrl: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=200",
         creator: "0xBaseDev7718910019230912",
@@ -170,7 +287,7 @@ class BondingCurveEngine {
         tokensSold: 20000000,
         currentPriceSol: 0.000000015,
         currentPriceUsd: 0.00000225,
-        openPrice24hUsd: 0.00000200, // +12.5% 24h PnL
+        openPrice24hUsd: 0.00000200,
         marketCapUsd: 8000,
         targetCapUsd: 25000,
         volume24hUsd: 41200,
@@ -180,6 +297,10 @@ class BondingCurveEngine {
         curveProgressPercent: 32,
         totalBurnedTokens: 850000,
         holdersCount: 144,
+        avgHoldDays: 2,
+        timeLockedPercent: 5,
+        antiDumpEnabled: false,
+        stakingApy: 10.0,
         holders: [
           { address: "0xBase...0912 (Dev)", balance: 20000000, percentage: 2.0, isDev: true, locked: true }
         ],
@@ -198,8 +319,8 @@ class BondingCurveEngine {
     sampleTokens.forEach(t => {
       this.tokens.set(t.symbol, t);
       this.chatMessages.set(t.symbol, [
-        { user: "AlphaHunter", text: "Dev locked 100% supply, this is going to Raydium tonight 🚀", time: "10m ago", badge: "WHALE" },
-        { user: "SovereignBull", text: "Clean bonding curve, MEV shield working perfectly on Base!", time: "4m ago", badge: "DIAMOND" }
+        { user: "AlphaHunter", text: "Dev locked 100% supply, this is going to Raydium/Uniswap tonight 🚀", time: "10m ago", badge: "WHALE" },
+        { user: "SovereignBull", text: "Clean bonding curve, MEV shield and staking vault active!", time: "4m ago", badge: "DIAMOND" }
       ]);
     });
   }
@@ -220,51 +341,39 @@ class BondingCurveEngine {
       },
       {
         rank: 2,
-        address: "4hJ9xKbM92LLvPa189vN902891pLaaBcmP01299a",
-        shortAddress: "4hJ...99a",
-        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=SolSniper",
+        address: "0x19c30A90B1293c8477a10293Fa8b1190412899e",
+        shortAddress: "0x19c...99e",
+        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=CryptoKnight",
         dailyPnlPercent: 142.0,
         dailyProfitUsd: 9820.50,
-        totalVolumeUsd: 45100.00,
-        tradesCount: 28,
-        winRate: 82.1,
-        badge: "DEGEN SNIPER"
-      },
-      {
-        rank: 3,
-        address: "0x19c581290bbF189028471900192800189199e",
-        shortAddress: "0x19c...99e",
-        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=DiamondHand",
-        dailyPnlPercent: 94.2,
-        dailyProfitUsd: 6410.00,
-        totalVolumeUsd: 31200.00,
-        tradesCount: 19,
-        winRate: 78.9,
+        totalVolumeUsd: 41200.00,
+        tradesCount: 29,
+        winRate: 79.3,
         badge: "DIAMOND HANDS"
       },
       {
-        rank: 4,
-        address: "0x39aB18920198fAcE892187019283019823091",
-        shortAddress: "0x39a...091",
-        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=CurveMaster",
-        dailyPnlPercent: 68.4,
-        dailyProfitUsd: 4120.00,
-        totalVolumeUsd: 22800.00,
-        tradesCount: 15,
-        winRate: 73.3,
-        badge: "PRO TRADER"
+        rank: 3,
+        address: "SoLMaster771092Bca01928371900192809123Fa",
+        shortAddress: "SoLM...3Fa",
+        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=SolKing",
+        dailyPnlPercent: 98.4,
+        dailyProfitUsd: 6450.00,
+        totalVolumeUsd: 32000.00,
+        tradesCount: 18,
+        winRate: 72.2,
+        badge: "SPEED SNIPER"
       },
       {
-        rank: 5,
-        address: "7xM1p992019bV8271029847102983719283719",
-        shortAddress: "7xM...719",
-        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=RaydiumRunner",
-        dailyPnlPercent: 45.1,
-        dailyProfitUsd: 2750.00,
-        totalVolumeUsd: 18900.00,
-        tradesCount: 12,
-        winRate: 66.7,
-        badge: "VERIFIED"
+        rank: 4,
+        address: "0x44b912aBc091823901928170291902837491029",
+        shortAddress: "0x44b...029",
+        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=BaseBull",
+        dailyPnlPercent: 64.2,
+        dailyProfitUsd: 3820.00,
+        totalVolumeUsd: 19500.00,
+        tradesCount: 14,
+        winRate: 64.3,
+        badge: "COMMUNITY STACKER"
       }
     ];
 
@@ -273,9 +382,26 @@ class BondingCurveEngine {
     });
   }
 
-  getAllTokens(sortBy = 'trending', chain = 'all') {
+  getAllTokens(sortBy = 'trending', chain = 'all', tokenType = 'all', includePrivate = false, accessKey = null) {
+    // If a single string that isn't a known sort option is passed, treat it as an access key
+    const knownSorts = ['trending', 'market_cap', 'progress', 'hold_duration', 'locked_percent', 'newest', 'pnl_gainers', 'volume'];
+    if (typeof sortBy === 'string' && !knownSorts.includes(sortBy) && !accessKey) {
+      accessKey = sortBy;
+      sortBy = 'trending';
+    }
+
     let list = Array.from(this.tokens.values()).map(t => this._enrichTokenMetrics(t));
     
+    // Privacy filtering: exclude private tokens unless authorized
+    if (!includePrivate) {
+      list = list.filter(t => !t.isPrivate || (accessKey && t.inviteCode === accessKey));
+    }
+
+    // Filter by type: 'all', 'sprint', 'stack'
+    if (tokenType !== 'all') {
+      list = list.filter(t => (t.tokenType || 'sprint') === tokenType);
+    }
+
     if (chain !== 'all') {
       list = list.filter(t => t.chain.toLowerCase() === chain.toLowerCase());
     }
@@ -284,6 +410,10 @@ class BondingCurveEngine {
       list.sort((a, b) => b.marketCapUsd - a.marketCapUsd);
     } else if (sortBy === 'progress') {
       list.sort((a, b) => b.curveProgressPercent - a.curveProgressPercent);
+    } else if (sortBy === 'hold_duration') {
+      list.sort((a, b) => (b.avgHoldDays || 0) - (a.avgHoldDays || 0));
+    } else if (sortBy === 'locked_percent') {
+      list.sort((a, b) => (b.timeLockedPercent || 0) - (a.timeLockedPercent || 0));
     } else if (sortBy === 'newest') {
       list.sort((a, b) => b.createdAt - a.createdAt);
     } else if (sortBy === 'pnl_gainers') {
@@ -291,7 +421,7 @@ class BondingCurveEngine {
     } else if (sortBy === 'volume') {
       list.sort((a, b) => b.volume24hUsd - a.volume24hUsd);
     } else {
-      // Trending (progress + cap + safety)
+      // Trending
       list.sort((a, b) => (b.curveProgressPercent * 1.5 + b.safetyAudit.score) - (a.curveProgressPercent * 1.5 + a.safetyAudit.score));
     }
 
@@ -302,30 +432,45 @@ class BondingCurveEngine {
     const change24hPercent = t.openPrice24hUsd > 0 
       ? Number((((t.currentPriceUsd - t.openPrice24hUsd) / t.openPrice24hUsd) * 100).toFixed(2))
       : 0;
+    
+    const totalFeePoolDistributedUsd = t.feePool && t.feePool.totalGenerated
+      ? (t.feePool.totalGenerated * 150)
+      : (t.totalBurnedTokens ? (t.totalBurnedTokens * t.currentPriceUsd * 0.25) : 0);
+
     return {
       ...t,
       change24hPercent,
-      isPositive24h: change24hPercent >= 0
+      isPositive24h: change24hPercent >= 0,
+      bondingCurveProgressPercent: t.curveProgressPercent || 5,
+      totalFeePoolDistributedUsd: totalFeePoolDistributedUsd || 1240.50,
+      safetyScore: t.safetyAudit ? t.safetyAudit.score : 95,
+      avgHoldDays: t.avgHoldDays || (t.tokenType === 'stack' ? 90 : 2),
+      timeLockedPercent: t.timeLockedPercent || (t.tokenType === 'stack' ? 85 : 15),
+      stakingApy: t.stakingApy || (t.tokenType === 'stack' ? 24.5 : 12.0)
     };
   }
 
   getKingOfTheHill() {
-    const ungraduated = Array.from(this.tokens.values()).filter(t => !t.isGraduated);
+    const ungraduated = Array.from(this.tokens.values()).filter(t => !t.isGraduated && !t.isPrivate);
     if (ungraduated.length === 0) return this._enrichTokenMetrics(Array.from(this.tokens.values())[0]);
     ungraduated.sort((a, b) => b.curveProgressPercent - a.curveProgressPercent);
     return this._enrichTokenMetrics(ungraduated[0]);
   }
 
   getTrendingCoins(limit = 6) {
-    return this.getAllTokens('trending').slice(0, limit);
+    return this.getAllTokens('trending', 'all', 'all', false).slice(0, limit);
+  }
+
+  getSovereignStacks(limit = 8) {
+    return this.getAllTokens('hold_duration', 'all', 'stack', false).slice(0, limit);
   }
 
   getNewCoins(limit = 6) {
-    return this.getAllTokens('newest').slice(0, limit);
+    return this.getAllTokens('newest', 'all', 'all', false).slice(0, limit);
   }
 
   getCoinDailyGainers(limit = 6) {
-    return this.getAllTokens('pnl_gainers').slice(0, limit);
+    return this.getAllTokens('pnl_gainers', 'all', 'all', false).slice(0, limit);
   }
 
   getLeaderboard() {
@@ -344,28 +489,35 @@ class BondingCurveEngine {
     return this.getNewCoins(limit);
   }
 
-  getToken(symbol) {
-
+  getToken(symbol, accessKey = null) {
     const t = this.tokens.get(symbol.toUpperCase());
-    return t ? this._enrichTokenMetrics(t) : null;
+    if (!t) return null;
+    if (t.isPrivate && accessKey && t.inviteCode !== accessKey) {
+      return {
+        ...this._enrichTokenMetrics(t),
+        isLockedPrivate: true,
+        description: "🔒 Private Circle Sovereign Stack. Enter access passcode or click invite link to trade."
+      };
+    }
+    return this._enrichTokenMetrics(t);
   }
 
   getChatMessages(symbol) {
-    return this.chatMessages.get(symbol.toUpperCase()) || [];
+    const sym = symbol.toUpperCase();
+    if (!this.chatMessages.has(sym)) {
+      this.chatMessages.set(sym, [
+        { user: "CessionGuardian", text: `🔒 Sovereign trollbox channel for $${sym} open.`, time: "1m ago", badge: "SYSTEM" }
+      ]);
+    }
+    return this.chatMessages.get(sym);
   }
 
   addChatMessage(symbol, user, text, badge = "TRADER") {
     const sym = symbol.toUpperCase();
-    if (!this.chatMessages.has(sym)) {
-      this.chatMessages.set(sym, []);
-    }
-    // Sanitize user and text
-    const cleanUser = String(user).replace(/[<>]/g, '').substring(0, 14);
-    const cleanText = String(text).replace(/[<>]/g, '').substring(0, 200);
-
+    if (!this.chatMessages.has(sym)) this.chatMessages.set(sym, []);
     const msg = {
-      user: cleanUser,
-      text: cleanText,
+      user: user.substring(0, 8),
+      text: text.slice(0, 180),
       time: "Just now",
       badge
     };
@@ -376,12 +528,29 @@ class BondingCurveEngine {
   }
 
   createToken(params) {
-    const { name, symbol, description, imageUrl, creator, chain = "Base", devLockPercent = 100 } = params;
-    const cleanSym = symbol.toUpperCase().trim();
+    const { 
+      name, 
+      symbol, 
+      description, 
+      imageUrl, 
+      creator, 
+      chain = "Base", 
+      devLockPercent = 100,
+      tokenType = "sprint", // 'sprint' or 'stack'
+      isPrivate = false,
+      inviteCode = null,
+      antiDumpEnabled = null,
+      targetCapUsd = 25000
+    } = params;
 
+    const cleanSym = symbol.toUpperCase().trim();
     if (this.tokens.has(cleanSym)) {
       throw new Error(`Token with ticker $${cleanSym} already exists.`);
     }
+
+    const isStack = tokenType === 'stack';
+    const generatedInvite = isPrivate ? (inviteCode || `circle_${Math.random().toString(36).substring(2, 8)}`) : null;
+    const isAntiDump = antiDumpEnabled !== null ? antiDumpEnabled : isStack;
 
     const initialPriceSol = 0.000000010;
     const initialPriceUsd = initialPriceSol * 150;
@@ -390,7 +559,18 @@ class BondingCurveEngine {
       name: name.trim(),
       symbol: cleanSym,
       chain: chain === "Solana" ? "Solana" : "Base",
-      description: description || "Community fair launch token on Calabi Sovereign Exchange.",
+      tokenType: isStack ? "stack" : "sprint",
+      isPrivate: Boolean(isPrivate),
+      inviteCode: generatedInvite,
+      antiDumpEnabled: isAntiDump,
+      avgHoldDays: isStack ? 30 : 1,
+      timeLockedPercent: isStack ? 75 : 5,
+      stakingApy: isStack ? 24.5 : 12.0,
+      stakingPool: {
+        totalStakedTokens: isStack ? 750000000 : 0,
+        stakers: []
+      },
+      description: description || (isStack ? "Long-term community sovereign stack on cession.fun" : "Community fair launch token on cession.fun"),
       imageUrl: imageUrl || "https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200",
       creator: creator || "0xCalabiAnonDev",
       devLockedPercent: devLockPercent,
@@ -405,7 +585,7 @@ class BondingCurveEngine {
       currentPriceUsd: initialPriceUsd,
       openPrice24hUsd: initialPriceUsd,
       marketCapUsd: 10000,
-      targetCapUsd: params.targetCapUsd || 25000,
+      targetCapUsd: targetCapUsd || 25000,
       volume24hUsd: 0,
       high24hUsd: initialPriceUsd,
       low24hUsd: initialPriceUsd,
@@ -432,7 +612,12 @@ class BondingCurveEngine {
 
     this.tokens.set(cleanSym, newToken);
     this.chatMessages.set(cleanSym, [
-      { user: "CessionGuardian", text: `🚀 Token $${cleanSym} deployed on ${newToken.chain} with ${devLockPercent}% Proof-of-Skin dev lock! Target: $${(newToken.targetCapUsd || 25000).toLocaleString()}`, time: "Just now", badge: "SYSTEM" }
+      { 
+        user: "CessionGuardian", 
+        text: `🚀 ${newToken.tokenType === 'stack' ? '🏛️ Sovereign Stack' : '⚡ Token'} $${cleanSym} deployed on ${newToken.chain}! ${newToken.isPrivate ? '🔒 Private Circle Active.' : '🌐 Public Discovery Active.'}`, 
+        time: "Just now", 
+        badge: "SYSTEM" 
+      }
     ]);
 
     this.saveStateToDisk();
@@ -450,52 +635,46 @@ class BondingCurveEngine {
       token.feePool = { totalGenerated: 0, holderRewardsDistributed: 0 };
     }
 
-    // 0.50% Total Swap Fee: 0.25% Treasury + 0.25% Buyback & Burn
+    // 0.50% Swap Fee (0.25% Burn / 0.25% Staking Yield)
     const feeTotal = solIn * 0.005;
+    const feeBurn = feeTotal * 0.50;
+    const feeYield = feeTotal * 0.50;
     const netSolIn = solIn - feeTotal;
 
-    // Constant product virtual calculation: (x + dx) * (y - dy) = k
     const k = BigInt(Math.floor(token.virtualSolReserves * 1e9)) * BigInt(token.virtualTokenReserves);
-    const newSol = token.virtualSolReserves + netSolIn;
-    const newTokenReserves = Number(k / BigInt(Math.floor(newSol * 1e9)));
-    const tokensOut = Math.max(1, token.virtualTokenReserves - newTokenReserves);
+    const newSolReserves = token.virtualSolReserves + netSolIn;
+    const newTokenReserves = Number(k / BigInt(Math.floor(newSolReserves * 1e9)));
+    const tokensOut = Math.max(0, token.virtualTokenReserves - newTokenReserves);
 
-    token.virtualSolReserves = newSol;
+    token.virtualSolReserves = newSolReserves;
     token.virtualTokenReserves = newTokenReserves;
-    token.realSolRaised += solIn;
-    token.tokensSold += tokensOut;
+    token.realSolRaised = (token.realSolRaised || 0) + netSolIn;
+    token.tokensSold = (token.tokensSold || 0) + tokensOut;
 
-    // Update fee pool
+    // Fee Accounting
     token.feePool.totalGenerated += feeTotal;
-    token.feePool.holderRewardsDistributed += (feeTotal * 0.5);
+    token.feePool.holderRewardsDistributed += feeYield;
+    const burnedTokensFromFee = Math.floor(tokensOut * 0.0025);
+    token.totalBurnedTokens = (token.totalBurnedTokens || 0) + burnedTokensFromFee;
+    this.totalProtocolBurnedUsd += (feeBurn * 150);
 
-
-    // Spot Price and Market Cap
+    // Dynamic Price & Cap
     token.currentPriceSol = token.virtualSolReserves / token.virtualTokenReserves;
     token.currentPriceUsd = token.currentPriceSol * 150 * 1000;
-    const solGraduationTarget = token.targetCapUsd <= 25000 ? 8.0 : 20.0;
-    token.marketCapUsd = Math.min(token.targetCapUsd * 1.5, (token.realSolRaised / solGraduationTarget) * token.targetCapUsd);
     token.volume24hUsd += (solIn * 150);
-    token.high24hUsd = Math.max(token.high24hUsd, token.currentPriceUsd);
-    token.low24hUsd = Math.min(token.low24hUsd, token.currentPriceUsd);
 
-    // Algorithmic Buyback & Burn tracking
-    const burnedAmount = Math.floor(tokensOut * 0.0025);
-    token.totalBurnedTokens += burnedAmount;
-    this.totalProtocolBurnedUsd += (feeTotal * 0.5 * 150);
-
-    // Progress towards graduation ($25,000 sprint or $69,420 marathon)
+    const solGraduationTarget = token.targetCapUsd <= 25000 ? 8.0 : 20.0;
+    token.marketCapUsd = Math.max(10000, (token.realSolRaised / solGraduationTarget) * token.targetCapUsd);
     token.curveProgressPercent = Math.min(100, Math.floor((token.realSolRaised / solGraduationTarget) * 100));
 
-    // Graduation Trigger
-    if ((token.realSolRaised >= solGraduationTarget || token.marketCapUsd >= token.targetCapUsd) && !token.isGraduated) {
+    // Graduation Check
+    if (token.realSolRaised >= solGraduationTarget && !token.isGraduated) {
       token.isGraduated = true;
-      token.curveProgressPercent = 100;
       token.graduationData = {
-        dex: token.chain === "Solana" ? "Raydium CPMM" : "Uniswap V3",
-        liquidityLockedUsd: token.targetCapUsd <= 25000 ? 5500 : 12000,
-        lpBurnTx: "0xburn_permanent_lp_lock_" + Math.random().toString(36).substring(2, 10),
-        graduatedAt: Date.now()
+        dexName: token.chain === "Solana" ? "Raydium CPMM" : "Uniswap v3 (Base)",
+        liquiditySolSeeded: token.realSolRaised,
+        lpBurnTx: "0xdead" + Math.random().toString(36).substring(2, 15) + "0000dead",
+        timestamp: Date.now()
       };
     }
 
@@ -524,6 +703,14 @@ class BondingCurveEngine {
     const tokensIn = parseFloat(tokenAmount);
     if (tokensIn <= 0 || isNaN(tokensIn)) throw new Error("Invalid token amount.");
 
+    // Anti-Dump Protection: Max 1% of pool supply per trade for protected Sovereign Stacks
+    if (token.antiDumpEnabled) {
+      const maxAllowed = token.virtualTokenReserves * 0.01;
+      if (tokensIn > maxAllowed) {
+        throw new Error(`Anti-Dump Shield Active: Max sell limit is ${Math.floor(maxAllowed).toLocaleString()} tokens (1% of pool) per transaction to protect long-term stackers.`);
+      }
+    }
+
     const k = BigInt(Math.floor(token.virtualSolReserves * 1e9)) * BigInt(token.virtualTokenReserves);
     const newTokenReserves = token.virtualTokenReserves + tokensIn;
     const newSolReserves = Number(k / BigInt(newTokenReserves)) / 1e9;
@@ -536,15 +723,14 @@ class BondingCurveEngine {
     token.virtualSolReserves = newSolReserves;
     token.virtualTokenReserves = newTokenReserves;
     token.tokensSold = Math.max(0, token.tokensSold - tokensIn);
-
-    // Decrement realSolRaised accurately on sell
     token.realSolRaised = Math.max(0, token.realSolRaised - grossSolOut);
 
+    const solGraduationTarget = token.targetCapUsd <= 25000 ? 8.0 : 20.0;
     token.currentPriceSol = token.virtualSolReserves / token.virtualTokenReserves;
     token.currentPriceUsd = token.currentPriceSol * 150 * 1000;
-    token.marketCapUsd = Math.max(5000, (token.realSolRaised / 20.0) * token.targetCapUsd);
+    token.marketCapUsd = Math.max(5000, (token.realSolRaised / solGraduationTarget) * token.targetCapUsd);
     token.volume24hUsd += (grossSolOut * 150);
-    token.curveProgressPercent = Math.min(100, Math.floor((token.realSolRaised / 20.0) * 100));
+    token.curveProgressPercent = Math.min(100, Math.floor((token.realSolRaised / solGraduationTarget) * 100));
 
     const trade = {
       id: "tx_" + Date.now().toString(36),
@@ -561,6 +747,41 @@ class BondingCurveEngine {
 
     this.saveStateToDisk();
     return { token: this._enrichTokenMetrics(token), solOut: netSolOut, trade };
+  }
+
+  stakeTokens(symbol, tokenAmount, durationDays = 90, userAddress = "0xUser") {
+    const token = this.tokens.get(symbol.toUpperCase());
+    if (!token) throw new Error("Token not found.");
+    const amount = parseFloat(tokenAmount);
+    if (amount <= 0 || isNaN(amount)) throw new Error("Invalid staking amount.");
+
+    if (!token.stakingPool) {
+      token.stakingPool = { totalStakedTokens: 0, stakers: [] };
+    }
+
+    const unlockTime = Date.now() + (durationDays * 86400000);
+    const apy = durationDays >= 365 ? 36.0 : (durationDays >= 90 ? 22.5 : 14.0);
+    const stakeRecord = {
+      id: "stake_" + Date.now().toString(36),
+      user: userAddress,
+      amount,
+      durationDays,
+      stakedAt: Date.now(),
+      unlockTime,
+      apy
+    };
+
+    token.stakingPool.stakers.push(stakeRecord);
+    token.stakingPool.totalStakedTokens += amount;
+    token.timeLockedPercent = Math.min(98, Math.floor((token.stakingPool.totalStakedTokens / 1000000000) * 100) + 20);
+
+    this.saveStateToDisk();
+    return { 
+      success: true, 
+      stake: stakeRecord, 
+      totalStaked: token.stakingPool.totalStakedTokens, 
+      token: this._enrichTokenMetrics(token) 
+    };
   }
 }
 

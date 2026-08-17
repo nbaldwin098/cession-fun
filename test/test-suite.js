@@ -1,6 +1,6 @@
 /**
- * Calabi Master Automated Test Suite
- * Validates mathematical invariants, fee splits, leaderboards, public reserves, and end-to-end user flows.
+ * Calabi & Cession Master Automated Test Suite
+ * Validates mathematical invariants, fee splits, leaderboards, public reserves, Sovereign Stacks, Diamond Staking, Anti-Dump Guards, and end-to-end user flows.
  */
 
 const assert = require('assert');
@@ -69,7 +69,7 @@ async function main() {
     // Buy 2.0 SOL worth
     const buyResult = bondingCurve.buyTokens("TDOGE", 2.0, "0xBuyerAddress");
     assert(buyResult.tokensOut > 0, "Should mint tokens to buyer");
-    assert(buyResult.token.realSolRaised === 2.0, "Real SOL raised should equal 2.0");
+    assert(buyResult.token.realSolRaised > 1.9, "Real SOL raised should be accrued after net fee split");
     assert(buyResult.token.feePool.totalGenerated > 0, "Fee pool should accrue swap fee");
   });
 
@@ -92,7 +92,7 @@ async function main() {
     const buyLarge = bondingCurve.buyTokens("GRAD", 10.0, "0xWhaleBuyer");
     assert.strictEqual(buyLarge.token.isGraduated, true, "Should graduate upon reaching $25k cap");
     assert.strictEqual(buyLarge.token.curveProgressPercent, 100, "Progress should be 100%");
-    assert(buyLarge.token.graduationData.lpBurnTx.startsWith("0xburn"), "LP tokens should be burned permanently to 0xdead");
+    assert(buyLarge.token.graduationData.lpBurnTx.startsWith("0xdead"), "LP tokens should be burned permanently to 0xdead");
   });
 
   // Test 2: Leaderboard & Daily PnL Rankings
@@ -187,6 +187,74 @@ async function main() {
     // 6. Trade on Exchange Pro Terminal
     treasuryService.recordTrade(15000);
     assert(treasuryService.getPublicReserves().totalReservesUsd > 0, "User must be able to trade on exchange");
+  });
+
+  // Test 6: Sovereign Stacks, Private Circles, Diamond Staking & Anti-Dump
+  console.log('\n[6] SOVEREIGN STACKS, PRIVATE CIRCLES, DIAMOND STAKING & ANTI-DUMP INVARIANTS:');
+  runTest('Sovereign Stack Creation & Discovery', () => {
+    const stack = bondingCurve.createToken({
+      name: "Baldwin Family Trust Stack",
+      symbol: "BFT",
+      creator: "0xFamCreator",
+      chain: "Base",
+      tokenType: "stack",
+      antiDumpEnabled: true,
+      devLockPercent: 100
+    });
+
+    assert.strictEqual(stack.tokenType, "stack");
+    assert.strictEqual(stack.antiDumpEnabled, true);
+
+    const allStacks = bondingCurve.getSovereignStacks();
+    const found = allStacks.find(s => s.symbol === 'BFT');
+    assert(found !== undefined, "Created stack should be discoverable in getSovereignStacks");
+  });
+
+  runTest('Private Circle Access Key Authorization & Redaction', () => {
+    const privateCoin = bondingCurve.createToken({
+      name: "Secret Syndicate",
+      symbol: "SSYN",
+      creator: "0xSyndicateDev",
+      chain: "Solana",
+      tokenType: "stack",
+      isPrivate: true,
+      inviteCode: "secret_syndicate_2026",
+      antiDumpEnabled: true
+    });
+
+    assert.strictEqual(privateCoin.isPrivate, true);
+
+    // Feed without key should redact or hide private coin
+    const feedPublic = bondingCurve.getAllTokens();
+    const foundInPublic = feedPublic.find(t => t.symbol === 'SSYN');
+    assert(foundInPublic === undefined || foundInPublic.isRedacted === true, "Private coin must be hidden or redacted without invite key");
+
+    // Feed with key should reveal private coin
+    const feedWithKey = bondingCurve.getAllTokens('secret_syndicate_2026');
+    const foundWithKey = feedWithKey.find(t => t.symbol === 'SSYN');
+    assert(foundWithKey !== undefined, "Private coin must be visible when passing correct invite key");
+    assert.strictEqual(foundWithKey.name, "Secret Syndicate");
+  });
+
+  runTest('Diamond Vault Staking: 30d/90d/365d Time-Lock APY Yields', () => {
+    const stakeRes = bondingCurve.stakeTokens("BFT", 250000, 90, "0xFamMember");
+    assert.strictEqual(stakeRes.success, true);
+    assert.strictEqual(stakeRes.stake.apy, 22.5, "90-day lock should yield 22.5% APY");
+    assert.strictEqual(stakeRes.stake.amount, 250000);
+    assert(stakeRes.totalStaked >= 250000, "Vault totalStaked should reflect staked amount");
+  });
+
+  runTest('1% Anti-Dump Circuit Breaker Guard Enforcement', () => {
+    // Attempting to dump more than 1% of pool (e.g., 20,000,000 tokens on BFT)
+    let threwAntiDump = false;
+    try {
+      bondingCurve.sellTokens("BFT", 20000000, "0xDumpAttempt");
+    } catch (err) {
+      if (err.message.includes('Anti-Dump Shield Active')) {
+        threwAntiDump = true;
+      }
+    }
+    assert.strictEqual(threwAntiDump, true, "Selling >1% of pool must be blocked by Anti-Dump Shield");
   });
 
   console.log('\n======================================================');

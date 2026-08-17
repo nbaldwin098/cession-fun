@@ -1,39 +1,42 @@
 /**
- * Calabi Master Launchpad, Leaderboard, Treasury & Terminal Controller
+ * Cession Sovereign Exchange & Launchpad Manager
+ * Cyber Coder Theme Controller
  * 
- * Includes:
- * 1. Fair Launchpad bonding curves with Proof-of-Skin dev locks
- * 2. Trader Leaderboard (24h Daily PnL, Win Rate, Volume)
- * 3. Coin 24h Daily Gainers/Losers, New Listings, and Popular Feeds
- * 4. Transparent Kraken-Grade Proof-of-Reserves Treasury
- * 5. Web Audio API synthesized sound FX (Buy chirp, Sell chime, Graduation fanfare)
- * 6. XSS-sanitized Trollbox & Multi-Wallet Support
+ * Features:
+ * 1. Meme Sprints (Fast velocity $25k bonding curves)
+ * 2. Sovereign Stacks (Long-term community assets, ROSCA/Tanda micro-endowments)
+ * 3. Public vs Private Circles with Invite Passcodes (e.g. fam_trust_2026)
+ * 4. 1% Max Sell Anti-Dump Circuit Breaker Guards
+ * 5. Diamond Vault Time-Lock Staking (30d / 90d / 365d at 14% - 36% APY)
+ * 6. Non-custodial Wallet Connect & Live Trollbox
  */
 
 class CalabiLaunchpadManager {
   constructor() {
     this.tokenGrid = document.getElementById('tokenGrid');
+    this.stacksGrid = document.getElementById('stacksGrid');
     this.searchInput = document.getElementById('tokenSearchInput');
     this.filterButtons = document.querySelectorAll('.filter-btn');
-    this.chainButtons = document.querySelectorAll('.chain-pill');
     
     this.activeFilter = 'trending';
     this.activeChain = 'all';
     this.tokens = [];
+    this.stacks = [];
     this.activeToken = null;
-    this.tradeMode = 'BUY'; // 'BUY' or 'SELL'
+    this.tradeMode = 'BUY'; // 'BUY' | 'SELL' | 'STAKE'
     this.currentView = 'launchpad';
+    this.unlockedKeys = new Set();
 
     // View Tabs
     this.tabViewLaunchpad = document.getElementById('tabViewLaunchpad');
+    this.tabViewStacks = document.getElementById('tabViewStacks');
     this.tabViewLeaderboard = document.getElementById('tabViewLeaderboard');
-    this.tabViewNewCoins = document.getElementById('tabViewNewCoins');
     this.tabViewTreasury = document.getElementById('tabViewTreasury');
     this.tabViewPro = document.getElementById('tabViewPro');
 
     this.sectionLaunchpad = document.getElementById('sectionLaunchpad');
+    this.sectionStacks = document.getElementById('sectionStacks');
     this.sectionLeaderboard = document.getElementById('sectionLeaderboard');
-    this.sectionNewCoins = document.getElementById('sectionNewCoins');
     this.sectionTreasury = document.getElementById('sectionTreasury');
     this.sectionProTrading = document.getElementById('sectionProTrading');
 
@@ -41,42 +44,51 @@ class CalabiLaunchpadManager {
     this.detailModal = document.getElementById('tokenDetailModal');
     this.deployModal = document.getElementById('deployTokenModal');
     this.walletModal = document.getElementById('walletModal');
-    this.sendModal = document.getElementById('sendModal');
-    this.receiveModal = document.getElementById('receiveModal');
     this.profileModal = document.getElementById('profileModal');
-    this.cexDossierModal = document.getElementById('cexDossierModal');
 
     // Detail Modal Elements
     this.btnCloseDetail = document.getElementById('btnCloseDetailModal');
     this.detailTabBuy = document.getElementById('detailTabBuy');
     this.detailTabSell = document.getElementById('detailTabSell');
+    this.detailTabStake = document.getElementById('detailTabStake');
     this.detailSwapAmount = document.getElementById('detailSwapAmount');
     this.btnExecuteSwap = document.getElementById('btnExecuteDetailSwap');
+    this.btnExecuteStake = document.getElementById('btnExecuteDetailStake');
     this.trollboxInput = document.getElementById('trollboxInput');
     this.btnSendTrollbox = document.getElementById('btnSendTrollbox');
+    this.btnCopyInvite = document.getElementById('btnCopyInviteLink');
 
     this.init();
   }
 
   init() {
+    this.checkUrlKeyParam();
     this.fetchTokens();
+    this.fetchStacks();
     this.fetchKing();
     this.fetchLeaderboard();
-    this.fetchDailyGainers();
     this.fetchTreasuryReserves();
     this.bindEvents();
     this.handleInitialRoute();
   }
 
+  checkUrlKeyParam() {
+    const params = new URLSearchParams(window.location.search);
+    const key = params.get('key') || params.get('invite');
+    if (key) {
+      this.unlockedKeys.add(key);
+    }
+  }
+
   handleInitialRoute() {
     const path = window.location.pathname.toLowerCase();
-    if (path === '/leaderboard' || path === '/rankings') {
+    if (path === '/stacks' || path === '/endowments') {
+      this.switchMainView('stacks', false);
+    } else if (path === '/leaderboard' || path === '/rankings') {
       this.switchMainView('leaderboard', false);
-    } else if (path === '/new-coins' || path === '/newcoins') {
-      this.switchMainView('newcoins', false);
     } else if (path === '/treasury' || path === '/reserves') {
       this.switchMainView('treasury', false);
-    } else if (path === '/pro' || path === '/terminal' || path === '/trade') {
+    } else if (path === '/pro' || path === '/terminal') {
       this.switchMainView('pro', false);
     } else if (path.startsWith('/coin/') || path.startsWith('/token/')) {
       const parts = path.split('/');
@@ -91,10 +103,10 @@ class CalabiLaunchpadManager {
       if (curPath === '/' || curPath === '/launchpad') {
         this.switchMainView('launchpad', false);
         if (this.detailModal) this.detailModal.classList.remove('active');
+      } else if (curPath === '/stacks') {
+        this.switchMainView('stacks', false);
       } else if (curPath === '/leaderboard') {
         this.switchMainView('leaderboard', false);
-      } else if (curPath === '/new-coins') {
-        this.switchMainView('newcoins', false);
       } else if (curPath === '/treasury') {
         this.switchMainView('treasury', false);
       } else if (curPath === '/pro') {
@@ -109,46 +121,25 @@ class CalabiLaunchpadManager {
   bindEvents() {
     // Navigation view tabs
     if (this.tabViewLaunchpad) this.tabViewLaunchpad.addEventListener('click', () => this.switchMainView('launchpad'));
+    if (this.tabViewStacks) this.tabViewStacks.addEventListener('click', () => this.switchMainView('stacks'));
     if (this.tabViewLeaderboard) this.tabViewLeaderboard.addEventListener('click', () => this.switchMainView('leaderboard'));
-    if (this.tabViewNewCoins) this.tabViewNewCoins.addEventListener('click', () => this.switchMainView('newcoins'));
     if (this.tabViewTreasury) this.tabViewTreasury.addEventListener('click', () => this.switchMainView('treasury'));
     if (this.tabViewPro) this.tabViewPro.addEventListener('click', () => this.switchMainView('pro'));
 
-    // Mobile Bottom Nav items
-    document.querySelectorAll('.mobile-nav-item').forEach(item => {
-      item.addEventListener('click', (e) => {
-        const view = item.getAttribute('data-view');
-        if (view === 'launch') {
-          this.openDeployModal();
-        } else if (view === 'wallet') {
-          this.openWalletModal();
-        } else if (view) {
-          this.switchMainView(view);
-          document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active'));
-          item.classList.add('active');
-        }
-      });
-    });
-
-    // Discovery Controls
+    // Search filter
     if (this.searchInput) {
-      this.searchInput.addEventListener('input', () => this.renderTokenGrid());
+      this.searchInput.addEventListener('input', () => {
+        this.renderTokenGrid();
+        this.renderStacksGrid();
+      });
     }
 
+    // Filter Buttons
     this.filterButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         this.filterButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         this.activeFilter = btn.getAttribute('data-filter');
-        this.fetchTokens();
-      });
-    });
-
-    this.chainButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        this.chainButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        this.activeChain = btn.getAttribute('data-chain');
         this.fetchTokens();
       });
     });
@@ -161,21 +152,28 @@ class CalabiLaunchpadManager {
     if (btnCloseDeploy) btnCloseDeploy.addEventListener('click', () => this.closeDeployModal());
     if (deployForm) deployForm.addEventListener('submit', (e) => this.handleDeploySubmit(e));
 
-    // Vault & Profile Modal Handlers
-    const btnVault = document.getElementById('btnOpenVaultModal');
-    const btnCloseVault = document.getElementById('btnCloseVaultModal');
-    if (btnVault) btnVault.addEventListener('click', () => this.openWalletModal());
-    if (btnCloseVault) btnCloseVault.addEventListener('click', () => this.closeWalletModal());
+    // Asset mode radio toggle
+    const privacyRadios = document.querySelectorAll('input[name="privacySelect"]');
+    const privateGroup = document.getElementById('privateCodeGroup');
+    privacyRadios.forEach(r => {
+      r.addEventListener('change', () => {
+        if (privateGroup) {
+          privateGroup.style.display = r.value === 'private' ? 'block' : 'none';
+        }
+      });
+    });
 
+    // Profile & Vault Modal Handlers
+    const btnVault = document.getElementById('btnOpenVaultModal');
+    if (btnVault) btnVault.addEventListener('click', () => this.openWalletModal());
     const btnProfile = document.getElementById('btnOpenProfileModal');
     if (btnProfile) btnProfile.addEventListener('click', () => this.openProfileModal());
 
     // Detail Modal Handlers
     if (this.btnCloseDetail) this.btnCloseDetail.addEventListener('click', () => this.closeDetailModal());
-    if (this.detailTabBuy && this.detailTabSell) {
-      this.detailTabBuy.addEventListener('click', () => this.setTradeMode('BUY'));
-      this.detailTabSell.addEventListener('click', () => this.setTradeMode('SELL'));
-    }
+    if (this.detailTabBuy) this.detailTabBuy.addEventListener('click', () => this.setTradeMode('BUY'));
+    if (this.detailTabSell) this.detailTabSell.addEventListener('click', () => this.setTradeMode('SELL'));
+    if (this.detailTabStake) this.detailTabStake.addEventListener('click', () => this.setTradeMode('STAKE'));
 
     // Quick Presets
     document.querySelectorAll('.preset-btn').forEach(btn => {
@@ -196,6 +194,10 @@ class CalabiLaunchpadManager {
       this.btnExecuteSwap.addEventListener('click', () => this.executeSwap());
     }
 
+    if (this.btnExecuteStake) {
+      this.btnExecuteStake.addEventListener('click', () => this.executeStake());
+    }
+
     // Trollbox
     if (this.btnSendTrollbox && this.trollboxInput) {
       this.btnSendTrollbox.addEventListener('click', () => this.sendTrollboxMessage());
@@ -204,10 +206,9 @@ class CalabiLaunchpadManager {
       });
     }
 
-    // Send Form
-    const sendForm = document.getElementById('sendFundsForm');
-    if (sendForm) {
-      sendForm.addEventListener('submit', (e) => this.handleSendSubmit(e));
+    // Copy Invite Link
+    if (this.btnCopyInvite) {
+      this.btnCopyInvite.addEventListener('click', () => this.copyInviteLink());
     }
   }
 
@@ -215,8 +216,8 @@ class CalabiLaunchpadManager {
     this.currentView = viewName;
     const views = [
       { name: 'launchpad', tab: this.tabViewLaunchpad, sec: this.sectionLaunchpad, path: '/' },
+      { name: 'stacks', tab: this.tabViewStacks, sec: this.sectionStacks, path: '/stacks' },
       { name: 'leaderboard', tab: this.tabViewLeaderboard, sec: this.sectionLeaderboard, path: '/leaderboard' },
-      { name: 'newcoins', tab: this.tabViewNewCoins, sec: this.sectionNewCoins, path: '/new-coins' },
       { name: 'treasury', tab: this.tabViewTreasury, sec: this.sectionTreasury, path: '/treasury' },
       { name: 'pro', tab: this.tabViewPro, sec: this.sectionProTrading, path: '/pro' }
     ];
@@ -229,11 +230,10 @@ class CalabiLaunchpadManager {
       }
     });
 
-    if (viewName === 'leaderboard') {
+    if (viewName === 'stacks') {
+      this.fetchStacks();
+    } else if (viewName === 'leaderboard') {
       this.fetchLeaderboard();
-      this.fetchDailyGainers();
-    } else if (viewName === 'newcoins') {
-      this.fetchNewListings();
     } else if (viewName === 'treasury') {
       this.fetchTreasuryReserves();
     } else if (viewName === 'pro' && window.chartController) {
@@ -241,7 +241,7 @@ class CalabiLaunchpadManager {
     }
   }
 
-  /* Audio Synthesizer via Web Audio API */
+  /* Audio Synthesizer */
   playAudioSfx(type) {
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -268,216 +268,173 @@ class CalabiLaunchpadManager {
         gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
         osc.start();
         osc.stop(ctx.currentTime + 0.2);
-      } else if (type === 'graduation') {
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
-        osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
-        osc.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+      } else if (type === 'stake') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
         osc.start();
-        osc.stop(ctx.currentTime + 0.6);
+        osc.stop(ctx.currentTime + 0.35);
       }
     } catch (e) {}
   }
 
   /* =========================================================
-     LEADERBOARD & DAILY GAINERS
+     FETCH TOKENS & SOVEREIGN STACKS
   ========================================================= */
-  async fetchLeaderboard() {
+  async fetchTokens() {
     try {
-      const res = await fetch('/api/market/leaderboard');
-      const data = await res.json();
-      if (data.success && data.leaderboard) {
-        this.renderLeaderboard(data.leaderboard);
-      }
-    } catch (err) {
-      console.warn('Leaderboard fetch error:', err);
-    }
-  }
-
-  renderLeaderboard(traders) {
-    const tbody = document.getElementById('leaderboardTableBody');
-    if (!tbody) return;
-
-    tbody.innerHTML = traders.map(t => {
-      const pnlClass = t.dailyPnlPercent >= 0 ? 'up' : 'down';
-      const pnlPrefix = t.dailyPnlPercent >= 0 ? '+' : '';
-      return `
-        <tr>
-          <td style="font-weight: 800; font-family: var(--font-mono); color: ${t.rank <= 3 ? 'var(--brand-yellow)' : 'var(--text-muted)'};">
-            #${t.rank}
-          </td>
-          <td>
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <img src="${t.avatar}" class="table-avatar" alt="${t.username}">
-              <div>
-                <div style="font-weight: 700; color: #fff;">${t.username}</div>
-                <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">${t.address}</div>
-              </div>
-            </div>
-          </td>
-          <td><span class="badge-tag safe">${t.badge}</span></td>
-          <td style="font-family: var(--font-mono); font-weight: 800;" class="${pnlClass}">
-            ${pnlPrefix}${t.dailyPnlPercent.toFixed(1)}% ($${t.dailyProfitUsd.toLocaleString()})
-          </td>
-          <td style="font-family: var(--font-mono); color: #fff;">$${t.totalVolumeUsd.toLocaleString()}</td>
-          <td style="font-family: var(--font-mono); color: var(--accent-emerald); font-weight: 700;">${t.winRate}%</td>
-          <td style="font-family: var(--font-mono); color: var(--text-muted);">${t.tradesCount}</td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  async fetchDailyGainers() {
-    try {
-      const res = await fetch('/api/market/daily-gainers');
-      const data = await res.json();
-      if (data.success && data.gainers) {
-        this.renderDailyGainers(data.gainers);
-      }
-    } catch (err) {
-      console.warn('Daily gainers fetch error:', err);
-    }
-  }
-
-  renderDailyGainers(coins) {
-    const grid = document.getElementById('coinPnlGrid');
-    if (!grid) return;
-
-    grid.innerHTML = coins.map(c => {
-      const pnlClass = c.change24hPercent >= 0 ? 'up' : 'down';
-      const pnlPrefix = c.change24hPercent >= 0 ? '+' : '';
-      return `
-        <div class="stat-card" onclick="window.launchpadManager.openTokenDetail('${c.symbol}')" style="cursor: pointer;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <img src="${c.imageUrl}" class="token-avatar-sm" alt="${c.symbol}">
-              <div>
-                <div style="font-weight: 700; font-size: 14px; color: #fff;">${c.name}</div>
-                <div style="font-size: 11px; color: var(--text-muted);">$${c.symbol} • ${c.chain}</div>
-              </div>
-            </div>
-            <div class="stat-val ${pnlClass}" style="font-size: 16px;">
-              ${pnlPrefix}${c.change24hPercent.toFixed(1)}%
-            </div>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 12px; font-family: var(--font-mono); color: var(--text-secondary); border-top: 1px dashed var(--border-color); padding-top: 8px;">
-            <span>Price: $${c.currentPriceUsd.toFixed(8)}</span>
-            <span>Vol: $${Math.floor(c.volume24hUsd).toLocaleString()}</span>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  /* =========================================================
-     NEW COINS FEED
-  ========================================================= */
-  async fetchNewListings() {
-    try {
-      const res = await fetch('/api/market/new-listings');
-      const data = await res.json();
-      if (data.success && data.newListings) {
-        this.renderNewListings(data.newListings);
-      }
-    } catch (err) {
-      console.warn('New listings fetch error:', err);
-    }
-  }
-
-  renderNewListings(coins) {
-    const grid = document.getElementById('newListingsGrid');
-    if (!grid) return;
-
-    grid.innerHTML = coins.map(c => `
-      <div class="token-card" onclick="window.launchpadManager.openTokenDetail('${c.symbol}')">
-        <div class="card-header-row">
-          <img src="${c.imageUrl}" class="token-avatar" alt="${c.name}">
-          <div class="card-title-meta">
-            <div class="token-title">${c.name}</div>
-            <div class="token-symbol">$${c.symbol}</div>
-          </div>
-          <div class="chain-tag ${c.chain === 'Solana' ? 'sol' : 'base'}">
-            ${c.chain === 'Solana' ? '⚡ SOL' : '🔵 BASE'}
-          </div>
-        </div>
-        <p class="token-snippet">${c.description}</p>
-        <div class="card-stats-grid">
-          <div class="stat-cell">
-            <span class="cell-label">MARKET CAP</span>
-            <span class="cell-val highlight">$${Math.floor(c.marketCapUsd).toLocaleString()}</span>
-          </div>
-          <div class="stat-cell">
-            <span class="cell-label">DEV LOCK</span>
-            <span class="cell-val safe">${c.devLockedPercent}%</span>
-          </div>
-        </div>
-        <div class="card-progress-bar-bg">
-          <div class="card-progress-bar-fill" style="width: ${c.bondingCurveProgressPercent}%;"></div>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  /* =========================================================
-     TRANSPARENT PROOF OF RESERVES TREASURY
-  ========================================================= */
-  async fetchTreasuryReserves() {
-    try {
-      const res = await fetch('/api/treasury/public-reserves');
+      const keyParam = Array.from(this.unlockedKeys).join(',');
+      const res = await fetch(`/api/tokens?type=sprint&sort=${this.activeFilter}&chain=${this.activeChain}&key=${keyParam}`);
       const data = await res.json();
       if (data.success) {
-        this.renderTreasuryReserves(data);
+        this.tokens = data.tokens;
+        this.renderTokenGrid();
       }
     } catch (err) {
-      console.warn('Treasury reserves fetch error:', err);
+      console.warn('Tokens fetch error:', err);
     }
   }
 
-  renderTreasuryReserves(data) {
-    const totalEl = document.getElementById('treasuryTotalReservesUsd');
-    const burnTokensEl = document.getElementById('treasuryTotalBurnedTokens');
-    const burnUsdEl = document.getElementById('treasuryTotalBurnedUsd');
-    const tableBody = document.getElementById('treasuryHoldingsTableBody');
-    const baseAddrEl = document.getElementById('treasuryBaseAddr');
-    const solAddrEl = document.getElementById('treasurySolAddr');
-
-    if (totalEl) totalEl.textContent = `$${data.totalReservesUsd.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-    if (burnTokensEl) burnTokensEl.textContent = `${data.burnStats.totalTokensBurned.toLocaleString()} TOKENS`;
-    if (burnUsdEl) burnUsdEl.textContent = `$${data.burnStats.totalUsdValueBurned.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-
-    if (baseAddrEl) {
-      baseAddrEl.textContent = data.publicWallets.baseL2.address;
-      baseAddrEl.onclick = () => window.open(data.publicWallets.baseL2.explorerUrl, '_blank');
+  async fetchStacks() {
+    try {
+      const res = await fetch('/api/tokens/stacks');
+      const data = await res.json();
+      if (data.success) {
+        this.stacks = data.stacks;
+        this.renderStacksGrid();
+      }
+    } catch (err) {
+      console.warn('Stacks fetch error:', err);
     }
-    if (solAddrEl) {
-      solAddrEl.textContent = data.publicWallets.solana.address;
-      solAddrEl.onclick = () => window.open(data.publicWallets.solana.explorerUrl, '_blank');
+  }
+
+  async unlockPrivateCircle() {
+    const input = document.getElementById('privateCircleUnlockInput');
+    if (!input || !input.value.trim()) {
+      this.toast('Please enter a private passcode.', 'error');
+      return;
+    }
+    const passcode = input.value.trim();
+    this.unlockedKeys.add(passcode);
+    this.toast(`🔑 Unlocking Private Circle for key: "${passcode}"...`, 'info');
+    
+    await this.fetchTokens();
+    await this.fetchStacks();
+    this.toast(`✓ Access Granted to private circles matching "${passcode}"!`, 'success');
+  }
+
+  renderTokenGrid() {
+    if (!this.tokenGrid) return;
+    const query = this.searchInput ? this.searchInput.value.toLowerCase().trim() : '';
+    const filtered = this.tokens.filter(t => {
+      return t.name.toLowerCase().includes(query) ||
+             t.symbol.toLowerCase().includes(query) ||
+             t.creator.toLowerCase().includes(query);
+    });
+
+    if (filtered.length === 0) {
+      this.tokenGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+          <div style="font-size: 28px; margin-bottom: 8px;">⚡</div>
+          <h3 style="font-size: 15px; color: #fff; font-family: var(--font-mono);">No active Meme Sprints found</h3>
+          <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 14px;">Deploy a zero-fee bonding curve sprint on Base or Solana.</p>
+          <button class="btn btn-launch" onclick="window.launchpadManager.openDeployModal('sprint')">+ Launch Meme Sprint</button>
+        </div>
+      `;
+      return;
     }
 
-    if (tableBody && data.tokenHoldings) {
-      tableBody.innerHTML = data.tokenHoldings.map(h => `
-        <tr>
-          <td>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <img src="${h.icon}" class="token-avatar-sm" alt="${h.symbol}">
-              <div>
-                <span style="font-weight: 700; color: #fff;">${h.name}</span>
-                <span style="font-size: 11px; color: var(--text-muted); margin-left: 4px;">($${h.symbol})</span>
-              </div>
+    this.tokenGrid.innerHTML = filtered.map(t => this.createTokenCardHtml(t)).join('');
+  }
+
+  renderStacksGrid() {
+    if (!this.stacksGrid) return;
+    const query = this.searchInput ? this.searchInput.value.toLowerCase().trim() : '';
+    const filtered = this.stacks.filter(t => {
+      return t.name.toLowerCase().includes(query) ||
+             t.symbol.toLowerCase().includes(query) ||
+             t.creator.toLowerCase().includes(query);
+    });
+
+    if (filtered.length === 0) {
+      this.stacksGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+          <div style="font-size: 28px; margin-bottom: 8px;">🏛️</div>
+          <h3 style="font-size: 15px; color: #fff; font-family: var(--font-mono);">No Sovereign Stacks found</h3>
+          <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 14px;">Create a long-term community micro-endowment or family pool.</p>
+          <button class="btn btn-launch" onclick="window.launchpadManager.openDeployModal('stack')">+ Create Sovereign Stack</button>
+        </div>
+      `;
+      return;
+    }
+
+    this.stacksGrid.innerHTML = filtered.map(t => this.createTokenCardHtml(t)).join('');
+  }
+
+  createTokenCardHtml(t) {
+    const isStack = t.tokenType === 'stack';
+    const isPrivate = t.isPrivate;
+    const badgeType = isStack 
+      ? `<span class="badge-tag stack">🏛️ STACK</span>` 
+      : `<span class="badge-tag" style="background: var(--cyber-blue-subtle); color: var(--cyber-blue); border: 1px solid var(--border-blue);">⚡ SPRINT</span>`;
+    
+    const privacyBadge = isPrivate 
+      ? `<span class="badge-tag private">🔒 PRIVATE CIRCLE</span>`
+      : '';
+
+    const antiDumpBadge = t.antiDumpEnabled
+      ? `<span class="badge-tag" style="background: var(--cyber-red-subtle); color: var(--cyber-red); border: 1px solid var(--border-red);">🛡️ 1% ANTI-DUMP</span>`
+      : '';
+
+    return `
+      <div class="token-card ${isStack ? 'stack-card' : ''}" onclick="window.launchpadManager.openTokenDetail('${t.symbol}')">
+        <div class="token-card-top">
+          <img src="${t.imageUrl || 'https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200'}" class="token-avatar" alt="${t.name}">
+          <div class="token-meta">
+            <div class="token-name-row">
+              <span class="token-name">${t.name}</span>
+              <span class="token-symbol">$${t.symbol}</span>
             </div>
-          </td>
-          <td style="font-family: var(--font-mono); color: #fff;">${h.amount.toLocaleString()} ${h.symbol}</td>
-          <td style="font-family: var(--font-mono); color: var(--brand-blue-light);">$${h.priceUsd >= 1 ? h.priceUsd.toFixed(2) : h.priceUsd.toFixed(8)}</td>
-          <td style="font-family: var(--font-mono); font-weight: 800; color: #fff;">$${h.valueUsd.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-          <td style="font-family: var(--font-mono); color: ${h.change24h >= 0 ? 'var(--accent-emerald)' : 'var(--accent-rose)'}; font-weight: 700;">
-            ${h.change24h >= 0 ? '+' : ''}${h.change24h}%
-          </td>
-        </tr>
-      `).join('');
-    }
+            <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+              ${badgeType}
+              ${privacyBadge}
+              ${antiDumpBadge}
+              <span class="chain-badge-sm">${t.chain === 'Solana' ? '⚡ SOL' : '🔵 BASE'}</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="token-desc-snippet">${t.description}</p>
+
+        <div class="token-card-stats">
+          <div class="card-stat-item">
+            <span class="stat-label">MARKET CAP</span>
+            <span class="stat-val highlight">$${Math.floor(t.marketCapUsd).toLocaleString()}</span>
+          </div>
+          <div class="card-stat-item">
+            <span class="stat-label">${isStack ? 'DIAMOND APY' : 'GRADUATION'}</span>
+            <span class="stat-val ${isStack ? 'cyan' : 'up'}">${isStack ? '28.5% APY' : t.bondingCurveProgressPercent + '%'}</span>
+          </div>
+          <div class="card-stat-item">
+            <span class="stat-label">DEV LOCK</span>
+            <span class="stat-val safe">${t.devLockedPercent}%</span>
+          </div>
+        </div>
+
+        <div class="curve-bar-container">
+          <div class="curve-bar-label">
+            <span>${isStack ? 'COMMUNITY VAULT PROGRESS' : 'DEX GRADUATION TARGET ($' + (t.targetCapUsd || 25000).toLocaleString() + ')'}</span>
+            <span>${t.bondingCurveProgressPercent}%</span>
+          </div>
+          <div class="curve-bar-track">
+            <div class="curve-bar-fill" style="width: ${Math.min(100, t.bondingCurveProgressPercent)}%;"></div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   /* =========================================================
@@ -505,126 +462,37 @@ class CalabiLaunchpadManager {
     const kingFeePool = document.getElementById('kingFeePool');
     const kingChain = document.getElementById('kingChain');
 
-    if (kingName) kingName.innerHTML = `${king.name} (<span id="kingSymbol">$${king.symbol}</span>)`;
+    if (kingName) kingName.innerHTML = `${king.name} (<span id="kingSymbol" style="color: var(--cyber-blue);">$${king.symbol}</span>)`;
     if (kingDesc) kingDesc.textContent = king.description;
     if (kingImg) kingImg.src = king.imageUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200';
-    if (kingMcap) kingMcap.textContent = `$${king.marketCapUsd.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-    if (kingProgress) kingProgress.textContent = `${king.bondingCurveProgressPercent}% ($${(king.targetCapUsd || 25000).toLocaleString()} Sprint Target)`;
+    if (kingMcap) kingMcap.textContent = `$${Math.floor(king.marketCapUsd).toLocaleString()}`;
+    if (kingProgress) kingProgress.textContent = `${king.bondingCurveProgressPercent}% ($${(king.targetCapUsd || 25000).toLocaleString()} Target)`;
     if (kingProgressBar) kingProgressBar.style.width = `${Math.min(100, king.bondingCurveProgressPercent)}%`;
-    if (kingFeePool) kingFeePool.textContent = `$${king.totalFeePoolDistributedUsd.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+    if (kingFeePool) kingFeePool.textContent = `$${king.totalFeePoolDistributedUsd.toFixed(2)}`;
     if (kingChain) kingChain.textContent = king.chain === 'Solana' ? '⚡ Solana' : '🔵 Base L2';
 
     const btnKing = document.getElementById('btnKingQuickBuy');
     if (btnKing) {
-      btnKing.textContent = `⚡ Quick Trade $${king.symbol}`;
+      btnKing.textContent = `⚡ Trade $${king.symbol}`;
       btnKing.onclick = () => this.openTokenDetail(king.symbol);
     }
   }
 
   /* =========================================================
-     DISCOVERY FEED
-  ========================================================= */
-  async fetchTokens() {
-    try {
-      const res = await fetch(`/api/tokens/feed?filter=${this.activeFilter}&chain=${this.activeChain}`);
-      const data = await res.json();
-      if (data.success) {
-        this.tokens = data.tokens;
-        this.renderTokenGrid();
-      }
-    } catch (err) {
-      console.warn('Tokens feed fetch error:', err);
-    }
-  }
-
-  renderTokenGrid() {
-    if (!this.tokenGrid) return;
-
-    const query = this.searchInput ? this.searchInput.value.toLowerCase().trim() : '';
-    const filtered = this.tokens.filter(t => {
-      return t.name.toLowerCase().includes(query) ||
-             t.symbol.toLowerCase().includes(query) ||
-             t.creator.toLowerCase().includes(query);
-    });
-
-    if (filtered.length === 0) {
-      this.tokenGrid.innerHTML = `
-        <div class="empty-state-box" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
-          <div style="font-size: 32px; margin-bottom: 12px;">🔍</div>
-          <h3 style="font-size: 16px; margin-bottom: 6px;">No sovereign coins match your criteria</h3>
-          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 18px;">Be the first to launch an un-ruggable coin on Solana or Base L2.</p>
-          <button class="btn btn-launch" onclick="window.launchpadManager.openDeployModal()">🚀 Launch a New Coin</button>
-        </div>
-      `;
-      return;
-    }
-
-    this.tokenGrid.innerHTML = filtered.map(t => {
-      const isSol = t.chain === 'Solana';
-      const isGraduated = t.status === 'GRADUATED';
-      const devBadge = t.devLockedPercent >= 80
-        ? `<span class="badge-tag safe">🛡️ ${t.devLockedPercent}% DEV LOCKED</span>`
-        : `<span class="badge-tag warn">⚠️ ${t.devLockedPercent}% DEV LOCKED</span>`;
-
-      return `
-        <div class="token-card ${t.isKing ? 'king-card-glow' : ''}" onclick="window.launchpadManager.openTokenDetail('${t.symbol}')">
-          <div class="card-header-row">
-            <img src="${t.imageUrl}" alt="${t.name}" class="token-avatar">
-            <div class="card-title-meta">
-              <div class="token-title">${t.name}</div>
-              <div class="token-symbol">$${t.symbol}</div>
-            </div>
-            <div class="chain-tag ${isSol ? 'sol' : 'base'}">${isSol ? '⚡ SOL' : '🔵 BASE'}</div>
-          </div>
-
-          <p class="token-snippet">${t.description}</p>
-
-          <div class="card-stats-grid">
-            <div class="stat-cell">
-              <span class="cell-label">MARKET CAP</span>
-              <span class="cell-val highlight">$${Math.floor(t.marketCapUsd).toLocaleString()}</span>
-            </div>
-            <div class="stat-cell">
-              <span class="cell-label">PROGRESS</span>
-              <span class="cell-val ${isGraduated ? 'up' : ''}">${isGraduated ? '🚀 GRADUATED' : t.bondingCurveProgressPercent + '%'}</span>
-            </div>
-            <div class="stat-cell">
-              <span class="cell-label">30% HOLDER DIVS</span>
-              <span class="cell-val up">$${t.totalFeePoolDistributedUsd.toFixed(2)}</span>
-            </div>
-            <div class="stat-cell">
-              <span class="cell-label">SAFETY SCORE</span>
-              <span class="cell-val safe">${t.safetyScore}/100</span>
-            </div>
-          </div>
-
-          <div class="card-progress-bar-bg">
-            <div class="card-progress-bar-fill" style="width: ${Math.min(100, t.bondingCurveProgressPercent)}%;"></div>
-          </div>
-
-          <div class="card-footer-row">
-            ${devBadge}
-            <span class="trade-count-tag">${t.tradeCount || 0} trades</span>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  /* =========================================================
-     DETAIL & SWAP MODAL
+     DETAIL MODAL & TERMINAL TRADING
   ========================================================= */
   async openTokenDetail(symbol, pushUrl = true) {
     try {
-      const res = await fetch(`/api/tokens/${symbol}`);
+      const keyParam = Array.from(this.unlockedKeys).join(',');
+      const res = await fetch(`/api/tokens/${symbol}?key=${keyParam}`);
       const data = await res.json();
       if (!data.success) {
-        if (window.showToast) window.showToast('Failed to load token details', 'error');
+        this.toast('Unable to load token details: ' + (data.error || 'Private token without key'), 'error');
         return;
       }
 
       this.activeToken = data.token;
-      this.renderDetailModal(data.token, data.trades);
+      this.renderDetailModal(data.token, data.trades || []);
       if (this.detailModal) this.detailModal.classList.add('active');
 
       if (pushUrl && window.location.pathname !== `/coin/${symbol}`) {
@@ -651,35 +519,56 @@ class CalabiLaunchpadManager {
 
   renderDetailModal(token, trades) {
     const img = document.getElementById('detailTokenImg');
+    const imgBig = document.getElementById('detailTokenImgBig');
     const name = document.getElementById('detailTokenName');
     const symbol = document.getElementById('detailTokenSymbol');
     const chain = document.getElementById('detailTokenChain');
-    const dev = document.getElementById('detailTokenDev');
+    const desc = document.getElementById('detailTokenDesc');
     const price = document.getElementById('detailTokenPrice');
     const mcap = document.getElementById('detailTokenMcap');
+    const gradCap = document.getElementById('detailGradCap');
     const fees = document.getElementById('detailTokenFees');
     const curveBar = document.getElementById('detailCurveBar');
     const curvePct = document.getElementById('detailCurvePercent');
-    const safety = document.getElementById('detailSafetyScore');
-    const currTag = document.getElementById('detailInputCurrencyTag');
+    const typeBadge = document.getElementById('detailTypeBadge');
+    const antiDumpBadge = document.getElementById('detailAntiDumpBadge');
+    const privateBanner = document.getElementById('detailPrivateBanner');
+    const antiDumpNotice = document.getElementById('antiDumpNotice');
 
-    if (img) img.src = token.imageUrl;
+    const avatar = token.imageUrl || 'https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200';
+    if (img) img.src = avatar;
+    if (imgBig) imgBig.src = avatar;
     if (name) name.textContent = token.name;
     if (symbol) symbol.textContent = `$${token.symbol}`;
     if (chain) chain.textContent = token.chain === 'Solana' ? '⚡ Solana' : '🔵 Base L2';
-    if (dev) dev.textContent = `Created by ${token.creator.substring(0, 8)}... (${token.devLockedPercent}% Dev Vesting Locked)`;
+    if (desc) desc.textContent = token.description;
     if (price) price.textContent = `$${token.currentPriceUsd.toFixed(8)}`;
     if (mcap) mcap.textContent = `$${Math.floor(token.marketCapUsd).toLocaleString()}`;
-    const gradCap = document.getElementById('detailGradCap');
     if (gradCap) gradCap.textContent = `$${(token.targetCapUsd || 25000).toLocaleString()}`;
     if (fees) fees.textContent = `$${token.totalFeePoolDistributedUsd.toFixed(2)}`;
     if (curveBar) curveBar.style.width = `${Math.min(100, token.bondingCurveProgressPercent)}%`;
     if (curvePct) curvePct.textContent = `${token.bondingCurveProgressPercent}%`;
-    if (safety) safety.textContent = `SCORE: ${token.safetyScore}/100 (A+)`;
-    if (currTag) currTag.textContent = token.chain === 'Solana' ? 'SOL' : 'ETH';
+
+    const isStack = token.tokenType === 'stack';
+    if (typeBadge) {
+      typeBadge.textContent = isStack ? '🏛️ SOVEREIGN STACK' : '⚡ MEME SPRINT';
+      typeBadge.className = isStack ? 'badge-tag stack' : 'badge-tag';
+    }
+
+    if (antiDumpBadge) {
+      antiDumpBadge.style.display = token.antiDumpEnabled ? 'inline-block' : 'none';
+    }
+
+    if (antiDumpNotice) {
+      antiDumpNotice.style.display = (token.antiDumpEnabled && this.tradeMode === 'SELL') ? 'block' : 'none';
+    }
+
+    if (privateBanner) {
+      privateBanner.style.display = token.isPrivate ? 'block' : 'none';
+    }
 
     this.setTradeMode('BUY');
-    this.renderTradeTape(trades || []);
+    this.renderTradeTape(trades);
   }
 
   setTradeMode(mode) {
@@ -687,30 +576,42 @@ class CalabiLaunchpadManager {
     if (!this.activeToken) return;
 
     const sym = this.activeToken.symbol;
-    const curr = this.activeToken.chain === 'Solana' ? 'SOL' : 'ETH';
-    const inputLabel = document.getElementById('detailSwapInputLabel');
-    const currTag = document.getElementById('detailInputCurrencyTag');
+    const isSol = this.activeToken.chain === 'Solana';
+    const curr = isSol ? 'SOL' : 'ETH';
 
-    if (mode === 'BUY') {
-      if (this.detailTabBuy) this.detailTabBuy.classList.add('active');
-      if (this.detailTabSell) this.detailTabSell.classList.remove('active');
-      if (this.btnExecuteSwap) {
-        this.btnExecuteSwap.className = 'btn btn-action-buy';
-        this.btnExecuteSwap.textContent = `Buy $${sym}`;
-      }
-      if (inputLabel) inputLabel.textContent = `Amount in ${curr}`;
-      if (currTag) currTag.textContent = curr;
+    const buySec = document.getElementById('tradeBuySellSection');
+    const stakeSec = document.getElementById('tradeStakeSection');
+    const inputLabel = document.getElementById('detailSwapInputLabel');
+    const antiDumpNotice = document.getElementById('antiDumpNotice');
+
+    if (this.detailTabBuy) this.detailTabBuy.className = mode === 'BUY' ? 'trade-mode-btn active-buy' : 'trade-mode-btn';
+    if (this.detailTabSell) this.detailTabSell.className = mode === 'SELL' ? 'trade-mode-btn active-sell' : 'trade-mode-btn';
+    if (this.detailTabStake) this.detailTabStake.className = mode === 'STAKE' ? 'trade-mode-btn active-stake' : 'trade-mode-btn';
+
+    if (mode === 'STAKE') {
+      if (buySec) buySec.style.display = 'none';
+      if (stakeSec) stakeSec.style.display = 'block';
     } else {
-      if (this.detailTabBuy) this.detailTabBuy.classList.remove('active');
-      if (this.detailTabSell) this.detailTabSell.classList.add('active');
-      if (this.btnExecuteSwap) {
-        this.btnExecuteSwap.className = 'btn btn-action-sell';
-        this.btnExecuteSwap.textContent = `Sell $${sym}`;
+      if (buySec) buySec.style.display = 'block';
+      if (stakeSec) stakeSec.style.display = 'none';
+
+      if (mode === 'BUY') {
+        if (this.btnExecuteSwap) {
+          this.btnExecuteSwap.className = 'btn btn-action-buy';
+          this.btnExecuteSwap.textContent = `Buy $${sym}`;
+        }
+        if (inputLabel) inputLabel.textContent = `Amount in ${curr}`;
+        if (antiDumpNotice) antiDumpNotice.style.display = 'none';
+      } else {
+        if (this.btnExecuteSwap) {
+          this.btnExecuteSwap.className = 'btn btn-action-sell';
+          this.btnExecuteSwap.textContent = `Sell $${sym}`;
+        }
+        if (inputLabel) inputLabel.textContent = `Amount of $${sym} to Sell`;
+        if (antiDumpNotice) antiDumpNotice.style.display = this.activeToken.antiDumpEnabled ? 'block' : 'none';
       }
-      if (inputLabel) inputLabel.textContent = `Amount in $${sym}`;
-      if (currTag) currTag.textContent = sym;
+      this.updateSwapEstimate();
     }
-    this.updateSwapEstimate();
   }
 
   updateSwapEstimate() {
@@ -720,7 +621,7 @@ class CalabiLaunchpadManager {
     if (!estBox) return;
 
     if (amt <= 0) {
-      estBox.innerHTML = `You will receive approx: <strong>0 $${this.activeToken.symbol}</strong>`;
+      estBox.innerHTML = `Estimated Output: <strong>0 $${this.activeToken.symbol}</strong>`;
       return;
     }
 
@@ -730,11 +631,11 @@ class CalabiLaunchpadManager {
     if (this.tradeMode === 'BUY') {
       const usdIn = amt * solPrice;
       const tokensOut = usdIn / (price * 1.005);
-      estBox.innerHTML = `You will receive approx: <strong>${Math.floor(tokensOut).toLocaleString()} $${this.activeToken.symbol}</strong> (0.25% Treasury, 0.25% Burn)`;
+      estBox.innerHTML = `Estimated Output: <strong>${Math.floor(tokensOut).toLocaleString()} $${this.activeToken.symbol}</strong> (0.25% Treasury, 0.25% Burn)`;
     } else {
       const usdOut = amt * price * 0.995;
       const solOut = usdOut / solPrice;
-      estBox.innerHTML = `You will receive approx: <strong>${solOut.toFixed(4)} SOL / ETH</strong>`;
+      estBox.innerHTML = `Estimated Output: <strong>${solOut.toFixed(4)} SOL / ETH</strong>`;
     }
   }
 
@@ -742,20 +643,11 @@ class CalabiLaunchpadManager {
     if (!this.activeToken) return;
     const amt = parseFloat(this.detailSwapAmount.value);
     if (!amt || amt <= 0) {
-      if (window.showToast) window.showToast('Please enter an amount to trade.', 'error');
+      this.toast('Please enter a valid amount.', 'error');
       return;
     }
 
-    const userAddr = window.walletEngine ? window.walletEngine.activeAddress : "0xCalabiTrader";
-
-    if (window.walletEngine) {
-      const ofacCheck = window.walletEngine.screenAddressLocally(userAddr);
-      if (!ofacCheck.allowed) {
-        if (window.showToast) window.showToast(`Transaction rejected: ${ofacCheck.detail}`, 'error');
-        return;
-      }
-    }
-
+    const userAddr = window.walletEngine ? window.walletEngine.activeAddress : "0xTrader";
     const endpoint = this.tradeMode === 'BUY'
       ? `/api/tokens/${this.activeToken.symbol}/buy`
       : `/api/tokens/${this.activeToken.symbol}/sell`;
@@ -774,39 +666,78 @@ class CalabiLaunchpadManager {
 
       if (data.success) {
         this.playAudioSfx(this.tradeMode === 'BUY' ? 'buy' : 'sell');
-        if (window.showToast) window.showToast(data.message, 'success');
+        this.toast(data.message, 'success');
         this.openTokenDetail(this.activeToken.symbol);
         this.fetchTokens();
+        this.fetchStacks();
         this.fetchKing();
         this.detailSwapAmount.value = '';
-
-        if (data.graduated) {
-          this.playAudioSfx('graduation');
-          if (window.showToast) window.showToast(`🎉 $${this.activeToken.symbol} REACHED $69,420 AND GRADUATED TO DEX!`, 'success');
-        }
       } else {
-        if (window.showToast) window.showToast(data.error, 'error');
+        this.toast(data.error, 'error');
       }
     } catch (err) {
-      if (window.showToast) window.showToast('Swap execution failed.', 'error');
+      this.toast('Trade execution failed.', 'error');
     }
+  }
+
+  async executeStake() {
+    if (!this.activeToken) return;
+    const amtInput = document.getElementById('stakeAmountInput');
+    const durInput = document.getElementById('stakeDurationSelect');
+    const amt = parseFloat(amtInput ? amtInput.value : 0);
+    const durationDays = durInput ? parseInt(durInput.value) : 90;
+
+    if (!amt || amt <= 0) {
+      this.toast('Please enter an amount of tokens to stake.', 'error');
+      return;
+    }
+
+    const userAddr = window.walletEngine ? window.walletEngine.activeAddress : "0xStaker";
+
+    try {
+      const res = await fetch(`/api/tokens/${this.activeToken.symbol}/stake`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: amt, durationDays, userAddress: userAddr })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        this.playAudioSfx('stake');
+        this.toast(data.message, 'success');
+        if (amtInput) amtInput.value = '';
+        this.openTokenDetail(this.activeToken.symbol);
+        this.fetchStacks();
+      } else {
+        this.toast(data.error, 'error');
+      }
+    } catch (err) {
+      this.toast('Staking failed.', 'error');
+    }
+  }
+
+  copyInviteLink() {
+    if (!this.activeToken) return;
+    const url = `${window.location.origin}/coin/${this.activeToken.symbol}?key=${this.activeToken.inviteCode || ''}`;
+    navigator.clipboard.writeText(url).then(() => {
+      this.toast(`✓ Private Invite Link Copied: ${url}`, 'success');
+    });
   }
 
   renderTradeTape(trades) {
     const tbody = document.getElementById('detailTradeTape');
     if (!tbody) return;
 
-    if (trades.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 12px;">No trades yet.</td></tr>`;
+    if (!trades || trades.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 10px;">No trades recorded yet.</td></tr>`;
       return;
     }
 
-    tbody.innerHTML = trades.map(tr => `
+    tbody.innerHTML = trades.slice(0, 10).map(tr => `
       <tr>
         <td style="color: var(--text-muted);">${tr.time}</td>
-        <td style="color: ${tr.type === 'BUY' ? 'var(--market-green)' : 'var(--market-red)'}; font-weight: 700;">${tr.type}</td>
-        <td>${tr.amountSol}</td>
-        <td>${Math.floor(tr.amountTokens).toLocaleString()}</td>
+        <td style="color: ${tr.type === 'BUY' ? 'var(--market-green)' : 'var(--cyber-red)'}; font-weight: 800;">${tr.type}</td>
+        <td>${tr.amountSol || tr.amount || 0}</td>
       </tr>
     `).join('');
   }
@@ -822,29 +753,12 @@ class CalabiLaunchpadManager {
         data.messages.forEach(m => {
           const div = document.createElement('div');
           div.className = 'trollbox-msg';
-
-          const badge = document.createElement('span');
-          badge.className = 'trollbox-badge';
-          badge.textContent = m.badge;
-
-          const author = document.createElement('span');
-          author.className = 'trollbox-author';
-          author.textContent = m.user + ':';
-
-          const text = document.createElement('span');
-          text.className = 'trollbox-text';
-          text.textContent = m.text; // Text content prevents XSS
-
-          div.appendChild(badge);
-          div.appendChild(author);
-          div.appendChild(text);
+          div.innerHTML = `<span style="color: var(--cyber-blue); font-weight: 800;">[${m.user}]</span>: <span>${m.text}</span>`;
           feed.appendChild(div);
         });
         feed.scrollTop = feed.scrollHeight;
       }
-    } catch (err) {
-      console.warn('Trollbox load error:', err);
-    }
+    } catch (err) {}
   }
 
   async sendTrollboxMessage() {
@@ -854,7 +768,7 @@ class CalabiLaunchpadManager {
 
     const user = window.walletEngine && window.walletEngine.activeAddress
       ? `Trader_${window.walletEngine.activeAddress.substring(2, 6)}`
-      : "AnonWhale";
+      : "AnonCoder";
 
     try {
       const res = await fetch(`/api/tokens/${this.activeToken.symbol}/chat`, {
@@ -871,10 +785,14 @@ class CalabiLaunchpadManager {
   }
 
   /* =========================================================
-     MODAL CONTROLS & WALLET
+     DEPLOY COIN / SOVEREIGN STACK
   ========================================================= */
-  openDeployModal() {
-    if (this.deployModal) this.deployModal.classList.add('active');
+  openDeployModal(defaultMode = 'sprint') {
+    if (this.deployModal) {
+      this.deployModal.classList.add('active');
+      const radio = document.querySelector(`input[name="tokenTypeSelect"][value="${defaultMode}"]`);
+      if (radio) radio.checked = true;
+    }
   }
 
   closeDeployModal() {
@@ -888,82 +806,142 @@ class CalabiLaunchpadManager {
     const description = document.getElementById('newTokenDesc').value;
     const imageUrl = document.getElementById('newTokenImage').value;
     const devLockPercent = document.getElementById('newDevLockPercent').value;
-    const chainRadio = document.querySelector('input[name="deployChain"]:checked');
-    const chain = chainRadio ? chainRadio.value : "Solana";
+    
+    const typeRadio = document.querySelector('input[name="tokenTypeSelect"]:checked');
+    const tokenType = typeRadio ? typeRadio.value : 'sprint';
 
-    const userAddr = window.walletEngine ? window.walletEngine.activeAddress : "0xCalabiCreator";
+    const privacyRadio = document.querySelector('input[name="privacySelect"]:checked');
+    const isPrivate = privacyRadio ? privacyRadio.value === 'private' : false;
+    const inviteCode = document.getElementById('newInviteCode') ? document.getElementById('newInviteCode').value.trim() : null;
+
+    const chainRadio = document.querySelector('input[name="deployChain"]:checked');
+    const chain = chainRadio ? chainRadio.value : "Base";
+
+    const userAddr = window.walletEngine ? window.walletEngine.activeAddress : "0xCreator";
 
     try {
       const res = await fetch('/api/tokens/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, symbol, description, imageUrl, creator: userAddr, chain, devLockPercent })
+        body: JSON.stringify({
+          name,
+          symbol,
+          description,
+          imageUrl,
+          creator: userAddr,
+          chain,
+          devLockPercent,
+          tokenType,
+          isPrivate,
+          inviteCode: isPrivate ? (inviteCode || `circle_${symbol.toLowerCase()}`) : null,
+          antiDumpEnabled: tokenType === 'stack'
+        })
       });
       const data = await res.json();
 
       if (data.success) {
-        if (window.showToast) window.showToast(`$${data.token.symbol} Deployed with Proof-of-Skin!`, 'success');
+        this.toast(`$${data.token.symbol} Deployed Successfully!`, 'success');
         this.closeDeployModal();
         document.getElementById('deployTokenForm').reset();
-        this.fetchTokens();
+        
+        if (isPrivate && data.token.inviteCode) {
+          this.unlockedKeys.add(data.token.inviteCode);
+        }
+
+        await this.fetchTokens();
+        await this.fetchStacks();
         this.openTokenDetail(data.token.symbol);
       } else {
-        if (window.showToast) window.showToast(data.error, 'error');
+        this.toast(data.error, 'error');
       }
     } catch (err) {
-      if (window.showToast) window.showToast('Error deploying coin.', 'error');
+      this.toast('Error deploying token.', 'error');
     }
   }
 
+  /* Leaderboard & Reserves */
+  async fetchLeaderboard() {
+    try {
+      const res = await fetch('/api/market/leaderboard');
+      const data = await res.json();
+      if (data.success && data.leaderboard) {
+        const tbody = document.getElementById('leaderboardTableBody');
+        if (tbody) {
+          tbody.innerHTML = data.leaderboard.map(t => `
+            <tr>
+              <td style="font-weight: 800; color: ${t.rank <= 3 ? 'var(--cyber-blue)' : 'var(--text-muted)'};">#${t.rank}</td>
+              <td><span style="font-weight: 700; color: #fff;">${t.username}</span> <span style="font-size: 10px; color: var(--text-muted);">(${t.address})</span></td>
+              <td><span class="badge-tag safe">${t.badge}</span></td>
+              <td style="color: var(--market-green); font-weight: 800;">+${t.dailyPnlPercent}% ($${t.dailyProfitUsd.toLocaleString()})</td>
+              <td>$${t.totalVolumeUsd.toLocaleString()}</td>
+              <td style="color: var(--cyber-blue); font-weight: 700;">${t.winRate}%</td>
+              <td style="color: var(--text-muted);">${t.tradesCount}</td>
+            </tr>
+          `).join('');
+        }
+      }
+    } catch (e) {}
+  }
+
+  async fetchTreasuryReserves() {
+    try {
+      const res = await fetch('/api/treasury/public-reserves');
+      const data = await res.json();
+      if (data.success) {
+        const totalEl = document.getElementById('treasuryTotalReservesUsd');
+        const burnTokensEl = document.getElementById('treasuryTotalBurnedTokens');
+        const burnUsdEl = document.getElementById('treasuryTotalBurnedUsd');
+        const tableBody = document.getElementById('treasuryHoldingsTableBody');
+
+        if (totalEl) totalEl.textContent = `$${data.totalReservesUsd.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+        if (burnTokensEl) burnTokensEl.textContent = `${data.burnStats.totalTokensBurned.toLocaleString()} TOKENS`;
+        if (burnUsdEl) burnUsdEl.textContent = `$${data.burnStats.totalUsdValueBurned.toLocaleString(undefined, { minimumFractionDigits: 2 })} USD Burned to 0xdead`;
+
+        if (tableBody && data.tokenHoldings) {
+          tableBody.innerHTML = data.tokenHoldings.map(h => `
+            <tr>
+              <td><strong>${h.name}</strong> ($${h.symbol})</td>
+              <td>${h.amount.toLocaleString()} ${h.symbol}</td>
+              <td style="color: var(--cyber-blue);">$${h.priceUsd.toFixed(2)}</td>
+              <td style="font-weight: 800; color: #fff;">$${h.valueUsd.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+              <td style="color: ${h.change24h >= 0 ? 'var(--market-green)' : 'var(--cyber-red)'}; font-weight: 700;">${h.change24h >= 0 ? '+' : ''}${h.change24h}%</td>
+            </tr>
+          `).join('');
+        }
+      }
+    } catch (e) {}
+  }
+
+  /* Modals & Toasts */
   openWalletModal() {
     if (this.walletModal) this.walletModal.classList.add('active');
   }
-
   closeWalletModal() {
     if (this.walletModal) this.walletModal.classList.remove('active');
   }
-
   openProfileModal() {
     if (this.profileModal) this.profileModal.classList.add('active');
   }
-
   closeProfileModal() {
     if (this.profileModal) this.profileModal.classList.remove('active');
   }
 
-  openSendModal() {
-    if (this.sendModal) this.sendModal.classList.add('active');
-  }
-
-  closeSendModal() {
-    if (this.sendModal) this.sendModal.classList.remove('active');
-  }
-
-  openReceiveModal() {
-    if (this.receiveModal) this.receiveModal.classList.add('active');
-  }
-
-  closeReceiveModal() {
-    if (this.receiveModal) this.receiveModal.classList.remove('active');
-  }
-
-  async handleSendSubmit(e) {
-    e.preventDefault();
-    const recipient = document.getElementById('sendRecipientInput').value;
-    const token = document.getElementById('sendTokenSelect').value;
-    const amount = document.getElementById('sendAmountInput').value;
-
-    try {
-      if (window.walletEngine) {
-        await window.walletEngine.executeSend(recipient, token, amount);
-        this.closeSendModal();
-        document.getElementById('sendFundsForm').reset();
-      }
-    } catch (err) {
-      if (window.showToast) window.showToast(err.message, 'error');
-    }
+  toast(msg, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `toast-msg ${type === 'error' ? 'error' : ''}`;
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.remove();
+    }, 4500);
   }
 }
+
+window.showToast = (msg, type) => {
+  if (window.launchpadManager) window.launchpadManager.toast(msg, type);
+};
 
 window.launchpadManager = null;
 document.addEventListener('DOMContentLoaded', () => {
