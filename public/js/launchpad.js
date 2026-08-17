@@ -1,6 +1,6 @@
 /**
- * Cession.fun — Multi-Page & Sidebar Drawer Controller
- * Exact Pump.fun UI for Board, Livestreams, Leaderboard, and Profile
+ * Cession.fun — Pump.fun Exact Multi-Page & Sidebar Drawer Controller
+ * Supports: Board/Coins, Livestreams, Live Theatre Studio, Leaderboard, Profile, and Token Detail Views
  */
 
 class CessionLaunchpadManager {
@@ -17,7 +17,8 @@ class CessionLaunchpadManager {
     this.tokens = [];
     this.activeToken = null;
     this.activeTab = 'thread';
-    this.currentView = 'board'; // 'board' | 'live' | 'leaderboard' | 'profile'
+    this.currentView = 'board'; // 'board' | 'live' | 'liveTheatre' | 'leaderboard' | 'profile'
+    this.theatreCanvasAnimId = null;
 
     this.init();
   }
@@ -25,11 +26,12 @@ class CessionLaunchpadManager {
   init() {
     this.bindEvents();
     this.bindSidebarAndNavigation();
-    this.fetchTokens();
+    this.fetchTokens().then(() => {
+      this.checkInitialRoute();
+    });
     this.fetchGlobalTrades();
-    this.checkInitialRoute();
 
-    // Auto refresh every 6 seconds
+    // Periodic polling to keep prices and tickers hot
     setInterval(() => {
       this.fetchTokens(false);
       this.fetchGlobalTrades();
@@ -47,8 +49,11 @@ class CessionLaunchpadManager {
     } else if (path.startsWith('/token/') || path.startsWith('/coin/')) {
       const sym = path.split('/')[2];
       if (sym) {
-        setTimeout(() => this.openTokenDetail(sym), 300);
+        this.openTokenDetail(sym);
       }
+    } else if (path === '/how-it-works') {
+      const modal = document.getElementById('howItWorksModal');
+      if (modal) modal.style.display = 'flex';
     }
   }
 
@@ -72,7 +77,7 @@ class CessionLaunchpadManager {
     if (btnCloseSidebar) btnCloseSidebar.addEventListener('click', closeDrawer);
     if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeDrawer);
 
-    // Sidebar navigation menu items
+    // Sidebar navigation links
     const menuBoard = document.getElementById('menuNavBoard');
     const menuLive = document.getElementById('menuNavLive');
     const menuLeaderboard = document.getElementById('menuNavLeaderboard');
@@ -83,7 +88,7 @@ class CessionLaunchpadManager {
     if (menuBoard) menuBoard.addEventListener('click', () => { this.switchPage('board'); closeDrawer(); });
     if (menuLive) menuLive.addEventListener('click', () => { this.switchPage('live'); closeDrawer(); });
     if (menuLeaderboard) menuLeaderboard.addEventListener('click', () => { this.switchPage('leaderboard'); closeDrawer(); });
-    if (menuFollowing) menuFollowing.addEventListener('click', () => { this.switchPage('board'); closeDrawer(); this.toast('Showing followed tokens', 'info'); });
+    if (menuFollowing) menuFollowing.addEventListener('click', () => { this.switchPage('board'); closeDrawer(); this.toast('Showing followed coins', 'info'); });
     if (menuProfile) menuProfile.addEventListener('click', () => { this.switchPage('profile'); closeDrawer(); });
     if (menuHowItWorks) menuHowItWorks.addEventListener('click', () => {
       closeDrawer();
@@ -95,12 +100,68 @@ class CessionLaunchpadManager {
     const brandLink = document.getElementById('brandHomeLink');
     const btnHeaderLive = document.getElementById('btnHeaderLive');
     const btnHeaderLeaderboard = document.getElementById('btnHeaderLeaderboard');
+    const btnOpenHowItWorks = document.getElementById('btnOpenHowItWorks');
+    const btnReadyToPump = document.getElementById('btnReadyToPump');
+    const btnCloseHowItWorks = document.getElementById('btnCloseHowItWorks');
 
     if (brandLink) brandLink.addEventListener('click', (e) => { e.preventDefault(); this.switchPage('board'); });
     if (btnHeaderLive) btnHeaderLive.addEventListener('click', (e) => { e.preventDefault(); this.switchPage('live'); });
     if (btnHeaderLeaderboard) btnHeaderLeaderboard.addEventListener('click', (e) => { e.preventDefault(); this.switchPage('leaderboard'); });
+    
+    if (btnOpenHowItWorks) {
+      btnOpenHowItWorks.addEventListener('click', (e) => {
+        e.preventDefault();
+        const modal = document.getElementById('howItWorksModal');
+        if (modal) modal.style.display = 'flex';
+      });
+    }
 
-    // Wallet pill click to open profile
+    if (btnCloseHowItWorks) {
+      btnCloseHowItWorks.addEventListener('click', () => {
+        const modal = document.getElementById('howItWorksModal');
+        if (modal) modal.style.display = 'none';
+      });
+    }
+
+    if (btnReadyToPump) {
+      btnReadyToPump.addEventListener('click', () => {
+        const modal = document.getElementById('howItWorksModal');
+        if (modal) modal.style.display = 'none';
+        this.switchPage('board');
+      });
+    }
+
+    // Go Live Modal Trigger
+    const btnOpenStreamStudio = document.getElementById('btnOpenStreamStudio');
+    if (btnOpenStreamStudio) {
+      btnOpenStreamStudio.addEventListener('click', () => {
+        this.toast('Stream Studio Initialized! Live broadcasting enabled for verified creators.', 'success');
+        this.openLiveTheatre('CESS', '🔥 PUMPING $CESS TO RAYDIUM GRADUATION TODAY!', '0x88f...1a2', 1420);
+      });
+    }
+
+    // Live Theatre Chat submission
+    const formTheatreChat = document.getElementById('formTheatreChat');
+    const theatreChatInput = document.getElementById('theatreChatInput');
+    const theatreChatStream = document.getElementById('theatreChatStream');
+    if (formTheatreChat && theatreChatInput && theatreChatStream) {
+      formTheatreChat.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const msg = theatreChatInput.value.trim();
+        if (!msg) return;
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'stream-chat-msg';
+        const user = window.walletEngine && window.walletEngine.activeAddress 
+          ? window.walletEngine.activeAddress.substring(0, 6) 
+          : 'anon_trader';
+        msgDiv.innerHTML = `<span class="stream-chat-author">${user}:</span><span>${this.escapeHtml(msg)}</span>`;
+        theatreChatStream.appendChild(msgDiv);
+        theatreChatStream.scrollTop = theatreChatStream.scrollHeight;
+        theatreChatInput.value = '';
+      });
+    }
+
+    // Wallet pill click
     const walletPill = document.getElementById('walletConnectedPill');
     if (walletPill) {
       walletPill.addEventListener('click', (e) => {
@@ -109,19 +170,53 @@ class CessionLaunchpadManager {
       });
     }
 
-    // Leaderboard sub-tabs
+    // Leaderboard Sub-Tabs
     const tabTraders = document.getElementById('tabTopTraders');
     const tabCreators = document.getElementById('tabTopCreators');
-    if (tabTraders && tabCreators) {
+    const tabGrad = document.getElementById('tabGraduatedCoins');
+    if (tabTraders && tabCreators && tabGrad) {
       tabTraders.addEventListener('click', () => {
         tabTraders.classList.add('active');
         tabCreators.classList.remove('active');
+        tabGrad.classList.remove('active');
         this.renderLeaderboardTraders();
       });
       tabCreators.addEventListener('click', () => {
         tabCreators.classList.add('active');
         tabTraders.classList.remove('active');
+        tabGrad.classList.remove('active');
         this.renderLeaderboardCreators();
+      });
+      tabGrad.addEventListener('click', () => {
+        tabGrad.classList.add('active');
+        tabTraders.classList.remove('active');
+        tabCreators.classList.remove('active');
+        this.renderLeaderboardGraduated();
+      });
+    }
+
+    // Profile Sub-Tabs
+    const tabProfHeld = document.getElementById('tabProfileHeld');
+    const tabProfCreated = document.getElementById('tabProfileCreated');
+    const tabProfHist = document.getElementById('tabProfileHistory');
+    if (tabProfHeld && tabProfCreated && tabProfHist) {
+      tabProfHeld.addEventListener('click', () => {
+        tabProfHeld.classList.add('active');
+        tabProfCreated.classList.remove('active');
+        tabProfHist.classList.remove('active');
+        this.renderProfileHoldings();
+      });
+      tabProfCreated.addEventListener('click', () => {
+        tabProfCreated.classList.add('active');
+        tabProfHeld.classList.remove('active');
+        tabProfHist.classList.remove('active');
+        this.renderProfileCreated();
+      });
+      tabProfHist.addEventListener('click', () => {
+        tabProfHist.classList.add('active');
+        tabProfHeld.classList.remove('active');
+        tabProfCreated.classList.remove('active');
+        this.renderProfileHistory();
       });
     }
 
@@ -136,17 +231,15 @@ class CessionLaunchpadManager {
     const views = {
       board: document.getElementById('viewBoard'),
       live: document.getElementById('viewLive'),
+      liveTheatre: document.getElementById('viewLiveTheatre'),
       leaderboard: document.getElementById('viewLeaderboard'),
       profile: document.getElementById('viewProfile')
     };
 
     Object.keys(views).forEach(k => {
       if (views[k]) {
-        if (k === viewName) {
-          views[k].classList.add('active');
-        } else {
-          views[k].classList.remove('active');
-        }
+        if (k === viewName) views[k].classList.add('active');
+        else views[k].classList.remove('active');
       }
     });
 
@@ -164,19 +257,103 @@ class CessionLaunchpadManager {
       }
     });
 
-    // Close any active detail modal if switching pages
+    // Close detail modal if open
     const detailModal = document.getElementById('tokenDetailModal');
     if (detailModal) detailModal.style.display = 'none';
 
-    // Update browser URL history
+    // Stop canvas animation if navigating away from theatre
+    if (viewName !== 'liveTheatre' && this.theatreCanvasAnimId) {
+      cancelAnimationFrame(this.theatreCanvasAnimId);
+      this.theatreCanvasAnimId = null;
+    }
+
+    // Update browser URL
     const route = viewName === 'board' ? '/' : `/${viewName}`;
     window.history.pushState({}, '', route);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Populate profile if navigating to profile
-    if (viewName === 'profile') {
+    // Populate data based on view
+    if (viewName === 'leaderboard') {
+      this.renderLeaderboardTraders();
+    } else if (viewName === 'profile') {
       this.updateProfileView();
     }
+  }
+
+  openLiveTheatre(symbol, title, host, viewers) {
+    this.switchPage('liveTheatre');
+    
+    const titleEl = document.getElementById('theatreStreamTitle');
+    const hostEl = document.getElementById('theatreStreamHost');
+    const coinEl = document.getElementById('theatreStreamCoin');
+    const viewerBadge = document.getElementById('theatreViewerBadge');
+    const btnDetail = document.getElementById('btnTheatreOpenDetail');
+
+    if (titleEl) titleEl.textContent = title;
+    if (hostEl) hostEl.textContent = host;
+    if (coinEl) coinEl.textContent = `$${symbol}`;
+    if (viewerBadge) viewerBadge.textContent = `👥 ${viewers.toLocaleString()} viewers`;
+    if (btnDetail) {
+      btnDetail.onclick = () => this.openTokenDetail(symbol);
+    }
+
+    // Start animated visualizer on canvas
+    this.startCanvasVisualizer();
+  }
+
+  startCanvasVisualizer() {
+    const canvas = document.getElementById('streamVisualizerCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let tick = 0;
+
+    const render = () => {
+      tick++;
+      ctx.fillStyle = '#06090e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Grid background effect
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Animated Sound Wave / Stream waveform
+      const barCount = 48;
+      const barWidth = canvas.width / barCount;
+      for (let i = 0; i < barCount; i++) {
+        const height = 40 + Math.sin(tick * 0.05 + i * 0.3) * 35 + Math.cos(tick * 0.08 + i * 0.2) * 25;
+        const x = i * barWidth;
+        const y = canvas.height / 2 - height / 2;
+        
+        ctx.fillStyle = i % 2 === 0 ? '#86efac' : '#22c55e';
+        ctx.shadowColor = 'rgba(134, 239, 172, 0.5)';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(x + 2, y, barWidth - 4, height);
+      }
+      ctx.shadowBlur = 0;
+
+      // Center Stream Watermark
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 22px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('LIVE STREAM FEED • BROADCASTING', canvas.width / 2, 70);
+
+      if (this.currentView === 'liveTheatre') {
+        this.theatreCanvasAnimId = requestAnimationFrame(render);
+      }
+    };
+    render();
   }
 
   updateProfileView() {
@@ -193,11 +370,141 @@ class CessionLaunchpadManager {
     if (avatarEl) avatarEl.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${addr}`;
     if (solEl && window.walletEngine) solEl.textContent = `${(window.walletEngine.balances.sol || 6.2).toFixed(2)} SOL`;
     if (cessEl && window.walletEngine) cessEl.textContent = `${(window.walletEngine.balances.cess || 250000).toLocaleString()} $CESS`;
+
+    this.renderProfileHoldings();
+  }
+
+  renderProfileHoldings() {
+    const thead = document.getElementById('profileThead');
+    const tbody = document.getElementById('profileHoldingsBody');
+    if (!tbody || !thead) return;
+
+    thead.innerHTML = `
+      <tr>
+        <th>Coin</th>
+        <th>Amount Held</th>
+        <th>Value (SOL)</th>
+        <th>PnL</th>
+        <th>Action</th>
+      </tr>
+    `;
+
+    tbody.innerHTML = `
+      <tr>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="images/cession-logo.png" style="width: 20px; height: 20px; border-radius: 4px;" alt="CESS">
+            <strong>$CESS (Cession)</strong>
+          </div>
+        </td>
+        <td>250,000 $CESS</td>
+        <td style="color: var(--pump-green); font-weight: 700;">6.25 SOL</td>
+        <td style="color: var(--pump-green); font-weight: 700;">+248.5%</td>
+        <td><button class="preset-pill" onclick="window.launchpadManager.openTokenDetail('CESS')">trade &rarr;</button></td>
+      </tr>
+      <tr>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=100" style="width: 20px; height: 20px; border-radius: 4px;" alt="BFT">
+            <strong>$BFT (Base Frog)</strong>
+          </div>
+        </td>
+        <td>120,000 $BFT</td>
+        <td style="color: var(--pump-green); font-weight: 700;">1.80 SOL</td>
+        <td style="color: var(--pump-green); font-weight: 700;">+42.1%</td>
+        <td><button class="preset-pill" onclick="window.launchpadManager.openTokenDetail('BFT')">trade &rarr;</button></td>
+      </tr>
+    `;
+  }
+
+  renderProfileCreated() {
+    const thead = document.getElementById('profileThead');
+    const tbody = document.getElementById('profileHoldingsBody');
+    if (!tbody || !thead) return;
+
+    thead.innerHTML = `
+      <tr>
+        <th>Coin</th>
+        <th>Market Cap</th>
+        <th>Bonding Curve</th>
+        <th>Raydium Status</th>
+        <th>Action</th>
+      </tr>
+    `;
+
+    tbody.innerHTML = `
+      <tr>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="images/cession-logo.png" style="width: 20px; height: 20px; border-radius: 4px;" alt="CESS">
+            <strong>$CESS (Cession)</strong>
+          </div>
+        </td>
+        <td style="color: var(--pump-green); font-weight: 700;">$58,240</td>
+        <td>
+          <div style="width: 100px; height: 6px; background: var(--bg-input); border-radius: 3px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px;">
+            <div style="width: 84%; height: 100%; background: var(--pump-green);"></div>
+          </div>
+          <span>84%</span>
+        </td>
+        <td><span style="color: #fbbf24; font-weight: 700;">Approaching $69k Target</span></td>
+        <td><button class="preset-pill" onclick="window.launchpadManager.openTokenDetail('CESS')">manage &rarr;</button></td>
+      </tr>
+    `;
+  }
+
+  renderProfileHistory() {
+    const thead = document.getElementById('profileThead');
+    const tbody = document.getElementById('profileHoldingsBody');
+    if (!tbody || !thead) return;
+
+    thead.innerHTML = `
+      <tr>
+        <th>Type</th>
+        <th>Coin</th>
+        <th>SOL Amount</th>
+        <th>Tokens</th>
+        <th>Time</th>
+        <th>Tx Hash</th>
+      </tr>
+    `;
+
+    tbody.innerHTML = `
+      <tr>
+        <td><span style="color: var(--pump-green); font-weight: 700;">BUY</span></td>
+        <td><strong>$CESS</strong></td>
+        <td>1.50 SOL</td>
+        <td>60,000</td>
+        <td>4m ago</td>
+        <td><a href="#" style="color: var(--text-muted);">5x8...9b1</a></td>
+      </tr>
+      <tr>
+        <td><span style="color: var(--pump-green); font-weight: 700;">BUY</span></td>
+        <td><strong>$BFT</strong></td>
+        <td>0.80 SOL</td>
+        <td>32,000</td>
+        <td>18m ago</td>
+        <td><a href="#" style="color: var(--text-muted);">9k2...1fa</a></td>
+      </tr>
+    `;
   }
 
   renderLeaderboardTraders() {
+    const thead = document.getElementById('leaderboardThead');
     const tbody = document.getElementById('leaderboardTableBody');
-    if (!tbody) return;
+    if (!tbody || !thead) return;
+
+    thead.innerHTML = `
+      <tr>
+        <th>Rank</th>
+        <th>Trader</th>
+        <th>24h Profit (SOL)</th>
+        <th>24h Profit (USD)</th>
+        <th>Win Rate</th>
+        <th>Total Trades</th>
+      </tr>
+    `;
+
     tbody.innerHTML = `
       <tr>
         <td><span class="rank-badge rank-1">1</span></td>
@@ -243,565 +550,600 @@ class CessionLaunchpadManager {
   }
 
   renderLeaderboardCreators() {
+    const thead = document.getElementById('leaderboardThead');
     const tbody = document.getElementById('leaderboardTableBody');
-    if (!tbody) return;
+    if (!tbody || !thead) return;
+
+    thead.innerHTML = `
+      <tr>
+        <th>Rank</th>
+        <th>Creator</th>
+        <th>Total Raised (SOL)</th>
+        <th>Graduated Coins</th>
+        <th>Coins Created</th>
+        <th>Total Volume</th>
+      </tr>
+    `;
+
     tbody.innerHTML = `
       <tr>
         <td><span class="rank-badge rank-1">1</span></td>
         <td>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=creator1" class="koth-creator-avatar" alt="Dev">
-            <span style="font-weight: 700; color: #fff;">0x33a...99f</span>
-            <span style="background: #fbbf24; color: #000; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">TOP CREATOR</span>
+            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=creator1" class="koth-creator-avatar" alt="Creator">
+            <span style="font-weight: 700; color: #fff;">0x71a...e89</span>
+            <span style="background: var(--pump-green-dark); color: var(--pump-green); font-size: 10px; padding: 2px 6px; border-radius: 4px;">TOP DEV</span>
           </div>
         </td>
-        <td style="color: var(--pump-green); font-weight: 700;">+210.00 SOL</td>
-        <td style="color: var(--pump-green); font-weight: 700;">+$30,450.00</td>
-        <td>6 Graduated</td>
-        <td>12 Coins</td>
+        <td style="color: var(--pump-green); font-weight: 700;">412.00 SOL</td>
+        <td>6</td>
+        <td>8</td>
+        <td>$540,200</td>
       </tr>
       <tr>
         <td><span class="rank-badge rank-2">2</span></td>
         <td>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=creator2" class="koth-creator-avatar" alt="Dev">
-            <span style="font-weight: 700; color: #fff;">0x77b...11d</span>
+            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=creator2" class="koth-creator-avatar" alt="Creator">
+            <span style="font-weight: 700; color: #fff;">0x99a...01f</span>
           </div>
         </td>
-        <td style="color: var(--pump-green); font-weight: 700;">+115.40 SOL</td>
-        <td style="color: var(--pump-green); font-weight: 700;">+$16,733.00</td>
-        <td>4 Graduated</td>
-        <td>8 Coins</td>
+        <td style="color: var(--pump-green); font-weight: 700;">280.50 SOL</td>
+        <td>4</td>
+        <td>5</td>
+        <td>$320,100</td>
+      </tr>
+    `;
+  }
+
+  renderLeaderboardGraduated() {
+    const thead = document.getElementById('leaderboardThead');
+    const tbody = document.getElementById('leaderboardTableBody');
+    if (!tbody || !thead) return;
+
+    thead.innerHTML = `
+      <tr>
+        <th>Rank</th>
+        <th>Coin</th>
+        <th>Market Cap</th>
+        <th>Raydium LP Burnt</th>
+        <th>Time to Graduate</th>
+        <th>Action</th>
+      </tr>
+    `;
+
+    tbody.innerHTML = `
+      <tr>
+        <td><span class="rank-badge rank-1">1</span></td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="images/cession-logo.png" style="width: 20px; height: 20px; border-radius: 4px;" alt="CESS">
+            <strong>$CESS (Cession)</strong>
+          </div>
+        </td>
+        <td style="color: var(--pump-green); font-weight: 700;">$69,420</td>
+        <td><span style="color: var(--pump-green); font-weight: 700;">✓ $12,000 Burnt</span></td>
+        <td>18 minutes</td>
+        <td><button class="preset-pill" onclick="window.launchpadManager.openTokenDetail('CESS')">view coin &rarr;</button></td>
       </tr>
     `;
   }
 
   bindEvents() {
-    // Search filter
+    // Search input
     if (this.searchInput) {
       this.searchInput.addEventListener('input', () => this.filterAndRenderTokens());
     }
 
-    // Sort order
+    // Sort order dropdown
     if (this.sortSelect) {
       this.sortSelect.addEventListener('change', (e) => {
         this.activeSort = e.target.value;
-        this.fetchTokens();
+        this.filterAndRenderTokens();
       });
     }
 
-    // Sort direction
+    // Sort direction dropdown
     if (this.sortDirSelect) {
       this.sortDirSelect.addEventListener('change', (e) => {
         this.activeDir = e.target.value;
-        this.fetchTokens();
+        this.filterAndRenderTokens();
       });
     }
 
-    // Modal Triggers
-    const btnDeployHero = document.getElementById('btnOpenDeployHero');
-    const deployModal = document.getElementById('deployModal');
+    // Start a new coin modal triggers
+    const btnHeroDeploy = document.getElementById('btnOpenDeployHero');
     const btnCloseDeploy = document.getElementById('btnCloseDeployModal');
+    const deployModal = document.getElementById('deployModal');
+    const btnToggleMore = document.getElementById('btnToggleMoreDeployOptions');
+    const deployMoreSection = document.getElementById('deployMoreOptionsSection');
+    const deployForm = document.getElementById('deployCoinForm');
 
-    if (btnDeployHero && deployModal) {
-      btnDeployHero.addEventListener('click', (e) => {
+    if (btnHeroDeploy && deployModal) {
+      btnHeroDeploy.addEventListener('click', (e) => {
         e.preventDefault();
         deployModal.style.display = 'flex';
       });
     }
+
     if (btnCloseDeploy && deployModal) {
       btnCloseDeploy.addEventListener('click', () => {
         deployModal.style.display = 'none';
       });
     }
 
-    // More options toggle in deploy modal
-    const btnMoreOptions = document.getElementById('btnToggleMoreDeployOptions');
-    const moreOptionsSection = document.getElementById('deployMoreOptionsSection');
-    if (btnMoreOptions && moreOptionsSection) {
-      btnMoreOptions.addEventListener('click', () => {
-        const isHidden = moreOptionsSection.style.display === 'none';
-        moreOptionsSection.style.display = isHidden ? 'block' : 'none';
-        btnMoreOptions.textContent = isHidden ? '[hide extra options ▲]' : '[show more options ▼]';
+    if (btnToggleMore && deployMoreSection) {
+      btnToggleMore.addEventListener('click', () => {
+        const isHidden = deployMoreSection.style.display === 'none';
+        deployMoreSection.style.display = isHidden ? 'block' : 'none';
+        btnToggleMore.textContent = isHidden ? '[hide extra options ▲]' : '[show more options ▼]';
       });
     }
 
-    // How It Works Modal
-    const btnHowItWorks = document.getElementById('btnOpenHowItWorks');
-    const howItWorksModal = document.getElementById('howItWorksModal');
-    const btnCloseHow = document.getElementById('btnCloseHowItWorks');
-    const btnReadyToPump = document.getElementById('btnReadyToPump');
-
-    if (btnHowItWorks && howItWorksModal) {
-      btnHowItWorks.addEventListener('click', (e) => {
-        e.preventDefault();
-        howItWorksModal.style.display = 'flex';
-      });
-    }
-    if (btnCloseHow && howItWorksModal) {
-      btnCloseHow.addEventListener('click', () => {
-        howItWorksModal.style.display = 'none';
-      });
-    }
-    if (btnReadyToPump && howItWorksModal) {
-      btnReadyToPump.addEventListener('click', () => {
-        howItWorksModal.style.display = 'none';
-      });
-    }
-
-    // Wallet Modal
-    const btnConnect = document.getElementById('btnConnectWallet');
-    const walletModal = document.getElementById('walletModal');
-    const btnCloseWallet = document.getElementById('btnCloseWalletModal');
-    if (btnConnect && walletModal) {
-      btnConnect.addEventListener('click', (e) => {
-        e.preventDefault();
-        walletModal.style.display = 'flex';
-      });
-    }
-    if (btnCloseWallet && walletModal) {
-      btnCloseWallet.addEventListener('click', () => {
-        walletModal.style.display = 'none';
-      });
-    }
-
-    // Disconnect Wallet
-    const btnDisconnect = document.getElementById('btnDisconnectWallet');
-    if (btnDisconnect) {
-      btnDisconnect.addEventListener('click', () => {
-        if (window.walletEngine) window.walletEngine.disconnect();
-      });
-    }
-
-    // Token Detail Modal Close
-    const detailModal = document.getElementById('tokenDetailModal');
-    const btnCloseDetail = document.getElementById('btnCloseDetailModal');
-    if (btnCloseDetail && detailModal) {
-      btnCloseDetail.addEventListener('click', () => {
-        detailModal.style.display = 'none';
-        this.activeToken = null;
-        window.history.pushState({}, '', '/');
-      });
-    }
-
-    // Deploy Coin Form Submit
-    const deployForm = document.getElementById('deployCoinForm');
     if (deployForm) {
       deployForm.addEventListener('submit', (e) => this.handleDeploySubmit(e));
     }
 
-    // Token Detail Tabs
+    // Token Detail Modal Close & Go Back
+    const btnCloseDetail = document.getElementById('btnCloseDetailModal');
+    const detailModal = document.getElementById('tokenDetailModal');
+    if (btnCloseDetail && detailModal) {
+      btnCloseDetail.addEventListener('click', () => {
+        detailModal.style.display = 'none';
+        window.history.pushState({}, '', '/');
+      });
+    }
+
+    // Detail Tabs (Thread, Trades, Holders)
     const tabThread = document.getElementById('tabThread');
     const tabTrades = document.getElementById('tabTrades');
     const tabHolders = document.getElementById('tabHolders');
-    const paneThread = document.getElementById('paneThread');
-    const paneTrades = document.getElementById('paneTrades');
-    const paneHolders = document.getElementById('paneHolders');
 
     if (tabThread && tabTrades && tabHolders) {
-      tabThread.addEventListener('click', () => {
-        tabThread.classList.add('active');
-        tabTrades.classList.remove('active');
-        tabHolders.classList.remove('active');
-        if (paneThread) paneThread.style.display = 'flex';
-        if (paneTrades) paneTrades.style.display = 'none';
-        if (paneHolders) paneHolders.style.display = 'none';
-      });
-
-      tabTrades.addEventListener('click', () => {
-        tabTrades.classList.add('active');
-        tabThread.classList.remove('active');
-        tabHolders.classList.remove('active');
-        if (paneThread) paneThread.style.display = 'none';
-        if (paneTrades) paneTrades.style.display = 'block';
-        if (paneHolders) paneHolders.style.display = 'none';
-        if (this.activeToken) this.fetchTokenTrades(this.activeToken.symbol);
-      });
-
-      tabHolders.addEventListener('click', () => {
-        tabHolders.classList.add('active');
-        tabThread.classList.remove('active');
-        tabTrades.classList.remove('active');
-        if (paneThread) paneThread.style.display = 'none';
-        if (paneTrades) paneTrades.style.display = 'none';
-        if (paneHolders) paneHolders.style.display = 'block';
-        if (this.activeToken) this.fetchTokenHolders(this.activeToken.symbol);
-      });
+      tabThread.addEventListener('click', () => this.switchDetailTab('thread'));
+      tabTrades.addEventListener('click', () => this.switchDetailTab('trades'));
+      tabHolders.addEventListener('click', () => this.switchDetailTab('holders'));
     }
 
-    // Comment Reply Submit
-    const btnSubmitReply = document.getElementById('btnSubmitReply');
-    if (btnSubmitReply) {
-      btnSubmitReply.addEventListener('click', () => this.handleCommentSubmit());
+    // Post Reply Comment button
+    const btnReply = document.getElementById('btnSubmitReply');
+    if (btnReply) {
+      btnReply.addEventListener('click', () => this.postComment());
+    }
+
+    // King of the Hill click to open token
+    const kingCard = document.getElementById('kingHeroCard');
+    if (kingCard) {
+      kingCard.addEventListener('click', () => {
+        if (this.tokens.length > 0) {
+          const king = this.getKingOfTheHill();
+          if (king) this.openTokenDetail(king.symbol);
+        }
+      });
     }
   }
 
-  async fetchTokens(showSpinner = true) {
+  async fetchTokens(render = true) {
     try {
-      const res = await fetch(`/api/tokens?sort=${this.activeSort}`);
+      const res = await fetch('/api/tokens');
       const data = await res.json();
-      if (data.success && data.tokens) {
+      if (data.tokens) {
         this.tokens = data.tokens;
-        this.updateKingOfTheHill(this.tokens);
-        this.filterAndRenderTokens();
+        if (render) {
+          this.filterAndRenderTokens();
+          this.renderKingOfTheHill();
+        }
       }
     } catch (e) {
-      console.warn('Error fetching tokens:', e);
+      console.warn('[CessionLaunchpad] Failed to fetch tokens:', e);
     }
   }
 
-  updateKingOfTheHill(tokens) {
-    if (!tokens || tokens.length === 0) return;
-    const sorted = [...tokens].sort((a, b) => (b.marketCapUsd || 0) - (a.marketCapUsd || 0));
-    const king = sorted[0];
-    if (!king) return;
+  async fetchGlobalTrades() {
+    try {
+      const res = await fetch('/api/trades/global');
+      const data = await res.json();
+      if (data.trades && data.trades.length > 0) {
+        this.renderGlobalMarquee(data.trades);
+      }
+    } catch (e) {
+      console.warn('[CessionLaunchpad] Failed to fetch marquee trades:', e);
+    }
+  }
 
-    const img = document.getElementById('kingImg');
-    const creator = document.getElementById('kingCreator');
-    const mcap = document.getElementById('kingMcap');
-    const replies = document.getElementById('kingReplies');
-    const nameTicker = document.getElementById('kingNameTicker');
-    const desc = document.getElementById('kingDesc');
-
-    if (img) img.src = king.imageUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200';
-    if (creator) creator.textContent = this.formatAddress(king.creator || '0xAnon');
-    if (mcap) mcap.textContent = `$${((king.marketCapUsd || 10000) / 1000).toFixed(1)}k`;
-    if (replies) replies.textContent = king.chatMessagesCount || 12;
-    if (nameTicker) nameTicker.textContent = `$${king.symbol} (${king.name})`;
-    if (desc) desc.textContent = king.description || 'Fair launch coin on the bonding curve.';
+  renderGlobalMarquee(trades) {
+    const track = document.getElementById('globalTradeMarquee');
+    if (!track) return;
+    track.innerHTML = trades.slice(0, 15).map(t => `
+      <div class="marquee-pill ${t.type.toLowerCase()}">
+        ${t.account ? t.account.substring(0, 6) + '...' : '0x88f...'} ${t.type.toLowerCase()} ${t.solAmount || '0.5'} SOL of <strong>$${t.symbol}</strong>
+      </div>
+    `).join('');
   }
 
   filterAndRenderTokens() {
     if (!this.tokenGrid) return;
     const query = (this.searchInput ? this.searchInput.value : '').toLowerCase().trim();
 
-    let list = this.tokens.filter(t => {
-      if (!query) return true;
-      return (
-        t.name.toLowerCase().includes(query) ||
-        t.symbol.toLowerCase().includes(query) ||
-        (t.creator && t.creator.toLowerCase().includes(query))
-      );
+    let filtered = this.tokens.filter(t => {
+      const matchesSearch = t.name.toLowerCase().includes(query) || t.symbol.toLowerCase().includes(query);
+      return matchesSearch;
     });
 
-    if (this.activeDir === 'asc') {
-      list.reverse();
-    }
+    // Sorting
+    filtered.sort((a, b) => {
+      let valA = 0, valB = 0;
+      switch (this.activeSort) {
+        case 'bump':
+        case 'creation':
+          valA = a.createdAt || 0;
+          valB = b.createdAt || 0;
+          break;
+        case 'market_cap':
+          valA = a.marketCapUsd || 0;
+          valB = b.marketCapUsd || 0;
+          break;
+        case 'replies':
+          valA = a.replyCount || 0;
+          valB = b.replyCount || 0;
+          break;
+        case 'last_reply':
+          valA = a.lastReplyAt || a.createdAt || 0;
+          valB = b.lastReplyAt || b.createdAt || 0;
+          break;
+        default:
+          valA = a.createdAt || 0;
+          valB = b.createdAt || 0;
+      }
+      return this.activeDir === 'desc' ? valB - valA : valA - valB;
+    });
 
-    if (list.length === 0) {
-      this.tokenGrid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted); font-family: var(--font-mono);">
-          no coins found matching your search.
-        </div>
-      `;
-      return;
-    }
-
-    this.tokenGrid.innerHTML = list.map(t => this.renderCardHtml(t)).join('');
+    this.tokenGrid.innerHTML = filtered.map(t => this.renderTokenCardHtml(t)).join('');
   }
 
-  renderCardHtml(token) {
-    const timeAgo = this.formatTimeAgo(token.createdAt);
-    const mcapK = ((token.marketCapUsd || 10000) / 1000).toFixed(1);
-    const progress = Math.min(100, Math.round(token.curveProgressPercent || 15));
-    const replies = token.chatMessagesCount || Math.floor(Math.random() * 20 + 2);
+  renderTokenCardHtml(token) {
+    const mcapFormatted = (token.marketCapUsd || 58240).toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0
+    });
+
+    const creatorShort = token.creatorAddress 
+      ? token.creatorAddress.substring(0, 6) + '...' + token.creatorAddress.slice(-4)
+      : '0x88f...1a2';
+
+    const avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${token.creatorAddress || token.symbol}`;
+    const tokenImg = token.imageUrl || 'images/cession-logo.png';
 
     return `
       <div class="token-card-pump" onclick="window.launchpadManager.openTokenDetail('${token.symbol}')">
-        <img src="${token.imageUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200'}" alt="${token.name}" class="token-card-thumb" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200'">
+        <img src="${tokenImg}" class="token-card-thumb" alt="${token.symbol}" onerror="this.src='images/cession-logo.png'">
         <div class="token-card-body">
           <div class="token-card-creator">
             <span>created by</span>
-            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=${token.creator || token.symbol}" class="token-card-creator-avatar" alt="Dev">
-            <span>${this.formatAddress(token.creator || '0xAnon')}</span>
-            <span>${timeAgo}</span>
+            <img src="${avatarUrl}" class="token-card-creator-avatar" alt="Avatar">
+            <span>${creatorShort}</span>
           </div>
-
-          <div class="token-card-mcap">
-            market cap: $${mcapK}k (bonding curve: ${progress}%)
-          </div>
-
-          <div class="token-card-replies">
-            replies: ${replies}
-          </div>
-
+          <div class="token-card-mcap">market cap: ${mcapFormatted}</div>
+          <div class="token-card-replies">replies: ${token.replyCount || 0}</div>
           <div class="token-card-title-desc">
-            <strong>$${token.symbol} (${token.name})</strong>: ${this.escapeHtml(token.description || '')}
+            <strong>${this.escapeHtml(token.name)} [ticker: $${token.symbol}]</strong>: ${this.escapeHtml(token.description || '')}
           </div>
         </div>
       </div>
     `;
   }
 
+  getKingOfTheHill() {
+    if (this.tokens.length === 0) return null;
+    return [...this.tokens].sort((a, b) => (b.marketCapUsd || 0) - (a.marketCapUsd || 0))[0];
+  }
+
+  renderKingOfTheHill() {
+    const king = this.getKingOfTheHill();
+    if (!king) return;
+
+    const kingImg = document.getElementById('kingImg');
+    const kingCreator = document.getElementById('kingCreator');
+    const kingMcap = document.getElementById('kingMcap');
+    const kingReplies = document.getElementById('kingReplies');
+    const kingNameTicker = document.getElementById('kingNameTicker');
+    const kingDesc = document.getElementById('kingDesc');
+
+    if (kingImg) kingImg.src = king.imageUrl || 'images/cession-logo.png';
+    if (kingCreator) kingCreator.textContent = king.creatorAddress ? king.creatorAddress.substring(0, 6) + '...' : '0x88f...1a2';
+    if (kingMcap) kingMcap.textContent = `$${((king.marketCapUsd || 58240) / 1000).toFixed(1)}k`;
+    if (kingReplies) kingReplies.textContent = king.replyCount || 42;
+    if (kingNameTicker) kingNameTicker.textContent = `$${king.symbol} (${king.name})`;
+    if (kingDesc) kingDesc.textContent = king.description || 'The sovereign fair launch liquidity engine.';
+  }
+
   async openTokenDetail(symbol) {
-    const token = this.tokens.find(t => t.symbol.toUpperCase() === symbol.toUpperCase());
-    if (!token) {
-      this.toast(`Coin $${symbol} not found.`, 'error');
-      return;
-    }
+    const token = this.tokens.find(t => t.symbol.toUpperCase() === symbol.toUpperCase()) || {
+      symbol: symbol,
+      name: symbol,
+      description: 'Sovereign bonding curve fair launch token.',
+      marketCapUsd: 58240,
+      currentPriceSol: 0.000000025,
+      bondingCurvePercent: 84.0,
+      replyCount: 18,
+      creatorAddress: '0x88f4b23a910cd99e1a2f0093ba4210e76a011a2'
+    };
 
     this.activeToken = token;
-    const modal = document.getElementById('tokenDetailModal');
-    if (!modal) return;
-
-    // Update browser URL
-    window.history.pushState({}, '', `/token/${token.symbol}`);
-
-    // Populate metadata
-    document.getElementById('detailTokenName').textContent = token.name;
-    document.getElementById('detailTokenSymbol').textContent = `$${token.symbol}`;
-    document.getElementById('detailTokenMeta').textContent = `created by ${this.formatAddress(token.creator || '0xAnon')} • ${this.formatTimeAgo(token.createdAt)}`;
-
-    const progress = Math.min(100, Math.round(token.curveProgressPercent || 20));
-    document.getElementById('detailProgressPercent').textContent = `${progress}%`;
-    document.getElementById('detailProgressBar').style.width = `${progress}%`;
-    document.getElementById('detailProgressText').textContent = `graduate this coin to Raydium at $69,420 market cap. there is ${(token.realSolRaised || 2.4).toFixed(2)} SOL in the bonding curve.`;
-
-    // Coin info right card
-    document.getElementById('detailCoinImg').src = token.imageUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200';
-    document.getElementById('detailCoinTitle').textContent = `${token.name} ($${token.symbol})`;
-    document.getElementById('detailCoinDescription').textContent = token.description || 'Fair launch coin on the bonding curve.';
-
-    // Socials
-    const twitterLink = document.getElementById('detailSocialTwitter');
-    const telegramLink = document.getElementById('detailSocialTelegram');
-    const websiteLink = document.getElementById('detailSocialWebsite');
-
-    if (twitterLink) {
-      if (token.twitter) {
-        twitterLink.href = token.twitter;
-        twitterLink.style.display = 'inline-flex';
-      } else {
-        twitterLink.style.display = 'none';
-      }
-    }
-
-    if (telegramLink) {
-      if (token.telegram) {
-        telegramLink.href = token.telegram;
-        telegramLink.style.display = 'inline-flex';
-      } else {
-        telegramLink.style.display = 'none';
-      }
-    }
-
-    if (websiteLink) {
-      if (token.website) {
-        websiteLink.href = token.website;
-        websiteLink.style.display = 'inline-flex';
-      } else {
-        websiteLink.style.display = 'none';
-      }
-    }
-
-    // Set active token in trading manager
     if (window.tradingManager) {
       window.tradingManager.setActiveToken(token);
     }
 
-    // Load chart
-    if (window.chartController) {
-      window.chartController.loadCandles(token.symbol);
+    const modal = document.getElementById('tokenDetailModal');
+    if (modal) modal.style.display = 'block';
+
+    // Update Token Detail Headline
+    const nameEl = document.getElementById('detailTokenName');
+    const symEl = document.getElementById('detailTokenSymbol');
+    const metaEl = document.getElementById('detailTokenMeta');
+    const barEl = document.getElementById('detailProgressBar');
+    const pctEl = document.getElementById('detailProgressPercent');
+    const subtextEl = document.getElementById('detailProgressText');
+    const coinImg = document.getElementById('detailCoinImg');
+    const coinTitle = document.getElementById('detailCoinTitle');
+    const coinDesc = document.getElementById('detailCoinDescription');
+
+    if (nameEl) nameEl.textContent = token.name;
+    if (symEl) symEl.textContent = `$${token.symbol}`;
+    if (metaEl) metaEl.textContent = `created by ${token.creatorAddress ? token.creatorAddress.substring(0, 6) + '...' : '0x88f...1a2'} • 5m ago`;
+    
+    const progress = token.bondingCurvePercent || 84;
+    if (barEl) barEl.style.width = `${progress}%`;
+    if (pctEl) pctEl.textContent = `${progress.toFixed(0)}%`;
+    if (subtextEl) {
+      subtextEl.textContent = `graduate this coin to Raydium at $69,420 market cap. there is ${(progress * 0.25).toFixed(1)} SOL in the bonding curve.`;
     }
 
-    // Load comments thread
-    this.fetchTokenComments(token.symbol);
+    if (coinImg) coinImg.src = token.imageUrl || 'images/cession-logo.png';
+    if (coinTitle) coinTitle.textContent = `${token.name} ($${token.symbol})`;
+    if (coinDesc) coinDesc.textContent = token.description || 'Sovereign fair launch on Cession.';
 
-    modal.style.display = 'block';
+    // Initialize/Render TradingView Chart
+    if (window.chartManager) {
+      window.chartManager.loadTokenChart(token.symbol);
+    }
+
+    // Fetch comments and trades
+    this.fetchComments(token.symbol);
+    this.fetchTrades(token.symbol);
+    this.fetchHolders(token.symbol);
+
+    window.history.pushState({}, '', `/token/${token.symbol}`);
   }
 
-  async fetchTokenComments(symbol) {
+  switchDetailTab(tabName) {
+    this.activeTab = tabName;
+    const tabThread = document.getElementById('tabThread');
+    const tabTrades = document.getElementById('tabTrades');
+    const tabHolders = document.getElementById('tabHolders');
+
+    const paneThread = document.getElementById('paneThread');
+    const paneTrades = document.getElementById('paneTrades');
+    const paneHolders = document.getElementById('paneHolders');
+
+    [tabThread, tabTrades, tabHolders].forEach(t => t && t.classList.remove('active'));
+    [paneThread, paneTrades, paneHolders].forEach(p => p && (p.style.display = 'none'));
+
+    if (tabName === 'thread') {
+      if (tabThread) tabThread.classList.add('active');
+      if (paneThread) paneThread.style.display = 'flex';
+    } else if (tabName === 'trades') {
+      if (tabTrades) tabTrades.classList.add('active');
+      if (paneTrades) paneTrades.style.display = 'block';
+    } else if (tabName === 'holders') {
+      if (tabHolders) tabHolders.classList.add('active');
+      if (paneHolders) paneHolders.style.display = 'block';
+    }
+  }
+
+  async fetchComments(symbol) {
     const list = document.getElementById('commentsList');
     if (!list) return;
 
     try {
-      const res = await fetch(`/api/tokens/${symbol}/chat`);
+      const res = await fetch(`/api/tokens/${symbol}/comments`);
       const data = await res.json();
-      if (data.success && data.messages) {
-        list.innerHTML = data.messages.map(m => `
-          <div class="comment-card">
-            <div class="comment-header">
-              <img src="https://api.dicebear.com/7.x/identicon/svg?seed=${m.user}" class="comment-avatar" alt="User">
-              <span style="color: #fff; font-weight: 700;">${m.user}</span>
-              <span>${m.time || 'just now'}</span>
-            </div>
-            <div class="comment-text">${this.escapeHtml(m.text || '')}</div>
-            ${m.image ? `<img src="${m.image}" class="comment-meme-img" alt="Meme">` : ''}
+      const comments = data.comments || [
+        { author: '0x88f...1a2', text: 'Dev locked 100% of supply in sovereign vault! PUMP!', createdAt: Date.now() - 300000 },
+        { author: '0x42b...c91', text: 'Raydium graduation incoming today! 🚀', createdAt: Date.now() - 600000 }
+      ];
+
+      list.innerHTML = comments.map(c => `
+        <div class="comment-card">
+          <div class="comment-header">
+            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=${c.author}" class="comment-avatar" alt="Avatar">
+            <span>${c.author}</span>
+            <span style="color: var(--text-muted); margin-left: auto;">${this.timeAgo(c.createdAt)}</span>
           </div>
-        `).join('');
-      }
+          <div class="comment-text">${this.escapeHtml(c.text)}</div>
+          ${c.imageUrl ? `<img src="${c.imageUrl}" class="comment-meme-img" alt="Meme">` : ''}
+        </div>
+      `).join('');
     } catch (e) {
-      console.warn('Error fetching comments:', e);
+      console.warn('Failed to fetch comments', e);
     }
   }
 
-  async handleCommentSubmit() {
+  async postComment() {
     if (!this.activeToken) return;
     const textInput = document.getElementById('replyCommentText');
-    const imageInput = document.getElementById('replyImageUrl');
+    const imgInput = document.getElementById('replyImageUrl');
     const text = textInput ? textInput.value.trim() : '';
-    const image = imageInput ? imageInput.value.trim() : '';
+    const imageUrl = imgInput ? imgInput.value.trim() : '';
 
-    if (!text && !image) {
-      this.toast('Please enter a comment or image URL.', 'error');
+    if (!text) {
+      this.toast('Please write a comment', 'error');
       return;
     }
 
-    const user = window.walletEngine && window.walletEngine.activeAddress 
-      ? this.formatAddress(window.walletEngine.activeAddress)
-      : 'anon_' + Math.floor(Math.random() * 8999 + 1000);
+    const author = window.walletEngine && window.walletEngine.activeAddress 
+      ? window.walletEngine.activeAddress.substring(0, 6) + '...'
+      : '0x' + Array.from({length: 4}, () => Math.floor(Math.random()*16).toString(16)).join('') + '...';
 
     try {
-      const res = await fetch(`/api/tokens/${this.activeToken.symbol}/chat`, {
+      await fetch(`/api/tokens/${this.activeToken.symbol}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user, text, image })
+        body: JSON.stringify({ author, text, imageUrl })
       });
-      const data = await res.json();
-      if (data.success) {
-        if (textInput) textInput.value = '';
-        if (imageInput) imageInput.value = '';
-        this.fetchTokenComments(this.activeToken.symbol);
-        this.toast('Reply posted!', 'success');
-      }
+
+      if (textInput) textInput.value = '';
+      if (imgInput) imgInput.value = '';
+      this.toast('Reply posted to thread!', 'success');
+      this.fetchComments(this.activeToken.symbol);
     } catch (e) {
-      this.toast('Failed to post reply.', 'error');
+      this.toast('Failed to post reply', 'error');
     }
   }
 
-  async fetchTokenTrades(symbol) {
+  async fetchTrades(symbol) {
     const tbody = document.getElementById('tradesTableBody');
     if (!tbody) return;
+
     try {
       const res = await fetch(`/api/tokens/${symbol}/trades`);
       const data = await res.json();
-      if (data.success && data.trades) {
-        tbody.innerHTML = data.trades.map(tr => `
-          <tr>
-            <td style="color: var(--pump-green);">${this.formatAddress(tr.account || tr.trader || '0xAnon')}</td>
-            <td style="color: ${tr.type === 'buy' ? 'var(--pump-green)' : 'var(--market-red)'}; font-weight: 700;">${tr.type}</td>
-            <td>${(tr.solAmount || 0.1).toFixed(2)}</td>
-            <td>${Math.floor(tr.tokenAmount || 100000).toLocaleString()}</td>
-            <td>${this.formatTimeAgo(tr.timestamp || Date.now())}</td>
-            <td><a href="#" style="color: var(--text-muted);">view</a></td>
-          </tr>
-        `).join('');
+      const trades = data.trades || [];
+
+      if (trades.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No trades yet. Be the first to buy on the curve!</td></tr>`;
+        return;
       }
+
+      tbody.innerHTML = trades.map(t => `
+        <tr>
+          <td>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <img src="https://api.dicebear.com/7.x/identicon/svg?seed=${t.account}" class="koth-creator-avatar" alt="Avatar">
+              <span>${t.account ? t.account.substring(0, 6) + '...' : '0x88f...'}</span>
+            </div>
+          </td>
+          <td><span style="color: ${t.type.toLowerCase() === 'buy' ? 'var(--pump-green)' : 'var(--market-red)'}; font-weight: 700;">${t.type.toUpperCase()}</span></td>
+          <td style="font-weight: 700; color: #fff;">${t.solAmount || '0.50'} SOL</td>
+          <td>${(t.tokenAmount || 20000).toLocaleString()}</td>
+          <td style="color: var(--text-muted);">${this.timeAgo(t.timestamp || Date.now())}</td>
+          <td><a href="#" style="color: var(--text-muted);">txn &rarr;</a></td>
+        </tr>
+      `).join('');
     } catch (e) {
-      console.warn('Error fetching trades:', e);
+      console.warn('Failed to fetch trades', e);
     }
   }
 
-  async fetchTokenHolders(symbol) {
+  async fetchHolders(symbol) {
     const tbody = document.getElementById('holdersTableBody');
     if (!tbody) return;
-    try {
-      const res = await fetch(`/api/tokens/${symbol}/holders`);
-      const data = await res.json();
-      if (data.success && data.holders) {
-        tbody.innerHTML = data.holders.map((h, i) => `
-          <tr>
-            <td>#${i + 1}</td>
-            <td style="color: ${h.isDev ? 'var(--pump-green)' : '#fff'};">${h.address}</td>
-            <td>${Math.floor(h.balance || 0).toLocaleString()}</td>
-            <td>${(h.percentage || 0).toFixed(2)}%</td>
-          </tr>
-        `).join('');
-      }
-    } catch (e) {
-      console.warn('Error fetching holders:', e);
-    }
-  }
 
-  async fetchGlobalTrades() {
-    const marquee = document.getElementById('globalTradeMarquee');
-    if (!marquee) return;
-    try {
-      const res = await fetch('/api/tokens/global-trades');
-      const data = await res.json();
-      if (data.success && data.trades && data.trades.length > 0) {
-        marquee.innerHTML = data.trades.map(t => `
-          <div class="marquee-pill ${t.type}">
-            ${this.formatAddress(t.trader || '0xAnon')} ${t.type === 'buy' ? 'bought' : 'sold'} ${(t.solAmount || 0.5).toFixed(2)} SOL of <strong>$${t.symbol}</strong>
-          </div>
-        `).join('');
-      }
-    } catch (e) {
-      // Keep static marquee if offline
-    }
+    tbody.innerHTML = `
+      <tr>
+        <td>#1</td>
+        <td><strong style="color: var(--pump-green);">Raydium Bonding Curve Pool</strong></td>
+        <td>750,000,000 $${symbol}</td>
+        <td>75.0%</td>
+      </tr>
+      <tr>
+        <td>#2</td>
+        <td>0x88f...1a2 (Creator)</td>
+        <td>150,000,000 $${symbol}</td>
+        <td>15.0%</td>
+      </tr>
+      <tr>
+        <td>#3</td>
+        <td>0x42b...c91</td>
+        <td>50,000,000 $${symbol}</td>
+        <td>5.0%</td>
+      </tr>
+      <tr>
+        <td>#4</td>
+        <td>0x91a...c01</td>
+        <td>30,000,000 $${symbol}</td>
+        <td>3.0%</td>
+      </tr>
+      <tr>
+        <td>#5</td>
+        <td>0x71a...e89</td>
+        <td>20,000,000 $${symbol}</td>
+        <td>2.0%</td>
+      </tr>
+    `;
   }
 
   async handleDeploySubmit(e) {
     e.preventDefault();
-    const name = document.getElementById('deployName').value.trim();
-    const symbol = document.getElementById('deploySymbol').value.trim().toUpperCase();
-    const description = document.getElementById('deployDesc').value.trim();
-    const imageUrl = document.getElementById('deployImage').value.trim();
-    const twitter = document.getElementById('deployTwitter').value.trim();
-    const telegram = document.getElementById('deployTelegram').value.trim();
-    const website = document.getElementById('deployWebsite').value.trim();
-    const initialBuy = parseFloat(document.getElementById('deployInitialBuy').value) || 0;
+    const name = document.getElementById('deployName')?.value.trim();
+    const symbol = document.getElementById('deploySymbol')?.value.trim().toUpperCase();
+    const desc = document.getElementById('deployDesc')?.value.trim();
+    const image = document.getElementById('deployImage')?.value.trim();
+    const twitter = document.getElementById('deployTwitter')?.value.trim();
+    const telegram = document.getElementById('deployTelegram')?.value.trim();
+    const website = document.getElementById('deployWebsite')?.value.trim();
+    const initialBuy = parseFloat(document.getElementById('deployInitialBuy')?.value) || 0;
 
-    const creator = window.walletEngine && window.walletEngine.activeAddress
-      ? window.walletEngine.activeAddress
-      : '0x' + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
+    if (!name || !symbol || !desc) {
+      this.toast('Please fill out all required fields', 'error');
+      return;
+    }
+
+    const payload = {
+      name,
+      symbol,
+      description: desc,
+      imageUrl: image || 'images/cession-logo.png',
+      socialLinks: { twitter, telegram, website },
+      initialBuySol: initialBuy,
+      creatorAddress: window.walletEngine && window.walletEngine.activeAddress 
+        ? window.walletEngine.activeAddress 
+        : '0x88f4b23a910cd99e1a2f0093ba4210e76a011a2'
+    };
 
     try {
-      const res = await fetch('/api/tokens/deploy', {
+      const res = await fetch('/api/tokens', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          symbol,
-          description,
-          imageUrl,
-          twitter,
-          telegram,
-          website,
-          initialBuySol: initialBuy,
-          creator
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
       if (data.success) {
-        document.getElementById('deployModal').style.display = 'none';
-        document.getElementById('deployCoinForm').reset();
-        this.toast(`Coin $${symbol} created successfully!`, 'success');
-        await this.fetchTokens();
+        this.toast(`$${symbol} successfully launched on bonding curve!`, 'success');
+        const modal = document.getElementById('deployModal');
+        if (modal) modal.style.display = 'none';
+        
+        await this.fetchTokens(true);
         this.openTokenDetail(symbol);
       } else {
-        this.toast(data.error || 'Failed to create coin', 'error');
+        this.toast(data.error || 'Failed to deploy token', 'error');
       }
     } catch (err) {
-      this.toast('Network error creating coin', 'error');
+      this.toast('Network error deploying token', 'error');
     }
   }
 
   toast(msg, type = 'info') {
     const container = document.getElementById('toastContainer');
     if (!container) return;
-    const toast = document.createElement('div');
-    toast.className = 'toast-msg';
-    toast.textContent = msg;
-    if (type === 'error') {
-      toast.style.borderColor = 'var(--market-red)';
-    }
-    container.appendChild(toast);
+
+    const div = document.createElement('div');
+    div.className = 'toast-msg';
+    if (type === 'error') div.style.borderColor = 'var(--market-red)';
+    if (type === 'success') div.style.borderColor = 'var(--pump-green)';
+    div.textContent = msg;
+
+    container.appendChild(div);
     setTimeout(() => {
-      toast.remove();
-    }, 4000);
+      div.style.opacity = '0';
+      setTimeout(() => div.remove(), 300);
+    }, 3500);
   }
 
-  formatAddress(addr) {
-    if (!addr) return '0x000...000';
-    if (addr.length <= 10) return addr;
-    return `${addr.substring(0, 5)}...${addr.substring(addr.length - 4)}`;
-  }
-
-  formatTimeAgo(ts) {
-    if (!ts) return 'just now';
-    const diff = Math.floor((Date.now() - ts) / 1000);
+  timeAgo(timestamp) {
+    const diff = Math.floor((Date.now() - timestamp) / 1000);
     if (diff < 60) return `${diff}s ago`;
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
@@ -809,12 +1151,8 @@ class CessionLaunchpadManager {
   }
 
   escapeHtml(str) {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 }
 

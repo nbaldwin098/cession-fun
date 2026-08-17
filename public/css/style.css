@@ -1,7 +1,7 @@
 /* =========================================================
    PUMP.FUN EXACT REPLICA DESIGN SYSTEM & STYLESHEET
    Complete Multi-Page UI: Hamburger Sidebar, Board, Live, 
-   Leaderboard, Profile, Token Detail, and Modals
+   Live Theatre Studio, Leaderboard, Profile, Token Detail, and Modals
    ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap');
@@ -191,6 +191,7 @@ button {
   font-size: 18px;
   color: var(--pump-green);
   font-family: var(--font-mono);
+  cursor: pointer;
 }
 
 .header-links-group {
@@ -694,7 +695,7 @@ button {
 }
 
 /* =========================================================
-   LIVESTREAMS PAGE VIEW
+   LIVESTREAMS PAGE & THEATRE VIEW
 ========================================================= */
 .live-page-container {
   max-width: 1280px;
@@ -773,6 +774,12 @@ button {
   display: flex;
   align-items: center;
   gap: 4px;
+  animation: pulseRed 2s infinite;
+}
+
+@keyframes pulseRed {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
 }
 
 .stream-badge-viewers {
@@ -807,6 +814,84 @@ button {
   color: var(--text-secondary);
 }
 
+/* Live Stream Theatre View */
+.stream-theatre-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  margin-top: 16px;
+}
+
+@media (max-width: 960px) {
+  .stream-theatre-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stream-player-container {
+  background: #080b10;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.stream-canvas-player {
+  width: 100%;
+  height: 440px;
+  background: #05070a;
+}
+
+.stream-chat-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  height: 520px;
+  display: flex;
+  flex-direction: column;
+}
+
+.stream-chat-header {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stream-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.stream-chat-msg {
+  display: flex;
+  gap: 6px;
+  line-height: 1.35;
+}
+
+.stream-chat-author {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--pump-green);
+}
+
+.stream-chat-input-bar {
+  padding: 10px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: 8px;
+}
+
 /* =========================================================
    LEADERBOARD PAGE VIEW
 ========================================================= */
@@ -828,6 +913,7 @@ button {
 .leaderboard-tabs {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .leaderboard-tab-btn {
@@ -839,6 +925,7 @@ button {
   padding: 8px 16px;
   border-radius: var(--radius-xs);
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .leaderboard-tab-btn.active {
@@ -911,6 +998,7 @@ button {
   margin-top: 10px;
   font-family: var(--font-mono);
   font-size: 13px;
+  flex-wrap: wrap;
 }
 
 .profile-balance-item strong {
@@ -1377,7 +1465,7 @@ button {
 }
 
 /* =========================================================
-   MODALS: START COIN, HOW IT WORKS, WALLET
+   MODALS: START COIN, HOW IT WORKS, WALLET, SLIPPAGE
 ========================================================= */
 .modal-overlay-generic {
   position: fixed;

@@ -82,7 +82,7 @@
       <div class="sidebar-social-links">
         <a href="https://x.com" target="_blank" class="bracket-link">[twitter]</a>
         <a href="https://t.me" target="_blank" class="bracket-link">[telegram]</a>
-        <a href="#" onclick="alert('Support channel active on Telegram and Discord.'); return false;" class="bracket-link">[support]</a>
+        <a href="#" onclick="alert('Support channel active on Telegram and Discord: @pumpfun_support'); return false;" class="bracket-link">[support]</a>
       </div>
       <div class="sidebar-legal-text">
         &copy; 2026 pump.fun • Sovereign Fair Launch Protocol
@@ -109,7 +109,7 @@
         <a href="#" class="bracket-link" id="btnHeaderLeaderboard">[leaderboard]</a>
         <a href="https://x.com" target="_blank" class="bracket-link">[twitter]</a>
         <a href="https://t.me" target="_blank" class="bracket-link">[telegram]</a>
-        <a href="#" class="bracket-link" onclick="alert('Support channel active on Telegram and Discord.'); return false;">[support]</a>
+        <a href="#" class="bracket-link" onclick="alert('Support channel active on Telegram: @pumpfun_support'); return false;">[support]</a>
       </div>
     </div>
 
@@ -145,7 +145,7 @@
         <span>👑</span>
         <span>king of the hill</span>
       </div>
-      <div class="koth-card" id="kingHeroCard" onclick="window.launchpadManager.openTokenDetail('CESS')">
+      <div class="koth-card" id="kingHeroCard">
         <img id="kingImg" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200" alt="King Token" class="koth-thumb">
         <div class="koth-details">
           <div class="koth-creator-row">
@@ -226,14 +226,14 @@
             Watch coin creators stream live on the bonding curve. Buy and chat directly from the stream.
           </p>
         </div>
-        <button class="btn-connect-wallet" onclick="alert('Streaming studio active! Connect camera & microphone.');">
+        <button class="btn-connect-wallet" id="btnOpenStreamStudio">
           📹 Go Live
         </button>
       </div>
 
       <div class="live-grid" id="livestreamsGrid">
         <!-- Stream 1 -->
-        <div class="stream-card" onclick="window.launchpadManager.openTokenDetail('CESS')">
+        <div class="stream-card" onclick="window.launchpadManager.openLiveTheatre('CESS', '🔥 PUMPING $CESS TO RAYDIUM GRADUATION TODAY!', '0x88f...1a2', 1420)">
           <div class="stream-video-preview">
             <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600" class="stream-video-bg" alt="Streamer">
             <div class="stream-badge-live">🔴 LIVE</div>
@@ -250,7 +250,7 @@
         </div>
 
         <!-- Stream 2 -->
-        <div class="stream-card" onclick="window.launchpadManager.openTokenDetail('BFT')">
+        <div class="stream-card" onclick="window.launchpadManager.openLiveTheatre('BFT', '🐸 Base Pepe Frog Token Memes & Dev Q&A', '0x42b...c91', 830)">
           <div class="stream-video-preview">
             <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600" class="stream-video-bg" alt="Streamer">
             <div class="stream-badge-live">🔴 LIVE</div>
@@ -267,7 +267,7 @@
         </div>
 
         <!-- Stream 3 -->
-        <div class="stream-card" onclick="window.launchpadManager.openTokenDetail('DOGE')">
+        <div class="stream-card" onclick="window.launchpadManager.openLiveTheatre('DOGE', '🚀 Doge Sovereign Fair Launch Community Stream', '0x99a...01f', 612)">
           <div class="stream-video-preview">
             <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600" class="stream-video-bg" alt="Streamer">
             <div class="stream-badge-live">🔴 LIVE</div>
@@ -287,7 +287,62 @@
   </main>
 
   <!-- =========================================================
-       VIEW 3: LEADERBOARD PAGE
+       VIEW 3: LIVE STREAM THEATRE STUDIO (INTERACTIVE PLAYER & CHAT)
+  ========================================================= -->
+  <main class="page-view" id="viewLiveTheatre">
+    <div class="live-page-container">
+      <button class="btn-go-back" onclick="window.launchpadManager.switchPage('live')">
+        <span>←</span>
+        <span>[back to all livestreams]</span>
+      </button>
+
+      <div class="stream-theatre-layout">
+        <!-- Video Player & Token Bar -->
+        <div class="stream-player-container">
+          <div style="position: relative; width: 100%; height: 420px; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <canvas id="streamVisualizerCanvas" width="800" height="420" style="width: 100%; height: 100%;"></canvas>
+            <div class="stream-badge-live" style="top: 14px; left: 14px;">🔴 LIVE BROADCAST</div>
+            <div class="stream-badge-viewers" id="theatreViewerBadge" style="top: 14px; right: 14px;">👥 1,420 viewers</div>
+          </div>
+
+          <div style="padding: 16px; background: var(--bg-card); display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 12px;">
+            <div>
+              <h2 id="theatreStreamTitle" style="font-size: 16px; color: #fff; margin-bottom: 4px;">PUMPING $CESS TO RAYDIUM GRADUATION</h2>
+              <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);">
+                Hosted by <strong id="theatreStreamHost" style="color: #fff;">0x88f...1a2</strong> • <span id="theatreStreamCoin" style="color: var(--pump-green); font-weight: 700;">$CESS</span>
+              </div>
+            </div>
+            <button class="btn-connect-wallet" id="btnTheatreOpenDetail" onclick="window.launchpadManager.openTokenDetail('CESS')">
+              📊 View Full Chart & Bonding Curve
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Chat Room -->
+        <div class="stream-chat-box">
+          <div class="stream-chat-header">
+            <span>💬 Live Stream Chat</span>
+            <span style="color: var(--pump-green); font-size: 11px;">● Connected</span>
+          </div>
+
+          <div class="stream-chat-messages" id="theatreChatStream">
+            <div class="stream-chat-msg"><span class="stream-chat-author">whale_trader:</span><span>LFG! Just bought 3 SOL! 🚀</span></div>
+            <div class="stream-chat-msg"><span class="stream-chat-author">sol_king:</span><span>Bonding curve is already 70% full!</span></div>
+            <div class="stream-chat-msg"><span class="stream-chat-author">anon_92:</span><span>Raydium migration incoming today!</span></div>
+            <div class="stream-chat-msg"><span class="stream-chat-author">crypto_chad:</span><span>Dev is cooking in the stream 🐸</span></div>
+          </div>
+
+          <form id="formTheatreChat" class="stream-chat-input-bar">
+            <input type="text" id="theatreChatInput" class="form-input-pump" placeholder="send message to stream..." style="flex: 1;" required>
+            <button type="submit" class="btn-post-reply" style="padding: 0 12px;">Send</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================================
+       VIEW 4: LEADERBOARD PAGE
   ========================================================= -->
   <main class="page-view" id="viewLeaderboard">
     <div class="leaderboard-container">
@@ -298,21 +353,22 @@
             <span>Hall of Fame & Leaderboard</span>
           </h1>
           <p style="color: var(--text-secondary); font-size: 13px; font-family: var(--font-mono); margin-top: 4px;">
-            Top 24-hour profitable traders and coin creators on the bonding curve.
+            Top 24-hour profitable traders, coin creators, and graduated tokens.
           </p>
         </div>
 
         <div class="leaderboard-tabs">
           <button class="leaderboard-tab-btn active" id="tabTopTraders">Top Traders</button>
           <button class="leaderboard-tab-btn" id="tabTopCreators">Top Creators</button>
+          <button class="leaderboard-tab-btn" id="tabGraduatedCoins">Graduated Coins</button>
         </div>
       </div>
 
       <table class="pump-table" style="background: var(--bg-card); border-radius: var(--radius-sm); overflow: hidden;">
-        <thead>
+        <thead id="leaderboardThead">
           <tr>
             <th>Rank</th>
-            <th>Trader / Creator</th>
+            <th>Trader</th>
             <th>24h Profit (SOL)</th>
             <th>24h Profit (USD)</th>
             <th>Win Rate</th>
@@ -320,56 +376,14 @@
           </tr>
         </thead>
         <tbody id="leaderboardTableBody">
-          <!-- Trader 1 -->
-          <tr>
-            <td><span class="rank-badge rank-1">1</span></td>
-            <td>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <img src="https://api.dicebear.com/7.x/identicon/svg?seed=top1" class="koth-creator-avatar" alt="Dev">
-                <span style="font-weight: 700; color: #fff;">0x88f...1a2</span>
-                <span style="background: var(--pump-green-dark); color: var(--pump-green); font-size: 10px; padding: 2px 6px; border-radius: 4px;">WHALE</span>
-              </div>
-            </td>
-            <td style="color: var(--pump-green); font-weight: 700;">+148.50 SOL</td>
-            <td style="color: var(--pump-green); font-weight: 700;">+$21,532.50</td>
-            <td>84.2%</td>
-            <td>142</td>
-          </tr>
-          <!-- Trader 2 -->
-          <tr>
-            <td><span class="rank-badge rank-2">2</span></td>
-            <td>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <img src="https://api.dicebear.com/7.x/identicon/svg?seed=top2" class="koth-creator-avatar" alt="Dev">
-                <span style="font-weight: 700; color: #fff;">0x42b...c91</span>
-              </div>
-            </td>
-            <td style="color: var(--pump-green); font-weight: 700;">+92.10 SOL</td>
-            <td style="color: var(--pump-green); font-weight: 700;">+$13,354.50</td>
-            <td>78.0%</td>
-            <td>98</td>
-          </tr>
-          <!-- Trader 3 -->
-          <tr>
-            <td><span class="rank-badge rank-3">3</span></td>
-            <td>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <img src="https://api.dicebear.com/7.x/identicon/svg?seed=top3" class="koth-creator-avatar" alt="Dev">
-                <span style="font-weight: 700; color: #fff;">0x91a...c01</span>
-              </div>
-            </td>
-            <td style="color: var(--pump-green); font-weight: 700;">+64.30 SOL</td>
-            <td style="color: var(--pump-green); font-weight: 700;">+$9,323.50</td>
-            <td>71.5%</td>
-            <td>64</td>
-          </tr>
+          <!-- Populated dynamically -->
         </tbody>
       </table>
     </div>
   </main>
 
   <!-- =========================================================
-       VIEW 4: PROFILE / PORTFOLIO PAGE
+       VIEW 5: PROFILE & PORTFOLIO PAGE
   ========================================================= -->
   <main class="page-view" id="viewProfile">
     <div class="profile-container">
@@ -392,6 +406,10 @@
               <div>$CESS Balance:</div>
               <strong id="profileCessBalance">250,000 $CESS</strong>
             </div>
+            <div class="profile-balance-item">
+              <div>Portfolio Value:</div>
+              <strong style="color: #fff;">$1,842.50</strong>
+            </div>
           </div>
         </div>
       </div>
@@ -404,7 +422,7 @@
       </div>
 
       <table class="pump-table" style="background: var(--bg-card); border-radius: var(--radius-sm);">
-        <thead>
+        <thead id="profileThead">
           <tr>
             <th>Coin</th>
             <th>Amount Held</th>
@@ -414,18 +432,7 @@
           </tr>
         </thead>
         <tbody id="profileHoldingsBody">
-          <tr>
-            <td>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100" style="width: 28px; height: 28px; border-radius: 4px;" alt="Cess">
-                <strong>$CESS (Cession)</strong>
-              </div>
-            </td>
-            <td>250,000</td>
-            <td>4.25 SOL</td>
-            <td style="color: var(--pump-green); font-weight: 700;">+1.45 SOL (+51.7%)</td>
-            <td><button class="preset-pill" onclick="window.launchpadManager.openTokenDetail('CESS')">trade &rarr;</button></td>
-          </tr>
+          <!-- Populated dynamically -->
         </tbody>
       </table>
     </div>
@@ -727,6 +734,38 @@
           <span style="font-size: 12px;">instant &rarr;</span>
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       SLIPPAGE CONFIGURATION MODAL
+  ========================================================= -->
+  <div class="modal-overlay-generic" id="slippageModal">
+    <div class="modal-box-pump" style="max-width: 380px;">
+      <div class="modal-header-row">
+        <span class="modal-title-text">set max slippage</span>
+        <button class="btn-close-modal" id="btnCloseSlippageModal">&times;</button>
+      </div>
+
+      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">
+        this is the maximum amount of slippage you are willing to accept when placing a trade.
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">
+        <button class="preset-pill" style="padding: 8px;" onclick="window.tradingManager.setSlippage(0.5)">0.5%</button>
+        <button class="preset-pill" style="padding: 8px;" onclick="window.tradingManager.setSlippage(1.0)">1.0%</button>
+        <button class="preset-pill" style="padding: 8px;" onclick="window.tradingManager.setSlippage(2.5)">2.5%</button>
+        <button class="preset-pill" style="padding: 8px;" onclick="window.tradingManager.setSlippage(5.0)">5.0%</button>
+      </div>
+
+      <div class="form-group-pump">
+        <label class="form-label-pump">custom slippage (%)</label>
+        <input type="number" id="customSlippageInput" class="form-input-pump" placeholder="e.g. 3.0" step="0.1">
+      </div>
+
+      <button class="btn-place-trade" style="width: 100%; margin-top: 10px;" id="btnSaveCustomSlippage">
+        save settings
+      </button>
     </div>
   </div>
 

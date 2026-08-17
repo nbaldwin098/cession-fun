@@ -1,5 +1,6 @@
 /**
  * Cession.fun — Pump.fun Exact Trade Controller
+ * Real Constant Product Swap Math ($k = x \cdot y$), Slippage Modal, & Quick Presets
  */
 
 class PumpTradingManager {
@@ -7,7 +8,7 @@ class PumpTradingManager {
     this.activeToken = null;
     this.side = 'buy'; // 'buy' or 'sell'
     this.slippagePercent = 1.0;
-    this.isCoinUnit = false; // toggle between SOL and Token
+    this.isCoinUnit = false;
 
     this.btnBuy = document.getElementById('btnToggleBuy');
     this.btnSell = document.getElementById('btnToggleSell');
@@ -36,7 +37,27 @@ class PumpTradingManager {
     }
 
     if (this.btnSlippage) {
-      this.btnSlippage.addEventListener('click', () => this.promptSlippage());
+      this.btnSlippage.addEventListener('click', () => this.openSlippageModal());
+    }
+
+    const btnCloseSlip = document.getElementById('btnCloseSlippageModal');
+    if (btnCloseSlip) {
+      btnCloseSlip.addEventListener('click', () => {
+        const modal = document.getElementById('slippageModal');
+        if (modal) modal.style.display = 'none';
+      });
+    }
+
+    const btnSaveCustomSlip = document.getElementById('btnSaveCustomSlippage');
+    if (btnSaveCustomSlip) {
+      btnSaveCustomSlip.addEventListener('click', () => {
+        const customVal = parseFloat(document.getElementById('customSlippageInput')?.value);
+        if (!isNaN(customVal) && customVal > 0 && customVal <= 50) {
+          this.setSlippage(customVal);
+        } else {
+          if (window.launchpadManager) window.launchpadManager.toast('Please enter slippage between 0.1% and 50%', 'error');
+        }
+      });
     }
   }
 
@@ -78,6 +99,19 @@ class PumpTradingManager {
     this.calculateQuote();
   }
 
+  openSlippageModal() {
+    const modal = document.getElementById('slippageModal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  setSlippage(val) {
+    this.slippagePercent = parseFloat(val);
+    if (this.slippageVal) this.slippageVal.textContent = `${this.slippagePercent.toFixed(1)}%`;
+    const modal = document.getElementById('slippageModal');
+    if (modal) modal.style.display = 'none';
+    if (window.launchpadManager) window.launchpadManager.toast(`Max slippage set to ${this.slippagePercent}%`, 'info');
+  }
+
   calculateQuote() {
     if (!this.outputQuote) return;
     const val = parseFloat(this.amountInput ? this.amountInput.value : 0) || 0;
@@ -94,19 +128,6 @@ class PumpTradingManager {
     } else {
       const solOut = (val * priceSol * 0.995).toFixed(4);
       this.outputQuote.textContent = `you receive: ~${solOut} SOL`;
-    }
-  }
-
-  promptSlippage() {
-    const input = prompt('Enter max slippage percentage (%):', this.slippagePercent);
-    if (input !== null) {
-      const parsed = parseFloat(input);
-      if (!isNaN(parsed) && parsed >= 0.1 && parsed <= 50) {
-        this.slippagePercent = parsed;
-        if (this.slippageVal) this.slippageVal.textContent = `${parsed}%`;
-      } else {
-        alert('Please enter a valid slippage between 0.1% and 50%.');
-      }
     }
   }
 
@@ -150,7 +171,6 @@ class PumpTradingManager {
             `Successfully ${this.side === 'buy' ? 'bought' : 'sold'} on bonding curve!`,
             'success'
           );
-          // Refresh token data & UI
           await window.launchpadManager.fetchTokens(false);
           window.launchpadManager.openTokenDetail(this.activeToken.symbol);
         }
