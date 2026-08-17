@@ -34,6 +34,10 @@ app.use('/api', apiRoutes);
 const cleanRoutes = [
   '/',
   '/launchpad',
+  '/bundles',
+  '/bundles/:id',
+  '/collections',
+  '/collections/:id',
   '/leaderboard',
   '/rankings',
   '/new-coins',

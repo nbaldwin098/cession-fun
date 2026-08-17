@@ -42,9 +42,7 @@ class BondingCurveEngine {
     if (this.tokens.size === 0) {
       this.initSampleTokens();
     }
-    if (this.collections.size === 0) {
-      this.initSampleCollections();
-    }
+    this.initSampleCollections();
     this.initSampleTraders();
   }
 
@@ -78,33 +76,106 @@ class BondingCurveEngine {
   initSampleCollections() {
     const sampleBaskets = [
       {
+        id: "col_moonshot_alpha",
+        name: "Solana Apex Moonshot Pack",
+        symbol: "APEX",
+        description: "The top trending alpha meme coins on Solana & Base with verified anti-rug parameters.",
+        creator: "0x88f4b23a109823",
+        imageUrl: "https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?w=500",
+        createdAt: Date.now() - (86400000 * 2),
+        roi24h: 342.8,
+        isTopPerformer: true,
+        tokens: [
+          { symbol: "USER", weight: 40, name: "The Random Bull" },
+          { symbol: "BILLY", weight: 30, name: "Billycoin" },
+          { symbol: "FLY", weight: 30, name: "Minecraft Fruit Fly" }
+        ],
+        totalVolumeUsd: 420800,
+        buyersCount: 312
+      },
+      {
         id: "col_ai_sovereign",
-        name: "AI & Sovereign Intelligence Basket",
+        name: "AI & Autonomous Agent Basket",
         symbol: "AISYS",
-        description: "Curated portfolio of the highest velocity AI and sovereign governance tokens on Base and Solana.",
+        description: "Curated portfolio of high-velocity AI agent tokens and sovereign liquidity engines.",
         creator: "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
         imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=200",
         createdAt: Date.now() - 86400000,
+        roi24h: 185.2,
+        isTopPerformer: true,
         tokens: [
-          { symbol: "CESS", weight: 40, name: "Cession Sovereign Network" },
-          { symbol: "SOLMEME", weight: 30, name: "Solana Speed Bull" },
-          { symbol: "BDOGE", weight: 30, name: "Based Doge" }
+          { symbol: "CESS", weight: 40, name: "Cession Sovereign Engine" },
+          { symbol: "FLY", weight: 30, name: "Minecraft Fruit Fly" },
+          { symbol: "USER", weight: 30, name: "The Random Bull" }
         ],
         totalVolumeUsd: 254800,
-        buyersCount: 142
+        buyersCount: 198
+      },
+      {
+        id: "col_animal_cult",
+        name: "Animal Meme Cult Index",
+        symbol: "ANIMALZ",
+        description: "The internet's favorite viral animal mascots combined into a single 1-click swap basket.",
+        creator: "topfloor_b",
+        imageUrl: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500",
+        createdAt: Date.now() - (86400000 * 3),
+        roi24h: 94.6,
+        isTopPerformer: true,
+        tokens: [
+          { symbol: "BILLY", weight: 50, name: "Billycoin" },
+          { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." }
+        ],
+        totalVolumeUsd: 184500,
+        buyersCount: 145
+      },
+      {
+        id: "col_deep_dip_pack",
+        name: "Contrarian Dip Hunters (Oversold Gem Basket)",
+        symbol: "DIPBUY",
+        description: "Deep discount basket of temporarily oversold meme coins for aggressive dip-buyers seeking 10x mean reversion.",
+        creator: "fltnarwhal",
+        imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500",
+        createdAt: Date.now() - (86400000 * 4),
+        roi24h: -48.2,
+        isWorstPerformer: true,
+        tokens: [
+          { symbol: "r/", weight: 40, name: "r/" },
+          { symbol: "ORANGEPENG", weight: 30, name: "The Orange Backpack Peng..." },
+          { symbol: "FLY", weight: 30, name: "Minecraft Fruit Fly" }
+        ],
+        totalVolumeUsd: 89500,
+        buyersCount: 92
+      },
+      {
+        id: "col_bleeding_edge_dip",
+        name: "High Volatility Dip Scalper",
+        symbol: "BOTTOM",
+        description: "Extreme drawdown coins at historical curve support. High risk, high reward bottom hunting.",
+        creator: "botfn",
+        imageUrl: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500",
+        createdAt: Date.now() - (86400000 * 5),
+        roi24h: -31.0,
+        isWorstPerformer: true,
+        tokens: [
+          { symbol: "r/", weight: 60, name: "r/" },
+          { symbol: "USER", weight: 40, name: "The Random Bull" }
+        ],
+        totalVolumeUsd: 52100,
+        buyersCount: 64
       },
       {
         id: "col_generational_stacks",
-        name: "Generational Wealth & Family Stacks",
+        name: "Baldwin Sovereign Family Stack",
         symbol: "FAMBASKET",
         description: "Curated long-term micro-endowments with 1% Anti-Dump protection and Diamond Staking yield.",
         creator: "0x091A4B8290CC189108a798129034",
         imageUrl: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200",
         createdAt: Date.now() - 172800000,
+        roi24h: 42.5,
+        isTopPerformer: false,
         tokens: [
-          { symbol: "FAMSTACK", weight: 50, name: "Baldwin Sovereign Family Stack" },
-          { symbol: "CESS", weight: 30, name: "Cession Sovereign Network" },
-          { symbol: "BDOGE", weight: 20, name: "Based Doge" }
+          { symbol: "CESS", weight: 50, name: "Cession Sovereign Engine" },
+          { symbol: "BILLY", weight: 50, name: "Billycoin" }
         ],
         totalVolumeUsd: 112000,
         buyersCount: 68
@@ -676,11 +747,13 @@ class BondingCurveEngine {
     return Array.from(this.collections.values()).map(col => {
       let aggregateMcap = 0;
       let aggregateVolume = 0;
+      let calculatedRoi = 0;
       const enrichedTokens = col.tokens.map(item => {
         const t = this.tokens.get(item.symbol.toUpperCase());
         if (t) {
           aggregateMcap += (t.marketCapUsd || 0) * (item.weight / 100);
           aggregateVolume += (t.volume24hUsd || 0) * (item.weight / 100);
+          calculatedRoi += (t.change24hPercent || 0) * (item.weight / 100);
           return {
             ...item,
             name: t.name,
@@ -692,13 +765,26 @@ class BondingCurveEngine {
         return item;
       });
 
+      const roi24h = col.roi24h !== undefined ? col.roi24h : Number(calculatedRoi.toFixed(1));
+
       return {
         ...col,
+        roi24h,
         tokens: enrichedTokens,
-        aggregateMcapUsd: Math.round(aggregateMcap),
-        aggregateVolumeUsd: Math.round(aggregateVolume)
+        aggregateMcapUsd: Math.round(aggregateMcap) || 58000,
+        aggregateVolumeUsd: Math.round(aggregateVolume) || (col.totalVolumeUsd || 15000)
       };
     });
+  }
+
+  getTopPerformingBundles(limit = 5) {
+    const cols = this.getAllCollections();
+    return cols.sort((a, b) => (b.roi24h || 0) - (a.roi24h || 0)).slice(0, limit);
+  }
+
+  getWorstPerformingBundles(limit = 5) {
+    const cols = this.getAllCollections();
+    return cols.sort((a, b) => (a.roi24h || 0) - (b.roi24h || 0)).slice(0, limit);
   }
 
   getCollection(id) {

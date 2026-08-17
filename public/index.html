@@ -69,9 +69,9 @@
           <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
         </button>
 
-        <!-- 6. Livestreams -->
-        <button class="rail-icon-btn" id="railNavLive" title="Livestreams">
-          <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+        <!-- 6. Bundles (cession.fun/bundles) -->
+        <button class="rail-icon-btn" id="railNavBundles" title="Bundles (cession.fun/bundles)">
+          <svg viewBox="0 0 24 24"><path d="M12 2L1 7l11 5 9-4.09V17h2V7L12 2zm-7.64 9.18L2 12l10 5 10-5-2.36-.82L12 15.18l-7.64-4zm0 4.5L2 16.5 12 21.5l10-5-2.36-.82L12 19.68l-7.64-4z"/></svg>
         </button>
 
         <!-- 7. Support -->
@@ -297,20 +297,64 @@
       </main>
 
       <!-- =========================================================
-           VIEW: LIVESTREAMS PAGE
+           VIEW: BUNDLES & BASKETS PAGE (cession.fun/bundles)
       ========================================================= -->
-      <main class="page-view" id="viewLive">
+      <main class="page-view" id="viewBundles">
         <section class="explore-section">
-          <div class="section-header-row">
-            <h2 class="section-title">🔴 Live Creator Streams</h2>
-            <button class="btn-signin-mint" id="btnOpenStreamStudio">📹 Go Live</button>
+          <div class="section-header-row" style="flex-wrap: wrap; gap: 14px;">
+            <div>
+              <h2 class="section-title">📦 Token Bundles & Curated Baskets</h2>
+              <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                Create custom meme baskets, share direct bundle links (<code>cession.fun/bundles/your-bundle</code>), or 1-click buy entire portfolios.
+              </div>
+            </div>
+            <button class="btn-signin-mint" id="btnOpenCreateBundleModal" style="display: flex; align-items: center; gap: 6px;">
+              <span>+ Create Bundle</span>
+            </button>
           </div>
-          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">
-            Watch coin creators stream live on the bonding curve. Buy and chat directly from the stream.
-          </p>
 
-          <div class="explore-coins-grid" id="livestreamsGrid">
-            <!-- Livestream cards rendered dynamically -->
+          <!-- Performance Leaderboard Matrices: Top vs Worst (Dip Hunters) -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin: 24px 0;">
+            <!-- TOP PERFORMERS -->
+            <div style="background: var(--bg-card); border: 1px solid rgba(134, 239, 172, 0.25); border-radius: var(--radius-md); padding: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border-card); padding-bottom: 10px;">
+                <div style="font-weight: 800; font-size: 14px; color: var(--pump-mint); display: flex; align-items: center; gap: 6px;">
+                  <span>🚀 Top Performing Bundles (24h)</span>
+                </div>
+                <span style="font-size: 11px; color: var(--pump-mint); font-weight: 700; font-family: var(--font-mono); background: rgba(134, 239, 172, 0.1); padding: 2px 8px; border-radius: 12px;">HIGHEST GAINS</span>
+              </div>
+              <div id="topBundlesList" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <!-- WORST PERFORMERS (DIP HUNTERS) -->
+            <div style="background: var(--bg-card); border: 1px solid rgba(248, 113, 113, 0.25); border-radius: var(--radius-md); padding: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border-card); padding-bottom: 10px;">
+                <div style="font-weight: 800; font-size: 14px; color: var(--accent-red); display: flex; align-items: center; gap: 6px;">
+                  <span>📉 Dip Hunter Packs (Worst Performing)</span>
+                </div>
+                <span style="font-size: 11px; color: var(--accent-red); font-weight: 700; font-family: var(--font-mono); background: rgba(248, 113, 113, 0.1); padding: 2px 8px; border-radius: 12px;">BUY THE DIP</span>
+              </div>
+              <div id="worstBundlesList" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- All Community Bundles Explorer -->
+          <div class="section-header-row" style="margin-top: 32px; border-top: 1px solid var(--border-card); padding-top: 24px;">
+            <div>
+              <h3 style="font-size: 16px; font-weight: 700; color: #fff;">All Community Bundles</h3>
+              <span style="font-size: 12px; color: var(--text-muted);">Explore user-created baskets or share your own</span>
+            </div>
+            <div class="search-input-wrapper" style="width: 280px;">
+              <input type="text" class="top-search-input" id="bundleSearchInput" placeholder="Filter bundles or coins...">
+            </div>
+          </div>
+
+          <div class="explore-coins-grid" id="allBundlesGrid" style="margin-top: 16px;">
+            <!-- Rendered dynamically -->
           </div>
         </section>
       </main>
@@ -625,6 +669,105 @@
         <input type="number" id="customSlippageInput" class="form-input-pump" placeholder="3.0" step="0.1">
       </div>
       <button class="btn-signin-mint" id="btnSaveCustomSlippage" style="width: 100%; margin-top: 8px;">Save</button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       CREATE BUNDLE MODAL
+  ========================================================= -->
+  <div class="modal-overlay-generic" id="createBundleModal">
+    <div class="modal-box-pump" style="max-width: 520px;">
+      <div class="modal-header-row">
+        <span class="modal-title-text">📦 Create Token Bundle / Basket</span>
+        <button class="btn-close-modal" id="btnCloseCreateBundleModal">&times;</button>
+      </div>
+
+      <form id="createBundleForm">
+        <div class="form-group-pump">
+          <label class="form-label-pump">Bundle Name</label>
+          <input type="text" id="bundleNameInput" class="form-input-pump" placeholder="e.g. Solana Apex Alpha Pack" required>
+        </div>
+
+        <div class="form-group-pump">
+          <label class="form-label-pump">Bundle Symbol / Ticker</label>
+          <input type="text" id="bundleSymbolInput" class="form-input-pump" placeholder="e.g. APEX" required>
+        </div>
+
+        <div class="form-group-pump">
+          <label class="form-label-pump">Description</label>
+          <textarea id="bundleDescInput" class="form-textarea-pump" placeholder="Curated basket of the strongest momentum tokens..." required></textarea>
+        </div>
+
+        <div class="form-group-pump">
+          <label class="form-label-pump">Cover Image URL</label>
+          <input type="url" id="bundleImageInput" class="form-input-pump" placeholder="https://..." value="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=500">
+        </div>
+
+        <!-- Token Allocation Matrix -->
+        <div class="form-group-pump">
+          <label class="form-label-pump" style="display: flex; justify-content: space-between;">
+            <span>Token Allocations (Must Sum to 100%)</span>
+            <span id="bundleWeightTotal" style="color: var(--pump-mint); font-weight: 700;">100%</span>
+          </label>
+          <div id="bundleTokensAllocationList" style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" class="form-input-pump token-alloc-sym" style="flex: 2;" placeholder="Symbol (e.g. USER)" value="USER" required>
+              <input type="number" class="form-input-pump token-alloc-pct" style="flex: 1;" placeholder="%" value="40" min="1" max="100" required>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" class="form-input-pump token-alloc-sym" style="flex: 2;" placeholder="Symbol (e.g. BILLY)" value="BILLY" required>
+              <input type="number" class="form-input-pump token-alloc-pct" style="flex: 1;" placeholder="%" value="30" min="1" max="100" required>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" class="form-input-pump token-alloc-sym" style="flex: 2;" placeholder="Symbol (e.g. FLY)" value="FLY" required>
+              <input type="number" class="form-input-pump token-alloc-pct" style="flex: 1;" placeholder="%" value="30" min="1" max="100" required>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-signin-mint" style="width: 100%; margin-top: 10px; padding: 12px; font-weight: 700;">
+          Deploy & Share Bundle (cession.fun/bundles)
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       1-CLICK BUY BUNDLE MODAL
+  ========================================================= -->
+  <div class="modal-overlay-generic" id="buyBundleModal">
+    <div class="modal-box-pump" style="max-width: 460px;">
+      <div class="modal-header-row">
+        <span class="modal-title-text" id="buyBundleModalTitle">⚡ 1-Click Buy Bundle</span>
+        <button class="btn-close-modal" id="btnCloseBuyBundleModal">&times;</button>
+      </div>
+
+      <div id="buyBundleSummaryBox" style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
+        <!-- Bundle summary loaded dynamically -->
+      </div>
+
+      <div class="form-group-pump">
+        <label class="form-label-pump">SOL Amount to Invest</label>
+        <div style="background-color: var(--bg-input); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;">
+          <input type="number" id="buyBundleSolAmount" style="background: transparent; border: none; font-size: 18px; font-weight: 700; color: #fff; width: 100%; outline: none;" placeholder="1.0" value="1.0" step="any">
+          <span style="font-weight: 700; color: var(--pump-mint); font-family: var(--font-mono);">SOL</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 6px; margin-bottom: 14px;">
+        <button class="cat-pill-btn" onclick="document.getElementById('buyBundleSolAmount').value=0.2">0.2 SOL</button>
+        <button class="cat-pill-btn" onclick="document.getElementById('buyBundleSolAmount').value=0.5">0.5 SOL</button>
+        <button class="cat-pill-btn" onclick="document.getElementById('buyBundleSolAmount').value=1.0">1.0 SOL</button>
+        <button class="cat-pill-btn" onclick="document.getElementById('buyBundleSolAmount').value=5.0">5.0 SOL</button>
+      </div>
+
+      <div id="buyBundleExecutionBreakdown" style="font-size: 11px; color: var(--text-secondary); font-family: var(--font-mono); margin-bottom: 14px; background: rgba(134, 239, 172, 0.05); padding: 10px; border-radius: var(--radius-sm); border: 1px dashed rgba(134, 239, 172, 0.2);">
+        Atomic 1-click execution across all underlying bonding curves with single transaction fee.
+      </div>
+
+      <button class="btn-signin-mint" id="btnConfirmBuyBundle" style="width: 100%; padding: 12px; font-weight: 800; font-size: 14px;">
+        ⚡ Execute 1-Click Bundle Purchase
+      </button>
     </div>
   </div>
 

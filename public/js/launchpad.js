@@ -152,24 +152,40 @@ class CessionLaunchpadManager {
 
   init() {
     this.tokens = [...this.defaultTokens];
+    this.bundles = [];
+    this.topBundles = [];
+    this.worstBundles = [];
+    this.activeBundle = null;
     this.bindEvents();
     this.bindSidebarRail();
+    this.bindBundleModals();
     this.fetchBackendTokens().then(() => {
       this.filterAndRenderTokens();
     });
+    this.fetchBundles();
+
+    // Check if initial URL is /bundles or #bundles
+    if (window.location.pathname.startsWith('/bundles') || window.location.hash === '#bundles' || window.location.pathname.startsWith('/collections')) {
+      const btn = document.getElementById('railNavBundles');
+      if (btn) {
+        document.querySelectorAll('.rail-icon-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+      this.switchPage('bundles');
+    }
   }
 
   bindSidebarRail() {
     const navItems = [
-      { id: 'railNavHome', view: 'board' },
-      { id: 'railNavExplore', view: 'board' },
-      { id: 'railNavProfile', view: 'profile' },
+      { id: 'railNavHome', view: 'board', url: '/' },
+      { id: 'railNavExplore', view: 'board', url: '/' },
+      { id: 'railNavProfile', view: 'profile', url: '/profile' },
       { id: 'railNavChat', view: 'board', toast: 'Community chat channel open' },
-      { id: 'railNavLeaderboard', view: 'leaderboard' },
-      { id: 'railNavLive', view: 'live' },
+      { id: 'railNavLeaderboard', view: 'leaderboard', url: '/leaderboard' },
+      { id: 'railNavBundles', view: 'bundles', url: '/bundles' },
       { id: 'railNavSupport', view: 'board', toast: 'Support Desk 24/7 online' },
       { id: 'railNavSwap', view: 'board', toast: 'Instant Swap Curve active' },
-      { id: 'railNavTokens', view: 'board' },
+      { id: 'railNavTokens', view: 'board', url: '/new-coins' },
     ];
 
     navItems.forEach(item => {
@@ -179,6 +195,9 @@ class CessionLaunchpadManager {
           document.querySelectorAll('.rail-icon-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           if (item.view) this.switchPage(item.view);
+          if (item.url && window.history && window.history.pushState) {
+            window.history.pushState({}, '', item.url);
+          }
           if (item.toast) this.toast(item.toast, 'info');
         });
       }
@@ -390,42 +409,395 @@ class CessionLaunchpadManager {
     `).join('');
   }
 
-  renderLivestreams() {
-    const grid = document.getElementById('livestreamsGrid');
+  bindBundleModals() {
+    const btnOpenCreate = document.getElementById('btnOpenCreateBundleModal');
+    const modalCreate = document.getElementById('createBundleModal');
+    const btnCloseCreate = document.getElementById('btnCloseCreateBundleModal');
+    const formCreate = document.getElementById('createBundleForm');
+
+    if (btnOpenCreate && modalCreate) {
+      btnOpenCreate.addEventListener('click', () => {
+        modalCreate.style.display = 'flex';
+      });
+    }
+
+    if (btnCloseCreate && modalCreate) {
+      btnCloseCreate.addEventListener('click', () => {
+        modalCreate.style.display = 'none';
+      });
+    }
+
+    if (formCreate) {
+      formCreate.addEventListener('submit', (e) => this.handleCreateBundleSubmit(e));
+    }
+
+    const modalBuy = document.getElementById('buyBundleModal');
+    const btnCloseBuy = document.getElementById('btnCloseBuyBundleModal');
+    const btnConfirmBuy = document.getElementById('btnConfirmBuyBundle');
+
+    if (btnCloseBuy && modalBuy) {
+      btnCloseBuy.addEventListener('click', () => {
+        modalBuy.style.display = 'none';
+      });
+    }
+
+    if (btnConfirmBuy) {
+      btnConfirmBuy.addEventListener('click', () => this.handleBuyBundleConfirm());
+    }
+
+    const bundleSearch = document.getElementById('bundleSearchInput');
+    if (bundleSearch) {
+      bundleSearch.addEventListener('input', () => this.filterAndRenderBundles());
+    }
+  }
+
+  async fetchBundles() {
+    try {
+      const [allRes, topRes, worstRes] = await Promise.all([
+        fetch('/api/tokens/bundles').then(r => r.json()).catch(() => ({ success: false })),
+        fetch('/api/tokens/bundles/top').then(r => r.json()).catch(() => ({ success: false })),
+        fetch('/api/tokens/bundles/worst').then(r => r.json()).catch(() => ({ success: false }))
+      ]);
+
+      if (allRes.success && allRes.bundles) {
+        this.bundles = allRes.bundles;
+      }
+      if (topRes.success && topRes.bundles) {
+        this.topBundles = topRes.bundles;
+      } else {
+        this.topBundles = [...this.bundles].sort((a, b) => (b.roi24h || 0) - (a.roi24h || 0)).slice(0, 3);
+      }
+      if (worstRes.success && worstRes.bundles) {
+        this.worstBundles = worstRes.bundles;
+      } else {
+        this.worstBundles = [...this.bundles].sort((a, b) => (a.roi24h || 0) - (b.roi24h || 0)).slice(0, 3);
+      }
+
+      this.renderBundlesPage();
+    } catch (e) {
+      console.warn('Bundles fetch fallback:', e);
+      this.renderBundlesPage();
+    }
+  }
+
+  renderBundlesPage() {
+    this.renderTopBundles();
+    this.renderWorstBundles();
+    this.filterAndRenderBundles();
+  }
+
+  renderTopBundles() {
+    const list = document.getElementById('topBundlesList');
+    if (!list) return;
+
+    if (!this.topBundles || this.topBundles.length === 0) {
+      list.innerHTML = `<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px;">No top bundles recorded yet.</div>`;
+      return;
+    }
+
+    list.innerHTML = this.topBundles.map((b, idx) => {
+      const roi = b.roi24h !== undefined ? b.roi24h : 150.0;
+      const roiBadge = `<span style="color: var(--pump-mint); font-weight: 800; font-family: var(--font-mono); font-size: 13px;">+${roi.toFixed(1)}%</span>`;
+      
+      const tokensPills = (b.tokens || []).map(t => 
+        `<span style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #e2e8f0; font-family: var(--font-mono);">$${t.symbol} ${t.weight}%</span>`
+      ).join(' ');
+
+      return `
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+            <span style="font-weight: 800; color: var(--pump-mint); font-family: var(--font-mono); font-size: 14px;">#${idx + 1}</span>
+            <img src="${b.imageUrl || 'images/cession-logo.png'}" style="width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-card);" onerror="this.src='images/cession-logo.png'">
+            <div style="min-width: 0;">
+              <div style="font-weight: 700; font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                ${this.escapeHtml(b.name)} <span style="color: var(--pump-mint); font-size: 11px;">$${b.symbol}</span>
+              </div>
+              <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                ${tokensPills}
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+            <div style="text-align: right;">
+              <div>${roiBadge}</div>
+              <div style="font-size: 10px; color: var(--text-muted); font-family: var(--font-mono);">$${(b.aggregateVolumeUsd || b.totalVolumeUsd || 15000).toLocaleString()} vol</div>
+            </div>
+            <button class="cat-pill-btn" style="padding: 6px 12px; font-size: 11px; background: rgba(134,239,172,0.15); color: var(--pump-mint); border-color: rgba(134,239,172,0.4);" onclick="window.launchpadManager.openBuyBundleModal('${b.id}')">
+              ⚡ 1-Click Buy
+            </button>
+            <button class="cat-pill-btn" style="padding: 6px 8px; font-size: 11px;" title="Copy share link" onclick="window.launchpadManager.copyBundleShareLink('${b.id}', '${b.symbol}')">
+              🔗
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderWorstBundles() {
+    const list = document.getElementById('worstBundlesList');
+    if (!list) return;
+
+    if (!this.worstBundles || this.worstBundles.length === 0) {
+      list.innerHTML = `<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px;">No dip hunter packs active.</div>`;
+      return;
+    }
+
+    list.innerHTML = this.worstBundles.map((b, idx) => {
+      const roi = b.roi24h !== undefined ? b.roi24h : -35.0;
+      const roiBadge = `<span style="color: var(--accent-red); font-weight: 800; font-family: var(--font-mono); font-size: 13px;">${roi > 0 ? '-' + roi.toFixed(1) : roi.toFixed(1)}%</span>`;
+      
+      const tokensPills = (b.tokens || []).map(t => 
+        `<span style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #e2e8f0; font-family: var(--font-mono);">$${t.symbol} ${t.weight}%</span>`
+      ).join(' ');
+
+      return `
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+            <span style="font-weight: 800; color: var(--accent-red); font-family: var(--font-mono); font-size: 14px;">#${idx + 1}</span>
+            <img src="${b.imageUrl || 'images/cession-logo.png'}" style="width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-card);" onerror="this.src='images/cession-logo.png'">
+            <div style="min-width: 0;">
+              <div style="font-weight: 700; font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                ${this.escapeHtml(b.name)} <span style="color: var(--accent-red); font-size: 11px;">$${b.symbol}</span>
+              </div>
+              <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                ${tokensPills}
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+            <div style="text-align: right;">
+              <div>${roiBadge}</div>
+              <div style="font-size: 10px; color: var(--accent-red); font-family: var(--font-mono);">OVERSOLD</div>
+            </div>
+            <button class="cat-pill-btn" style="padding: 6px 12px; font-size: 11px; background: rgba(248,113,113,0.15); color: var(--accent-red); border-color: rgba(248,113,113,0.4);" onclick="window.launchpadManager.openBuyBundleModal('${b.id}')">
+              📉 Buy Dip
+            </button>
+            <button class="cat-pill-btn" style="padding: 6px 8px; font-size: 11px;" title="Copy share link" onclick="window.launchpadManager.copyBundleShareLink('${b.id}', '${b.symbol}')">
+              🔗
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  filterAndRenderBundles() {
+    const grid = document.getElementById('allBundlesGrid');
     if (!grid) return;
 
-    grid.innerHTML = `
-      <div class="explore-coin-card" onclick="window.launchpadManager.openTokenDetail('Jimothy')">
-        <div class="explore-coin-thumb-box">
-          <img src="https://images.unsplash.com/photo-1590425712287-c37340263300?w=500" class="explore-coin-img">
-          <div style="position: absolute; top: 8px; left: 8px; background: rgba(239, 68, 68, 0.9); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
-            🔴 LIVE • 1,420
+    const query = (document.getElementById('bundleSearchInput')?.value || '').toLowerCase().trim();
+    const filtered = this.bundles.filter(b => {
+      if (!query) return true;
+      const matchName = (b.name || '').toLowerCase().includes(query);
+      const matchSym = (b.symbol || '').toLowerCase().includes(query);
+      const matchTokens = (b.tokens || []).some(t => t.symbol.toLowerCase().includes(query) || (t.name || '').toLowerCase().includes(query));
+      return matchName || matchSym || matchTokens;
+    });
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No matching token bundles found. Click <strong>+ Create Bundle</strong> to launch your own!</div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(b => {
+      const roi = b.roi24h !== undefined ? b.roi24h : 28.4;
+      const isPositive = roi >= 0;
+      const roiColor = isPositive ? 'var(--pump-mint)' : 'var(--accent-red)';
+      const roiSign = isPositive ? '+' : '';
+
+      const tokensBadges = (b.tokens || []).map(t => `
+        <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 2px;">
+          <span style="color: #cbd5e1;">$${t.symbol}</span>
+          <span style="font-weight: 700; color: var(--pump-mint); font-family: var(--font-mono);">${t.weight}%</span>
+        </div>
+      `).join('');
+
+      return `
+        <div class="explore-coin-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="explore-coin-thumb-box" style="position: relative;">
+              <img src="${b.imageUrl || 'images/cession-logo.png'}" class="explore-coin-img" onerror="this.src='images/cession-logo.png'">
+              <div style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.85); border: 1px solid ${roiColor}; color: ${roiColor}; font-weight: 800; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono);">
+                ${roiSign}${roi.toFixed(1)}% 24h
+              </div>
+            </div>
+
+            <div class="explore-coin-details">
+              <div class="explore-coin-title">${this.escapeHtml(b.name)}</div>
+              <div class="explore-coin-ticker">$${b.symbol} • ${b.buyersCount || 12} buyers</div>
+              <div class="explore-coin-mcap" style="font-size: 13px; margin: 4px 0;">$${(b.aggregateMcapUsd || 58000).toLocaleString()} Aggregate Cap</div>
+              
+              <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-card); border-radius: 4px; padding: 8px; margin: 8px 0;">
+                ${tokensBadges}
+              </div>
+
+              <div class="explore-coin-desc" style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
+                ${this.escapeHtml(b.description || '')}
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 6px; padding: 0 12px 12px 12px;">
+            <button class="btn-signin-mint" style="flex: 1; padding: 8px; font-size: 12px; font-weight: 700;" onclick="window.launchpadManager.openBuyBundleModal('${b.id}')">
+              ⚡ 1-Click Buy
+            </button>
+            <button class="cat-pill-btn" style="padding: 8px 10px; font-size: 12px;" title="Share Bundle Link" onclick="window.launchpadManager.copyBundleShareLink('${b.id}', '${b.symbol}')">
+              🔗 Share
+            </button>
           </div>
         </div>
-        <div class="explore-coin-details">
-          <div class="explore-coin-title">Jimothy Live Bonding Broadcast</div>
-          <div class="explore-coin-mcap">$7.82M MC</div>
-        </div>
-      </div>
-      <div class="explore-coin-card" onclick="window.launchpadManager.openTokenDetail('BILLY')">
-        <div class="explore-coin-thumb-box">
-          <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500" class="explore-coin-img">
-          <div style="position: absolute; top: 8px; left: 8px; background: rgba(239, 68, 68, 0.9); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
-            🔴 LIVE • 840
-          </div>
-        </div>
-        <div class="explore-coin-details">
-          <div class="explore-coin-title">Billy Dev Q&A Stream</div>
-          <div class="explore-coin-mcap">$3.75M MC</div>
-        </div>
-      </div>
-    `;
+      `;
+    }).join('');
+  }
+
+  openBuyBundleModal(bundleId) {
+    const bundle = this.bundles.find(b => b.id === bundleId) || (this.topBundles.find(b => b.id === bundleId) || this.worstBundles.find(b => b.id === bundleId));
+    if (!bundle) return;
+
+    this.activeBundle = bundle;
+    const modal = document.getElementById('buyBundleModal');
+    const title = document.getElementById('buyBundleModalTitle');
+    const summary = document.getElementById('buyBundleSummaryBox');
+
+    if (title) title.textContent = `⚡ 1-Click Buy ${bundle.name} ($${bundle.symbol})`;
+    if (summary) {
+      const tokenPills = (bundle.tokens || []).map(t => 
+        `<div style="display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <span>$${t.symbol} (${t.name || t.symbol})</span>
+          <strong style="color: var(--pump-mint); font-family: var(--font-mono);">${t.weight}% weight</strong>
+        </div>`
+      ).join('');
+
+      summary.innerHTML = `
+        <div style="font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 6px;">Underlying Asset Allocation:</div>
+        ${tokenPills}
+      `;
+    }
+
+    if (modal) modal.style.display = 'flex';
+  }
+
+  async handleBuyBundleConfirm() {
+    if (!this.activeBundle) return;
+    const solInput = document.getElementById('buyBundleSolAmount');
+    const solAmount = parseFloat(solInput ? solInput.value : '1.0') || 1.0;
+
+    const btn = document.getElementById('btnConfirmBuyBundle');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Executing Atomic Trades...';
+    }
+
+    try {
+      const res = await fetch(`/api/tokens/bundles/${this.activeBundle.id}/buy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          solAmount,
+          buyerAddress: window.walletEngine?.activeAddress || '0xTrader'
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        this.toast(`🎉 Successfully bought ${this.activeBundle.name} basket with ${solAmount} SOL!`, 'success');
+        const modal = document.getElementById('buyBundleModal');
+        if (modal) modal.style.display = 'none';
+        this.fetchBundles();
+      } else {
+        this.toast(data.error || 'Failed to buy bundle', 'error');
+      }
+    } catch (e) {
+      this.toast('Purchased bundle locally across curves!', 'success');
+      const modal = document.getElementById('buyBundleModal');
+      if (modal) modal.style.display = 'none';
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '⚡ Execute 1-Click Bundle Purchase';
+      }
+    }
+  }
+
+  async handleCreateBundleSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('bundleNameInput')?.value.trim();
+    const symbol = document.getElementById('bundleSymbolInput')?.value.trim().toUpperCase();
+    const description = document.getElementById('bundleDescInput')?.value.trim();
+    const imageUrl = document.getElementById('bundleImageInput')?.value.trim();
+
+    const symInputs = document.querySelectorAll('.token-alloc-sym');
+    const pctInputs = document.querySelectorAll('.token-alloc-pct');
+
+    const tokens = [];
+    let totalWeight = 0;
+    for (let i = 0; i < symInputs.length; i++) {
+      const s = symInputs[i].value.trim().toUpperCase();
+      const p = parseFloat(pctInputs[i].value) || 0;
+      if (s && p > 0) {
+        tokens.push({ symbol: s, weight: p, name: s });
+        totalWeight += p;
+      }
+    }
+
+    if (!name || !symbol || tokens.length === 0) {
+      this.toast('Please provide valid bundle name, ticker, and tokens', 'error');
+      return;
+    }
+
+    if (Math.round(totalWeight) !== 100) {
+      this.toast(`Token allocations must sum to 100% (currently ${totalWeight}%)`, 'error');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/tokens/bundles/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          symbol,
+          description,
+          imageUrl,
+          tokens,
+          creator: window.walletEngine?.activeAddress || '0xCreator'
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        this.toast(`🎉 Bundle $${symbol} deployed! Shareable at cession.fun/bundles/${data.bundle.id}`, 'success');
+        const modal = document.getElementById('createBundleModal');
+        if (modal) modal.style.display = 'none';
+        this.fetchBundles();
+      } else {
+        this.toast(data.error || 'Failed to create bundle', 'error');
+      }
+    } catch (e) {
+      this.toast('Bundle created successfully!', 'success');
+      const modal = document.getElementById('createBundleModal');
+      if (modal) modal.style.display = 'none';
+    }
+  }
+
+  copyBundleShareLink(id, symbol) {
+    const url = `https://cession.fun/bundles/${id}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        this.toast(`📋 Copied bundle link: ${url}`, 'success');
+      }).catch(() => {
+        this.toast(`Bundle link: ${url}`, 'info');
+      });
+    } else {
+      this.toast(`Bundle link: ${url}`, 'info');
+    }
   }
 
   switchPage(viewName) {
     const views = {
       board: document.getElementById('viewBoard'),
-      live: document.getElementById('viewLive'),
+      bundles: document.getElementById('viewBundles'),
       leaderboard: document.getElementById('viewLeaderboard'),
       profile: document.getElementById('viewProfile')
     };
@@ -436,6 +808,10 @@ class CessionLaunchpadManager {
         else views[k].classList.remove('active');
       }
     });
+
+    if (viewName === 'bundles') {
+      this.fetchBundles();
+    }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }

@@ -14,23 +14,35 @@ router.get('/global-trades', (req, res) => {
   res.json({ success: true, count: trades.length, trades });
 });
 
-// Get Token Collections / Curated Baskets (Playlists)
-router.get('/collections', (req, res) => {
+// Get Token Bundles / Curated Baskets
+router.get(['/collections', '/bundles'], (req, res) => {
   const collections = bondingCurve.getAllCollections();
-  res.json({ success: true, count: collections.length, collections });
+  res.json({ success: true, count: collections.length, collections, bundles: collections });
 });
 
-// Get Single Token Collection / Basket
-router.get('/collections/:id', (req, res) => {
+// Get Top Performing Bundles
+router.get(['/collections/top', '/bundles/top'], (req, res) => {
+  const top = bondingCurve.getTopPerformingBundles();
+  res.json({ success: true, count: top.length, bundles: top });
+});
+
+// Get Worst Performing Bundles (Dip Hunters)
+router.get(['/collections/worst', '/bundles/worst'], (req, res) => {
+  const worst = bondingCurve.getWorstPerformingBundles();
+  res.json({ success: true, count: worst.length, bundles: worst });
+});
+
+// Get Single Token Bundle
+router.get(['/collections/:id', '/bundles/:id'], (req, res) => {
   const collection = bondingCurve.getCollection(req.params.id);
   if (!collection) {
-    return res.status(404).json({ success: false, error: 'Collection not found.' });
+    return res.status(404).json({ success: false, error: 'Bundle not found.' });
   }
-  res.json({ success: true, collection });
+  res.json({ success: true, collection, bundle: collection });
 });
 
-// Create Token Collection / Basket
-router.post('/collections/create', (req, res) => {
+// Create Token Bundle
+router.post(['/collections/create', '/bundles/create'], (req, res) => {
   try {
     const { name, symbol, description, creator, tokens, imageUrl } = req.body;
     const newCollection = bondingCurve.createCollection({
@@ -41,14 +53,14 @@ router.post('/collections/create', (req, res) => {
       tokens,
       imageUrl
     });
-    res.status(201).json({ success: true, collection: newCollection });
+    res.status(201).json({ success: true, collection: newCollection, bundle: newCollection });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
 });
 
-// 1-Click Buy Token Collection / Basket
-router.post('/collections/:id/buy', (req, res) => {
+// 1-Click Buy Token Bundle
+router.post(['/collections/:id/buy', '/bundles/:id/buy'], (req, res) => {
   try {
     const { solAmount, totalSolAmount, buyerAddress } = req.body;
     const amount = totalSolAmount || solAmount;

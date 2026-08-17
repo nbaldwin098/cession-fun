@@ -698,55 +698,54 @@
   "collections": [
     {
       "id": "col_ai_sovereign",
-      "name": "AI & Sovereign Intelligence Basket",
+      "name": "AI & Autonomous Agent Basket",
       "symbol": "AISYS",
-      "description": "Curated portfolio of the highest velocity AI and sovereign governance tokens on Base and Solana.",
+      "description": "Curated portfolio of high-velocity AI agent tokens and sovereign liquidity engines.",
       "creator": "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
       "imageUrl": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=200",
-      "createdAt": 1786889108173,
+      "createdAt": 1786890970774,
+      "roi24h": 185.2,
+      "isTopPerformer": true,
       "tokens": [
         {
           "symbol": "CESS",
           "weight": 40,
-          "name": "Cession Sovereign Network"
+          "name": "Cession Sovereign Engine"
         },
         {
-          "symbol": "SOLMEME",
+          "symbol": "FLY",
           "weight": 30,
-          "name": "Solana Speed Bull"
+          "name": "Minecraft Fruit Fly"
         },
         {
-          "symbol": "BDOGE",
+          "symbol": "USER",
           "weight": 30,
-          "name": "Based Doge"
+          "name": "The Random Bull"
         }
       ],
-      "totalVolumeUsd": 254905,
-      "buyersCount": 143
+      "totalVolumeUsd": 254800,
+      "buyersCount": 198
     },
     {
       "id": "col_generational_stacks",
-      "name": "Generational Wealth & Family Stacks",
+      "name": "Baldwin Sovereign Family Stack",
       "symbol": "FAMBASKET",
       "description": "Curated long-term micro-endowments with 1% Anti-Dump protection and Diamond Staking yield.",
       "creator": "0x091A4B8290CC189108a798129034",
       "imageUrl": "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200",
-      "createdAt": 1786802708173,
+      "createdAt": 1786804570774,
+      "roi24h": 42.5,
+      "isTopPerformer": false,
       "tokens": [
         {
-          "symbol": "FAMSTACK",
-          "weight": 50,
-          "name": "Baldwin Sovereign Family Stack"
-        },
-        {
           "symbol": "CESS",
-          "weight": 30,
-          "name": "Cession Sovereign Network"
+          "weight": 50,
+          "name": "Cession Sovereign Engine"
         },
         {
-          "symbol": "BDOGE",
-          "weight": 20,
-          "name": "Based Doge"
+          "symbol": "BILLY",
+          "weight": 50,
+          "name": "Billycoin"
         }
       ],
       "totalVolumeUsd": 112000,
@@ -770,6 +769,139 @@
           "symbol": "TDOGE",
           "weight": 40,
           "name": "TDOGE"
+        }
+      ],
+      "totalVolumeUsd": 0,
+      "buyersCount": 1
+    },
+    {
+      "id": "col_moonshot_alpha",
+      "name": "Solana Apex Moonshot Pack",
+      "symbol": "APEX",
+      "description": "The top trending alpha meme coins on Solana & Base with verified anti-rug parameters.",
+      "creator": "0x88f4b23a109823",
+      "imageUrl": "https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?w=500",
+      "createdAt": 1786804570774,
+      "roi24h": 342.8,
+      "isTopPerformer": true,
+      "tokens": [
+        {
+          "symbol": "USER",
+          "weight": 40,
+          "name": "The Random Bull"
+        },
+        {
+          "symbol": "BILLY",
+          "weight": 30,
+          "name": "Billycoin"
+        },
+        {
+          "symbol": "FLY",
+          "weight": 30,
+          "name": "Minecraft Fruit Fly"
+        }
+      ],
+      "totalVolumeUsd": 420800,
+      "buyersCount": 313
+    },
+    {
+      "id": "col_animal_cult",
+      "name": "Animal Meme Cult Index",
+      "symbol": "ANIMALZ",
+      "description": "The internet's favorite viral animal mascots combined into a single 1-click swap basket.",
+      "creator": "topfloor_b",
+      "imageUrl": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500",
+      "createdAt": 1786718170774,
+      "roi24h": 94.6,
+      "isTopPerformer": true,
+      "tokens": [
+        {
+          "symbol": "BILLY",
+          "weight": 50,
+          "name": "Billycoin"
+        },
+        {
+          "symbol": "ORANGEPENG",
+          "weight": 50,
+          "name": "The Orange Backpack Peng..."
+        }
+      ],
+      "totalVolumeUsd": 184500,
+      "buyersCount": 145
+    },
+    {
+      "id": "col_deep_dip_pack",
+      "name": "Contrarian Dip Hunters (Oversold Gem Basket)",
+      "symbol": "DIPBUY",
+      "description": "Deep discount basket of temporarily oversold meme coins for aggressive dip-buyers seeking 10x mean reversion.",
+      "creator": "fltnarwhal",
+      "imageUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500",
+      "createdAt": 1786631770774,
+      "roi24h": -48.2,
+      "isWorstPerformer": true,
+      "tokens": [
+        {
+          "symbol": "r/",
+          "weight": 40,
+          "name": "r/"
+        },
+        {
+          "symbol": "ORANGEPENG",
+          "weight": 30,
+          "name": "The Orange Backpack Peng..."
+        },
+        {
+          "symbol": "FLY",
+          "weight": 30,
+          "name": "Minecraft Fruit Fly"
+        }
+      ],
+      "totalVolumeUsd": 89500,
+      "buyersCount": 92
+    },
+    {
+      "id": "col_bleeding_edge_dip",
+      "name": "High Volatility Dip Scalper",
+      "symbol": "BOTTOM",
+      "description": "Extreme drawdown coins at historical curve support. High risk, high reward bottom hunting.",
+      "creator": "botfn",
+      "imageUrl": "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500",
+      "createdAt": 1786545370774,
+      "roi24h": -31,
+      "isWorstPerformer": true,
+      "tokens": [
+        {
+          "symbol": "r/",
+          "weight": 60,
+          "name": "r/"
+        },
+        {
+          "symbol": "USER",
+          "weight": 40,
+          "name": "The Random Bull"
+        }
+      ],
+      "totalVolumeUsd": 52100,
+      "buyersCount": 64
+    },
+    {
+      "id": "col_msxc7c10",
+      "name": "Ultra Alpha Pack",
+      "symbol": "UALPHA",
+      "description": "Community alpha bundle",
+      "creator": "0xCreator",
+      "imageUrl": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=200",
+      "createdAt": 1786977396900,
+      "tokens": [
+        {
+          "symbol": "USER",
+          "weight": 50,
+          "name": "USER"
+        },
+        {
+          "symbol": "BILLY",
+          "weight": 50,
+          "name": "BILLY"
         }
       ],
       "totalVolumeUsd": 0,
