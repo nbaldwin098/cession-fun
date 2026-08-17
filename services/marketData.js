@@ -168,11 +168,44 @@ class TruePriceOracle {
 
   /**
    * Return all cryptocurrencies with optional category filter and query search
+   * Automatically merges freshly minted tokens from Cession bonding curves
    */
   getAllCryptos(category = 'all', search = '') {
-    let list = [...this.cryptoCatalog];
+    let userCryptos = [];
+    try {
+      const bondingCurve = require('./bondingCurve');
+      const tokens = bondingCurve.getAllTokens(true);
+      if (Array.isArray(tokens)) {
+        userCryptos = tokens.map((t, idx) => {
+          const metrics = this.calculateTokenMarketMetrics(t);
+          return {
+            rank: 100 + idx,
+            symbol: t.symbol,
+            name: t.name,
+            category: 'cession',
+            icon: t.imageUrl || '/images/cession-logo.png',
+            price: metrics ? metrics.currentPriceUsd : (t.currentPriceUsd || 0.0001),
+            change24h: metrics ? metrics.change24h : 0.0,
+            high24h: metrics ? metrics.high24hUsd : ((t.currentPriceUsd || 0.0001) * 1.15),
+            low24h: metrics ? metrics.low24hUsd : ((t.currentPriceUsd || 0.0001) * 0.85),
+            volume24h: t.volume24hUsd || 0,
+            marketCap: metrics ? metrics.marketCapUsd : (t.marketCapUsd || 5000),
+            isCessionToken: true,
+            sparkline: [0.00008, 0.0001, 0.00012, metrics ? metrics.currentPriceUsd : 0.00015]
+          };
+        });
+      }
+    } catch (e) {
+      userCryptos = [];
+    }
+
+    let list = [...userCryptos, ...this.cryptoCatalog];
     if (category && category !== 'all') {
-      list = list.filter(c => c.category === category);
+      if (category === 'cession') {
+        list = list.filter(c => c.category === 'cession' || c.symbol === 'CESS');
+      } else {
+        list = list.filter(c => c.category === category);
+      }
     }
     if (search && search.trim() !== '') {
       const q = search.trim().toLowerCase();

@@ -148,17 +148,26 @@ class CalabiExchange {
   }
 
   /* ==========================================================================
-     CANVAS CANDLESTICK ENGINE (GLITCH-FREE & HIGH-DPI SCALED)
+     CANVAS CANDLESTICK ENGINE (GLITCH-FREE, HIGH-DPI & FLICKER-FREE)
      ========================================================================== */
   initCanvas() {
     this.canvas = document.getElementById('calabiCandleCanvas');
     if (!this.canvas) return;
-    this.ctx = this.canvas.getContext('2d');
+    this.ctx = this.canvas.getContext('2d', { alpha: false });
 
-    window.addEventListener('resize', () => {
-      this.resizeCanvas();
-      this.drawChart();
-    });
+    // Handle responsive resize cleanly
+    if (window.ResizeObserver && this.canvas.parentElement) {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.resizeCanvas();
+        this.drawChart();
+      });
+      this.resizeObserver.observe(this.canvas.parentElement);
+    } else {
+      window.addEventListener('resize', () => {
+        this.resizeCanvas();
+        this.drawChart();
+      });
+    }
 
     this.canvas.addEventListener('mousemove', (e) => {
       const rect = this.canvas.getBoundingClientRect();
@@ -169,6 +178,7 @@ class CalabiExchange {
 
     this.canvas.addEventListener('mouseleave', () => {
       this.hoverCandle = null;
+      this.hoverMouse = null;
       this.drawChart();
     });
 
@@ -176,17 +186,19 @@ class CalabiExchange {
   }
 
   resizeCanvas() {
-    if (!this.canvas) return;
+    if (!this.canvas || !this.ctx) return;
     const container = this.canvas.parentElement;
+    if (!container) return;
     const dpr = window.devicePixelRatio || 1;
-    const w = container.clientWidth || 800;
-    const h = container.clientHeight || 450;
+    const w = Math.max(320, container.clientWidth || 800);
+    const h = Math.max(260, container.clientHeight || 450);
 
-    this.canvas.width = w * dpr;
-    this.canvas.height = h * dpr;
+    this.canvas.width = Math.floor(w * dpr);
+    this.canvas.height = Math.floor(h * dpr);
     this.canvas.style.width = `${w}px`;
     this.canvas.style.height = `${h}px`;
 
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.scale(dpr, dpr);
     this.canvasWidth = w;
     this.canvasHeight = h;
@@ -230,21 +242,26 @@ class CalabiExchange {
   }
 
   drawChart() {
-    if (!this.ctx || !this.candles || this.candles.length === 0) return;
-
+    if (!this.ctx || !this.canvas) return;
     const ctx = this.ctx;
-    const w = this.canvasWidth;
-    const h = this.canvasHeight;
-    const paddingRight = 65;
-    const paddingBottom = 30;
-    const chartW = w - paddingRight;
-    const chartH = h - paddingBottom;
+    const w = this.canvasWidth || 800;
+    const h = this.canvasHeight || 450;
+    const paddingRight = 75;
+    const paddingBottom = 26;
+    const chartW = Math.max(100, w - paddingRight);
+    const chartH = Math.max(100, h - paddingBottom);
 
-    ctx.clearRect(0, 0, w, h);
-
-    // Background
+    // Background fill (pure crisp white)
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, w, h);
+
+    if (!this.candles || this.candles.length === 0) {
+      ctx.fillStyle = '#64748B';
+      ctx.font = '14px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Loading real-time candlestick data for ${this.activeSymbol}...`, w / 2, h / 2);
+      return;
+    }
 
     // Min / Max calculation
     let minPrice = Infinity;
@@ -257,15 +274,20 @@ class CalabiExchange {
       if (c.volume > maxVol) maxVol = c.volume;
     });
 
-    // 8% margin
-    const range = maxPrice - minPrice || 1;
-    minPrice -= range * 0.08;
-    maxPrice += range * 0.08;
-    const priceSpan = maxPrice - minPrice;
+    if (minPrice === Infinity || maxPrice === -Infinity) {
+      minPrice = (this.currentPrice || 100) * 0.9;
+      maxPrice = (this.currentPrice || 100) * 1.1;
+    }
+
+    // 8% dynamic padding
+    const range = maxPrice - minPrice || (minPrice * 0.1) || 1;
+    minPrice = Math.max(0, minPrice - range * 0.08);
+    maxPrice = maxPrice + range * 0.08;
+    const priceSpan = maxPrice - minPrice || 1;
 
     const getY = (price) => chartH - ((price - minPrice) / priceSpan) * chartH;
 
-    // Gridlines & Price Tags
+    // Gridlines & Price Scale
     ctx.strokeStyle = '#F1F5F9';
     ctx.lineWidth = 1;
     ctx.fillStyle = '#64748B';
@@ -275,33 +297,44 @@ class CalabiExchange {
     const steps = 5;
     for (let i = 0; i <= steps; i++) {
       const p = minPrice + (priceSpan / steps) * i;
-      const y = getY(p);
+      const y = Math.floor(getY(p)) + 0.5;
 
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(chartW, y);
       ctx.stroke();
 
-      ctx.fillText(p > 10 ? p.toFixed(2) : p > 0.01 ? p.toFixed(4) : p.toFixed(6), chartW + 8, y + 3);
+      const label = p >= 1000 ? `$${p.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        : p >= 1 ? `$${p.toFixed(2)}`
+        : p >= 0.01 ? `$${p.toFixed(4)}`
+        : `$${p.toFixed(6)}`;
+      ctx.fillText(label, chartW + 6, y + 3);
     }
 
-    // Volume Histogram (Lower 20%)
+    // Time Axis Separator Line
+    ctx.strokeStyle = '#E2E8F0';
+    ctx.beginPath();
+    ctx.moveTo(0, chartH + 0.5);
+    ctx.lineTo(chartW, chartH + 0.5);
+    ctx.stroke();
+
+    // Volume Histogram (Lower 18% of chart)
     const candleCount = this.candles.length;
-    const candleW = Math.max(2, (chartW / candleCount) * 0.65);
     const spacing = chartW / candleCount;
+    const candleW = Math.max(1.5, spacing * 0.68);
 
     this.candles.forEach((c, idx) => {
       const x = idx * spacing + spacing / 2;
       const isUp = c.close >= c.open;
       const volH = (c.volume / (maxVol || 1)) * (chartH * 0.18);
 
-      ctx.fillStyle = isUp ? 'rgba(5, 150, 105, 0.18)' : 'rgba(220, 38, 38, 0.18)';
-      ctx.fillRect(x - candleW / 2, chartH - volH, candleW, volH);
+      ctx.fillStyle = isUp ? 'rgba(5, 150, 105, 0.16)' : 'rgba(220, 38, 38, 0.16)';
+      ctx.fillRect(Math.floor(x - candleW / 2), Math.floor(chartH - volH), Math.ceil(candleW), Math.ceil(volH));
     });
 
     // Candlesticks (Wicks & Bodies)
     this.candles.forEach((c, idx) => {
-      const x = idx * spacing + spacing / 2;
+      const x = Math.floor(idx * spacing + spacing / 2) + 0.5;
       const isUp = c.close >= c.open;
       const color = isUp ? '#059669' : '#DC2626';
 
@@ -314,37 +347,39 @@ class CalabiExchange {
       ctx.strokeStyle = color;
       ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.moveTo(x, yHigh);
-      ctx.lineTo(x, yLow);
+      ctx.moveTo(x, Math.floor(yHigh));
+      ctx.lineTo(x, Math.floor(yLow));
       ctx.stroke();
 
       // Body
       ctx.fillStyle = color;
       const bodyY = Math.min(yOpen, yClose);
       const bodyH = Math.max(2, Math.abs(yClose - yOpen));
-      ctx.fillRect(x - candleW / 2, bodyY, candleW, bodyH);
+      ctx.fillRect(Math.floor(x - candleW / 2), Math.floor(bodyY), Math.ceil(candleW), Math.ceil(bodyH));
     });
 
-    // EMA 20 (Royal Blue Smooth Line)
-    ctx.strokeStyle = '#1E50FF';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    let ema = this.candles[0].close;
-    const k = 2 / (20 + 1);
+    // EMA 20 (Smooth Royal Blue Overlay)
+    if (this.candles.length >= 2) {
+      ctx.strokeStyle = '#1E50FF';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      let ema = this.candles[0].close;
+      const k = 2 / (20 + 1);
 
-    this.candles.forEach((c, idx) => {
-      ema = c.close * k + ema * (1 - k);
-      const x = idx * spacing + spacing / 2;
-      const y = getY(ema);
-      if (idx === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
+      this.candles.forEach((c, idx) => {
+        ema = c.close * k + ema * (1 - k);
+        const x = idx * spacing + spacing / 2;
+        const y = getY(ema);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
 
-    // Current Price Line
+    // Current Price Dashed Reference Line
     const lastCandle = this.candles[this.candles.length - 1];
     if (lastCandle) {
-      const currentY = getY(lastCandle.close);
+      const currentY = Math.floor(getY(lastCandle.close)) + 0.5;
       ctx.strokeStyle = '#1E50FF';
       ctx.setLineDash([4, 4]);
       ctx.beginPath();
@@ -353,50 +388,67 @@ class CalabiExchange {
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Current Price Label Badge
+      // Current Price Badge on Right Margin
       ctx.fillStyle = '#1E50FF';
-      ctx.fillRect(chartW + 2, currentY - 10, 58, 20);
+      ctx.fillRect(chartW + 2, currentY - 10, 70, 20);
       ctx.fillStyle = '#FFFFFF';
       ctx.font = 'bold 10px JetBrains Mono, monospace';
-      ctx.fillText(lastCandle.close.toFixed(2), chartW + 6, currentY + 3);
+      ctx.textAlign = 'left';
+      const pStr = lastCandle.close >= 1000 ? lastCandle.close.toFixed(2) : lastCandle.close >= 1 ? lastCandle.close.toFixed(2) : lastCandle.close.toFixed(4);
+      ctx.fillText(pStr, chartW + 6, currentY + 4);
+    }
+
+    // Crosshair & Inspection Tooltip
+    if (this.hoverCandle && this.hoverMouse) {
+      const { mouseX, mouseY } = this.hoverMouse;
+
+      ctx.strokeStyle = 'rgba(100, 116, 139, 0.45)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+
+      // Vertical crosshair
+      ctx.beginPath();
+      ctx.moveTo(Math.floor(mouseX) + 0.5, 0);
+      ctx.lineTo(Math.floor(mouseX) + 0.5, chartH);
+      ctx.stroke();
+
+      // Horizontal crosshair
+      ctx.beginPath();
+      ctx.moveTo(0, Math.floor(mouseY) + 0.5);
+      ctx.lineTo(chartW, Math.floor(mouseY) + 0.5);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Top Floating Bar with OHLCV data
+      const c = this.hoverCandle;
+      const dateStr = new Date(c.time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.fillRect(6, 4, chartW - 12, 22);
+      ctx.fillStyle = '#0F172A';
+      ctx.font = 'bold 11px JetBrains Mono, monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(
+        `O: ${c.open.toFixed(2)}  H: ${c.high.toFixed(2)}  L: ${c.low.toFixed(2)}  C: ${c.close.toFixed(2)}  Vol: ${c.volume.toLocaleString()}  [${dateStr}]`,
+        12,
+        18
+      );
     }
   }
 
   handleCanvasHover(mouseX, mouseY) {
     if (!this.candles || this.candles.length === 0) return;
-    const chartW = this.canvasWidth - 65;
+    const chartW = this.canvasWidth - 75;
     const spacing = chartW / this.candles.length;
     const idx = Math.floor(mouseX / spacing);
 
     if (idx >= 0 && idx < this.candles.length) {
       this.hoverCandle = this.candles[idx];
-      this.drawChart();
-
-      // Draw Crosshair
-      const ctx = this.ctx;
-      ctx.strokeStyle = 'rgba(100, 116, 139, 0.4)';
-      ctx.setLineDash([2, 2]);
-
-      // Vertical line
-      ctx.beginPath();
-      ctx.moveTo(mouseX, 0);
-      ctx.lineTo(mouseX, this.canvasHeight - 30);
-      ctx.stroke();
-
-      // Horizontal line
-      ctx.beginPath();
-      ctx.moveTo(0, mouseY);
-      ctx.lineTo(chartW, mouseY);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Top Info Banner
-      const c = this.hoverCandle;
-      const dateStr = new Date(c.time * 1000).toLocaleTimeString();
-      ctx.fillStyle = '#0F172A';
-      ctx.font = 'bold 11px JetBrains Mono, monospace';
-      ctx.fillText(`O: ${c.open.toFixed(2)}  H: ${c.high.toFixed(2)}  L: ${c.low.toFixed(2)}  C: ${c.close.toFixed(2)}  Vol: ${c.volume}  [${dateStr}]`, 12, 18);
+      this.hoverMouse = { mouseX, mouseY };
+    } else {
+      this.hoverCandle = null;
+      this.hoverMouse = null;
     }
+    this.drawChart();
   }
 
   /* ==========================================================================
@@ -493,15 +545,28 @@ class CalabiExchange {
     const pairLow = document.getElementById('terminalLow24h');
     const pairVol = document.getElementById('terminalVol24h');
 
+    const formatPrice = (p) => {
+      if (!p && p !== 0) return '$0.00';
+      if (p >= 1000) return `$${p.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      if (p >= 1) return `$${p.toFixed(2)}`;
+      if (p >= 0.01) return `$${p.toFixed(4)}`;
+      return `$${p.toFixed(6)}`;
+    };
+
     if (pairTitle) pairTitle.textContent = this.activePair;
-    if (pairPrice) pairPrice.textContent = `$${coin.price > 1 ? coin.price.toLocaleString(undefined, { minimumFractionDigits: 2 }) : coin.price}`;
+    if (pairPrice) pairPrice.textContent = formatPrice(coin.price);
     if (pairChange) {
       pairChange.textContent = `${coin.change24h >= 0 ? '+' : ''}${coin.change24h}%`;
       pairChange.className = `stat-card-sub ${coin.change24h >= 0 ? 'up' : 'down'}`;
     }
-    if (pairHigh) pairHigh.textContent = `$${coin.high24h}`;
-    if (pairLow) pairLow.textContent = `$${coin.low24h}`;
-    if (pairVol) pairVol.textContent = `$${(coin.volume24h / 1e6).toFixed(1)}M`;
+    if (pairHigh) pairHigh.textContent = formatPrice(coin.high24h);
+    if (pairLow) pairLow.textContent = formatPrice(coin.low24h);
+    if (pairVol) {
+      const vol = coin.volume24h || 0;
+      pairVol.textContent = vol >= 1e9 ? `$${(vol / 1e9).toFixed(2)}B`
+        : vol >= 1e6 ? `$${(vol / 1e6).toFixed(1)}M`
+        : `$${vol.toLocaleString()}`;
+    }
 
     // Order Entry unit
     const unitEl = document.getElementById('orderAmountUnit');
