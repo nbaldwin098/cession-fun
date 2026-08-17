@@ -1,51 +1,60 @@
 /* =========================================================
-   PUMP.FUN 2026 EXACT MODERN REPLICA STYLESHEET
-   Exact Layout matching the screenshot:
-   - Left Vertical Icon Rail with Pill Logo & [ + ]
-   - Top Notification Banner ("Trade faster. Pump is better on mobile. ›")
-   - Top Navbar with ‹ ›, Search with ⌘K, + Create, and Mint "Sign in"
-   - "Trending now" Hero Carousel with glowing badges
-   - "Explore coins" with Category Pills (Movers, Mayhem, New, Charities, Live, Market cap, Agents, Oldest, Last trade)
-   - Grid / Table Layout Switcher & Filter Funnel
-   - Modern Coin Cards with embedded green SVG Sparkline Graphs
-   - Bottom-Right "We value your privacy" Cookie Banner
-   - Full Token Detail & Trading Modal
+   CESSION PROTOCOL - WHITE & ROYAL BLUE DESIGN SYSTEM
+   Brand Identity: Crisp White, Royal Blue (#1E50FF), Slate Navy (#0F172A), Muted Slate (#64748B)
+   Exact Template & Layout Preserved:
+   - Left Vertical Text Navigation Rail
+   - Top Notification Banner
+   - Top Navbar with History, Search, Create Coin, Create Wallet, Deposit, and Sign In
+   - Clean Hero & Protocol Architecture
+   - Explore Coins & Curated Token Bundles Matrix
+   - Grid / Table Layout Switcher
+   - Sovereign 0% Crypto Exchange & Spot Swap Terminal
+   - Token Details Modal & Multi-Chain HD Vault Modals
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Modern Pump.fun Dark Palette */
-  --bg-app: #0c0f17;
-  --bg-sidebar: #090c13;
-  --bg-card: #131824;
-  --bg-card-hover: #1a2232;
-  --bg-input: #121824;
-  --bg-pill: #1a2233;
-  --bg-pill-hover: #222d42;
-  --bg-modal: #131824;
-  --bg-banner: #11151f;
+  /* White & Royal Blue Palette */
+  --bg-app: #f8fafc;
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --bg-input: #f8fafc;
+  --bg-pill: #f1f5f9;
+  --bg-pill-hover: #e2e8f0;
+  --bg-modal: #ffffff;
+  --bg-banner: #eff6ff;
 
-  /* Brand Accents */
-  --pump-mint: #86efac;
-  --pump-mint-hover: #4ade80;
-  --pump-mint-dark: #14532d;
-  --pump-mint-glow: rgba(134, 239, 172, 0.2);
-  --accent-red: #f87171;
-  --accent-orange: #fb923c;
-  --accent-purple: #c084fc;
-  --accent-pink: #f472b6;
+  /* Brand Accents (Royal Blue & Secondary) */
+  --pump-mint: #1e50ff; /* Primary Royal Blue */
+  --pump-mint-hover: #003cd6;
+  --pump-mint-dark: #1e3a8a;
+  --pump-mint-glow: rgba(30, 80, 255, 0.2);
+  --accent-blue: #1e50ff;
+  --accent-light-blue: #3b82f6;
+  --accent-red: #dc2626;
+  --accent-green: #16a34a;
+  --accent-orange: #ea580c;
+  --accent-purple: #7c3aed;
+  --accent-pink: #db2777;
 
   /* Borders & Dividers */
-  --border-subtle: #1e2638;
-  --border-card: #232d42;
-  --border-active: #86efac;
+  --border-subtle: #e2e8f0;
+  --border-card: #e2e8f0;
+  --border-active: #1e50ff;
 
   /* Typography */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-mint: #86efac;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-mint: #1e50ff;
+  --text-on-accent: #ffffff;
+
+  /* Shadows for White Theme */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
 
   /* Fonts */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -85,7 +94,7 @@ body {
   background: var(--bg-app);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-subtle);
+  background: #cbd5e1;
   border-radius: var(--radius-xs);
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -105,103 +114,101 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 
 /* Left Vertical Sidebar Rail */
 .sidebar-rail {
-  width: 58px;
+  width: 90px;
   background-color: var(--bg-sidebar);
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 0;
+  padding: 16px 6px;
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   z-index: 200;
+  box-shadow: var(--shadow-sm);
 }
 
 .rail-top-logo {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--pump-mint);
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+  margin-bottom: 20px;
   cursor: pointer;
-}
-
-.rail-top-logo svg {
-  width: 24px;
-  height: 24px;
-  fill: var(--pump-mint);
+  text-align: center;
 }
 
 .rail-icons-stack {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   flex: 1;
   width: 100%;
 }
 
 .rail-icon-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-sm);
+  width: 100%;
+  height: 36px;
+  border-radius: var(--radius-xs);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   transition: all 0.15s ease;
-  position: relative;
   cursor: pointer;
-}
-
-.rail-icon-btn svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
+  text-decoration: none;
+  border: 1px solid transparent;
 }
 
 .rail-icon-btn:hover {
-  color: #fff;
+  color: var(--text-primary);
   background-color: var(--bg-pill);
+  border-color: var(--border-card);
 }
 
 .rail-icon-btn.active {
   background-color: var(--pump-mint);
-  color: #0c0f17;
-  font-weight: 700;
-}
-
-.rail-icon-btn.active svg {
-  fill: #0c0f17;
+  color: #ffffff;
+  font-weight: 800;
+  border-color: var(--pump-mint);
+  box-shadow: 0 2px 8px var(--pump-mint-glow);
 }
 
 .rail-create-btn {
-  width: 36px;
+  width: 100%;
   height: 36px;
   background-color: var(--pump-mint);
-  color: #0c0f17;
-  border-radius: var(--radius-sm);
+  color: #ffffff;
+  border-radius: var(--radius-xs);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 11px;
   font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   cursor: pointer;
   margin-top: auto;
   transition: all 0.15s ease;
+  box-shadow: 0 2px 8px var(--pump-mint-glow);
 }
 
 .rail-create-btn:hover {
   background-color: var(--pump-mint-hover);
-  transform: scale(1.06);
+  transform: scale(1.02);
 }
 
 /* Main Content Area */
 .main-viewport {
-  margin-left: 58px;
+  margin-left: 90px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -213,38 +220,40 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
    TOP NOTIFICATION BANNER
 ========================================================= */
 .top-notice-banner {
-  background-color: #080b11;
-  border-bottom: 1px solid var(--border-subtle);
+  background-color: #eff6ff;
+  border-bottom: 1px solid #dbeafe;
   padding: 8px 16px;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: #1e40af;
   position: relative;
 }
 
 .top-notice-link {
-  color: #fff;
+  color: var(--pump-mint);
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
 }
 .top-notice-link:hover {
-  color: var(--pump-mint);
+  color: var(--pump-mint-hover);
+  text-decoration: underline;
 }
 
 .top-notice-close {
   position: absolute;
   right: 16px;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
+  font-weight: 600;
 }
 .top-notice-close:hover {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 /* =========================================================
@@ -256,11 +265,12 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   justify-content: space-between;
   padding: 12px 24px;
   border-bottom: 1px solid var(--border-subtle);
-  background-color: var(--bg-app);
+  background-color: var(--bg-sidebar);
   gap: 16px;
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: var(--shadow-sm);
 }
 
 .nav-left-group {
@@ -278,8 +288,8 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 }
 
 .nav-chevron-btn {
-  width: 32px;
   height: 32px;
+  padding: 0 10px;
   background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
@@ -287,12 +297,15 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
-  font-size: 16px;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 .nav-chevron-btn:hover {
-  color: #fff;
+  color: var(--text-primary);
   border-color: var(--border-card);
+  background-color: var(--bg-pill);
 }
 
 .nav-search-wrapper {
@@ -304,22 +317,25 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   padding: 6px 12px;
   flex: 1;
   gap: 8px;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .nav-search-wrapper:focus-within {
   border-color: var(--pump-mint);
+  box-shadow: 0 0 0 3px rgba(30, 80, 255, 0.1);
+  background-color: #ffffff;
 }
 
 .nav-search-icon {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .nav-search-input {
   background: transparent;
   border: none;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 13px;
   width: 100%;
   outline: none;
@@ -329,7 +345,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 }
 
 .nav-shortcut-kbd {
-  background-color: var(--bg-card);
+  background-color: var(--bg-pill);
   border: 1px solid var(--border-subtle);
   color: var(--text-muted);
   font-size: 10px;
@@ -340,11 +356,12 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 
 .nav-trash-btn {
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
+  font-weight: 600;
 }
 .nav-trash-btn:hover {
-  color: #fff;
+  color: var(--accent-red);
 }
 
 .nav-right-group {
@@ -356,7 +373,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 .btn-create-coin {
   background-color: var(--bg-card);
   border: 1px solid var(--border-card);
-  color: #fff;
+  color: var(--text-primary);
   font-size: 13px;
   font-weight: 600;
   padding: 8px 16px;
@@ -368,29 +385,31 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   transition: all 0.15s ease;
 }
 .btn-create-coin:hover {
-  background-color: var(--bg-card-hover);
+  background-color: #eff6ff;
   border-color: var(--pump-mint);
+  color: var(--pump-mint);
 }
 
 .btn-signin-mint {
   background-color: var(--pump-mint);
-  color: #0c0f17;
+  color: #ffffff;
   font-size: 13px;
   font-weight: 700;
   padding: 8px 18px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.15s ease;
+  box-shadow: 0 2px 8px var(--pump-mint-glow);
 }
 .btn-signin-mint:hover {
   background-color: var(--pump-mint-hover);
-  box-shadow: 0 0 14px var(--pump-mint-glow);
+  box-shadow: 0 4px 14px var(--pump-mint-glow);
 }
 
 .wallet-connected-pill {
-  background-color: var(--bg-card);
+  background-color: #ffffff;
   border: 1px solid var(--border-card);
-  color: #fff;
+  color: var(--text-primary);
   font-family: var(--font-mono);
   font-size: 13px;
   padding: 6px 14px;
@@ -399,6 +418,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   align-items: center;
   gap: 10px;
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
 }
 .wallet-connected-pill .balance {
   color: var(--pump-mint);
@@ -422,7 +442,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 .section-title {
   font-size: 18px;
   font-weight: 800;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .carousel-nav-btns {
@@ -444,8 +464,9 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   cursor: pointer;
 }
 .carousel-arrow-btn:hover {
-  color: #fff;
+  color: var(--text-primary);
   border-color: var(--border-card);
+  background-color: var(--bg-pill);
 }
 
 .trending-cards-row {
@@ -474,19 +495,21 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   transition: all 0.15s ease;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-sm);
 }
 
 .trending-card:hover {
   border-color: var(--pump-mint);
   transform: translateY(-2px);
   background-color: var(--bg-card-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .trending-thumb-wrapper {
   width: 100%;
   height: 150px;
   position: relative;
-  background-color: #090c12;
+  background-color: #f1f5f9;
   overflow: hidden;
 }
 
@@ -509,7 +532,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 
 .trending-name-row {
   position: absolute;
-  bottom: -22px; /* fallback */
+  bottom: -22px;
 }
 
 .trending-body {
@@ -522,7 +545,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 .trending-title-line {
   font-size: 13px;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -585,14 +608,16 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 
 .cat-pill-btn:hover {
   background-color: var(--bg-pill-hover);
-  color: #fff;
+  color: var(--text-primary);
+  border-color: #cbd5e1;
 }
 
 .cat-pill-btn.active {
   background-color: var(--pump-mint);
-  color: #0c0f17;
+  color: #ffffff;
   font-weight: 700;
   border-color: var(--pump-mint);
+  box-shadow: 0 2px 8px var(--pump-mint-glow);
 }
 
 .explore-view-controls {
@@ -615,7 +640,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   cursor: pointer;
 }
 .btn-filter-funnel:hover {
-  color: #fff;
+  color: var(--text-primary);
   border-color: var(--pump-mint);
 }
 
@@ -639,8 +664,8 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 
 .view-toggle-btn.active {
   background-color: var(--bg-pill);
-  color: #fff;
-  font-weight: 600;
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
 .btn-settings-gear {
@@ -656,7 +681,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   cursor: pointer;
 }
 .btn-settings-gear:hover {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 /* =========================================================
@@ -677,19 +702,21 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   transition: all 0.15s ease;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-sm);
 }
 
 .explore-coin-card:hover {
   border-color: var(--pump-mint);
   transform: translateY(-2px);
   background-color: var(--bg-card-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .explore-coin-thumb-box {
   width: 100%;
   aspect-ratio: 1/1;
   position: relative;
-  background-color: #0b0e15;
+  background-color: #f1f5f9;
   overflow: hidden;
 }
 
@@ -699,14 +726,14 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   object-fit: cover;
 }
 
-/* Mini Green Sparkline Chart overlay */
+/* Mini Sparkline Chart overlay */
 .sparkline-svg {
   position: absolute;
   bottom: 8px;
   right: 8px;
   width: 60px;
   height: 24px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.2));
 }
 
 .explore-coin-details {
@@ -719,7 +746,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 .explore-coin-title {
   font-size: 14px;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -769,6 +796,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   border: 1px solid var(--border-card);
   border-radius: var(--radius-md);
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .pump-data-table {
@@ -781,9 +809,10 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 .pump-data-table th {
   text-align: left;
   padding: 12px 16px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
+  background-color: #f8fafc;
   border-bottom: 1px solid var(--border-card);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 12px;
 }
 
@@ -791,11 +820,12 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   padding: 12px 16px;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-subtle);
+  background-color: #ffffff;
 }
 
 .pump-data-table tr:hover td {
-  background-color: var(--bg-card-hover);
-  color: #fff;
+  background-color: #f1f5f9;
+  color: var(--text-primary);
 }
 
 /* =========================================================
@@ -810,7 +840,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   border: 1px solid var(--border-card);
   border-radius: var(--radius-md);
   padding: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+  box-shadow: var(--shadow-lg);
   z-index: 400;
   display: flex;
   flex-direction: column;
@@ -820,7 +850,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 .cookie-title {
   font-size: 14px;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .cookie-desc {
@@ -841,19 +871,21 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   font-size: 12px;
   color: var(--text-secondary);
   cursor: pointer;
+  font-weight: 600;
 }
 .cookie-link-btn:hover {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .btn-accept-cookie {
   background-color: var(--pump-mint);
-  color: #0c0f17;
+  color: #ffffff;
   font-weight: 700;
   font-size: 12px;
   padding: 6px 14px;
   border-radius: var(--radius-sm);
   cursor: pointer;
+  box-shadow: 0 2px 8px var(--pump-mint-glow);
 }
 .btn-accept-cookie:hover {
   background-color: var(--pump-mint-hover);
@@ -873,7 +905,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 .modal-overlay-generic {
   position: fixed;
   inset: 0;
-  background: rgba(8, 11, 16, 0.85);
+  background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(4px);
   z-index: 500;
   display: none;
@@ -892,6 +924,8 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   position: relative;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  color: var(--text-primary);
 }
 
 .modal-header-row {
@@ -904,7 +938,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 .modal-title-text {
   font-size: 16px;
   font-weight: 800;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .btn-close-modal {
@@ -913,7 +947,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   cursor: pointer;
 }
 .btn-close-modal:hover {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .form-group-pump {
@@ -925,6 +959,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 
 .form-label-pump {
   font-size: 12px;
+  font-weight: 600;
   color: var(--text-secondary);
 }
 
@@ -932,28 +967,32 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   background: var(--bg-input);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-xs);
-  color: #fff;
+  color: var(--text-primary);
   font-size: 13px;
   padding: 9px 12px;
   outline: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 .form-input-pump:focus {
   border-color: var(--pump-mint);
+  background-color: #ffffff;
 }
 
 .form-textarea-pump {
   background: var(--bg-input);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-xs);
-  color: #fff;
+  color: var(--text-primary);
   font-size: 13px;
   padding: 9px 12px;
   outline: none;
   resize: vertical;
   min-height: 70px;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 .form-textarea-pump:focus {
   border-color: var(--pump-mint);
+  background-color: #ffffff;
 }
 
 .btn-place-trade {
@@ -964,20 +1003,28 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   font-size: 14px;
   border-radius: var(--radius-sm);
   background: var(--pump-mint);
-  color: #0c0f17;
+  color: #ffffff;
   cursor: pointer;
   transition: all 0.15s ease;
+  box-shadow: 0 2px 8px var(--pump-mint-glow);
+}
+.btn-place-trade:hover {
+  background: var(--pump-mint-hover);
 }
 .btn-place-trade.sell {
   background: var(--accent-red);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+}
+.btn-place-trade.sell:hover {
+  background: #b91c1c;
 }
 
 /* Toast */
 .toast-container {
   position: fixed;
   bottom: 20px;
-  left: 80px;
+  left: 110px;
   z-index: 600;
   display: flex;
   flex-direction: column;
@@ -985,14 +1032,14 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 }
 
 .toast-msg {
-  background: var(--bg-card);
+  background: #ffffff;
   border: 1px solid var(--pump-mint);
-  color: #fff;
+  color: var(--text-primary);
   font-family: var(--font-mono);
   font-size: 12px;
   padding: 10px 16px;
   border-radius: var(--radius-sm);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-md);
   animation: slideIn 0.2s ease-out;
 }
 
@@ -1002,14 +1049,15 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 }
 
 /* =========================================================
-   STANDARD PUMP.FUN FOOTER & TRANSPARENCY STYLES
+   STANDARD FOOTER & TRANSPARENCY STYLES
    ========================================================= */
 .site-footer-pump {
   border-top: 1px solid var(--border-subtle);
-  background: var(--bg-sidebar);
+  background: #ffffff;
   margin-top: 48px;
   padding: 40px 32px 28px 32px;
   color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
 }
 
 .footer-top-grid {
@@ -1051,7 +1099,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 .footer-brand-name {
   font-size: 16px;
   font-weight: 800;
-  color: #fff;
+  color: var(--pump-mint);
   letter-spacing: -0.02em;
 }
 
@@ -1069,11 +1117,12 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 }
 
 .footer-social-link {
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 12px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  font-weight: 600;
   transition: color 0.15s ease;
 }
 .footer-social-link:hover {
@@ -1083,7 +1132,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 .footer-col-title {
   font-size: 12px;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 14px;
@@ -1142,6 +1191,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   border: 1px solid var(--border-card);
   border-radius: var(--radius-md);
   padding: 20px;
+  box-shadow: var(--shadow-sm);
 }
 
 .wallet-address-box {
@@ -1154,7 +1204,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   align-items: center;
   font-family: var(--font-mono);
   font-size: 12px;
-  color: #fff;
+  color: var(--text-primary);
   word-break: break-all;
 }
 
@@ -1179,20 +1229,21 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   display: flex;
   align-items: center;
   gap: 6px;
+  box-shadow: var(--shadow-sm);
 }
 
 .bundle-cat-pill:hover {
-  border-color: rgba(134, 239, 172, 0.4);
-  color: #fff;
-  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(30, 80, 255, 0.4);
+  color: var(--text-primary);
+  background: #eff6ff;
 }
 
 .bundle-cat-pill.active {
-  background: rgba(134, 239, 172, 0.12);
+  background: #eff6ff;
   border-color: var(--pump-mint);
   color: var(--pump-mint);
   font-weight: 700;
-  box-shadow: 0 0 10px rgba(134, 239, 172, 0.15);
+  box-shadow: 0 0 10px rgba(30, 80, 255, 0.15);
 }
 
 .bundle-row-item {
@@ -1200,16 +1251,16 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
+  background: #ffffff;
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-sm);
   transition: all 0.15s ease;
   cursor: pointer;
 }
 
 .bundle-row-item:hover {
-  border-color: var(--border-card);
-  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--pump-mint);
+  background: #eff6ff;
   transform: translateX(2px);
 }
 
@@ -1250,11 +1301,13 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.15s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .exchange-ticker-chip:hover, .exchange-ticker-chip.active {
   border-color: var(--pump-mint);
-  background: rgba(134, 239, 172, 0.08);
+  background: #eff6ff;
+  color: var(--pump-mint);
 }
 
 .exchange-card {
@@ -1262,6 +1315,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   border: 1px solid var(--border-card);
   border-radius: var(--radius-md);
   padding: 18px;
+  box-shadow: var(--shadow-sm);
 }
 
 .exchange-input-box {
@@ -1270,16 +1324,17 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   border-radius: var(--radius-sm);
   padding: 12px 14px;
   margin: 8px 0;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .exchange-input-box:focus-within {
   border-color: var(--pump-mint);
+  background-color: #ffffff;
 }
 
 .exchange-select {
   background: var(--bg-pill);
-  color: #fff;
+  color: var(--text-primary);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-sm);
   padding: 6px 10px;
@@ -1293,7 +1348,7 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--bg-card);
+  background: #ffffff;
   border: 1px solid var(--border-card);
   color: var(--pump-mint);
   display: flex;
@@ -1304,22 +1359,22 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   position: relative;
   cursor: pointer;
   transition: transform 0.2s ease, background 0.2s ease;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
 }
 
 .exchange-swap-flip-btn:hover {
   transform: rotate(180deg) scale(1.08);
-  background: rgba(134, 239, 172, 0.15);
+  background: #eff6ff;
   border-color: var(--pump-mint);
 }
 
 .exchange-depth-bar-bid {
-  background: rgba(134, 239, 172, 0.15);
+  background: rgba(30, 80, 255, 0.08);
   border-left: 2px solid var(--pump-mint);
 }
 
 .exchange-depth-bar-ask {
-  background: rgba(248, 113, 113, 0.15);
+  background: rgba(220, 38, 38, 0.08);
   border-right: 2px solid var(--accent-red);
 }
-
-

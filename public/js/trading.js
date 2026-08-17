@@ -144,19 +144,26 @@ class PumpTradingManager {
     }
 
     const we = window.walletEngine;
+    if (!we || !we.isAuthenticated || !we.activeAddress) {
+      if (window.launchpadManager) {
+        window.launchpadManager.toast('Please connect your crypto wallet to trade.', 'info');
+      }
+      if (we) we.openWalletModal();
+      return;
+    }
+
     if (this.side === 'buy') {
-      const availableSol = (we && we.balances && we.balances.sol !== undefined) ? we.balances.sol : 0.00;
+      const availableSol = (we.balances && we.balances.sol !== undefined) ? we.balances.sol : 0.00;
       if (availableSol <= 0 || availableSol < amount) {
         if (window.launchpadManager) {
-          window.launchpadManager.toast(`❌ Insufficient SOL balance (${availableSol.toFixed(2)} SOL). Connect wallet or deposit SOL to trade.`, 'error');
+          window.launchpadManager.toast(`Insufficient SOL balance (${availableSol.toFixed(2)} SOL). Please deposit SOL to trade.`, 'error');
         }
+        if (we) we.openDepositModal();
         return;
       }
     }
 
-    const trader = we && we.activeAddress
-      ? we.activeAddress
-      : '0x' + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
+    const trader = we.activeAddress;
 
     const endpoint = this.side === 'buy' 
       ? `/api/tokens/${this.activeToken.symbol}/buy`
@@ -177,6 +184,14 @@ class PumpTradingManager {
 
       const data = await res.json();
       if (data.success) {
+        if (this.side === 'buy') {
+          we.balances.sol = Math.max(0, (we.balances.sol || 0) - amount);
+          we.balances.cess = (we.balances.cess || 0) + (data.tokensReceived || 0);
+        } else {
+          we.balances.sol = (we.balances.sol || 0) + (data.solReceived || 0);
+        }
+        we.renderState();
+
         if (window.launchpadManager) {
           window.launchpadManager.toast(
             `Successfully ${this.side === 'buy' ? 'bought' : 'sold'} on bonding curve!`,

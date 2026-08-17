@@ -305,19 +305,28 @@ class CessionExchangeManager {
 
     const ctx = canvas.getContext('2d');
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * (window.devicePixelRatio || 1);
-    canvas.height = rect.height * (window.devicePixelRatio || 1);
-    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.floor(rect.width || 600);
+    const height = Math.floor(rect.height || 360);
 
-    const width = rect.width;
-    const height = rect.height;
+    // Dimension cache to prevent constant buffer reallocation & flickering
+    if (!this._chartDims || this._chartDims.w !== width || this._chartDims.h !== height || this._chartDims.dpr !== dpr) {
+      this._chartDims = { w: width, h: height, dpr };
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+    }
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
 
     ctx.clearRect(0, 0, width, height);
 
     // Background gradient
     const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
-    bgGrad.addColorStop(0, '#090d16');
-    bgGrad.addColorStop(1, '#05070a');
+    bgGrad.addColorStop(0, '#ffffff');
+    bgGrad.addColorStop(1, '#f8fafc');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
@@ -338,7 +347,7 @@ class CessionExchangeManager {
     const priceRange = maxPrice - minPrice;
 
     // Draw horizontal grid lines
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 1;
     ctx.font = '10px JetBrains Mono, monospace';
     ctx.fillStyle = '#64748b';
@@ -362,8 +371,8 @@ class CessionExchangeManager {
     this.candles.forEach((c, idx) => {
       const x = idx * spacing + spacing / 2;
       const isUp = c.close >= c.open;
-      const color = isUp ? '#86efac' : '#f87171';
-      const wickColor = isUp ? '#86efac' : '#f87171';
+      const color = isUp ? '#16a34a' : '#dc2626';
+      const wickColor = isUp ? '#16a34a' : '#dc2626';
 
       // Candlestick Y mapping (top 80% of canvas)
       const chartH = height * 0.78;
@@ -388,7 +397,7 @@ class CessionExchangeManager {
 
       // Volume bar at bottom 20%
       const volH = (c.volume / (maxVol || 1)) * (height * 0.18);
-      ctx.fillStyle = isUp ? 'rgba(134, 239, 172, 0.25)' : 'rgba(248, 113, 113, 0.25)';
+      ctx.fillStyle = isUp ? 'rgba(22, 163, 74, 0.25)' : 'rgba(220, 38, 38, 0.25)';
       ctx.fillRect(x - candleWidth / 2, height - volH, candleWidth, volH);
     });
   }

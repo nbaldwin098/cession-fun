@@ -195,6 +195,48 @@ class CessionWalletEngine {
         }
       });
     }
+
+    // Top Navigation & Modal Action Buttons
+    const btnNavCreate = document.getElementById('btnNavCreateWallet');
+    if (btnNavCreate) {
+      btnNavCreate.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.openCreateWalletModal();
+      });
+    }
+
+    const btnNavDep = document.getElementById('btnNavDeposit');
+    if (btnNavDep) {
+      btnNavDep.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.openDepositModal();
+      });
+    }
+
+    const btnConfirmVault = document.getElementById('btnConfirmUnlockVault');
+    if (btnConfirmVault) {
+      btnConfirmVault.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.confirmCreateVault();
+      });
+    }
+
+    const btnCloseVault = document.getElementById('btnCloseCreateVaultModal');
+    if (btnCloseVault) {
+      btnCloseVault.addEventListener('click', (e) => {
+        e.preventDefault();
+        const m = document.getElementById('createVaultModal');
+        if (m) m.style.display = 'none';
+      });
+    }
+
+    const btnCopyMnemonic = document.getElementById('btnCopySeedPhrase');
+    if (btnCopyMnemonic) {
+      btnCopyMnemonic.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.copyGeneratedMnemonic();
+      });
+    }
   }
 
   openAuthModal(defaultTab = 'email') {
@@ -202,6 +244,8 @@ class CessionWalletEngine {
     if (modal) {
       modal.classList.add('active');
       this.switchAuthTab(defaultTab);
+    } else {
+      this.openWalletModal();
     }
   }
 
@@ -726,11 +770,19 @@ class CessionWalletEngine {
    * Open Dedicated 1-Click Sovereign HD Wallet Creation Modal
    */
   openCreateWalletModal() {
-    this.closeAuthModal();
-    this.closeWalletModal();
-    this.regenerateNewVaultMnemonic();
-    const modal = document.getElementById('createVaultModal');
-    if (modal) modal.style.display = 'flex';
+    try {
+      this.closeAuthModal();
+      this.closeWalletModal();
+      this.regenerateNewVaultMnemonic();
+      const modal = document.getElementById('createVaultModal');
+      if (modal) {
+        modal.style.display = 'flex';
+      }
+    } catch (err) {
+      console.error('[Wallet] Error opening create vault modal:', err);
+      const modal = document.getElementById('createVaultModal');
+      if (modal) modal.style.display = 'flex';
+    }
   }
 
   /**
@@ -738,7 +790,11 @@ class CessionWalletEngine {
    */
   regenerateNewVaultMnemonic() {
     const entropy = new Uint8Array(16);
-    window.crypto.getRandomValues(entropy);
+    if (window.crypto && window.crypto.getRandomValues) {
+      window.crypto.getRandomValues(entropy);
+    } else {
+      for (let i = 0; i < 16; i++) entropy[i] = Math.floor(Math.random() * 256);
+    }
 
     const words = [];
     for (let i = 0; i < 12; i++) {
@@ -760,9 +816,9 @@ class CessionWalletEngine {
     const grid = document.getElementById('seedWordsGrid');
     if (grid) {
       grid.innerHTML = words.map((w, idx) => `
-        <div style="background: rgba(255,255,255,0.06); padding: 6px 10px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px; color: #fff; display: flex; justify-content: space-between;">
-          <span style="color: var(--text-muted);">${idx + 1}.</span>
-          <strong style="color: var(--pump-mint);">${w}</strong>
+        <div style="background: #ffffff; border: 1px solid var(--border-card); padding: 8px 10px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 12px; color: var(--text-primary); display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm);">
+          <span style="color: var(--text-muted); font-weight: 600;">${idx + 1}.</span>
+          <strong style="color: var(--pump-mint); font-weight: 700;">${w}</strong>
         </div>
       `).join('');
     }
@@ -942,9 +998,9 @@ class CessionWalletEngine {
     const grid = document.getElementById('backupSeedWordsGrid');
     if (grid) {
       grid.innerHTML = words.map((w, idx) => `
-        <div style="background: rgba(255,255,255,0.06); padding: 6px 10px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px; color: #fff; display: flex; justify-content: space-between;">
-          <span style="color: var(--text-muted);">${idx + 1}.</span>
-          <strong style="color: var(--pump-mint);">${w}</strong>
+        <div style="background: #ffffff; border: 1px solid var(--border-card); padding: 8px 10px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 12px; color: var(--text-primary); display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm);">
+          <span style="color: var(--text-muted); font-weight: 600;">${idx + 1}.</span>
+          <strong style="color: var(--pump-mint); font-weight: 700;">${w}</strong>
         </div>
       `).join('');
     }
@@ -1047,18 +1103,27 @@ class CessionWalletEngine {
   logout() {
     this.isAuthenticated = false;
     this.activeAddress = '';
+    this.activeWalletType = 'none';
     this.userProfile = null;
     this.vaultData = null;
     this.sessionToken = null;
+    this.balances = { eth: 0.00, sol: 0.00, cess: 0.00, usdc: 0.00 };
 
     localStorage.removeItem('cession_session_token');
     localStorage.removeItem('cession_user_profile');
     localStorage.removeItem('cession_vault_data');
     localStorage.removeItem('cession_wallet_type');
     localStorage.removeItem('cession_balances');
+    localStorage.removeItem('calabi_active_wallet');
+    localStorage.removeItem('session_token');
+    sessionStorage.clear();
 
     this.renderState();
-    if (window.showToast) window.showToast('Logged out successfully.', 'info');
+    if (window.showToast) window.showToast('Wallet disconnected successfully.', 'info');
+  }
+
+  disconnect() {
+    this.logout();
   }
 
   async fetchOnChainBalance(address) {
@@ -1189,12 +1254,57 @@ class CessionWalletEngine {
   }
 }
 
-window.walletEngine = null;
+// Global Export & Immediate Initialization
+window.CessionWalletEngine = CessionWalletEngine;
+
+// Initialize immediately so all inline clicks work reliably
+if (!window.walletEngine) {
+  try {
+    window.walletEngine = new CessionWalletEngine();
+  } catch (err) {
+    console.error('[Wallet] Initialization error:', err);
+  }
+}
+
 window.showToast = (msg, type = 'info') => {
-  if (window.launchpadManager) {
+  if (window.launchpadManager && typeof window.launchpadManager.toast === 'function') {
     window.launchpadManager.toast(msg, type);
+  } else {
+    let container = document.getElementById('toastContainer');
+    if (container) {
+      const div = document.createElement('div');
+      div.className = 'toast-msg';
+      div.textContent = msg;
+      container.appendChild(div);
+      setTimeout(() => div.remove(), 3000);
+    }
   }
 };
+
+window.openCreateWalletModal = () => {
+  if (window.walletEngine) {
+    window.walletEngine.openCreateWalletModal();
+  } else {
+    const m = document.getElementById('createVaultModal');
+    if (m) m.style.display = 'flex';
+  }
+};
+
+window.confirmCreateVault = () => {
+  if (window.walletEngine) window.walletEngine.confirmCreateVault();
+};
+
+window.openDepositModal = () => {
+  if (window.walletEngine) {
+    window.walletEngine.openDepositModal();
+  } else {
+    const m = document.getElementById('depositCryptoModal');
+    if (m) m.style.display = 'flex';
+  }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-  window.walletEngine = new CessionWalletEngine();
+  if (!window.walletEngine) {
+    window.walletEngine = new CessionWalletEngine();
+  }
 });

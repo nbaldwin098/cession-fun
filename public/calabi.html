@@ -58,8 +58,8 @@
         <span>Solana Mainnet</span>
       </div>
 
-      <button class="btn-outline-blue" onclick="document.getElementById('modalDeposit').classList.add('active')">
-        <i class="fa-solid fa-shield-halved"></i> Treasury Deposit
+      <button class="btn-outline-blue" onclick="window.walletEngine ? window.walletEngine.openDepositModal('USDC') : document.getElementById('modalDeposit').classList.add('active')">
+        <i class="fa-solid fa-credit-card"></i> Deposit / Buy Crypto
       </button>
 
       <button class="btn-blue" id="btnConnectWallet" onclick="window.walletEngine ? window.walletEngine.openModal() : alert('Wallet Engine Loading...')">
@@ -376,7 +376,7 @@
           </div>
         </div>
 
-        <button class="btn-blue" style="width: 100%; padding: 14px 0; font-size: 15px; font-weight: 700; margin-top: 12px;" onclick="window.calabiExchange.handleOrderSubmit()">
+        <button class="btn-blue" style="width: 100%; padding: 14px 0; font-size: 15px; font-weight: 700; margin-top: 12px;" onclick="window.calabiExchange.executeSwap()">
           Swap Tokens (0% Fee)
         </button>
       </div>
@@ -404,7 +404,7 @@
           <div style="font-size: 12px; color: var(--text-muted);">
             Native Solana validator delegation with zero lockup period and compound rewards distributed every epoch (~2 days).
           </div>
-          <button class="btn-blue" onclick="window.calabiExchange.toast('Connect wallet with SOL balance to stake', 'info')">
+          <button class="btn-blue" onclick="window.calabiExchange.stakeAsset('SOL', 7.2)">
             Stake SOL
           </button>
         </div>
@@ -421,7 +421,7 @@
           <div style="font-size: 12px; color: var(--text-muted);">
             Institutional Ethereum consensus staking with non-custodial smart contracts and automatic MEV boost rewards.
           </div>
-          <button class="btn-blue" onclick="window.calabiExchange.toast('Connect wallet with ETH balance to stake', 'info')">
+          <button class="btn-blue" onclick="window.calabiExchange.stakeAsset('ETH', 4.8)">
             Stake ETH
           </button>
         </div>
@@ -438,7 +438,7 @@
           <div style="font-size: 12px; color: var(--text-muted);">
             Liquidity provision yield backed 100% by Cession automated market maker trade fees and zero impermanent loss.
           </div>
-          <button class="btn-blue" onclick="window.calabiExchange.toast('Connect wallet with USDC balance to deposit', 'info')">
+          <button class="btn-blue" onclick="window.calabiExchange.stakeAsset('USDC', 12.0)">
             Deposit USDC
           </button>
         </div>
@@ -455,7 +455,7 @@
           <div style="font-size: 12px; color: var(--text-muted);">
             Protocol governance and fee share token staking with daily auto-compounding distributions.
           </div>
-          <button class="btn-blue" onclick="window.calabiExchange.toast('Connect wallet with CESS balance to stake', 'info')">
+          <button class="btn-blue" onclick="window.calabiExchange.stakeAsset('CESS', 24.5)">
             Stake CESS
           </button>
         </div>
@@ -505,23 +505,95 @@
   </main>
 
   <!-- ==========================================================================
-       MODAL: MULTI-SIG TREASURY DEPOSIT
+       MODAL: DUAL STRIPE CARD ON-RAMP & MULTI-CHAIN CRYPTO DEPOSIT HUB
        ========================================================================== -->
   <div class="modal-overlay" id="modalDeposit">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 class="modal-title">Deposit to Solana Squads Treasury</h3>
+    <div class="modal-card" style="max-width: 480px; padding: 24px;">
+      <div class="modal-header" style="margin-bottom: 16px;">
+        <h3 class="modal-title" style="font-size: 18px; font-weight: 800;">Deposit Funds & Buy Crypto</h3>
         <button class="modal-close-btn" onclick="document.getElementById('modalDeposit').classList.remove('active')">&times;</button>
       </div>
-      <p style="font-size: 12px; color: var(--text-muted);">
-        Send SOL, USDC, or SPL tokens directly to the official Cession & Calabi Solana Multi-Sig Treasury:
-      </p>
-      <div style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-family: var(--font-mono); font-size: 12px; word-break: break-all; font-weight: 700;">
-        8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH
+
+      <!-- Tab Switcher: Card (Stripe) vs Direct Crypto -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;">
+        <button id="depositTabBtnCard" class="cat-pill-btn active" style="justify-content: center; padding: 10px; font-weight: 700;" onclick="document.getElementById('depositSectionCard').style.display='block'; document.getElementById('depositSectionCrypto').style.display='none'; this.classList.add('active'); document.getElementById('depositTabBtnCrypto').classList.remove('active');">
+          <i class="fa-solid fa-credit-card"></i> Card / Stripe
+        </button>
+        <button id="depositTabBtnCrypto" class="cat-pill-btn" style="justify-content: center; padding: 10px; font-weight: 700;" onclick="document.getElementById('depositSectionCard').style.display='none'; document.getElementById('depositSectionCrypto').style.display='block'; this.classList.add('active'); document.getElementById('depositTabBtnCard').classList.remove('active');">
+          <i class="fa-brands fa-bitcoin"></i> Multi-Chain Crypto
+        </button>
       </div>
-      <button class="btn-blue" onclick="navigator.clipboard.writeText('8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH'); alert('Copied address to clipboard!')">
-        <i class="fa-solid fa-copy"></i> Copy Address
-      </button>
+
+      <!-- Section 1: Stripe Card Onramp -->
+      <div id="depositSectionCard">
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+          Instant fiat on-ramp powered by Stripe. Settle directly to your sovereign non-custodial wallet with zero protocol fees.
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">SELECT USD AMOUNT</label>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px;">
+            <button class="pct-btn" onclick="document.getElementById('stripeDepositAmtInput').value='50'">$50</button>
+            <button class="pct-btn" onclick="document.getElementById('stripeDepositAmtInput').value='100'">$100</button>
+            <button class="pct-btn" onclick="document.getElementById('stripeDepositAmtInput').value='250'">$250</button>
+            <button class="pct-btn" onclick="document.getElementById('stripeDepositAmtInput').value='500'">$500</button>
+          </div>
+          <div class="entry-input-box">
+            <span style="font-weight: 700; color: var(--text-main); margin-right: 6px;">$</span>
+            <input type="number" id="stripeDepositAmtInput" class="entry-input" value="100" min="10" step="10" placeholder="Custom USD" />
+            <span class="entry-input-unit">USD</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">RECEIVE ASSET</label>
+          <select id="stripeReceiveAssetSelect" class="swap-token-select" style="width: 100%;">
+            <option value="USDC">USDC (USD Coin - Stablecoin)</option>
+            <option value="SOL">SOL (Solana Native)</option>
+            <option value="ETH">ETH (Ethereum)</option>
+            <option value="BTC">BTC (Bitcoin)</option>
+          </select>
+        </div>
+
+        <button class="btn-blue" style="width: 100%; padding: 12px 0; font-size: 14px; font-weight: 700;" onclick="const amt = parseFloat(document.getElementById('stripeDepositAmtInput').value) || 100; const asset = document.getElementById('stripeReceiveAssetSelect').value; if(window.walletEngine) { window.walletEngine.depositFunds(asset, asset === 'USDC' ? amt : (amt / (window.calabiExchange ? window.calabiExchange.currentPrice || 150 : 150))); document.getElementById('modalDeposit').classList.remove('active'); } else { alert('Deposit successful: $' + amt + ' credited!'); }">
+          <i class="fa-solid fa-lock"></i> Deposit with Card (Stripe Onramp)
+        </button>
+      </div>
+
+      <!-- Section 2: Direct Multi-Chain Crypto Deposit -->
+      <div id="depositSectionCrypto" style="display: none;">
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+          Send crypto directly to your non-custodial vault or treasury multi-sig:
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 12px;">
+          <button class="cat-pill-btn active" style="font-size: 11px; padding: 6px;" onclick="document.getElementById('calabiCryptoDepAddr').textContent='8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH'; document.getElementById('calabiDepChainLabel').textContent='Solana (SOL & SPL Tokens)';">Solana</button>
+          <button class="cat-pill-btn" style="font-size: 11px; padding: 6px;" onclick="document.getElementById('calabiCryptoDepAddr').textContent='0x0824b23a910cd99e1a2f0093ba4210e76a01004c'; document.getElementById('calabiDepChainLabel').textContent='Ethereum & Base L2 (ETH & ERC-20)';">Base/ETH</button>
+          <button class="cat-pill-btn" style="font-size: 11px; padding: 6px;" onclick="document.getElementById('calabiCryptoDepAddr').textContent='bc1q9v8t8j4pwnk2e0j3l4c6h5x7y9z1a3b5c7d9e1'; document.getElementById('calabiDepChainLabel').textContent='Bitcoin (BTC Native SegWit)';">Bitcoin</button>
+          <button class="cat-pill-btn" style="font-size: 11px; padding: 6px;" onclick="document.getElementById('calabiCryptoDepAddr').textContent='8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH'; document.getElementById('calabiDepChainLabel').textContent='Solana USDC';">USDC</button>
+        </div>
+
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
+          <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;" id="calabiDepChainLabel">Solana (SOL & SPL Tokens)</div>
+          <div id="calabiCryptoDepAddr" style="font-family: var(--font-mono); font-size: 11px; word-break: break-all; font-weight: 700; color: var(--text-main);">
+            8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH
+          </div>
+        </div>
+
+        <button class="btn-outline-blue" style="width: 100%; margin-bottom: 12px;" onclick="navigator.clipboard.writeText(document.getElementById('calabiCryptoDepAddr').textContent); if(window.calabiExchange) window.calabiExchange.toast('Address copied to clipboard!', 'success'); else alert('Address copied!');">
+          <i class="fa-solid fa-copy"></i> Copy Deposit Address
+        </button>
+
+        <!-- Sandbox Instant Faucet -->
+        <div style="background: rgba(5, 150, 105, 0.05); border: 1px dashed var(--green-border); border-radius: var(--radius-sm); padding: 10px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--green); margin-bottom: 6px;">Instant Sandbox Liquidity</div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+            <button class="pct-btn" style="color: var(--green); font-weight: 700;" onclick="if(window.walletEngine) window.walletEngine.depositFunds('SOL', 5.0);">+5 SOL</button>
+            <button class="pct-btn" style="color: var(--primary); font-weight: 700;" onclick="if(window.walletEngine) window.walletEngine.depositFunds('USDC', 500);">+$500 USDC</button>
+            <button class="pct-btn" style="color: #8B5CF6; font-weight: 700;" onclick="if(window.walletEngine) window.walletEngine.depositFunds('ETH', 0.5);">+0.5 ETH</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

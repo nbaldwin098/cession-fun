@@ -674,8 +674,22 @@ class CessionLaunchpadManager {
 
   async handleBuyBundleConfirm() {
     if (!this.activeBundle) return;
+
+    if (!window.walletEngine || !window.walletEngine.isAuthenticated || !window.walletEngine.activeAddress) {
+      this.toast('Please connect your crypto wallet or sign in to buy bundles.', 'info');
+      if (window.walletEngine) window.walletEngine.openWalletModal();
+      return;
+    }
+
     const solInput = document.getElementById('buyBundleSolAmount');
     const solAmount = parseFloat(solInput ? solInput.value : '1.0') || 1.0;
+
+    const solBalance = (window.walletEngine && window.walletEngine.balances) ? (window.walletEngine.balances.sol || 0) : 0;
+    if (solBalance < solAmount) {
+      this.toast(`Insufficient SOL balance! Bundle requires ${solAmount.toFixed(2)} SOL. Your balance: ${solBalance.toFixed(2)} SOL.`, 'error');
+      if (window.walletEngine) window.walletEngine.openDepositModal();
+      return;
+    }
 
     const btn = document.getElementById('btnConfirmBuyBundle');
     if (btn) {
@@ -689,13 +703,17 @@ class CessionLaunchpadManager {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           solAmount,
-          buyerAddress: window.walletEngine?.activeAddress || '0xTrader'
+          buyerAddress: window.walletEngine.activeAddress
         })
       });
 
       const data = await res.json();
       if (data.success) {
-        this.toast(`🎉 Successfully bought ${this.activeBundle.name} basket with ${solAmount} SOL!`, 'success');
+        if (window.walletEngine && window.walletEngine.balances) {
+          window.walletEngine.balances.sol = Math.max(0, (window.walletEngine.balances.sol || 0) - solAmount);
+          window.walletEngine.renderState();
+        }
+        this.toast(`Successfully bought ${this.activeBundle.name} basket with ${solAmount} SOL!`, 'success');
         const modal = document.getElementById('buyBundleModal');
         if (modal) modal.style.display = 'none';
         this.fetchBundles();
@@ -709,7 +727,7 @@ class CessionLaunchpadManager {
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = '⚡ Execute 1-Click Bundle Purchase';
+        btn.textContent = 'Execute 1-Click Bundle Purchase';
       }
     }
   }
@@ -1087,17 +1105,22 @@ class CessionLaunchpadManager {
       return;
     }
 
+    if (!window.walletEngine || !window.walletEngine.isAuthenticated || !window.walletEngine.activeAddress) {
+      this.toast('Please connect your crypto wallet or sign in to mint.', 'info');
+      if (window.walletEngine) window.walletEngine.openWalletModal();
+      return;
+    }
+
     // Strict balance check for mint fee + initial buy
     const solBalance = (window.walletEngine && window.walletEngine.balances) ? (window.walletEngine.balances.sol || 0) : 0;
     const requiredSol = 0.1 + initialBuy;
     if (solBalance < requiredSol) {
-      this.toast(`⚠️ Insufficient SOL balance! Minting requires ${requiredSol.toFixed(2)} SOL (0.1 fee + initial buy). Your balance: ${solBalance.toFixed(2)} SOL.`, 'error');
+      this.toast(`Insufficient SOL balance! Minting requires ${requiredSol.toFixed(2)} SOL (0.1 fee + initial buy). Your balance: ${solBalance.toFixed(2)} SOL.`, 'error');
+      if (window.walletEngine) window.walletEngine.openDepositModal();
       return;
     }
 
-    const creator = (window.walletEngine && window.walletEngine.activeAddress)
-      ? window.walletEngine.activeAddress
-      : '0x' + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
+    const creator = window.walletEngine.activeAddress;
 
     const btnSubmit = document.querySelector('#deployCoinForm button[type="submit"]');
     if (btnSubmit) btnSubmit.textContent = 'Minting 0.1 SOL on bonding curve...';

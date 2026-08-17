@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>pump.fun</title>
+  <title>Cession | Sovereign Fair Launch Protocol & Exchange</title>
   
   <!-- Meta & SEO Tags -->
-  <meta name="description" content="pump.fun prevents rugs by making sure that all created tokens are safe. each coin on pump is a fair-launch with no presale and no team allocation.">
-  <meta property="og:title" content="pump.fun">
-  <meta property="og:description" content="Trade faster. Pump is better on mobile.">
+  <meta name="description" content="Cession prevents rugs by making sure that all created tokens are safe. Each coin on Cession is a 100% fair-launch with no presale and continuous mathematical bonding curves.">
+  <meta property="og:title" content="Cession | Sovereign Fair Launch Protocol">
+  <meta property="og:description" content="Trade faster. Fair bonding curves and non-custodial decentralized trading on Solana and Base.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://cession.fun">
   <meta property="og:image" content="images/cession-logo.png">
@@ -16,9 +16,9 @@
   <!-- Google Fonts: Inter + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Charting & Web3 Libraries -->
+  <!-- Web3 & Charting Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
   <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
@@ -32,52 +32,50 @@
   <div class="app-container">
     
     <!-- =========================================================
-         LEFT VERTICAL ICON RAIL
+         LEFT VERTICAL TEXT NAVIGATION RAIL
     ========================================================= -->
     <aside class="sidebar-rail" id="sidebarRail">
-      <!-- Mint Green Pill Logo -->
-      <div class="rail-top-logo" id="railLogo" title="pump.fun">
-        <svg viewBox="0 0 24 24">
-          <path d="M4.5 10.5C3.12 11.88 3.12 14.12 4.5 15.5L8.5 19.5C9.88 20.88 12.12 20.88 13.5 19.5L19.5 13.5C20.88 12.12 20.88 9.88 19.5 8.5L15.5 4.5C14.12 3.12 11.88 3.12 10.5 4.5L4.5 10.5Z" />
-        </svg>
+      <!-- Plain Text Brand Header -->
+      <div class="rail-top-logo" id="railLogo" title="Cession Protocol">
+        CESSION
       </div>
 
-      <!-- Icon Navigation Stack -->
+      <!-- Text-Only Navigation Stack -->
       <div class="rail-icons-stack">
         <!-- 1. Home -->
         <button class="rail-icon-btn active" id="railNavHome" title="Home">
-          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          HOME
         </button>
 
         <!-- 2. Explore Coins -->
-        <button class="rail-icon-btn" id="railNavExplore" title="Explore Coins & Bundles">
-          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        <button class="rail-icon-btn" id="railNavExplore" title="Explore Coins">
+          EXPLORE
         </button>
 
-        <!-- 3. Calabi Pro Crypto Exchange -->
-        <a href="/exchange" class="rail-icon-btn" id="railNavExchange" title="Calabi Pro Crypto Exchange">
-          <svg viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
+        <!-- 3. Exchange -->
+        <a href="/exchange" class="rail-icon-btn" id="railNavExchange" title="Crypto Exchange">
+          EXCHANGE
         </a>
 
-        <!-- 4. Profile / Portfolio -->
-        <button class="rail-icon-btn" id="railNavProfile" title="Profile">
-          <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <!-- 4. Profile -->
+        <button class="rail-icon-btn" id="railNavProfile" title="Profile and Portfolio">
+          PROFILE
         </button>
 
-        <!-- 5. Leaderboard / Analytics -->
+        <!-- 5. Leaderboard -->
         <button class="rail-icon-btn" id="railNavLeaderboard" title="Leaderboard">
-          <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+          RANKS
         </button>
 
-        <!-- 6. Bundles (cession.fun/bundles) -->
-        <button class="rail-icon-btn" id="railNavBundles" title="Bundles (cession.fun/bundles)">
-          <svg viewBox="0 0 24 24"><path d="M12 2L1 7l11 5 9-4.09V17h2V7L12 2zm-7.64 9.18L2 12l10 5 10-5-2.36-.82L12 15.18l-7.64-4zm0 4.5L2 16.5 12 21.5l10-5-2.36-.82L12 19.68l-7.64-4z"/></svg>
+        <!-- 6. Bundles -->
+        <button class="rail-icon-btn" id="railNavBundles" title="Token Bundles">
+          BUNDLES
         </button>
       </div>
 
-      <!-- Bottom Mint Green Create Button -->
+      <!-- Bottom Text Create Button -->
       <button class="rail-create-btn" id="railBtnCreate" title="Create Coin" onclick="window.launchpadManager.openDeployModal()">
-        +
+        CREATE
       </button>
     </aside>
 
@@ -88,45 +86,42 @@
       
       <!-- Top Notice Banner -->
       <div class="top-notice-banner" id="topNoticeBanner">
-        <span class="top-notice-link">Trade faster. Cession Sovereign Fair Launch Protocol is Live. ›</span>
-        <button class="top-notice-close" onclick="document.getElementById('topNoticeBanner').style.display='none'">&times;</button>
+        <span class="top-notice-link">Trade faster. Cession Sovereign Fair Launch Protocol is Live.</span>
+        <button class="top-notice-close" onclick="document.getElementById('topNoticeBanner').style.display='none'">[Close]</button>
       </div>
 
       <!-- Top Navbar -->
       <header class="top-navbar">
         <div class="nav-left-group">
-          <!-- Back / Forward Chevrons -->
+          <!-- Back / Forward History Buttons -->
           <div class="nav-history-btns">
-            <button class="nav-chevron-btn" onclick="window.history.back()">‹</button>
-            <button class="nav-chevron-btn" onclick="window.history.forward()">›</button>
+            <button class="nav-chevron-btn" onclick="window.history.back()">Back</button>
+            <button class="nav-chevron-btn" onclick="window.history.forward()">Forward</button>
           </div>
 
           <!-- Search Input (Hidden on Home, Active on Explore) -->
           <div class="nav-search-wrapper" id="navbarSearchWrapper" style="display: none;">
-            <span class="nav-search-icon">🔍</span>
-            <input type="text" id="tokenSearchInput" class="nav-search-input" placeholder="Search for coins, creators, tickers...">
-            <span class="nav-shortcut-kbd">⌘ K</span>
-            <span class="nav-trash-btn" onclick="document.getElementById('tokenSearchInput').value=''; window.launchpadManager.filterAndRenderTokens();">🗑</span>
+            <span class="nav-search-icon">Search:</span>
+            <input type="text" id="tokenSearchInput" class="nav-search-input" placeholder="Search coins, creators, tickers...">
+            <span class="nav-shortcut-kbd">Ctrl K</span>
+            <span class="nav-trash-btn" onclick="document.getElementById('tokenSearchInput').value=''; window.launchpadManager.filterAndRenderTokens();">[Clear]</span>
           </div>
         </div>
 
         <div class="nav-right-group">
           <!-- + Create Button -->
           <button class="btn-create-coin" id="btnNavbarCreate" onclick="window.launchpadManager.openDeployModal()">
-            <span>+</span>
-            <span>Create</span>
+            Create Coin
           </button>
 
-          <!-- ⚡ Create Sovereign Wallet Button -->
-          <button class="cat-pill-btn" id="btnNavCreateWallet" onclick="window.walletEngine.openCreateWalletModal()" style="font-weight: 700; color: #fff; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); display: inline-flex; align-items: center; gap: 4px;">
-            <span>⚡</span>
-            <span>Create Wallet</span>
+          <!-- Create Sovereign Wallet Button -->
+          <button class="cat-pill-btn" id="btnNavCreateWallet" onclick="window.walletEngine.openCreateWalletModal()" style="font-weight: 700; color: var(--pump-mint); background: rgba(30, 80, 255, 0.08); border: 1px solid rgba(30, 80, 255, 0.25); display: inline-flex; align-items: center;">
+            Create Wallet
           </button>
 
-          <!-- 📥 Deposit Crypto Button -->
-          <button class="cat-pill-btn" id="btnNavDeposit" onclick="window.walletEngine.openDepositModal()" style="font-weight: 700; color: var(--pump-mint); background: rgba(134, 239, 172, 0.12); border: 1px solid rgba(134, 239, 172, 0.4); display: inline-flex; align-items: center; gap: 4px;">
-            <span>📥</span>
-            <span>Deposit</span>
+          <!-- Deposit Crypto Button -->
+          <button class="cat-pill-btn" id="btnNavDeposit" onclick="window.walletEngine.openDepositModal()" style="font-weight: 700; color: var(--pump-mint); background: rgba(30, 80, 255, 0.08); border: 1px solid rgba(30, 80, 255, 0.25); display: inline-flex; align-items: center;">
+            Deposit
           </button>
 
           <!-- Sign In Button (or Connected Wallet Pill) -->
@@ -137,7 +132,7 @@
           <div class="wallet-connected-pill" id="walletConnectedPill" style="display: none;">
             <span class="balance" id="navWalletBalance">0.00 SOL</span>
             <span id="navWalletAddress">0x...</span>
-            <button id="btnDisconnectWallet" style="color: var(--accent-red); margin-left: 6px;" onclick="window.walletEngine.disconnect()">✕</button>
+            <button id="btnDisconnectWallet" style="color: var(--accent-red); margin-left: 6px; font-weight: 700;" onclick="window.walletEngine.disconnect()">Disconnect</button>
           </div>
         </div>
       </header>
@@ -148,14 +143,14 @@
       <main class="page-view active" id="viewHome">
         <section class="explore-section">
           <!-- Hero Banner -->
-          <div style="background: linear-gradient(135deg, rgba(20, 24, 33, 0.95), rgba(12, 14, 20, 0.98)); border: 1px solid var(--border-card); border-radius: var(--radius-lg); padding: 48px 36px; text-align: center; margin-bottom: 28px; position: relative; overflow: hidden;">
-            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(134, 239, 172, 0.1); border: 1px solid rgba(134, 239, 172, 0.3); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--pump-mint); margin-bottom: 18px;">
-              <span>🛡️ 100% Fair Launch Bonding Curve</span>
+          <div style="background: linear-gradient(135deg, #ffffff, #eff6ff); border: 1px solid #bfdbfe; box-shadow: var(--shadow-sm); border: 1px solid var(--border-card); border-radius: var(--radius-lg); padding: 48px 36px; text-align: center; margin-bottom: 28px; position: relative; overflow: hidden;">
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(30, 80, 255, 0.08); border: 1px solid rgba(30, 80, 255, 0.25); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--pump-mint); margin-bottom: 18px;">
+              <span>100% Fair Launch Bonding Curve</span>
               <span>•</span>
-              <span>0 Pre-mine</span>
+              <span>Zero Pre-mine</span>
             </div>
             
-            <h1 style="font-size: 38px; font-weight: 900; color: #fff; line-height: 1.2; max-width: 760px; margin: 0 auto 16px auto; letter-spacing: -0.02em;">
+            <h1 style="font-size: 38px; font-weight: 900; color: var(--text-primary); line-height: 1.2; max-width: 760px; margin: 0 auto 16px auto; letter-spacing: -0.02em;">
               The Sovereign Fair Launch Protocol & Liquidity Network
             </h1>
             
@@ -165,13 +160,13 @@
 
             <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
               <button class="btn-signin-mint" style="padding: 12px 28px; font-size: 14px; font-weight: 800;" onclick="window.launchpadManager.openDeployModal()">
-                + Launch Coin (0.1 SOL)
+                Launch Coin (0.1 SOL)
               </button>
               <button class="cat-pill-btn" style="padding: 12px 24px; font-size: 14px; font-weight: 700;" onclick="window.launchpadManager.switchPage('explore')">
-                Explore Coins & Bundles →
+                Explore Coins & Bundles
               </button>
               <a href="/exchange" class="cat-pill-btn" style="padding: 12px 24px; font-size: 14px; font-weight: 700; color: #60a5fa; border-color: rgba(96, 165, 250, 0.4); text-decoration: none;">
-                Calabi Pro Crypto Exchange ↗
+                Live Crypto Exchange
               </a>
             </div>
           </div>
@@ -179,29 +174,29 @@
           <!-- 3-Step "How It Works" Section -->
           <div style="margin-bottom: 32px;">
             <div class="section-header-row" style="margin-bottom: 16px;">
-              <h2 class="section-title">⚡ How Cession Works</h2>
+              <h2 class="section-title">How Cession Works</h2>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
               <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px;">
-                <div style="font-size: 28px; margin-bottom: 12px;">🪙</div>
-                <h3 style="font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 8px;">1. Instant Fair Mint</h3>
+                <div style="font-weight: 800; font-size: 13px; color: var(--pump-mint); text-transform: uppercase; margin-bottom: 6px;">STEP 1</div>
+                <h3 style="font-size: 17px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">1. Instant Fair Mint</h3>
                 <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
                   Pay 0.1 SOL mint fee to deploy your token. 100% of the token supply is immediately deposited into the public bonding curve. No dev allocations, no presales, no VC dumps.
                 </p>
               </div>
 
               <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px;">
-                <div style="font-size: 28px; margin-bottom: 12px;">📈</div>
-                <h3 style="font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 8px;">2. Bonding Curve Trading</h3>
+                <div style="font-weight: 800; font-size: 13px; color: var(--pump-mint); text-transform: uppercase; margin-bottom: 6px;">STEP 2</div>
+                <h3 style="font-size: 17px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">2. Bonding Curve Trading</h3>
                 <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
                   Buy and sell tokens directly on the mathematical bonding curve. Liquidity is guaranteed at every price step with 0 slippage exploitation and strict anti-MEV front-running guards.
                 </p>
               </div>
 
               <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px;">
-                <div style="font-size: 28px; margin-bottom: 12px;">🚀</div>
-                <h3 style="font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 8px;">3. Automated DEX Graduation</h3>
+                <div style="font-weight: 800; font-size: 13px; color: var(--pump-mint); text-transform: uppercase; margin-bottom: 6px;">STEP 3</div>
+                <h3 style="font-size: 17px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">3. Automated DEX Graduation</h3>
                 <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
                   When a coin hits 100% curve completion ($69,420 market cap), accumulated SOL reserves are migrated to Raydium / Uniswap DEX and LP tokens are permanently burned.
                 </p>
@@ -212,8 +207,8 @@
           <!-- Protocol Trust & Verified Multi-Sig Metrics -->
           <div style="background: var(--bg-card); border: 1px solid rgba(134, 239, 172, 0.2); border-radius: var(--radius-md); padding: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
             <div>
-              <div style="font-weight: 800; color: #fff; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                <span>🛡️ Solana Squads Multi-Sig Treasury</span>
+              <div style="font-weight: 800; color: var(--text-primary); font-size: 16px;">
+                Solana Squads Multi-Sig Treasury
               </div>
               <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; font-family: var(--font-mono);">
                 8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH
@@ -221,7 +216,7 @@
             </div>
             <div style="display: flex; gap: 10px;">
               <button class="cat-pill-btn" onclick="window.launchpadManager.switchPage('transparency')">View Proof of Reserves</button>
-              <a href="https://solscan.io/account/8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH" target="_blank" rel="noopener noreferrer" class="cat-pill-btn" style="text-decoration: none;">Solscan ↗</a>
+              <a href="https://solscan.io/account/8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH" target="_blank" rel="noopener noreferrer" class="cat-pill-btn" style="text-decoration: none;">Solscan</a>
             </div>
           </div>
         </section>
@@ -252,23 +247,21 @@
           <div class="explore-controls-bar">
             <!-- Left Category Filter Pills -->
             <div class="category-pills-row" id="categoryPillsRow">
-              <button class="cat-pill-btn active" data-cat="movers">✨ Movers</button>
-              <button class="cat-pill-btn" data-cat="mayhem">🔥 Mayhem</button>
-              <button class="cat-pill-btn" data-cat="new">🌱 New</button>
-              <button class="cat-pill-btn" data-cat="market_cap">🔥 Market cap</button>
-              <button class="cat-pill-btn" data-cat="last_trade">⚡ Last trade</button>
-              <button class="cat-pill-btn" onclick="window.launchpadManager.switchPage('bundles')">📦 Bundles</button>
+              <button class="cat-pill-btn active" data-cat="movers">Movers</button>
+              <button class="cat-pill-btn" data-cat="mayhem">Mayhem</button>
+              <button class="cat-pill-btn" data-cat="new">New</button>
+              <button class="cat-pill-btn" data-cat="market_cap">Market cap</button>
+              <button class="cat-pill-btn" data-cat="last_trade">Last trade</button>
+              <button class="cat-pill-btn" onclick="window.launchpadManager.switchPage('bundles')">Bundles</button>
             </div>
 
             <!-- Right Controls: Grid/Table Switcher -->
             <div class="explore-view-controls">
               <div class="view-mode-toggle-group">
                 <button class="view-toggle-btn active" id="btnViewGrid">
-                  <span>⊞</span>
                   <span>Grid</span>
                 </button>
                 <button class="view-toggle-btn" id="btnViewTable">
-                  <span>☷</span>
                   <span>Table</span>
                 </button>
               </div>
@@ -277,7 +270,7 @@
 
           <!-- Main Explore Coins Cards Grid (Renders empty state when 0 coins) -->
           <div class="explore-coins-grid" id="exploreCoinsGrid">
-            <!-- Populated dynamically with Sparkline SVGs by launchpad.js -->
+            <!-- Populated dynamically by launchpad.js -->
           </div>
 
           <!-- Table View Mode Container (Renders empty state when 0 coins) -->
@@ -312,7 +305,7 @@
           <div class="section-header-row" style="flex-wrap: wrap; gap: 14px;">
             <div>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <h2 class="section-title">💱 Sovereign Live Crypto Exchange</h2>
+                <h2 class="section-title">Sovereign Live Crypto Exchange</h2>
                 <span style="background: rgba(134, 239, 172, 0.12); color: var(--pump-mint); border: 1px solid var(--pump-mint); font-size: 11px; font-weight: 800; font-family: var(--font-mono); padding: 2px 8px; border-radius: 12px;">0.00% FEE FREE</span>
               </div>
               <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
@@ -321,36 +314,36 @@
             </div>
             
             <div style="display: flex; gap: 8px; align-items: center;">
-              <button class="cat-pill-btn active" id="btnExchangeTabSwap" onclick="window.exchangeManager.switchTab('swap')">💱 0% Swap</button>
-              <button class="cat-pill-btn" id="btnExchangeTabBuy" onclick="window.exchangeManager.switchTab('buy')">💳 Buy with Card</button>
-              <button class="cat-pill-btn" id="btnExchangeTabTransfer" onclick="window.exchangeManager.switchTab('transfer')">📥 Send / Receive</button>
+              <button class="cat-pill-btn active" id="btnExchangeTabSwap" onclick="window.exchangeManager.switchTab('swap')">0% Swap</button>
+              <button class="cat-pill-btn" id="btnExchangeTabBuy" onclick="window.exchangeManager.switchTab('buy')">Buy with Card</button>
+              <button class="cat-pill-btn" id="btnExchangeTabTransfer" onclick="window.exchangeManager.switchTab('transfer')">Send / Receive</button>
             </div>
           </div>
 
           <!-- Real-Time Ticker Strip -->
           <div class="exchange-ticker-strip" id="exchangeTickerStrip">
             <div class="exchange-ticker-chip active" data-pair="SOL-USDC" onclick="window.exchangeManager.selectPair('SOL-USDC')">
-              <span style="font-weight: 700; color: #fff;">SOL/USDC</span>
+              <span style="font-weight: 700; color: var(--text-primary);">SOL/USDC</span>
               <span id="stripSolPrice" style="color: var(--pump-mint); font-weight: 700;">$154.20</span>
               <span style="color: var(--pump-mint); font-size: 11px;">+5.72%</span>
             </div>
             <div class="exchange-ticker-chip" data-pair="ETH-USDC" onclick="window.exchangeManager.selectPair('ETH-USDC')">
-              <span style="font-weight: 700; color: #fff;">ETH/USDC</span>
+              <span style="font-weight: 700; color: var(--text-primary);">ETH/USDC</span>
               <span id="stripEthPrice" style="color: var(--pump-mint); font-weight: 700;">$3,480.50</span>
               <span style="color: var(--pump-mint); font-size: 11px;">+3.15%</span>
             </div>
             <div class="exchange-ticker-chip" data-pair="BTC-USDC" onclick="window.exchangeManager.selectPair('BTC-USDC')">
-              <span style="font-weight: 700; color: #fff;">BTC/USDC</span>
+              <span style="font-weight: 700; color: var(--text-primary);">BTC/USDC</span>
               <span id="stripBtcPrice" style="color: var(--pump-mint); font-weight: 700;">$65,420.00</span>
               <span style="color: var(--pump-mint); font-size: 11px;">+2.84%</span>
             </div>
             <div class="exchange-ticker-chip" data-pair="SOL-ETH" onclick="window.exchangeManager.selectPair('SOL-ETH')">
-              <span style="font-weight: 700; color: #fff;">SOL/ETH</span>
-              <span id="stripSolEthPrice" style="color: #fff; font-weight: 700;">0.0443 ETH</span>
+              <span style="font-weight: 700; color: var(--text-primary);">SOL/ETH</span>
+              <span id="stripSolEthPrice" style="color: var(--text-primary); font-weight: 700;">0.0443 ETH</span>
               <span style="color: var(--pump-mint); font-size: 11px;">+2.45%</span>
             </div>
             <div class="exchange-ticker-chip" data-pair="CESS-SOL" onclick="window.exchangeManager.selectPair('CESS-SOL')">
-              <span style="font-weight: 700; color: #fff;">CESS/SOL</span>
+              <span style="font-weight: 700; color: var(--text-primary);">CESS/SOL</span>
               <span id="stripCessPrice" style="color: var(--pump-mint); font-weight: 700;">0.0027 SOL</span>
               <span style="color: var(--pump-mint); font-size: 11px;">+14.80%</span>
             </div>
@@ -366,7 +359,7 @@
               <div class="exchange-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                   <div style="display: flex; align-items: baseline; gap: 10px;">
-                    <span id="activePairDisplay" style="font-size: 18px; font-weight: 800; color: #fff; font-family: var(--font-mono);">SOL/USDC</span>
+                    <span id="activePairDisplay" style="font-size: 18px; font-weight: 800; color: var(--text-primary); font-family: var(--font-mono);">SOL/USDC</span>
                     <span id="activePairPriceDisplay" style="font-size: 18px; font-weight: 800; color: var(--pump-mint); font-family: var(--font-mono);">$154.20</span>
                     <span id="activePairChangeDisplay" style="font-size: 11px; font-weight: 700; color: var(--pump-mint); background: rgba(134,239,172,0.1); padding: 2px 6px; border-radius: 8px;">+5.72% 24h</span>
                   </div>
@@ -380,15 +373,15 @@
                 </div>
 
                 <!-- Canvas Chart Area -->
-                <div style="background: #090c12; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); height: 300px; position: relative; overflow: hidden;">
+                <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); height: 300px; position: relative; overflow: hidden;">
                   <canvas id="exchangeCandleCanvas" width="700" height="300" style="width: 100%; height: 100%; display: block;"></canvas>
                 </div>
 
                 <!-- Market Stats Bar -->
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; font-size: 11px; font-family: var(--font-mono); background: var(--bg-input); padding: 10px; border-radius: var(--radius-sm);">
-                  <div><span style="color: var(--text-muted);">24h High:</span> <strong id="stat24hHigh" style="color: #fff;">$158.40</strong></div>
-                  <div><span style="color: var(--text-muted);">24h Low:</span> <strong id="stat24hLow" style="color: #fff;">$144.10</strong></div>
-                  <div><span style="color: var(--text-muted);">24h Volume:</span> <strong id="stat24hVol" style="color: #fff;">$1.42M</strong></div>
+                  <div><span style="color: var(--text-muted);">24h High:</span> <strong id="stat24hHigh" style="color: var(--text-primary);">$158.40</strong></div>
+                  <div><span style="color: var(--text-muted);">24h Low:</span> <strong id="stat24hLow" style="color: var(--text-primary);">$144.10</strong></div>
+                  <div><span style="color: var(--text-muted);">24h Volume:</span> <strong id="stat24hVol" style="color: var(--text-primary);">$1.42M</strong></div>
                   <div><span style="color: var(--text-muted);">Oracle:</span> <strong style="color: var(--pump-mint);">Coinbase Live</strong></div>
                 </div>
               </div>
@@ -398,7 +391,7 @@
                 <!-- L2 Depth Orderbook -->
                 <div class="exchange-card">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span style="font-weight: 700; color: #fff; font-size: 13px;">📊 L2 Order Book</span>
+                    <span style="font-weight: 700; color: var(--text-primary); font-size: 13px;">L2 Order Book</span>
                     <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">Spread: <strong id="orderbookSpread" style="color: var(--pump-mint);">0.05</strong></span>
                   </div>
                   <table class="pump-data-table" style="font-size: 11px;">
@@ -414,8 +407,8 @@
                 <!-- Recent Live Trades -->
                 <div class="exchange-card">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span style="font-weight: 700; color: #fff; font-size: 13px;">⚡ Market Trades</span>
-                    <span style="font-size: 11px; color: var(--pump-mint); font-weight: 700;">● Live Stream</span>
+                    <span style="font-weight: 700; color: var(--text-primary); font-size: 13px;">Market Trades</span>
+                    <span style="font-size: 11px; color: var(--pump-mint); font-weight: 700;">Live Stream</span>
                   </div>
                   <table class="pump-data-table" style="font-size: 11px;">
                     <thead>
@@ -436,8 +429,8 @@
               <!-- Active Connected Wallet Card -->
               <div class="exchange-card" style="border-left: 3px solid var(--pump-mint);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <div style="font-weight: 800; font-size: 13px; color: #fff; display: flex; align-items: center; gap: 6px;">
-                    <span>💼 Active Trading Wallet</span>
+                  <div style="font-weight: 800; font-size: 13px; color: var(--text-primary); display: flex; align-items: center;">
+                    <span>Active Trading Wallet</span>
                   </div>
                   <span id="exchangeWalletBadge" style="font-size: 10px; font-weight: 700; font-family: var(--font-mono); color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 10px;">DISCONNECTED</span>
                 </div>
@@ -453,10 +446,10 @@
                     <span style="color: var(--text-muted);">SOL:</span> <strong id="exchangeBalSol" style="color: var(--pump-mint);">0.00 SOL</strong>
                   </div>
                   <div style="background: var(--bg-input); padding: 6px 10px; border-radius: var(--radius-xs);">
-                    <span style="color: var(--text-muted);">ETH:</span> <strong id="exchangeBalEth" style="color: #fff;">0.00 ETH</strong>
+                    <span style="color: var(--text-muted);">ETH:</span> <strong id="exchangeBalEth" style="color: var(--text-primary);">0.00 ETH</strong>
                   </div>
                   <div style="background: var(--bg-input); padding: 6px 10px; border-radius: var(--radius-xs);">
-                    <span style="color: var(--text-muted);">USDC:</span> <strong id="exchangeBalUsdc" style="color: #fff;">$0.00</strong>
+                    <span style="color: var(--text-muted);">USDC:</span> <strong id="exchangeBalUsdc" style="color: var(--text-primary);">$0.00</strong>
                   </div>
                   <div style="background: var(--bg-input); padding: 6px 10px; border-radius: var(--radius-xs);">
                     <span style="color: var(--text-muted);">CESS:</span> <strong id="exchangeBalCess" style="color: var(--pump-mint);">0</strong>
@@ -465,7 +458,7 @@
 
                 <!-- Quick Action if Disconnected or Want to Create New -->
                 <div id="exchangeWalletActionsRow" style="display: flex; gap: 8px; margin-top: 10px;">
-                  <button class="btn-signin-mint" style="flex: 1; padding: 6px; font-size: 11px;" onclick="window.walletEngine.generateNewVault()">+ New 1-Click Vault</button>
+                  <button class="btn-signin-mint" style="flex: 1; padding: 6px; font-size: 11px;" onclick="window.walletEngine.generateNewVault()">New Vault</button>
                   <button class="cat-pill-btn" style="flex: 1; padding: 6px; font-size: 11px; justify-content: center;" onclick="window.walletEngine.openAuthModal()">Connect Wallet</button>
                 </div>
               </div>
@@ -473,7 +466,7 @@
               <!-- PANE 1: 0% FEE INSTANT SWAP -->
               <div class="exchange-card" id="paneExchangeSwap">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                  <h3 style="font-size: 15px; font-weight: 800; color: #fff;">💱 0% Fee Instant Swap</h3>
+                  <h3 style="font-size: 15px; font-weight: 800; color: var(--text-primary);">0% Fee Instant Swap</h3>
                   <span style="font-size: 11px; color: var(--pump-mint); font-family: var(--font-mono);">Slippage: <strong>0.5%</strong></span>
                 </div>
 
@@ -481,10 +474,10 @@
                 <div class="exchange-input-box">
                   <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 6px;">
                     <span>You Pay</span>
-                    <span>Balance: <strong id="swapPayBalanceDisplay" style="color: #fff;">0.00 SOL</strong> <button class="cat-pill-btn" style="padding: 1px 4px; font-size: 10px; margin-left: 4px;" onclick="window.exchangeManager.setPayMax()">MAX</button></span>
+                    <span>Balance: <strong id="swapPayBalanceDisplay" style="color: var(--text-primary);">0.00 SOL</strong> <button class="cat-pill-btn" style="padding: 1px 4px; font-size: 10px; margin-left: 4px;" onclick="window.exchangeManager.setPayMax()">MAX</button></span>
                   </div>
                   <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="number" id="swapPayAmountInput" placeholder="0.0" step="any" style="background: transparent; border: none; font-size: 22px; font-weight: 800; color: #fff; width: 100%; outline: none; font-family: var(--font-mono);" oninput="window.exchangeManager.updateQuote()">
+                    <input type="number" id="swapPayAmountInput" placeholder="0.0" step="any" style="background: transparent; border: none; font-size: 22px; font-weight: 800; color: var(--text-primary); width: 100%; outline: none; font-family: var(--font-mono);" oninput="window.exchangeManager.updateQuote()">
                     <select id="swapPayTokenSelect" class="exchange-select" onchange="window.exchangeManager.updateQuote()">
                       <option value="SOL">SOL (Solana)</option>
                       <option value="ETH">ETH (Base / EVM)</option>
@@ -498,7 +491,7 @@
 
                 <!-- FLIP BUTTON -->
                 <button class="exchange-swap-flip-btn" id="btnFlipSwapTokens" title="Flip Direction" onclick="window.exchangeManager.flipTokens()">
-                  ⇅
+                  Flip
                 </button>
 
                 <!-- YOU RECEIVE INPUT -->
@@ -528,11 +521,11 @@
                   </div>
                   <div style="display: flex; justify-content: space-between;">
                     <span style="color: var(--text-muted);">Estimated Network Gas:</span>
-                    <span style="color: #fff; font-family: var(--font-mono);">~$0.0002 (Solana/Base)</span>
+                    <span style="color: var(--text-primary); font-family: var(--font-mono);">~$0.0002 (Solana/Base)</span>
                   </div>
                   <div style="display: flex; justify-content: space-between;">
                     <span style="color: var(--text-muted);">Routing Method:</span>
-                    <span style="color: #fff;">Direct Sovereign Non-Custodial Route</span>
+                    <span style="color: var(--text-primary);">Direct Sovereign Non-Custodial Route</span>
                   </div>
                   <div style="display: flex; justify-content: space-between;">
                     <span style="color: var(--text-muted);">Price Impact:</span>
@@ -541,13 +534,13 @@
                 </div>
 
                 <button class="btn-signin-mint" id="btnExecuteSwap" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 800;" onclick="window.exchangeManager.executeSwap()">
-                  💱 Execute Instant 0% Swap
+                  Execute Instant 0% Swap
                 </button>
               </div>
 
               <!-- PANE 2: BUY CRYPTO WITH CARD / ON-RAMP -->
               <div class="exchange-card" id="paneExchangeBuy" style="display: none;">
-                <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 6px;">💳 Buy Real Crypto with Card</h3>
+                <h3 style="font-size: 15px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">Buy Real Crypto with Card</h3>
                 <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 14px;">Instant zero-fee on-ramp deposited straight into your connected wallet.</div>
 
                 <div class="form-group-pump">
@@ -575,24 +568,24 @@
                     ≈ 0.3242 SOL
                   </div>
                   <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-                    Destination: <span id="buyCryptoDestinationDisplay" style="color: #fff; font-family: var(--font-mono);">0x082...004c</span>
+                    Destination: <span id="buyCryptoDestinationDisplay" style="color: var(--text-primary); font-family: var(--font-mono);">0x082...004c</span>
                   </div>
                 </div>
 
                 <button class="btn-signin-mint" id="btnExecuteCardBuy" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 800; margin-top: 12px;" onclick="window.exchangeManager.executeCardBuy()">
-                  ⚡ Instant Buy Crypto (0% Fee)
+                  Instant Buy Crypto (0% Fee)
                 </button>
               </div>
 
               <!-- PANE 3: SEND & RECEIVE / TRANSFER -->
               <div class="exchange-card" id="paneExchangeTransfer" style="display: none;">
-                <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 6px;">📥 Deposit & Withdraw Hub</h3>
+                <h3 style="font-size: 15px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">Deposit & Withdraw Hub</h3>
                 
                 <!-- Deposit / Receive Tab Box -->
                 <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px;">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <div style="font-weight: 700; color: var(--pump-mint); font-size: 12px;">🟢 Deposit Crypto (Solana / Base / Bitcoin)</div>
-                    <button class="btn-signin-mint" style="padding: 4px 10px; font-size: 11px;" onclick="window.walletEngine.openDepositModal()">📥 Full Deposit & QR Modal</button>
+                    <div style="font-weight: 700; color: var(--pump-mint); font-size: 12px;">Deposit Crypto (Solana / Base / Bitcoin)</div>
+                    <button class="btn-signin-mint" style="padding: 4px 10px; font-size: 11px;" onclick="window.walletEngine.openDepositModal()">Full Deposit Modal</button>
                   </div>
                   <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 10px;">
                     Send any SOL, ETH, or USDC to your sovereign vault address below or fund with 1-click testnet simulation:
@@ -604,13 +597,13 @@
                   </div>
                   <div class="wallet-addr-box" style="margin-bottom: 10px;">
                     <span>EVM Address:</span>
-                    <strong id="depositEthAddr" style="color: #fff; font-size: 11px; word-break: break-all;">Not Connected</strong>
+                    <strong id="depositEthAddr" style="color: var(--text-primary); font-size: 11px; word-break: break-all;">Not Connected</strong>
                     <button class="cat-pill-btn" style="padding: 2px 6px; font-size: 10px;" onclick="if(document.getElementById('depositEthAddr').textContent!=='Not Connected'){navigator.clipboard.writeText(document.getElementById('depositEthAddr').textContent); window.launchpadManager.toast('EVM address copied', 'success');}else{window.walletEngine.openAuthModal();}">copy</button>
                   </div>
 
                   <!-- Quick Sandbox Deposit Faucet -->
                   <div style="display: flex; gap: 6px; align-items: center; border-top: 1px solid var(--border-card); padding-top: 10px; flex-wrap: wrap;">
-                    <span style="font-size: 11px; color: var(--text-secondary);">🚰 Instant Test Deposit:</span>
+                    <span style="font-size: 11px; color: var(--text-secondary);">Instant Test Deposit:</span>
                     <button class="cat-pill-btn" style="padding: 3px 8px; font-size: 11px; color: var(--pump-mint);" onclick="window.walletEngine.depositFunds('SOL', 1.0)">+1.0 SOL</button>
                     <button class="cat-pill-btn" style="padding: 3px 8px; font-size: 11px; color: var(--accent-purple);" onclick="window.walletEngine.depositFunds('ETH', 0.5)">+0.5 ETH</button>
                     <button class="cat-pill-btn" style="padding: 3px 8px; font-size: 11px; color: #60a5fa;" onclick="window.walletEngine.depositFunds('USDC', 500)">+$500 USDC</button>
@@ -619,7 +612,7 @@
 
                 <!-- Send / Withdraw Section -->
                 <div>
-                  <div style="font-weight: 700; color: #fff; font-size: 13px; margin-bottom: 8px;">📤 Send / Withdraw to External Address</div>
+                  <div style="font-weight: 700; color: var(--text-primary); font-size: 13px; margin-bottom: 8px;">Send / Withdraw to External Address</div>
                   <div class="form-group-pump">
                     <label class="form-label-pump">Token</label>
                     <select id="transferTokenSelect" class="form-input-pump">
@@ -645,7 +638,7 @@
               <!-- RECENT SESSION SWAP HISTORY -->
               <div class="exchange-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                  <span style="font-weight: 700; color: #fff; font-size: 13px;">📋 Your Exchange Activity</span>
+                  <span style="font-weight: 700; color: var(--text-primary); font-size: 13px;">Your Exchange Activity</span>
                   <span style="font-size: 11px; color: var(--text-muted);">Live On-Chain Receipts</span>
                 </div>
                 <div id="exchangeRecentHistoryList" style="display: flex; flex-direction: column; gap: 8px; font-family: var(--font-mono); font-size: 11px;">
@@ -666,9 +659,9 @@
         <section class="explore-section">
           <div class="section-header-row" style="flex-wrap: wrap; gap: 14px;">
             <div>
-              <h2 class="section-title">📦 Token Bundles & Curated Baskets</h2>
+              <h2 class="section-title">Token Bundles & Curated Baskets</h2>
               <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
-                Create custom meme baskets, share direct bundle links (<code>cession.fun/bundles/your-bundle</code>), or 1-click buy entire portfolios.
+                Create custom meme baskets, share direct bundle links, or 1-click buy entire portfolios.
               </div>
             </div>
             <button class="btn-signin-mint" id="btnOpenCreateBundleModal" style="display: flex; align-items: center; gap: 6px;">
@@ -676,43 +669,43 @@
             </button>
           </div>
 
-          <!-- Category Selector Tabs: All, Memes, Politics, Trends, Whale, AI Agents -->
+          <!-- Category Selector Tabs -->
           <div class="bundle-category-bar" id="bundleCategoryTabs" style="display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0 12px 0;">
             <button class="bundle-cat-pill active" data-category="all">
-              <span>🌐 All Categories</span>
+              <span>All Categories</span>
             </button>
             <button class="bundle-cat-pill" data-category="memes">
-              <span>🎭 Memes</span>
+              <span>Memes</span>
             </button>
             <button class="bundle-cat-pill" data-category="politics">
-              <span>🏛️ Politics</span>
+              <span>Politics</span>
             </button>
             <button class="bundle-cat-pill" data-category="trends">
-              <span>📈 Trends</span>
+              <span>Trends</span>
             </button>
             <button class="bundle-cat-pill" data-category="whale">
-              <span>🐋 Whale</span>
+              <span>Whale</span>
             </button>
             <button class="bundle-cat-pill" data-category="ai">
               <span>Agents</span>
             </button>
           </div>
 
-          <!-- Performance Leaderboard Matrices: Top 5 Best vs Top 5 Worst (Dip Hunters) -->
+          <!-- Performance Leaderboard Matrices -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin: 16px 0 28px 0;">
             <!-- TOP 5 BEST PERFORMERS -->
             <div style="background: var(--bg-card); border: 1px solid rgba(134, 239, 172, 0.25); border-radius: var(--radius-md); padding: 18px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border-card); padding-bottom: 10px;">
                 <div>
-                  <div style="font-weight: 800; font-size: 15px; color: var(--pump-mint); display: flex; align-items: center; gap: 6px;">
-                    <span>🚀 Top 5 Best Performing Bundles</span>
+                  <div style="font-weight: 800; font-size: 15px; color: var(--pump-mint);">
+                    Top 5 Best Performing Bundles
                   </div>
                   <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Highest 24h ROI gainers in selected category</div>
                 </div>
                 <span id="topCatBadge" style="font-size: 11px; color: var(--pump-mint); font-weight: 700; font-family: var(--font-mono); background: rgba(134, 239, 172, 0.1); padding: 3px 8px; border-radius: 12px;">ALL</span>
               </div>
               <div id="topBundlesList" style="display: flex; flex-direction: column; gap: 10px;">
-                <!-- Rendered dynamically (Top 5) -->
+                <!-- Rendered dynamically -->
               </div>
             </div>
 
@@ -720,15 +713,15 @@
             <div style="background: var(--bg-card); border: 1px solid rgba(248, 113, 113, 0.25); border-radius: var(--radius-md); padding: 18px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border-card); padding-bottom: 10px;">
                 <div>
-                  <div style="font-weight: 800; font-size: 15px; color: var(--accent-red); display: flex; align-items: center; gap: 6px;">
-                    <span>📉 Top 5 Worst Performing Bundles</span>
+                  <div style="font-weight: 800; font-size: 15px; color: var(--accent-red);">
+                    Top 5 Worst Performing Bundles
                   </div>
                   <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Dip hunter discount entries at curve floor</div>
                 </div>
                 <span id="worstCatBadge" style="font-size: 11px; color: var(--accent-red); font-weight: 700; font-family: var(--font-mono); background: rgba(248, 113, 113, 0.1); padding: 3px 8px; border-radius: 12px;">BUY DIP</span>
               </div>
               <div id="worstBundlesList" style="display: flex; flex-direction: column; gap: 10px;">
-                <!-- Rendered dynamically (Top 5 Worst) -->
+                <!-- Rendered dynamically -->
               </div>
             </div>
           </div>
@@ -736,7 +729,7 @@
           <!-- All Community Bundles Explorer for Selected Category -->
           <div class="section-header-row" style="margin-top: 28px; border-top: 1px solid var(--border-card); padding-top: 24px;">
             <div>
-              <h3 style="font-size: 16px; font-weight: 700; color: #fff;" id="allBundlesSectionTitle">All Community Bundles</h3>
+              <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary);" id="allBundlesSectionTitle">All Community Bundles</h3>
               <span style="font-size: 12px; color: var(--text-muted);">Explore user-created baskets or share your own</span>
             </div>
             <div class="search-input-wrapper" style="width: 280px;">
@@ -756,7 +749,7 @@
       <main class="page-view" id="viewLeaderboard">
         <section class="explore-section">
           <div class="section-header-row">
-            <h2 class="section-title">🏆 Hall of Fame & Leaderboard</h2>
+            <h2 class="section-title">Hall of Fame & Leaderboard</h2>
             <div class="category-pills-row">
               <button class="cat-pill-btn active" id="tabTopTraders">Top Traders</button>
               <button class="cat-pill-btn" id="tabTopCreators">Top Creators</button>
@@ -790,9 +783,11 @@
       <main class="page-view" id="viewProfile">
         <section class="explore-section">
           <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-            <img id="profileAvatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=guest" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--border-card);" alt="Profile">
+            <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--bg-input); border: 2px solid var(--border-card); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; color: var(--pump-mint);">
+              USER
+            </div>
             <div style="flex: 1;">
-              <div style="font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+              <div style="font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
                 <span id="profileAddressFull">Not Connected</span>
                 <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="if(document.getElementById('profileAddressFull').textContent !== 'Not Connected'){navigator.clipboard.writeText(document.getElementById('profileAddressFull').textContent); window.launchpadManager.toast('Address copied', 'success');} else { window.walletEngine.openAuthModal(); }">copy</button>
               </div>
@@ -802,15 +797,15 @@
               <div style="display: flex; gap: 24px; margin-top: 14px; font-family: var(--font-mono); font-size: 13px; flex-wrap: wrap;">
                 <div>SOL Balance: <strong id="profileSolBalance" style="color: var(--pump-mint); font-size: 16px;">0.00 SOL</strong></div>
                 <div>$CESS Balance: <strong id="profileCessBalance" style="color: var(--pump-mint); font-size: 16px;">0 $CESS</strong></div>
-                <div>Portfolio Value: <strong id="profilePortfolioValue" style="color: #fff; font-size: 16px;">$0.00</strong></div>
+                <div>Portfolio Value: <strong id="profilePortfolioValue" style="color: var(--text-primary); font-size: 16px;">$0.00</strong></div>
               </div>
 
               <!-- Profile Sovereign Wallet Action Row -->
               <div style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; border-top: 1px solid var(--border-card); padding-top: 14px;">
-                <button class="cat-pill-btn" style="color: #fff; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); font-weight: 700;" onclick="window.walletEngine.openCreateWalletModal()">⚡ Create Sovereign Vault</button>
-                <button class="btn-signin-mint" style="padding: 6px 14px; font-size: 12px; font-weight: 700;" onclick="window.walletEngine.openDepositModal()">📥 Deposit Crypto</button>
-                <button class="cat-pill-btn" style="color: var(--pump-mint); border: 1px solid rgba(134, 239, 172, 0.4);" onclick="window.walletEngine.depositFunds('SOL', 1.0)">🚰 Faucet (+1.0 SOL)</button>
-                <button class="cat-pill-btn" style="color: var(--text-secondary);" onclick="window.walletEngine.exportSecretPhrase()">🔑 Export Backup Phrase</button>
+                <button class="cat-pill-btn" style="color: var(--text-primary); background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); font-weight: 700;" onclick="window.walletEngine.openCreateWalletModal()">Create Sovereign Vault</button>
+                <button class="btn-signin-mint" style="padding: 6px 14px; font-size: 12px; font-weight: 700;" onclick="window.walletEngine.openDepositModal()">Deposit Crypto</button>
+                <button class="cat-pill-btn" style="color: var(--pump-mint); border: 1px solid rgba(134, 239, 172, 0.4);" onclick="window.walletEngine.depositFunds('SOL', 1.0)">Faucet (+1.0 SOL)</button>
+                <button class="cat-pill-btn" style="color: var(--text-secondary);" onclick="window.walletEngine.exportSecretPhrase()">Export Backup Phrase</button>
               </div>
             </div>
           </div>
@@ -840,8 +835,6 @@
         </section>
       </main>
 
-
-
       <!-- =========================================================
            VIEW: TRANSPARENCY & COMPANY PROTOCOL WALLETS
       ========================================================= -->
@@ -849,13 +842,13 @@
         <section class="explore-section">
           <div class="section-header-row">
             <div>
-              <h2 class="section-title">🛡️ Protocol Transparency & Verified Company Wallets</h2>
+              <h2 class="section-title">Protocol Transparency & Verified Company Wallets</h2>
               <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
                 100% on-chain proof of reserves, official protocol fee collection wallets, and real-time fee distribution metrics.
               </div>
             </div>
             <button class="cat-pill-btn" onclick="window.launchpadManager.refreshTransparency()" style="display: flex; align-items: center; gap: 6px;">
-              <span>↻ Refresh On-Chain Data</span>
+              <span>Refresh On-Chain Data</span>
             </button>
           </div>
 
@@ -866,8 +859,7 @@
             <div class="transparency-card" style="border: 1px solid rgba(134, 239, 172, 0.3);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="font-size: 18px;">🟣</span>
-                  <strong style="font-size: 15px; color: #fff;">Solana Company Treasury</strong>
+                  <strong style="font-size: 15px; color: var(--text-primary);">Solana Company Treasury</strong>
                 </div>
                 <span style="font-size: 11px; background: rgba(134, 239, 172, 0.15); color: var(--pump-mint); font-weight: 700; padding: 3px 8px; border-radius: 12px;">0.1 SOL MINT FEE AGGREGATOR</span>
               </div>
@@ -880,7 +872,7 @@
 
               <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 13px; border-top: 1px solid var(--border-card); padding-top: 12px;">
                 <span>Live Treasury Balance: <strong id="solTreasuryBal" style="color: var(--pump-mint); font-size: 15px;">48.60 SOL</strong></span>
-                <a href="https://solscan.io/account/8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH" target="_blank" rel="noopener noreferrer" style="color: var(--pump-mint); font-size: 12px; text-decoration: underline;">Verify on Solscan ↗</a>
+                <a href="https://solscan.io/account/8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH" target="_blank" rel="noopener noreferrer" style="color: var(--pump-mint); font-size: 12px; text-decoration: underline;">Verify on Solscan</a>
               </div>
             </div>
 
@@ -888,8 +880,7 @@
             <div class="transparency-card" style="border: 1px solid rgba(192, 132, 252, 0.3);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="font-size: 18px;">🔵</span>
-                  <strong style="font-size: 15px; color: #fff;">Base L2 Protocol Treasury</strong>
+                  <strong style="font-size: 15px; color: var(--text-primary);">Base L2 Protocol Treasury</strong>
                 </div>
                 <span style="font-size: 11px; background: rgba(192, 132, 252, 0.15); color: var(--accent-purple); font-weight: 700; padding: 3px 8px; border-radius: 12px;">EVM LP & DUAL-CHAIN VAULT</span>
               </div>
@@ -902,7 +893,7 @@
 
               <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 13px; border-top: 1px solid var(--border-card); padding-top: 12px;">
                 <span>Live Treasury Balance: <strong id="evmTreasuryBal" style="color: var(--accent-purple); font-size: 15px;">14.28 ETH</strong></span>
-                <a href="https://basescan.org" target="_blank" rel="noopener noreferrer" style="color: var(--accent-purple); font-size: 12px; text-decoration: underline;">Verify on BaseScan ↗</a>
+                <a href="https://basescan.org" target="_blank" rel="noopener noreferrer" style="color: var(--accent-purple); font-size: 12px; text-decoration: underline;">Verify on BaseScan</a>
               </div>
             </div>
 
@@ -910,25 +901,25 @@
 
           <!-- Protocol Fee Breakdown & Flow Architecture -->
           <div class="transparency-card" style="margin-top: 24px;">
-            <h3 style="font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 14px;">Protocol Fee Routing Architecture</h3>
+            <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin-bottom: 14px;">Protocol Fee Routing Architecture</h3>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
               <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 14px; border-left: 3px solid var(--pump-mint);">
-                <div style="font-weight: 700; color: #fff; font-size: 14px;">0.1 SOL Mint Fee</div>
+                <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">0.1 SOL Mint Fee</div>
                 <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4;">
                   Every newly created coin pays exactly 0.1 SOL at creation. 100% of this fee is immediately settled and credited to the company treasury wallet.
                 </div>
               </div>
 
               <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 14px; border-left: 3px solid var(--accent-purple);">
-                <div style="font-weight: 700; color: #fff; font-size: 14px;">1.0% AMM Trading Swap Fee</div>
+                <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">1.0% AMM Trading Swap Fee</div>
                 <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4;">
                   Every buy and sell trade on the bonding curve incurs a 1.0% swap fee. Automatically split between protocol growth and liquidity stability.
                 </div>
               </div>
 
               <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 14px; border-left: 3px solid var(--accent-orange);">
-                <div style="font-weight: 700; color: #fff; font-size: 14px;">Automatic DEX Graduation ($69,420 Cap)</div>
+                <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">Automatic DEX Graduation ($69,420 Cap)</div>
                 <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4;">
                   Upon reaching 100% bonding curve fill, accumulated SOL reserves are migrated to Raydium / Uniswap with LP tokens burned permanently.
                 </div>
@@ -944,7 +935,7 @@
       <main class="page-view" id="viewTerms">
         <section class="explore-section">
           <div class="transparency-card">
-            <h2 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 12px;">Terms of Service & Risk Disclosures</h2>
+            <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary); margin-bottom: 12px;">Terms of Service & Risk Disclosures</h2>
             <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; display: flex; flex-direction: column; gap: 12px;">
               <p>Cession.fun is a decentralized, non-custodial digital asset protocol. All tokens launched on Cession are community-created smart contracts and bonding curves.</p>
               <p>Cryptocurrency trading and meme asset launches involve substantial financial risk. You are solely responsible for verifying token parameters, developer lock status, and liquidity metrics before trading.</p>
@@ -955,7 +946,7 @@
       </main>
 
       <!-- =========================================================
-           STANDARD SITE FOOTER WITH LOGO & ALL PAGES
+           SITE FOOTER
       ========================================================= -->
       <footer class="site-footer-pump">
         <div class="footer-top-grid">
@@ -963,17 +954,16 @@
           <!-- Column 1: Brand & Mission -->
           <div class="footer-brand-col">
             <div class="footer-logo-row">
-              <img src="images/cession-logo.png" class="footer-logo-img" alt="Cession">
               <span class="footer-brand-name">cession.fun</span>
             </div>
             <p class="footer-brand-tagline">
               The sovereign fair launch bonding curve and non-custodial decentralized exchange on Solana & Base.
             </p>
             <div class="footer-social-row">
-              <a href="https://x.com" target="_blank" rel="noopener" class="footer-social-link">𝕏 Twitter</a>
-              <a href="https://telegram.org" target="_blank" rel="noopener" class="footer-social-link">✈ Telegram</a>
-              <a href="https://github.com/nbaldwin098/cession-fun" target="_blank" rel="noopener" class="footer-social-link">⌨ GitHub</a>
-              <a href="https://discord.com" target="_blank" rel="noopener" class="footer-social-link">💬 Discord</a>
+              <a href="https://x.com" target="_blank" rel="noopener" class="footer-social-link">Twitter</a>
+              <a href="https://telegram.org" target="_blank" rel="noopener" class="footer-social-link">Telegram</a>
+              <a href="https://github.com/nbaldwin098/cession-fun" target="_blank" rel="noopener" class="footer-social-link">GitHub</a>
+              <a href="https://discord.com" target="_blank" rel="noopener" class="footer-social-link">Discord</a>
             </div>
           </div>
 
@@ -981,13 +971,11 @@
           <div>
             <div class="footer-col-title">Markets & Trade</div>
             <ul class="footer-links-list">
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('exchange')">💱 Live 0% Crypto Exchange</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('exchange')">💳 Buy Crypto with Card</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('board')">Coins Board</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.openDeployModal()">+ Create a Coin (0.1 SOL)</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('exchange')">Live 0% Crypto Exchange</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('exchange')">Buy Crypto with Card</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('explore')">Coins Board</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.openDeployModal()">Create Coin (0.1 SOL)</button></li>
               <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('bundles')">Bundles & Baskets</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('board')">King of the Hill</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('board')">Top 24h Gainers</button></li>
             </ul>
           </div>
 
@@ -995,7 +983,6 @@
           <div>
             <div class="footer-col-title">Ecosystem</div>
             <ul class="footer-links-list">
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('staking')">Staking & Yield</button></li>
               <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('leaderboard')">Leaderboard & Hall of Fame</button></li>
               <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('profile')">Profile & Portfolio</button></li>
               <li class="footer-link-item"><button onclick="window.walletEngine.openAuthModal()">Connect Wallet</button></li>
@@ -1009,12 +996,12 @@
               <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('transparency')">Protocol Transparency</button></li>
               <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('transparency')">Company Treasury Wallets</button></li>
               <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('transparency')">0.1 SOL Fee Breakdown</button></li>
-              <li class="footer-link-item"><a href="https://solscan.io" target="_blank" rel="noopener">Solscan Explorer ↗</a></li>
-              <li class="footer-link-item"><a href="https://basescan.org" target="_blank" rel="noopener">BaseScan Explorer ↗</a></li>
+              <li class="footer-link-item"><a href="https://solscan.io" target="_blank" rel="noopener">Solscan Explorer</a></li>
+              <li class="footer-link-item"><a href="https://basescan.org" target="_blank" rel="noopener">BaseScan Explorer</a></li>
             </ul>
           </div>
 
-          <!-- Column 5: Legal & System -->
+          <!-- Column 5: Legal & Security -->
           <div>
             <div class="footer-col-title">Legal & Security</div>
             <ul class="footer-links-list">
@@ -1033,7 +1020,6 @@
             &copy; 2026 Cession Protocol Inc. All rights reserved. Non-custodial sovereign software.
           </div>
           <div class="footer-node-status">
-            <span class="status-dot-pulse"></span>
             <span>Solana Mainnet & Base L2 Nodes Live • Block Height #289,142,098</span>
           </div>
         </div>
@@ -1043,7 +1029,7 @@
   </div>
 
   <!-- =========================================================
-       "WE VALUE YOUR PRIVACY" COOKIE BANNER (EXACT TO SCREENSHOT)
+       "WE VALUE YOUR PRIVACY" COOKIE BANNER
   ========================================================= -->
   <div class="privacy-cookie-banner" id="privacyCookieBanner">
     <div class="cookie-title">We value your privacy</div>
@@ -1063,7 +1049,7 @@
   <div class="modal-overlay-generic" id="tokenDetailModal">
     <div class="modal-box-pump" style="max-width: 1080px;">
       <div class="modal-header-row">
-        <button class="cat-pill-btn" id="btnCloseDetailModal">← [go back to coins]</button>
+        <button class="cat-pill-btn" id="btnCloseDetailModal">[Go Back to Coins]</button>
         <button class="btn-close-modal" onclick="document.getElementById('tokenDetailModal').style.display='none'">&times;</button>
       </div>
 
@@ -1071,20 +1057,20 @@
         <!-- Left Column: Chart & Tabs -->
         <div>
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-            <h2 style="font-size: 20px; font-weight: 800; color: #fff;" id="detailTokenName">Token Name</h2>
+            <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary);" id="detailTokenName">Token Name</h2>
             <span style="color: var(--pump-mint); font-weight: 700; font-family: var(--font-mono);" id="detailTokenSymbol">$TICKER</span>
             <span style="color: var(--text-muted); font-size: 12px;" id="detailTokenMeta">created by 0x88f...1a2 • 2d ago</span>
           </div>
 
           <!-- Chart Box -->
-          <div style="background-color: #090c12; border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px;">
+          <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px;">
             <div id="tradingviewChart" style="width: 100%; height: 320px;"></div>
           </div>
 
           <!-- Bonding Curve Progress -->
           <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px;">
             <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 13px; font-weight: 700; margin-bottom: 6px;">
-              <span>bonding curve progress: <strong id="detailProgressPercent" style="color: var(--pump-mint);">84%</strong></span>
+              <span>Bonding curve progress: <strong id="detailProgressPercent" style="color: var(--pump-mint);">84%</strong></span>
             </div>
             <div style="width: 100%; height: 8px; background: var(--bg-input); border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
               <div id="detailProgressBar" style="width: 84%; height: 100%; background: var(--pump-mint);"></div>
@@ -1096,17 +1082,17 @@
 
           <!-- Tabs: Thread, Trades, Holders -->
           <div class="category-pills-row" style="margin-bottom: 14px;">
-            <button class="cat-pill-btn active" id="tabThread">thread</button>
-            <button class="cat-pill-btn" id="tabTrades">trades</button>
-            <button class="cat-pill-btn" id="tabHolders">holders</button>
+            <button class="cat-pill-btn active" id="tabThread">Thread</button>
+            <button class="cat-pill-btn" id="tabTrades">Trades</button>
+            <button class="cat-pill-btn" id="tabHolders">Holders</button>
           </div>
 
           <div id="paneThread" style="display: flex; flex-direction: column; gap: 10px;">
             <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; display: flex; flex-direction: column; gap: 8px;">
-              <textarea id="replyCommentText" class="form-textarea-pump" placeholder="add a comment..." style="min-height: 50px;"></textarea>
+              <textarea id="replyCommentText" class="form-textarea-pump" placeholder="Add a comment..." style="min-height: 50px;"></textarea>
               <div style="display: flex; justify-content: space-between; align-items: center;">
-                <input type="text" id="replyImageUrl" class="form-input-pump" placeholder="meme image url (optional)" style="flex: 1; max-width: 240px; padding: 4px 8px; font-size: 11px;">
-                <button class="btn-signin-mint" id="btnSubmitReply" style="padding: 6px 14px;">post reply</button>
+                <input type="text" id="replyImageUrl" class="form-input-pump" placeholder="Meme image url (optional)" style="flex: 1; max-width: 240px; padding: 4px 8px; font-size: 11px;">
+                <button class="btn-signin-mint" id="btnSubmitReply" style="padding: 6px 14px;">Post Reply</button>
               </div>
             </div>
             <div id="commentsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
@@ -1140,37 +1126,37 @@
             </div>
 
             <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
-              <span>slippage: <strong id="currentSlippageVal">1.0%</strong></span>
-              <button style="color: var(--pump-mint); cursor: pointer;" id="btnSetSlippage">[set slippage]</button>
+              <span>Slippage: <strong id="currentSlippageVal">1.0%</strong></span>
+              <button style="color: var(--pump-mint); cursor: pointer;" id="btnSetSlippage">[Set Slippage]</button>
             </div>
 
             <div style="background-color: var(--bg-input); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-              <input type="number" id="tradeAmountInput" style="background: transparent; border: none; font-size: 18px; font-weight: 700; color: #fff; width: 100%; outline: none;" placeholder="0.0" step="any">
+              <input type="number" id="tradeAmountInput" style="background: transparent; border: none; font-size: 18px; font-weight: 700; color: var(--text-primary); width: 100%; outline: none;" placeholder="0.0" step="any">
               <span style="font-weight: 700; color: var(--pump-mint); font-family: var(--font-mono);" id="tradeUnitLabel">SOL</span>
             </div>
 
             <!-- Quick Presets -->
             <div style="display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap;">
-              <button class="cat-pill-btn" style="padding: 4px 8px; font-size: 11px;" onclick="window.tradingManager.setPreset(0)">reset</button>
+              <button class="cat-pill-btn" style="padding: 4px 8px; font-size: 11px;" onclick="window.tradingManager.setPreset(0)">Reset</button>
               <button class="cat-pill-btn" style="padding: 4px 8px; font-size: 11px;" onclick="window.tradingManager.setPreset(0.1)">0.1 SOL</button>
               <button class="cat-pill-btn" style="padding: 4px 8px; font-size: 11px;" onclick="window.tradingManager.setPreset(0.5)">0.5 SOL</button>
               <button class="cat-pill-btn" style="padding: 4px 8px; font-size: 11px;" onclick="window.tradingManager.setPreset(1.0)">1 SOL</button>
-              <button class="cat-pill-btn" style="padding: 4px 8px; font-size: 11px;" onclick="window.tradingManager.setPreset('max')">max</button>
+              <button class="cat-pill-btn" style="padding: 4px 8px; font-size: 11px;" onclick="window.tradingManager.setPreset('max')">Max</button>
             </div>
 
             <div id="tradeOutputQuote" style="font-size: 11px; color: var(--text-secondary); font-family: var(--font-mono); margin-bottom: 12px;">
-              you receive: 0 tokens
+              You Receive: 0 tokens
             </div>
 
             <button class="btn-place-trade" id="btnPlaceTrade">
-              place trade
+              Place Trade
             </button>
           </div>
 
           <!-- Coin Details Card -->
           <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; gap: 10px;">
             <img id="detailCoinImg" src="" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: var(--radius-sm);" alt="Coin">
-            <div id="detailCoinTitle" style="font-size: 15px; font-weight: 800; color: #fff;">Name</div>
+            <div id="detailCoinTitle" style="font-size: 15px; font-weight: 800; color: var(--text-primary);">Name</div>
             <div id="detailCoinDescription" style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">Description</div>
           </div>
         </div>
@@ -1184,14 +1170,14 @@
   <div class="modal-overlay-generic" id="deployModal">
     <div class="modal-box-pump">
       <div class="modal-header-row">
-        <span class="modal-title-text">+ Create a new coin</span>
+        <span class="modal-title-text">Create a new coin</span>
         <button class="btn-close-modal" id="btnCloseDeployModal">&times;</button>
       </div>
 
       <form id="deployCoinForm">
         <div class="form-group-pump">
           <label class="form-label-pump">Coin name</label>
-          <input type="text" id="deployName" class="form-input-pump" placeholder="e.g. The Random Bull" required>
+          <input type="text" id="deployName" class="form-input-pump" placeholder="e.g. Sovereign Bull" required>
         </div>
 
         <div class="form-group-pump">
@@ -1201,7 +1187,7 @@
 
         <div class="form-group-pump">
           <label class="form-label-pump">Description</label>
-          <textarea id="deployDesc" class="form-textarea-pump" placeholder="A random user. A nobody..." required></textarea>
+          <textarea id="deployDesc" class="form-textarea-pump" placeholder="Token description and mission..." required></textarea>
         </div>
 
         <div class="form-group-pump">
@@ -1210,7 +1196,7 @@
         </div>
 
         <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center;">
-          <span>Mint Fee: <strong style="color: #fff;">0.1 SOL</strong></span>
+          <span>Mint Fee: <strong style="color: var(--text-primary);">0.1 SOL</strong></span>
           <span style="color: var(--pump-mint); font-weight: 700;">Fair Launch AMM</span>
         </div>
 
@@ -1220,7 +1206,7 @@
         </div>
 
         <button type="submit" class="btn-signin-mint" style="width: 100%; margin-top: 10px; padding: 12px;">
-          Launch on bonding curve (0.1 SOL)
+          Launch on Bonding Curve (0.1 SOL)
         </button>
       </form>
     </div>
@@ -1243,76 +1229,61 @@
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <!-- Phantom (Solana) -->
         <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between; background: rgba(171, 159, 242, 0.08); border: 1px solid rgba(171, 159, 242, 0.3);" onclick="window.walletEngine.connectPhantom()">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 18px;">👻</span>
-            <div style="text-align: left;">
-              <strong style="color: #fff; display: block;">Phantom Wallet</strong>
-              <span style="font-size: 11px; color: var(--text-secondary);">Solana Mainnet Native</span>
-            </div>
+          <div style="text-align: left;">
+            <strong style="color: var(--text-primary); display: block;">Phantom Wallet</strong>
+            <span style="font-size: 11px; color: var(--text-secondary);">Solana Mainnet Native</span>
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
             <span id="badgePhantomDetected" style="display: none; font-size: 10px; background: rgba(134, 239, 172, 0.2); color: var(--pump-mint); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
-            <span style="color: var(--pump-mint); font-weight: 700;">Connect &rarr;</span>
+            <span style="color: var(--pump-mint); font-weight: 700;">Connect</span>
           </div>
         </button>
 
         <!-- Trust Wallet (Solana & EVM) -->
         <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between; background: rgba(51, 117, 255, 0.08); border: 1px solid rgba(51, 117, 255, 0.3);" onclick="window.walletEngine.connectTrustWallet()">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 18px;">🛡️</span>
-            <div style="text-align: left;">
-              <strong style="color: #fff; display: block;">Trust Wallet</strong>
-              <span style="font-size: 11px; color: var(--text-secondary);">Solana & Base Multi-Chain</span>
-            </div>
+          <div style="text-align: left;">
+            <strong style="color: var(--text-primary); display: block;">Trust Wallet</strong>
+            <span style="font-size: 11px; color: var(--text-secondary);">Solana & Base Multi-Chain</span>
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
             <span id="badgeTrustDetected" style="display: none; font-size: 10px; background: rgba(134, 239, 172, 0.2); color: var(--pump-mint); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
-            <span style="color: var(--pump-mint); font-weight: 700;">Connect &rarr;</span>
+            <span style="color: var(--pump-mint); font-weight: 700;">Connect</span>
           </div>
         </button>
 
         <!-- MetaMask (Base / EVM) -->
         <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between; background: rgba(246, 133, 27, 0.08); border: 1px solid rgba(246, 133, 27, 0.3);" onclick="window.walletEngine.connectEVM('metamask')">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 18px;">🦊</span>
-            <div style="text-align: left;">
-              <strong style="color: #fff; display: block;">MetaMask</strong>
-              <span style="font-size: 11px; color: var(--text-secondary);">Base L2 & Ethereum</span>
-            </div>
+          <div style="text-align: left;">
+            <strong style="color: var(--text-primary); display: block;">MetaMask</strong>
+            <span style="font-size: 11px; color: var(--text-secondary);">Base L2 & Ethereum</span>
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
             <span id="badgeMetaMaskDetected" style="display: none; font-size: 10px; background: rgba(134, 239, 172, 0.2); color: var(--pump-mint); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
-            <span style="color: var(--pump-mint); font-weight: 700;">Connect &rarr;</span>
+            <span style="color: var(--pump-mint); font-weight: 700;">Connect</span>
           </div>
         </button>
 
         <!-- Solflare (Solana) -->
         <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between; background: rgba(254, 185, 30, 0.08); border: 1px solid rgba(254, 185, 30, 0.3);" onclick="window.walletEngine.connectSolflare()">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 18px;">☀️</span>
-            <div style="text-align: left;">
-              <strong style="color: #fff; display: block;">Solflare</strong>
-              <span style="font-size: 11px; color: var(--text-secondary);">Solana Mainnet</span>
-            </div>
+          <div style="text-align: left;">
+            <strong style="color: var(--text-primary); display: block;">Solflare</strong>
+            <span style="font-size: 11px; color: var(--text-secondary);">Solana Mainnet</span>
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
             <span id="badgeSolflareDetected" style="display: none; font-size: 10px; background: rgba(134, 239, 172, 0.2); color: var(--pump-mint); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
-            <span style="color: var(--pump-mint); font-weight: 700;">Connect &rarr;</span>
+            <span style="color: var(--pump-mint); font-weight: 700;">Connect</span>
           </div>
         </button>
 
         <!-- Coinbase Wallet -->
         <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between; background: rgba(0, 82, 255, 0.08); border: 1px solid rgba(0, 82, 255, 0.3);" onclick="window.walletEngine.connectCoinbase()">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 18px;">🔵</span>
-            <div style="text-align: left;">
-              <strong style="color: #fff; display: block;">Coinbase Wallet</strong>
-              <span style="font-size: 11px; color: var(--text-secondary);">Base & Solana Smart Wallet</span>
-            </div>
+          <div style="text-align: left;">
+            <strong style="color: var(--text-primary); display: block;">Coinbase Wallet</strong>
+            <span style="font-size: 11px; color: var(--text-secondary);">Base & Solana Smart Wallet</span>
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
             <span id="badgeCoinbaseDetected" style="display: none; font-size: 10px; background: rgba(134, 239, 172, 0.2); color: var(--pump-mint); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
-            <span style="color: var(--pump-mint); font-weight: 700;">Connect &rarr;</span>
+            <span style="color: var(--pump-mint); font-weight: 700;">Connect</span>
           </div>
         </button>
 
@@ -1323,13 +1294,13 @@
 
         <!-- 1-Click Instant Vault Generation -->
         <button class="btn-signin-mint" style="padding: 12px; font-size: 13px; text-align: center; justify-content: center; width: 100%;" onclick="window.walletEngine.generateNewVault(true)">
-          ⚡ 1-Click Instant Sovereign Vault
+          Instant Sovereign Vault
         </button>
 
         <!-- Import Existing Key Accordion Toggle -->
         <div style="margin-top: 6px;">
           <button class="cat-pill-btn" style="width: 100%; justify-content: center; font-size: 11px; color: var(--text-secondary);" onclick="const b = document.getElementById('importVaultCollapse'); b.style.display = b.style.display === 'none' ? 'block' : 'none';">
-            🔑 Have a 12-word seed phrase or private key? Click to import
+            Have a 12-word seed phrase or private key? Click to import
           </button>
           
           <div id="importVaultCollapse" style="display: none; margin-top: 8px; background: var(--bg-input); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
@@ -1373,7 +1344,7 @@
   <div class="modal-overlay-generic" id="createBundleModal">
     <div class="modal-box-pump" style="max-width: 520px;">
       <div class="modal-header-row">
-        <span class="modal-title-text">📦 Create Token Bundle / Basket</span>
+        <span class="modal-title-text">Create Token Bundle / Basket</span>
         <button class="btn-close-modal" id="btnCloseCreateBundleModal">&times;</button>
       </div>
 
@@ -1395,11 +1366,11 @@
 
         <div class="form-group-pump">
           <label class="form-label-pump">Bundle Category</label>
-          <select id="bundleCategorySelect" class="form-input-pump" style="cursor: pointer; background: var(--bg-input); color: #fff;">
-            <option value="memes" selected>🎭 Memes (Viral & Animals)</option>
-            <option value="politics">🏛️ Politics (PolitiFi & Elections)</option>
-            <option value="trends">📈 Trends (Social Media & Meta)</option>
-            <option value="whale">🐋 Whale (Smart Money & Inflows)</option>
+          <select id="bundleCategorySelect" class="form-input-pump" style="cursor: pointer; background: var(--bg-input); color: var(--text-primary);">
+            <option value="memes" selected>Memes (Viral & Animals)</option>
+            <option value="politics">Politics (PolitiFi & Elections)</option>
+            <option value="trends">Trends (Social Media & Meta)</option>
+            <option value="whale">Whale (Smart Money & Inflows)</option>
             <option value="ai">Autonomous Agents (Swarms)</option>
           </select>
         </div>
@@ -1432,7 +1403,7 @@
         </div>
 
         <button type="submit" class="btn-signin-mint" style="width: 100%; margin-top: 10px; padding: 12px; font-weight: 700;">
-          Deploy & Share Bundle (cession.fun/bundles)
+          Deploy & Share Bundle
         </button>
       </form>
     </div>
@@ -1444,7 +1415,7 @@
   <div class="modal-overlay-generic" id="buyBundleModal">
     <div class="modal-box-pump" style="max-width: 460px;">
       <div class="modal-header-row">
-        <span class="modal-title-text" id="buyBundleModalTitle">⚡ 1-Click Buy Bundle</span>
+        <span class="modal-title-text" id="buyBundleModalTitle">1-Click Buy Bundle</span>
         <button class="btn-close-modal" id="btnCloseBuyBundleModal">&times;</button>
       </div>
 
@@ -1455,7 +1426,7 @@
       <div class="form-group-pump">
         <label class="form-label-pump">SOL Amount to Invest</label>
         <div style="background-color: var(--bg-input); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;">
-          <input type="number" id="buyBundleSolAmount" style="background: transparent; border: none; font-size: 18px; font-weight: 700; color: #fff; width: 100%; outline: none;" placeholder="1.0" value="1.0" step="any">
+          <input type="number" id="buyBundleSolAmount" style="background: transparent; border: none; font-size: 18px; font-weight: 700; color: var(--text-primary); width: 100%; outline: none;" placeholder="1.0" value="1.0" step="any">
           <span style="font-weight: 700; color: var(--pump-mint); font-family: var(--font-mono);">SOL</span>
         </div>
       </div>
@@ -1472,13 +1443,18 @@
       </div>
 
       <button class="btn-signin-mint" id="btnConfirmBuyBundle" style="width: 100%; padding: 12px; font-weight: 800; font-size: 14px;">
+        Execute 1-Click Bundle Purchase
+      </button>
+    </div>
+  </div>
+
   <!-- =========================================================
        CREATE SOVEREIGN VAULT MODAL (1-CLICK HD WALLET GENERATION)
   ========================================================= -->
   <div class="modal-overlay-generic" id="createVaultModal">
     <div class="modal-box-pump" style="max-width: 520px;">
       <div class="modal-header-row">
-        <span class="modal-title-text">⚡ Create Sovereign Multi-Chain Vault</span>
+        <span class="modal-title-text">Create Sovereign Multi-Chain Vault</span>
         <button class="btn-close-modal" id="btnCloseCreateVaultModal" onclick="document.getElementById('createVaultModal').style.display='none'">&times;</button>
       </div>
 
@@ -1493,24 +1469,24 @@
 
       <div style="display: flex; gap: 8px; margin-bottom: 14px;">
         <button class="cat-pill-btn" style="flex: 1; justify-content: center; font-size: 12px; color: var(--pump-mint);" id="btnCopySeedPhrase" onclick="window.walletEngine.copyGeneratedMnemonic()">
-          📋 Copy 12 Words
+          Copy 12 Words
         </button>
         <button class="cat-pill-btn" style="flex: 1; justify-content: center; font-size: 12px; color: var(--text-secondary);" onclick="window.walletEngine.regenerateNewVaultMnemonic()">
-          🔄 Generate New
+          Generate New
         </button>
       </div>
 
       <!-- Derived Multi-Chain Addresses Preview -->
       <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px;">
-        <div style="font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 6px;">Derived Multi-Chain Addresses:</div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">Derived Multi-Chain Addresses:</div>
         <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
-          <div>🟣 Solana (Ed25519): <span id="derivedSolAddrPreview" style="color: var(--pump-mint);">...</span></div>
-          <div>🔵 Base / EVM (secp256k1): <span id="derivedEthAddrPreview" style="color: #60a5fa;">...</span></div>
+          <div>Solana (Ed25519): <span id="derivedSolAddrPreview" style="color: var(--pump-mint);">...</span></div>
+          <div>Base / EVM (secp256k1): <span id="derivedEthAddrPreview" style="color: #60a5fa;">...</span></div>
         </div>
       </div>
 
       <button class="btn-signin-mint" id="btnConfirmUnlockVault" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 800;" onclick="window.walletEngine.confirmCreateVault()">
-        ✓ I've Saved My Seed Phrase — Unlock Sovereign Vault
+        Confirm Saved Seed Phrase — Unlock Sovereign Vault
       </button>
     </div>
   </div>
@@ -1521,7 +1497,7 @@
   <div class="modal-overlay-generic" id="depositCryptoModal">
     <div class="modal-box-pump" style="max-width: 480px;">
       <div class="modal-header-row">
-        <span class="modal-title-text">📥 Deposit Crypto & Fund Wallet</span>
+        <span class="modal-title-text">Deposit Crypto & Fund Wallet</span>
         <button class="btn-close-modal" id="btnCloseDepositModal" onclick="document.getElementById('depositCryptoModal').style.display='none'">&times;</button>
       </div>
 
@@ -1547,15 +1523,15 @@
           <span id="depositModalAddressText" style="color: var(--pump-mint);">...</span>
         </div>
 
-        <button class="cat-pill-btn" style="width: 100%; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; background: rgba(134, 239, 172, 0.15); border: 1px solid var(--pump-mint);" onclick="navigator.clipboard.writeText(document.getElementById('depositModalAddressText').textContent); window.launchpadManager.toast('Deposit address copied!', 'success');">
-          📋 Copy Deposit Address
+        <button class="cat-pill-btn" style="width: 100%; justify-content: center; font-size: 12px; font-weight: 700; color: var(--text-primary); background: rgba(134, 239, 172, 0.15); border: 1px solid var(--pump-mint);" onclick="navigator.clipboard.writeText(document.getElementById('depositModalAddressText').textContent); window.launchpadManager.toast('Deposit address copied!', 'success');">
+          Copy Deposit Address
         </button>
       </div>
 
       <!-- Instant Sandbox Faucet Deposit Section -->
       <div style="background: rgba(134, 239, 172, 0.05); border: 1px dashed rgba(134, 239, 172, 0.3); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <span style="font-weight: 700; font-size: 12px; color: var(--pump-mint);">🚰 Instant Sandbox Faucet</span>
+          <span style="font-weight: 700; font-size: 12px; color: var(--pump-mint);">Instant Sandbox Faucet</span>
           <span style="font-size: 10px; color: var(--text-muted);">Free Testnet/Devnet Liquidity</span>
         </div>
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
@@ -1566,8 +1542,8 @@
       </div>
 
       <!-- Fiat Card Buy Option -->
-      <button class="btn-signin-mint" style="width: 100%; padding: 12px; font-size: 13px; font-weight: 700; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: none; color: #fff;" onclick="document.getElementById('depositCryptoModal').style.display='none'; window.location.href='/exchange';">
-        💳 Buy with Card / Apple Pay (0% Fee On-Ramp) &rarr;
+      <button class="btn-signin-mint" style="width: 100%; padding: 12px; font-size: 13px; font-weight: 700; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: none; color: var(--text-primary);" onclick="document.getElementById('depositCryptoModal').style.display='none'; window.location.href='/exchange';">
+        Buy with Card / Apple Pay (0% Fee On-Ramp)
       </button>
     </div>
   </div>
@@ -1578,7 +1554,7 @@
   <div class="modal-overlay-generic" id="backupSeedModal">
     <div class="modal-box-pump" style="max-width: 480px;">
       <div class="modal-header-row">
-        <span class="modal-title-text">🔑 Secret Recovery Phrase</span>
+        <span class="modal-title-text">Secret Recovery Phrase</span>
         <button class="btn-close-modal" onclick="document.getElementById('backupSeedModal').style.display='none'">&times;</button>
       </div>
 
@@ -1591,7 +1567,7 @@
       </div>
 
       <button class="cat-pill-btn" style="width: 100%; justify-content: center; font-size: 12px; color: var(--pump-mint); margin-bottom: 8px;" onclick="window.walletEngine.copyCurrentMnemonic()">
-        📋 Copy Seed Phrase to Clipboard
+        Copy Seed Phrase to Clipboard
       </button>
 
       <button class="btn-signin-mint" style="width: 100%; padding: 10px;" onclick="document.getElementById('backupSeedModal').style.display='none'">
