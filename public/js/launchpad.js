@@ -180,12 +180,12 @@ class CessionLaunchpadManager {
       { id: 'railNavHome', view: 'board', url: '/' },
       { id: 'railNavExplore', view: 'board', url: '/' },
       { id: 'railNavProfile', view: 'profile', url: '/profile' },
-      { id: 'railNavChat', view: 'board', toast: 'Community chat channel open' },
+      { id: 'railNavChat', view: 'board', toast: 'Community chat & trollbox active' },
       { id: 'railNavLeaderboard', view: 'leaderboard', url: '/leaderboard' },
       { id: 'railNavBundles', view: 'bundles', url: '/bundles' },
-      { id: 'railNavSupport', view: 'board', toast: 'Support Desk 24/7 online' },
-      { id: 'railNavSwap', view: 'board', toast: 'Instant Swap Curve active' },
-      { id: 'railNavTokens', view: 'board', url: '/new-coins' },
+      { id: 'railNavStaking', view: 'staking', url: '/staking' },
+      { id: 'railNavTransparency', view: 'transparency', url: '/transparency' },
+      { id: 'railNavTerms', view: 'terms', url: '/terms' },
     ];
 
     navItems.forEach(item => {
@@ -423,6 +423,38 @@ class CessionLaunchpadManager {
         </td>
       </tr>
     `).join('');
+  }
+
+  renderLivestreams() {
+    const grid = document.getElementById('livestreamsGrid');
+    if (!grid) return;
+
+    grid.innerHTML = `
+      <div class="explore-coin-card" onclick="window.launchpadManager.openTokenDetail('Jimothy')">
+        <div class="explore-coin-thumb-box" style="position: relative;">
+          <img src="images/cession-logo.png" class="explore-coin-img" onerror="this.src='images/cession-logo.png'">
+          <div style="position: absolute; top: 8px; left: 8px; background: rgba(239, 68, 68, 0.9); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
+            🔴 LIVE • 1,420
+          </div>
+        </div>
+        <div class="explore-coin-details">
+          <div class="explore-coin-title">Jimothy Live Bonding Broadcast</div>
+          <div class="explore-coin-mcap">$7.82M MC</div>
+        </div>
+      </div>
+      <div class="explore-coin-card" onclick="window.launchpadManager.openTokenDetail('BILLY')">
+        <div class="explore-coin-thumb-box" style="position: relative;">
+          <img src="images/cession-logo.png" class="explore-coin-img" onerror="this.src='images/cession-logo.png'">
+          <div style="position: absolute; top: 8px; left: 8px; background: rgba(239, 68, 68, 0.9); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
+            🔴 LIVE • 840
+          </div>
+        </div>
+        <div class="explore-coin-details">
+          <div class="explore-coin-title">Billy Dev Q&A Stream</div>
+          <div class="explore-coin-mcap">$3.75M MC</div>
+        </div>
+      </div>
+    `;
   }
 
   bindBundleModals() {

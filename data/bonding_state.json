@@ -1,5 +1,5 @@
 {
-  "totalProtocolBurnedUsd": 42961.63750000002,
+  "totalProtocolBurnedUsd": 42962.125000000015,
   "tokens": [
     {
       "name": "Cession Sovereign Network",
@@ -13,21 +13,21 @@
       "devLockedPercent": 100,
       "devTokensLocked": 50000000,
       "createdAt": 1786889108173,
-      "virtualSolReserves": 28.898,
-      "virtualTokenReserves": 710083742,
-      "realSolRaised": 8.198,
-      "tokensSold": 289916258,
-      "currentPriceSol": 4.0696608429037935e-8,
-      "currentPriceUsd": 0.00610449126435569,
+      "virtualSolReserves": 29.793499999999998,
+      "virtualTokenReserves": 688740831,
+      "realSolRaised": 9.0935,
+      "tokensSold": 311259169,
+      "currentPriceSol": 4.325792614435545e-8,
+      "currentPriceUsd": 0.006488688921653317,
       "openPrice24hUsd": 0.00000375,
-      "marketCapUsd": 25618.75,
+      "marketCapUsd": 28417.187500000004,
       "targetCapUsd": 25000,
-      "volume24hUsd": 148560,
+      "volume24hUsd": 148695,
       "high24hUsd": 0.0000072,
       "low24hUsd": 0.0000036,
       "isGraduated": true,
       "curveProgressPercent": 100,
-      "totalBurnedTokens": 4224790,
+      "totalBurnedTokens": 4278146,
       "holdersCount": 382,
       "avgHoldDays": 12,
       "timeLockedPercent": 25,
@@ -66,6 +66,36 @@
       },
       "recentTrades": [
         {
+          "id": "tx_msxdstf1",
+          "type": "BUY",
+          "amountSol": 0.1,
+          "amountTokens": 2307864,
+          "usdVal": "15.00",
+          "user": "0x082b...004c",
+          "time": "Just now",
+          "mevShielded": true
+        },
+        {
+          "id": "tx_msxdspzk",
+          "type": "BUY",
+          "amountSol": 0.4,
+          "amountTokens": 9388223,
+          "usdVal": "60.00",
+          "user": "0x082b...004c",
+          "time": "Just now",
+          "mevShielded": true
+        },
+        {
+          "id": "tx_msxdolen",
+          "type": "BUY",
+          "amountSol": 0.4,
+          "amountTokens": 9646824,
+          "usdVal": "60.00",
+          "user": "0xb629...8069",
+          "time": "Just now",
+          "mevShielded": true
+        },
+        {
           "id": "tx_msxb2uoo",
           "type": "BUY",
           "amountSol": 0.4,
@@ -97,8 +127,8 @@
         }
       ],
       "feePool": {
-        "totalGenerated": 0.002,
-        "holderRewardsDistributed": 0.001
+        "totalGenerated": 0.006500000000000001,
+        "holderRewardsDistributed": 0.0032500000000000003
       },
       "graduationData": {
         "dexName": "Uniswap v3 (Base)",
@@ -1073,6 +1103,154 @@
           "mevShielded": true
         }
       ]
+    },
+    {
+      "name": "Audit Bull Coin 7819",
+      "symbol": "ABC7819",
+      "chain": "Solana",
+      "tokenType": "sprint",
+      "antiDumpEnabled": false,
+      "avgHoldDays": 1,
+      "timeLockedPercent": 5,
+      "stakingApy": 12,
+      "stakingPool": {
+        "totalStakedTokens": 0,
+        "stakers": []
+      },
+      "description": "A verified audit token created to ensure bonding curve precision.",
+      "imageUrl": "images/cession-logo.png",
+      "creator": "0xb62951ced740074e1d9764cfd7638069",
+      "devLockedPercent": 100,
+      "devTokensLocked": 50000000,
+      "createdAt": 1786979888792,
+      "mintFeeSol": 0.1,
+      "virtualSolReserves": 10.299,
+      "virtualTokenReserves": 980677735,
+      "realSolRaised": 0.29900000000000004,
+      "tokensSold": 20322265,
+      "totalBurnedTokens": 48305,
+      "currentPriceSol": 1.0501920898612019e-8,
+      "currentPriceUsd": 0.001575288134791803,
+      "openPrice24hUsd": 0.0000015,
+      "marketCapUsd": 10000,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 45,
+      "high24hUsd": 0.0000015,
+      "low24hUsd": 0.0000015,
+      "isGraduated": false,
+      "curveProgressPercent": 3,
+      "feePool": {
+        "totalGenerated": 0.001,
+        "holderRewardsDistributed": 0.0005
+      },
+      "holdersCount": 1,
+      "holders": [
+        {
+          "address": "0xb629... (Dev Locked)",
+          "balance": 50000000,
+          "percentage": 5,
+          "isDev": true,
+          "locked": true
+        }
+      ],
+      "safetyAudit": {
+        "score": 98,
+        "grade": "A+",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 5,
+        "warnings": []
+      },
+      "twitter": null,
+      "telegram": null,
+      "website": null,
+      "lastBumpTime": 1786979888792,
+      "recentTrades": [
+        {
+          "id": "tx_msxdoqs9",
+          "type": "BUY",
+          "amountSol": 0.2,
+          "amountTokens": 19322265,
+          "usdVal": "30.00",
+          "user": "0xb629...8069",
+          "time": "Just now",
+          "mevShielded": true
+        }
+      ]
+    },
+    {
+      "name": "Audit Bull Coin 2230",
+      "symbol": "ABC2230",
+      "chain": "Solana",
+      "tokenType": "sprint",
+      "antiDumpEnabled": false,
+      "avgHoldDays": 1,
+      "timeLockedPercent": 5,
+      "stakingApy": 12,
+      "stakingPool": {
+        "totalStakedTokens": 0,
+        "stakers": []
+      },
+      "description": "A verified audit token created to ensure bonding curve precision.",
+      "imageUrl": "images/cession-logo.png",
+      "creator": "0x082bc5abd819d56b48cfec250d2b004c",
+      "devLockedPercent": 100,
+      "devTokensLocked": 50000000,
+      "createdAt": 1786980081470,
+      "mintFeeSol": 0.1,
+      "virtualSolReserves": 10.299,
+      "virtualTokenReserves": 980677735,
+      "realSolRaised": 0.29900000000000004,
+      "tokensSold": 20322265,
+      "totalBurnedTokens": 48305,
+      "currentPriceSol": 1.0501920898612019e-8,
+      "currentPriceUsd": 0.001575288134791803,
+      "openPrice24hUsd": 0.0000015,
+      "marketCapUsd": 10000,
+      "targetCapUsd": 25000,
+      "volume24hUsd": 45,
+      "high24hUsd": 0.0000015,
+      "low24hUsd": 0.0000015,
+      "isGraduated": false,
+      "curveProgressPercent": 3,
+      "feePool": {
+        "totalGenerated": 0.001,
+        "holderRewardsDistributed": 0.0005
+      },
+      "holdersCount": 1,
+      "holders": [
+        {
+          "address": "0x082b... (Dev Locked)",
+          "balance": 50000000,
+          "percentage": 5,
+          "isDev": true,
+          "locked": true
+        }
+      ],
+      "safetyAudit": {
+        "score": 98,
+        "grade": "A+",
+        "mevProtected": true,
+        "devVestingLocked": true,
+        "top10HoldersPercent": 5,
+        "warnings": []
+      },
+      "twitter": null,
+      "telegram": null,
+      "website": null,
+      "lastBumpTime": 1786980081470,
+      "recentTrades": [
+        {
+          "id": "tx_msxdsvgf",
+          "type": "BUY",
+          "amountSol": 0.2,
+          "amountTokens": 19322265,
+          "usdVal": "30.00",
+          "user": "0x082b...004c",
+          "time": "Just now",
+          "mevShielded": true
+        }
+      ]
     }
   ],
   "collections": [
@@ -1103,8 +1281,8 @@
           "name": "The Random Bull"
         }
       ],
-      "totalVolumeUsd": 480000,
-      "buyersCount": 380
+      "totalVolumeUsd": 480120,
+      "buyersCount": 382
     },
     {
       "id": "col_generational_stacks",

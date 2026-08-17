@@ -1444,7 +1444,19 @@ class BondingCurveEngine {
   }
 
   getToken(symbol, accessKey = null) {
-    const t = this.tokens.get(symbol.toUpperCase());
+    const sym = symbol.toUpperCase();
+    if (!this.tokens.has(sym)) {
+      try {
+        this.createToken({
+          name: symbol,
+          symbol: sym,
+          description: `Fair launch token $${sym} on Cession bonding curve.`,
+          chain: "Solana",
+          tokenType: "sprint"
+        });
+      } catch (e) {}
+    }
+    const t = this.tokens.get(sym);
     if (!t) return null;
     if (t.isPrivate && accessKey && t.inviteCode !== accessKey) {
       return {
@@ -1460,7 +1472,19 @@ class BondingCurveEngine {
    * Top Holders & Bubble Distribution
    */
   getTokenHolders(symbol) {
-    const token = this.tokens.get(symbol.toUpperCase());
+    const sym = symbol.toUpperCase();
+    if (!this.tokens.has(sym)) {
+      try {
+        this.createToken({
+          name: symbol,
+          symbol: sym,
+          description: `Fair launch token $${sym} on Cession bonding curve.`,
+          chain: "Solana",
+          tokenType: "sprint"
+        });
+      } catch (e) {}
+    }
+    const token = this.tokens.get(sym);
     if (!token) throw new Error("Token not found.");
 
     const curveSupplyPercent = Math.max(10, 100 - (token.curveProgressPercent || 0) * 0.7);
@@ -1872,7 +1896,19 @@ class BondingCurveEngine {
   }
 
   buyTokens(symbol, solAmount, buyerAddress) {
-    const token = this.tokens.get(symbol.toUpperCase());
+    const sym = symbol.toUpperCase();
+    if (!this.tokens.has(sym)) {
+      try {
+        this.createToken({
+          name: symbol,
+          symbol: sym,
+          description: `Fair launch token $${sym} on Cession bonding curve.`,
+          chain: "Solana",
+          tokenType: "sprint"
+        });
+      } catch (e) {}
+    }
+    const token = this.tokens.get(sym);
     if (!token) throw new Error("Token not found.");
 
     const solIn = parseFloat(solAmount);
@@ -1944,7 +1980,19 @@ class BondingCurveEngine {
   }
 
   sellTokens(symbol, tokenAmount, sellerAddress) {
-    const token = this.tokens.get(symbol.toUpperCase());
+    const sym = symbol.toUpperCase();
+    if (!this.tokens.has(sym)) {
+      try {
+        this.createToken({
+          name: symbol,
+          symbol: sym,
+          description: `Fair launch token $${sym} on Cession bonding curve.`,
+          chain: "Solana",
+          tokenType: "sprint"
+        });
+      } catch (e) {}
+    }
+    const token = this.tokens.get(sym);
     if (!token) throw new Error("Token not found.");
 
     const tokensIn = parseFloat(tokenAmount);
