@@ -85,13 +85,13 @@ class BondingCurveEngine {
         currentPriceSol: 0.000000035,
         currentPriceUsd: 0.00000525,
         openPrice24hUsd: 0.00000375, // +40% 24h PnL
-        marketCapUsd: 52500,
-        targetCapUsd: 69420,
+        marketCapUsd: 19500,
+        targetCapUsd: 25000,
         volume24hUsd: 148500,
         high24hUsd: 0.00000580,
         low24hUsd: 0.00000360,
         isGraduated: false,
-        curveProgressPercent: 76,
+        curveProgressPercent: 78,
         totalBurnedTokens: 4200000,
         holdersCount: 382,
         holders: [
@@ -129,8 +129,8 @@ class BondingCurveEngine {
         currentPriceSol: 0.000000022,
         currentPriceUsd: 0.00000330,
         openPrice24hUsd: 0.00000250, // +32% 24h PnL
-        marketCapUsd: 33000,
-        targetCapUsd: 69420,
+        marketCapUsd: 12000,
+        targetCapUsd: 25000,
         volume24hUsd: 92400,
         high24hUsd: 0.00000350,
         low24hUsd: 0.00000240,
@@ -171,8 +171,8 @@ class BondingCurveEngine {
         currentPriceSol: 0.000000015,
         currentPriceUsd: 0.00000225,
         openPrice24hUsd: 0.00000200, // +12.5% 24h PnL
-        marketCapUsd: 22500,
-        targetCapUsd: 69420,
+        marketCapUsd: 8000,
+        targetCapUsd: 25000,
         volume24hUsd: 41200,
         high24hUsd: 0.00000240,
         low24hUsd: 0.00000190,
@@ -405,7 +405,7 @@ class BondingCurveEngine {
       currentPriceUsd: initialPriceUsd,
       openPrice24hUsd: initialPriceUsd,
       marketCapUsd: 10000,
-      targetCapUsd: 69420,
+      targetCapUsd: params.targetCapUsd || 25000,
       volume24hUsd: 0,
       high24hUsd: initialPriceUsd,
       low24hUsd: initialPriceUsd,
@@ -432,7 +432,7 @@ class BondingCurveEngine {
 
     this.tokens.set(cleanSym, newToken);
     this.chatMessages.set(cleanSym, [
-      { user: "CalabiGuardian", text: `🚀 Token $${cleanSym} deployed on ${newToken.chain} with ${devLockPercent}% Proof-of-Skin dev lock!`, time: "Just now", badge: "SYSTEM" }
+      { user: "CessionGuardian", text: `🚀 Token $${cleanSym} deployed on ${newToken.chain} with ${devLockPercent}% Proof-of-Skin dev lock! Target: $${(newToken.targetCapUsd || 25000).toLocaleString()}`, time: "Just now", badge: "SYSTEM" }
     ]);
 
     this.saveStateToDisk();
@@ -473,7 +473,8 @@ class BondingCurveEngine {
     // Spot Price and Market Cap
     token.currentPriceSol = token.virtualSolReserves / token.virtualTokenReserves;
     token.currentPriceUsd = token.currentPriceSol * 150 * 1000;
-    token.marketCapUsd = (token.realSolRaised / 20.0) * token.targetCapUsd;
+    const solGraduationTarget = token.targetCapUsd <= 25000 ? 8.0 : 20.0;
+    token.marketCapUsd = Math.min(token.targetCapUsd * 1.5, (token.realSolRaised / solGraduationTarget) * token.targetCapUsd);
     token.volume24hUsd += (solIn * 150);
     token.high24hUsd = Math.max(token.high24hUsd, token.currentPriceUsd);
     token.low24hUsd = Math.min(token.low24hUsd, token.currentPriceUsd);
@@ -483,16 +484,16 @@ class BondingCurveEngine {
     token.totalBurnedTokens += burnedAmount;
     this.totalProtocolBurnedUsd += (feeTotal * 0.5 * 150);
 
-    // Progress towards $69,420 graduation
-    token.curveProgressPercent = Math.min(100, Math.floor((token.realSolRaised / 20.0) * 100));
+    // Progress towards graduation ($25,000 sprint or $69,420 marathon)
+    token.curveProgressPercent = Math.min(100, Math.floor((token.realSolRaised / solGraduationTarget) * 100));
 
     // Graduation Trigger
-    if ((token.realSolRaised >= 20.0 || token.marketCapUsd >= token.targetCapUsd) && !token.isGraduated) {
+    if ((token.realSolRaised >= solGraduationTarget || token.marketCapUsd >= token.targetCapUsd) && !token.isGraduated) {
       token.isGraduated = true;
       token.curveProgressPercent = 100;
       token.graduationData = {
         dex: token.chain === "Solana" ? "Raydium CPMM" : "Uniswap V3",
-        liquidityLockedUsd: 12000,
+        liquidityLockedUsd: token.targetCapUsd <= 25000 ? 5500 : 12000,
         lpBurnTx: "0xburn_permanent_lp_lock_" + Math.random().toString(36).substring(2, 10),
         graduatedAt: Date.now()
       };

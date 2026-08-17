@@ -509,7 +509,7 @@ class CalabiLaunchpadManager {
     if (kingDesc) kingDesc.textContent = king.description;
     if (kingImg) kingImg.src = king.imageUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200';
     if (kingMcap) kingMcap.textContent = `$${king.marketCapUsd.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-    if (kingProgress) kingProgress.textContent = `${king.bondingCurveProgressPercent}% ($69,420 Target)`;
+    if (kingProgress) kingProgress.textContent = `${king.bondingCurveProgressPercent}% ($${(king.targetCapUsd || 25000).toLocaleString()} Sprint Target)`;
     if (kingProgressBar) kingProgressBar.style.width = `${Math.min(100, king.bondingCurveProgressPercent)}%`;
     if (kingFeePool) kingFeePool.textContent = `$${king.totalFeePoolDistributedUsd.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
     if (kingChain) kingChain.textContent = king.chain === 'Solana' ? '⚡ Solana' : '🔵 Base L2';
@@ -670,6 +670,8 @@ class CalabiLaunchpadManager {
     if (dev) dev.textContent = `Created by ${token.creator.substring(0, 8)}... (${token.devLockedPercent}% Dev Vesting Locked)`;
     if (price) price.textContent = `$${token.currentPriceUsd.toFixed(8)}`;
     if (mcap) mcap.textContent = `$${Math.floor(token.marketCapUsd).toLocaleString()}`;
+    const gradCap = document.getElementById('detailGradCap');
+    if (gradCap) gradCap.textContent = `$${(token.targetCapUsd || 25000).toLocaleString()}`;
     if (fees) fees.textContent = `$${token.totalFeePoolDistributedUsd.toFixed(2)}`;
     if (curveBar) curveBar.style.width = `${Math.min(100, token.bondingCurveProgressPercent)}%`;
     if (curvePct) curvePct.textContent = `${token.bondingCurveProgressPercent}%`;

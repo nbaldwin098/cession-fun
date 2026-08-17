@@ -79,17 +79,18 @@ async function main() {
     assert(sellResult.token.realSolRaised < 2.0, "Real SOL raised should correctly decrement upon sell");
   });
 
-  runTest('Graduation Threshold Trigger at $69,420 Cap & Burn to 0xdead', () => {
+  runTest('Graduation Threshold Trigger at Market-Adjusted $25,000 Sprint Cap & Burn to 0xdead', () => {
     const gradToken = bondingCurve.createToken({
       name: "Graduation Token",
       symbol: "GRAD",
       creator: "0xDevGrad",
       chain: "Solana",
-      devLockPercent: 100
+      devLockPercent: 100,
+      targetCapUsd: 25000
     });
 
-    const buyLarge = bondingCurve.buyTokens("GRAD", 30.0, "0xWhaleBuyer");
-    assert.strictEqual(buyLarge.token.isGraduated, true, "Should graduate upon reaching $69k cap");
+    const buyLarge = bondingCurve.buyTokens("GRAD", 10.0, "0xWhaleBuyer");
+    assert.strictEqual(buyLarge.token.isGraduated, true, "Should graduate upon reaching $25k cap");
     assert.strictEqual(buyLarge.token.curveProgressPercent, 100, "Progress should be 100%");
     assert(buyLarge.token.graduationData.lpBurnTx.startsWith("0xburn"), "LP tokens should be burned permanently to 0xdead");
   });
