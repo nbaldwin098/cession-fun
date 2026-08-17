@@ -850,6 +850,24 @@ class CessionWalletEngine {
     const navBal = document.getElementById('navWalletBalance');
     const navAddr = document.getElementById('navWalletAddress');
 
+    // Profile DOM elements
+    const profileAddr = document.getElementById('profileAddressFull');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileVaultStatus = document.getElementById('profileVaultStatus');
+    const profileSol = document.getElementById('profileSolBalance');
+    const profileCess = document.getElementById('profileCessBalance');
+    const profilePortfolioVal = document.getElementById('profilePortfolioValue');
+    const profileHoldingsBody = document.getElementById('profileHoldingsBody');
+
+    // Exchange DOM elements
+    const exBadge = document.getElementById('exchangeWalletBadge');
+    const exAddr = document.getElementById('exchangeWalletAddressDisplay');
+    const exSol = document.getElementById('exchangeBalSol');
+    const exEth = document.getElementById('exchangeBalEth');
+    const exUsdc = document.getElementById('exchangeBalUsdc');
+    const exCess = document.getElementById('exchangeBalCess');
+    const swapPayBal = document.getElementById('swapPayBalanceDisplay');
+
     if (this.isAuthenticated && this.activeAddress) {
       if (btnConnect) btnConnect.style.display = 'none';
       if (pill) pill.style.display = 'flex';
@@ -860,9 +878,62 @@ class CessionWalletEngine {
 
       if (navAddr) navAddr.textContent = shortAddr;
       if (navBal) navBal.textContent = `${(this.balances.sol || 0.0).toFixed(2)} SOL`;
+
+      if (profileAddr) profileAddr.textContent = this.activeAddress;
+      if (profileAvatar) profileAvatar.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(this.activeAddress)}`;
+      if (profileVaultStatus) {
+        profileVaultStatus.innerHTML = `<span style="color: var(--pump-mint); font-weight: 700;">Connected (${(this.activeWalletType || 'Sovereign').toUpperCase()})</span>`;
+      }
+      if (profileSol) profileSol.textContent = `${(this.balances.sol || 0.0).toFixed(2)} SOL`;
+      if (profileCess) profileCess.textContent = `${(this.balances.cess || 0).toLocaleString()} $CESS`;
+      if (profilePortfolioVal) {
+        const totalUsd = ((this.balances.sol || 0) * 154.20) + ((this.balances.eth || 0) * 3480.50) + (this.balances.usdc || 0) + ((this.balances.cess || 0) * 0.001);
+        profilePortfolioVal.textContent = `$${totalUsd.toFixed(2)}`;
+      }
+
+      if (exBadge) {
+        exBadge.textContent = 'CONNECTED';
+        exBadge.style.color = 'var(--pump-mint)';
+        exBadge.style.background = 'rgba(134,239,172,0.1)';
+      }
+      if (exAddr) exAddr.textContent = `${shortAddr} (${(this.activeWalletType || 'Sovereign').toUpperCase()})`;
+      if (exSol) exSol.textContent = `${(this.balances.sol || 0.0).toFixed(2)} SOL`;
+      if (exEth) exEth.textContent = `${(this.balances.eth || 0.0).toFixed(2)} ETH`;
+      if (exUsdc) exUsdc.textContent = `$${(this.balances.usdc || 0.0).toFixed(2)}`;
+      if (exCess) exCess.textContent = `${(this.balances.cess || 0).toLocaleString()}`;
+      if (swapPayBal) swapPayBal.textContent = `${(this.balances.sol || 0.0).toFixed(2)} SOL`;
+
     } else {
       if (btnConnect) btnConnect.style.display = 'inline-flex';
       if (pill) pill.style.display = 'none';
+
+      if (profileAddr) profileAddr.textContent = 'Not Connected';
+      if (profileAvatar) profileAvatar.src = 'https://api.dicebear.com/7.x/identicon/svg?seed=guest';
+      if (profileVaultStatus) {
+        profileVaultStatus.innerHTML = `<span style="color: var(--text-muted); font-weight: 700;">Disconnected (Connect Wallet)</span>`;
+      }
+      if (profileSol) profileSol.textContent = '0.00 SOL';
+      if (profileCess) profileCess.textContent = '0 $CESS';
+      if (profilePortfolioVal) profilePortfolioVal.textContent = '$0.00';
+      if (profileHoldingsBody) {
+        profileHoldingsBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 30px;">No wallet connected. Connect your wallet or 1-Click Sovereign Vault to view holdings.</td></tr>`;
+      }
+
+      if (exBadge) {
+        exBadge.textContent = 'DISCONNECTED';
+        exBadge.style.color = 'var(--text-muted)';
+        exBadge.style.background = 'rgba(255,255,255,0.05)';
+      }
+      if (exAddr) exAddr.textContent = 'Not Connected';
+      if (exSol) exSol.textContent = '0.00 SOL';
+      if (exEth) exEth.textContent = '0.00 ETH';
+      if (exUsdc) exUsdc.textContent = '$0.00';
+      if (exCess) exCess.textContent = '0';
+      if (swapPayBal) swapPayBal.textContent = '0.00 SOL';
+    }
+
+    if (window.exchangeManager && typeof window.exchangeManager.renderWalletBalances === 'function') {
+      window.exchangeManager.renderWalletBalances();
     }
   }
 }

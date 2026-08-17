@@ -427,27 +427,27 @@
                   <div style="font-weight: 800; font-size: 13px; color: #fff; display: flex; align-items: center; gap: 6px;">
                     <span>💼 Active Trading Wallet</span>
                   </div>
-                  <span id="exchangeWalletBadge" style="font-size: 10px; font-weight: 700; font-family: var(--font-mono); color: var(--pump-mint); background: rgba(134,239,172,0.1); padding: 2px 6px; border-radius: 10px;">CONNECTED</span>
+                  <span id="exchangeWalletBadge" style="font-size: 10px; font-weight: 700; font-family: var(--font-mono); color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 10px;">DISCONNECTED</span>
                 </div>
                 
                 <div style="display: flex; align-items: center; justify-content: space-between; font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
-                  <span id="exchangeWalletAddressDisplay">0x082...004c (Sovereign Vault)</span>
+                  <span id="exchangeWalletAddressDisplay">Not Connected</span>
                   <button class="cat-pill-btn" style="padding: 1px 6px; font-size: 10px;" onclick="window.launchpadManager.copyCurrentAddress()">copy</button>
                 </div>
 
                 <!-- Live Balance Pills -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-family: var(--font-mono); font-size: 11px;">
                   <div style="background: var(--bg-input); padding: 6px 10px; border-radius: var(--radius-xs);">
-                    <span style="color: var(--text-muted);">SOL:</span> <strong id="exchangeBalSol" style="color: var(--pump-mint);">6.20 SOL</strong>
+                    <span style="color: var(--text-muted);">SOL:</span> <strong id="exchangeBalSol" style="color: var(--pump-mint);">0.00 SOL</strong>
                   </div>
                   <div style="background: var(--bg-input); padding: 6px 10px; border-radius: var(--radius-xs);">
-                    <span style="color: var(--text-muted);">ETH:</span> <strong id="exchangeBalEth" style="color: #fff;">1.45 ETH</strong>
+                    <span style="color: var(--text-muted);">ETH:</span> <strong id="exchangeBalEth" style="color: #fff;">0.00 ETH</strong>
                   </div>
                   <div style="background: var(--bg-input); padding: 6px 10px; border-radius: var(--radius-xs);">
-                    <span style="color: var(--text-muted);">USDC:</span> <strong id="exchangeBalUsdc" style="color: #fff;">$1,250.00</strong>
+                    <span style="color: var(--text-muted);">USDC:</span> <strong id="exchangeBalUsdc" style="color: #fff;">$0.00</strong>
                   </div>
                   <div style="background: var(--bg-input); padding: 6px 10px; border-radius: var(--radius-xs);">
-                    <span style="color: var(--text-muted);">CESS:</span> <strong id="exchangeBalCess" style="color: var(--pump-mint);">250,000</strong>
+                    <span style="color: var(--text-muted);">CESS:</span> <strong id="exchangeBalCess" style="color: var(--pump-mint);">0</strong>
                   </div>
                 </div>
 
@@ -469,7 +469,7 @@
                 <div class="exchange-input-box">
                   <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 6px;">
                     <span>You Pay</span>
-                    <span>Balance: <strong id="swapPayBalanceDisplay" style="color: #fff;">6.20 SOL</strong> <button class="cat-pill-btn" style="padding: 1px 4px; font-size: 10px; margin-left: 4px;" onclick="window.exchangeManager.setPayMax()">MAX</button></span>
+                    <span>Balance: <strong id="swapPayBalanceDisplay" style="color: #fff;">0.00 SOL</strong> <button class="cat-pill-btn" style="padding: 1px 4px; font-size: 10px; margin-left: 4px;" onclick="window.exchangeManager.setPayMax()">MAX</button></span>
                   </div>
                   <div style="display: flex; align-items: center; gap: 10px;">
                     <input type="number" id="swapPayAmountInput" placeholder="0.0" step="any" style="background: transparent; border: none; font-size: 22px; font-weight: 800; color: #fff; width: 100%; outline: none; font-family: var(--font-mono);" oninput="window.exchangeManager.updateQuote()">
@@ -767,19 +767,19 @@
       <main class="page-view" id="viewProfile">
         <section class="explore-section">
           <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-            <img id="profileAvatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=myprofile" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--pump-mint);" alt="Profile">
+            <img id="profileAvatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=guest" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--border-card);" alt="Profile">
             <div style="flex: 1;">
               <div style="font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
-                <span id="profileAddressFull">0x88f4b23a910cd99e1a2f0093ba4210e76a011a2</span>
-                <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="navigator.clipboard.writeText(document.getElementById('profileAddressFull').textContent); window.launchpadManager.toast('Address copied', 'success');">copy</button>
+                <span id="profileAddressFull">Not Connected</span>
+                <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="if(document.getElementById('profileAddressFull').textContent !== 'Not Connected'){navigator.clipboard.writeText(document.getElementById('profileAddressFull').textContent); window.launchpadManager.toast('Address copied', 'success');} else { window.walletEngine.openAuthModal(); }">copy</button>
               </div>
               <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">
-                Status: <span style="color: var(--pump-mint); font-weight: 700;">Active Sovereign Vault</span>
+                Status: <span id="profileVaultStatus" style="color: var(--text-muted); font-weight: 700;">Disconnected (Connect Wallet)</span>
               </div>
-              <div style="display: flex; gap: 24px; margin-top: 14px; font-family: var(--font-mono); font-size: 13px;">
-                <div>SOL Balance: <strong id="profileSolBalance" style="color: var(--pump-mint); font-size: 16px;">6.20 SOL</strong></div>
-                <div>$CESS Balance: <strong id="profileCessBalance" style="color: var(--pump-mint); font-size: 16px;">250,000 $CESS</strong></div>
-                <div>Portfolio Value: <strong style="color: #fff; font-size: 16px;">$1,842.50</strong></div>
+              <div style="display: flex; gap: 24px; margin-top: 14px; font-family: var(--font-mono); font-size: 13px; flex-wrap: wrap;">
+                <div>SOL Balance: <strong id="profileSolBalance" style="color: var(--pump-mint); font-size: 16px;">0.00 SOL</strong></div>
+                <div>$CESS Balance: <strong id="profileCessBalance" style="color: var(--pump-mint); font-size: 16px;">0 $CESS</strong></div>
+                <div>Portfolio Value: <strong id="profilePortfolioValue" style="color: #fff; font-size: 16px;">$0.00</strong></div>
               </div>
             </div>
           </div>

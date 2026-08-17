@@ -138,8 +138,8 @@
           </button>
 
           <div class="wallet-connected-pill" id="walletConnectedPill" style="display: none;">
-            <span class="balance" id="navWalletBalance">6.20 SOL</span>
-            <span id="navWalletAddress">0x88f...1a2</span>
+            <span class="balance" id="navWalletBalance">0.00 SOL</span>
+            <span id="navWalletAddress">0x...</span>
             <button id="btnDisconnectWallet" style="color: var(--accent-red); margin-left: 6px;">✕</button>
           </div>
         </div>
@@ -355,19 +355,19 @@
       <main class="page-view" id="viewProfile">
         <section class="explore-section">
           <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-            <img id="profileAvatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=myprofile" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--pump-mint);" alt="Profile">
+            <img id="profileAvatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=guest" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--border-card);" alt="Profile">
             <div style="flex: 1;">
               <div style="font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
-                <span id="profileAddressFull">0x88f4b23a910cd99e1a2f0093ba4210e76a011a2</span>
-                <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="navigator.clipboard.writeText(document.getElementById('profileAddressFull').textContent); window.launchpadManager.toast('Address copied', 'success');">copy</button>
+                <span id="profileAddressFull">Not Connected</span>
+                <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="if(document.getElementById('profileAddressFull').textContent !== 'Not Connected'){navigator.clipboard.writeText(document.getElementById('profileAddressFull').textContent); window.launchpadManager.toast('Address copied', 'success');} else { window.walletEngine.openAuthModal(); }">copy</button>
               </div>
               <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">
-                Status: <span style="color: var(--pump-mint); font-weight: 700;">Active Sovereign Vault</span>
+                Status: <span id="profileVaultStatus" style="color: var(--text-muted); font-weight: 700;">Disconnected (Connect Wallet)</span>
               </div>
-              <div style="display: flex; gap: 24px; margin-top: 14px; font-family: var(--font-mono); font-size: 13px;">
-                <div>SOL Balance: <strong id="profileSolBalance" style="color: var(--pump-mint); font-size: 16px;">6.20 SOL</strong></div>
-                <div>$CESS Balance: <strong id="profileCessBalance" style="color: var(--pump-mint); font-size: 16px;">250,000 $CESS</strong></div>
-                <div>Portfolio Value: <strong style="color: #fff; font-size: 16px;">$1,842.50</strong></div>
+              <div style="display: flex; gap: 24px; margin-top: 14px; font-family: var(--font-mono); font-size: 13px; flex-wrap: wrap;">
+                <div>SOL Balance: <strong id="profileSolBalance" style="color: var(--pump-mint); font-size: 16px;">0.00 SOL</strong></div>
+                <div>$CESS Balance: <strong id="profileCessBalance" style="color: var(--pump-mint); font-size: 16px;">0 $CESS</strong></div>
+                <div>Portfolio Value: <strong id="profilePortfolioValue" style="color: #fff; font-size: 16px;">$0.00</strong></div>
               </div>
             </div>
           </div>

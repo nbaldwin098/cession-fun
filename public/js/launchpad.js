@@ -205,7 +205,7 @@ class CessionLaunchpadManager {
           volume24hUsd: t.volume24hUsd || 1500,
           currentPriceSol: t.currentPriceSol || 0.000000010,
           currentPriceUsd: t.currentPriceUsd || (t.currentPriceSol ? t.currentPriceSol * 150 : 0.0000015),
-          creatorAddress: t.creator ? `${t.creator.substring(0, 6)}...` : (t.creatorAddress || '0x88f4b2'),
+          creatorAddress: t.creator ? (t.creator.length > 8 ? `${t.creator.substring(0, 4)}...${t.creator.substring(t.creator.length - 4)}` : t.creator) : (t.creatorAddress || '0x000...000'),
           ageText: 'just now',
           imageUrl: t.imageUrl || 'images/cession-logo.png',
           description: t.description || 'Sovereign fair launch on Cession bonding curve.',

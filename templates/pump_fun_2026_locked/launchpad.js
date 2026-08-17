@@ -14,138 +14,7 @@ class CessionLaunchpadManager {
     this.activeToken = null;
     this.tokens = [];
 
-    this.defaultTokens = [
-      {
-        name: 'The Random Bull',
-        symbol: 'USER',
-        marketCapUsd: 122000,
-        volume24hUsd: 45200,
-        currentPriceSol: 0.000000122,
-        creatorAddress: '76kXMM',
-        ageText: '2d',
-        imageUrl: 'https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?w=500',
-        description: 'A random user. A nobody. Not a celeb. Not a KOL. Just a random bull pumping to graduation.',
-        category: 'movers',
-        bondingCurvePercent: 78
-      },
-      {
-        name: 'Billycoin',
-        symbol: 'BILLY',
-        marketCapUsd: 3750000,
-        volume24hUsd: 1280000,
-        currentPriceSol: 0.00000375,
-        creatorAddress: 'topfloor_b',
-        ageText: '10h',
-        imageUrl: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500',
-        description: 'The iconic golden doge wearing glasses. Community driven meme sensation.',
-        category: 'mayhem',
-        bondingCurvePercent: 96
-      },
-      {
-        name: 'r/',
-        symbol: 'r/',
-        marketCapUsd: 8350,
-        volume24hUsd: 3200,
-        currentPriceSol: 0.000000008,
-        creatorAddress: 'fltnarwhal',
-        ageText: '2y',
-        imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500',
-        description: 'The unofficial community coin of Reddit on the bonding curve.',
-        category: 'oldest',
-        bondingCurvePercent: 12
-      },
-      {
-        name: 'Minecraft Fruit Fly',
-        symbol: 'FLY',
-        marketCapUsd: 27900,
-        volume24hUsd: 8900,
-        currentPriceSol: 0.000000028,
-        creatorAddress: 'botfn',
-        ageText: '50m',
-        imageUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500',
-        description: 'FLY-000 [Neural] autonomous spider fly simulation agent.',
-        category: 'agents',
-        bondingCurvePercent: 39
-      },
-      {
-        name: 'The Orange Backpack Peng...',
-        symbol: 'ORANGEPENG',
-        marketCapUsd: 41800,
-        volume24hUsd: 14200,
-        currentPriceSol: 0.000000042,
-        creatorAddress: 'dyedkraken',
-        ageText: '48m',
-        imageUrl: 'https://images.unsplash.com/photo-1598439210625-5067c578f3f6?w=500',
-        description: 'Penguins with orange backpacks sliding into Raydium graduation.',
-        category: 'new',
-        bondingCurvePercent: 54
-      },
-      {
-        name: 'The Black Bull',
-        symbol: 'ANSEM',
-        marketCapUsd: 273000000,
-        volume24hUsd: 42100000,
-        currentPriceSol: 0.000273,
-        creatorAddress: 'ansem',
-        ageText: '1d',
-        imageUrl: 'https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?w=500',
-        description: 'Golden Bull? Try Black Bull. Sovereign liquidity powerhouse.',
-        category: 'market_cap',
-        bondingCurvePercent: 99
-      },
-      {
-        name: 'Jimothy The Raccoon',
-        symbol: 'Jimothy',
-        marketCapUsd: 7820000,
-        volume24hUsd: 2100000,
-        currentPriceSol: 0.00000782,
-        creatorAddress: 'jimothy_dev',
-        ageText: '3h',
-        imageUrl: 'https://images.unsplash.com/photo-1590425712287-c37340263300?w=500',
-        description: "The Internet Isn't Done With Jimothy Yet.",
-        category: 'movers',
-        bondingCurvePercent: 92
-      },
-      {
-        name: 'ちいかわ',
-        symbol: 'Chiikawa',
-        marketCapUsd: 1510000,
-        volume24hUsd: 480000,
-        currentPriceSol: 0.00000151,
-        creatorAddress: 'anime_cult',
-        ageText: '5h',
-        imageUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500',
-        description: 'The Little World of Chiikawa viral anime mascot.',
-        category: 'movers',
-        bondingCurvePercent: 88
-      },
-      {
-        name: 'Tung Tung Tung Sahur',
-        symbol: 'TripleT',
-        marketCapUsd: 10700000,
-        volume24hUsd: 3100000,
-        currentPriceSol: 0.0000107,
-        creatorAddress: 'sahur_lead',
-        ageText: '12h',
-        imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500',
-        description: 'Tung Tung Tung Sahur Passes $25M Market Cap.',
-        category: 'mayhem',
-        bondingCurvePercent: 95
-      },
-      {
-        name: 'Cession Sovereign Engine',
-        symbol: 'CESS',
-        marketCapUsd: 58240,
-        volume24hUsd: 18400,
-        currentPriceSol: 0.000000058,
-        creatorAddress: '0x88f4b23a',
-        ageText: '10m',
-        imageUrl: 'images/cession-logo.png',
-        description: 'The flagship fair launch token on Cession with anti-rug proof of skin.',
-        category: 'new',
-        bondingCurvePercent: 84
-      }
-    ];
+    this.defaultTokens = [];
 
     this.init();
   }
@@ -596,7 +465,7 @@ class CessionLaunchpadManager {
       marketCapUsd: 58240 + initialBuy * 1450,
       volume24hUsd: initialBuy * 145,
       currentPriceSol: 0.000000058,
-      creatorAddress: '0x88f4b23a',
+      creatorAddress: (window.walletEngine && window.walletEngine.activeAddress) ? (window.walletEngine.activeAddress.length > 8 ? `${window.walletEngine.activeAddress.substring(0, 4)}...${window.walletEngine.activeAddress.substring(window.walletEngine.activeAddress.length - 4)}` : window.walletEngine.activeAddress) : '0x000...000',
       ageText: 'just now',
       imageUrl: image || 'images/cession-logo.png',
       description: desc,
