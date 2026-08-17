@@ -8,7 +8,7 @@
   <!-- Meta & SEO Tags -->
   <meta name="description" content="pump.fun prevents rugs by making sure that all created tokens are safe. each coin on pump is a fair-launch with no presale and no team allocation.">
   <meta property="og:title" content="pump.fun">
-  <meta property="og:description" content="Trade, stream, and create fair launch coins on the bonding curve.">
+  <meta property="og:description" content="Trade faster. Pump is better on mobile.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://cession.fun">
   <meta property="og:image" content="images/cession-logo.png">
@@ -16,7 +16,7 @@
   <!-- Google Fonts: Inter + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Charting & Web3 Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
@@ -29,548 +29,494 @@
 </head>
 <body>
 
-  <!-- Top Live Trade Ticker Tape -->
-  <div class="marquee-stream-container">
-    <div class="marquee-stream-track" id="globalTradeMarquee">
-      <div class="marquee-pill buy">0x88f...1a2 bought 1.5 SOL of <strong>$CESS</strong></div>
-      <div class="marquee-pill buy">4hJ...99a bought 2.0 SOL of <strong>$BFT</strong></div>
-      <div class="marquee-pill buy">0x71a...c09 bought 0.8 SOL of <strong>$PEPE</strong></div>
-      <div class="marquee-pill sell">7zK...33b sold 0.2 SOL of <strong>$SOLMEME</strong></div>
-      <div class="marquee-pill buy">0x91a...c01 bought 3.5 SOL of <strong>$CESS</strong></div>
-    </div>
-  </div>
-
-  <!-- Left Slide-Out Hamburger Sidebar Drawer -->
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
-  <aside class="sidebar-drawer" id="sidebarDrawer">
-    <div class="sidebar-header">
-      <div class="sidebar-brand">
-        <img src="images/cession-logo.png" alt="Logo" style="width: 22px; height: 22px; border-radius: 4px;">
-        <span>pump.fun</span>
-      </div>
-      <button class="btn-close-sidebar" id="btnCloseSidebar">&times;</button>
-    </div>
-
-    <nav class="sidebar-menu-list">
-      <div class="sidebar-menu-item active" id="menuNavBoard">
-        <span class="icon">🪙</span>
-        <span>board / coins</span>
-      </div>
-      <div class="sidebar-menu-item" id="menuNavLive">
-        <span class="icon">📹</span>
-        <span>livestreams</span>
-      </div>
-      <div class="sidebar-menu-item" id="menuNavLeaderboard">
-        <span class="icon">🏆</span>
-        <span>leaderboard</span>
-      </div>
-      <div class="sidebar-menu-item" id="menuNavFollowing">
-        <span class="icon">⭐</span>
-        <span>following</span>
-      </div>
-      <div class="sidebar-menu-item" id="menuNavProfile">
-        <span class="icon">👤</span>
-        <span>profile / portfolio</span>
-      </div>
-      <div class="sidebar-menu-item" id="menuNavHowItWorks">
-        <span class="icon">❓</span>
-        <span>how it works</span>
-      </div>
-    </nav>
-
-    <div class="sidebar-footer">
-      <div class="sidebar-social-links">
-        <a href="https://x.com" target="_blank" class="bracket-link">[twitter]</a>
-        <a href="https://t.me" target="_blank" class="bracket-link">[telegram]</a>
-        <a href="#" onclick="alert('Support channel active on Telegram and Discord: @pumpfun_support'); return false;" class="bracket-link">[support]</a>
-      </div>
-      <div class="sidebar-legal-text">
-        &copy; 2026 pump.fun • Sovereign Fair Launch Protocol
-      </div>
-    </div>
-  </aside>
-
-  <!-- Header / Navbar -->
-  <header class="header-pump">
-    <div class="header-left">
-      <!-- Hamburger Menu Button -->
-      <button class="btn-hamburger" id="btnOpenSidebar" title="Menu">
-        ☰
-      </button>
-
-      <a href="/" class="brand-link" id="brandHomeLink">
-        <img src="images/cession-logo.png" alt="Logo" style="width: 24px; height: 24px; border-radius: 4px;">
-        <span>pump.fun</span>
-      </a>
-
-      <div class="header-links-group">
-        <a href="#" class="bracket-link" id="btnOpenHowItWorks">[ [?] how it works ]</a>
-        <a href="#" class="bracket-link" id="btnHeaderLive">[livestreams]</a>
-        <a href="#" class="bracket-link" id="btnHeaderLeaderboard">[leaderboard]</a>
-        <a href="https://x.com" target="_blank" class="bracket-link">[twitter]</a>
-        <a href="https://t.me" target="_blank" class="bracket-link">[telegram]</a>
-        <a href="#" class="bracket-link" onclick="alert('Support channel active on Telegram: @pumpfun_support'); return false;">[support]</a>
-      </div>
-    </div>
-
-    <div class="header-right">
-      <!-- Unconnected State -->
-      <button class="btn-connect-wallet" id="btnConnectWallet">
-        [connect wallet]
-      </button>
-
-      <!-- Connected State (Hidden by default) -->
-      <div class="wallet-connected-pill" id="walletConnectedPill" style="display: none;">
-        <span class="balance" id="navWalletBalance">0.00 SOL</span>
-        <span id="navWalletAddress">0x000...000</span>
-        <button id="btnDisconnectWallet" style="color: var(--market-red); margin-left: 6px;" title="Disconnect">✕</button>
-      </div>
-    </div>
-  </header>
-
-  <!-- =========================================================
-       VIEW 1: BOARD / COINS FEED (DEFAULT HOME)
-  ========================================================= -->
-  <main class="page-view active" id="viewBoard">
-    <!-- Hero / Start a new coin -->
-    <section class="hero-cta-section">
-      <a href="#" class="btn-start-coin-hero" id="btnOpenDeployHero">
-        [start a new coin]
-      </a>
-    </section>
-
-    <!-- King of the Hill -->
-    <section class="koth-container">
-      <div class="koth-title-row">
-        <span>👑</span>
-        <span>king of the hill</span>
-      </div>
-      <div class="koth-card" id="kingHeroCard">
-        <img id="kingImg" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200" alt="King Token" class="koth-thumb">
-        <div class="koth-details">
-          <div class="koth-creator-row">
-            <span>created by</span>
-            <img id="kingCreatorAvatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=creator" class="koth-creator-avatar" alt="Avatar">
-            <span id="kingCreator">0x88f...1a2</span>
-            <span id="kingTimeAgo">10m ago</span>
-          </div>
-          <div class="koth-stats-row">
-            <span>market cap: <span id="kingMcap">$58.2k</span></span>
-            <span class="replies">[replies: <span id="kingReplies">42</span>]</span>
-          </div>
-          <div class="koth-desc-row">
-            <strong id="kingNameTicker">$CESS (Cession)</strong>: <span id="kingDesc">The sovereign fair launch liquidity engine.</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Search & Filter Controls -->
-    <section class="controls-container">
-      <div class="search-bar-row">
-        <div class="search-input-wrapper">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="tokenSearchInput" class="search-input-main" placeholder="search for token(name, ticker)...">
-        </div>
+  <div class="app-container">
+    
+    <!-- =========================================================
+         LEFT VERTICAL ICON RAIL
+    ========================================================= -->
+    <aside class="sidebar-rail" id="sidebarRail">
+      <!-- Mint Green Pill Logo -->
+      <div class="rail-top-logo" id="railLogo" title="pump.fun">
+        <svg viewBox="0 0 24 24">
+          <path d="M4.5 10.5C3.12 11.88 3.12 14.12 4.5 15.5L8.5 19.5C9.88 20.88 12.12 20.88 13.5 19.5L19.5 13.5C20.88 12.12 20.88 9.88 19.5 8.5L15.5 4.5C14.12 3.12 11.88 3.12 10.5 4.5L4.5 10.5Z" />
+        </svg>
       </div>
 
-      <div class="filter-bar-row">
-        <div class="filter-left">
-          <span>sort:</span>
-          <select id="selectSortOrder" class="select-pump">
-            <option value="bump">bump order</option>
-            <option value="last_reply">last reply</option>
-            <option value="replies">reply count</option>
-            <option value="market_cap">market cap</option>
-            <option value="creation">creation time</option>
-          </select>
+      <!-- Icon Navigation Stack -->
+      <div class="rail-icons-stack">
+        <!-- 1. Home / Board -->
+        <button class="rail-icon-btn" id="railNavHome" title="Home">
+          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        </button>
 
-          <span>order:</span>
-          <select id="selectSortDirection" class="select-pump">
-            <option value="desc">desc</option>
-            <option value="asc">asc</option>
-          </select>
-        </div>
+        <!-- 2. Explore (Active) -->
+        <button class="rail-icon-btn active" id="railNavExplore" title="Explore Coins">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </button>
 
-        <div class="filter-right">
-          <label class="toggle-label-pump">
-            <span>show animations:</span>
-            <input type="checkbox" id="toggleLiveAnimations" checked>
-          </label>
-          <label class="toggle-label-pump">
-            <span>include nsfw:</span>
-            <input type="checkbox" id="toggleIncludeNsfw">
-          </label>
-        </div>
-      </div>
-    </section>
+        <!-- 3. Profile / Portfolio -->
+        <button class="rail-icon-btn" id="railNavProfile" title="Profile">
+          <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </button>
 
-    <!-- Cards Grid -->
-    <section class="cards-grid-container" id="tokenGrid">
-      <!-- Tokens rendered dynamically by launchpad.js -->
-    </section>
-  </main>
+        <!-- 4. Messages / Chat -->
+        <button class="rail-icon-btn" id="railNavChat" title="Chat">
+          <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+        </button>
 
-  <!-- =========================================================
-       VIEW 2: LIVESTREAMS PAGE
-  ========================================================= -->
-  <main class="page-view" id="viewLive">
-    <div class="live-page-container">
-      <div class="live-page-header">
-        <div>
-          <h1 class="live-page-title">
-            <span>🔴</span>
-            <span>Live Creator Streams</span>
-          </h1>
-          <p style="color: var(--text-secondary); font-size: 13px; font-family: var(--font-mono); margin-top: 4px;">
-            Watch coin creators stream live on the bonding curve. Buy and chat directly from the stream.
-          </p>
-        </div>
-        <button class="btn-connect-wallet" id="btnOpenStreamStudio">
-          📹 Go Live
+        <!-- 5. Leaderboard / Analytics -->
+        <button class="rail-icon-btn" id="railNavLeaderboard" title="Leaderboard">
+          <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+        </button>
+
+        <!-- 6. Livestreams -->
+        <button class="rail-icon-btn" id="railNavLive" title="Livestreams">
+          <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+        </button>
+
+        <!-- 7. Support -->
+        <button class="rail-icon-btn" id="railNavSupport" title="Support">
+          <svg viewBox="0 0 24 24"><path d="M12 1a9 9 0 0 0-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7a9 9 0 0 0-9-9z"/></svg>
+        </button>
+
+        <!-- 8. Swap -->
+        <button class="rail-icon-btn" id="railNavSwap" title="Swap">
+          <svg viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
+        </button>
+
+        <!-- 9. Tokens -->
+        <button class="rail-icon-btn" id="railNavTokens" title="Tokens">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
         </button>
       </div>
 
-      <div class="live-grid" id="livestreamsGrid">
-        <!-- Stream 1 -->
-        <div class="stream-card" onclick="window.launchpadManager.openLiveTheatre('CESS', '🔥 PUMPING $CESS TO RAYDIUM GRADUATION TODAY!', '0x88f...1a2', 1420)">
-          <div class="stream-video-preview">
-            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600" class="stream-video-bg" alt="Streamer">
-            <div class="stream-badge-live">🔴 LIVE</div>
-            <div class="stream-badge-viewers">👥 1,420 viewers</div>
-          </div>
-          <div class="stream-card-body">
-            <div class="stream-title">🔥 PUMPING $CESS TO RAYDIUM GRADUATION TODAY!</div>
-            <div class="stream-creator-info">
-              <img src="https://api.dicebear.com/7.x/identicon/svg?seed=streamer1" class="koth-creator-avatar" alt="Avatar">
-              <span>0x88f...1a2</span>
-              <span style="color: var(--pump-green); font-weight: 700; margin-left: auto;">$CESS • $58.2k mcap</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Stream 2 -->
-        <div class="stream-card" onclick="window.launchpadManager.openLiveTheatre('BFT', '🐸 Base Pepe Frog Token Memes & Dev Q&A', '0x42b...c91', 830)">
-          <div class="stream-video-preview">
-            <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600" class="stream-video-bg" alt="Streamer">
-            <div class="stream-badge-live">🔴 LIVE</div>
-            <div class="stream-badge-viewers">👥 830 viewers</div>
-          </div>
-          <div class="stream-card-body">
-            <div class="stream-title">🐸 Base Pepe Frog Token Memes & Dev Q&A</div>
-            <div class="stream-creator-info">
-              <img src="https://api.dicebear.com/7.x/identicon/svg?seed=streamer2" class="koth-creator-avatar" alt="Avatar">
-              <span>0x42b...c91</span>
-              <span style="color: var(--pump-green); font-weight: 700; margin-left: auto;">$BFT • $32.4k mcap</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Stream 3 -->
-        <div class="stream-card" onclick="window.launchpadManager.openLiveTheatre('DOGE', '🚀 Doge Sovereign Fair Launch Community Stream', '0x99a...01f', 612)">
-          <div class="stream-video-preview">
-            <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600" class="stream-video-bg" alt="Streamer">
-            <div class="stream-badge-live">🔴 LIVE</div>
-            <div class="stream-badge-viewers">👥 612 viewers</div>
-          </div>
-          <div class="stream-card-body">
-            <div class="stream-title">🚀 Doge Sovereign Fair Launch Community Stream</div>
-            <div class="stream-creator-info">
-              <img src="https://api.dicebear.com/7.x/identicon/svg?seed=streamer3" class="koth-creator-avatar" alt="Avatar">
-              <span>0x99a...01f</span>
-              <span style="color: var(--pump-green); font-weight: 700; margin-left: auto;">$DOGE • $19.8k mcap</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <!-- =========================================================
-       VIEW 3: LIVE STREAM THEATRE STUDIO (INTERACTIVE PLAYER & CHAT)
-  ========================================================= -->
-  <main class="page-view" id="viewLiveTheatre">
-    <div class="live-page-container">
-      <button class="btn-go-back" onclick="window.launchpadManager.switchPage('live')">
-        <span>←</span>
-        <span>[back to all livestreams]</span>
+      <!-- Bottom Mint Green Create Button -->
+      <button class="rail-create-btn" id="railBtnCreate" title="Create Coin">
+        +
       </button>
+    </aside>
 
-      <div class="stream-theatre-layout">
-        <!-- Video Player & Token Bar -->
-        <div class="stream-player-container">
-          <div style="position: relative; width: 100%; height: 420px; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-            <canvas id="streamVisualizerCanvas" width="800" height="420" style="width: 100%; height: 100%;"></canvas>
-            <div class="stream-badge-live" style="top: 14px; left: 14px;">🔴 LIVE BROADCAST</div>
-            <div class="stream-badge-viewers" id="theatreViewerBadge" style="top: 14px; right: 14px;">👥 1,420 viewers</div>
+    <!-- =========================================================
+         MAIN VIEWPORT
+    ========================================================= -->
+    <div class="main-viewport">
+      
+      <!-- Top Notice Banner -->
+      <div class="top-notice-banner" id="topNoticeBanner">
+        <span class="top-notice-link">Trade faster. Pump is better on mobile. ›</span>
+        <button class="top-notice-close" onclick="document.getElementById('topNoticeBanner').style.display='none'">&times;</button>
+      </div>
+
+      <!-- Top Navbar -->
+      <header class="top-navbar">
+        <div class="nav-left-group">
+          <!-- Back / Forward Chevrons -->
+          <div class="nav-history-btns">
+            <button class="nav-chevron-btn" onclick="window.history.back()">‹</button>
+            <button class="nav-chevron-btn" onclick="window.history.forward()">›</button>
           </div>
 
-          <div style="padding: 16px; background: var(--bg-card); display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 12px;">
-            <div>
-              <h2 id="theatreStreamTitle" style="font-size: 16px; color: #fff; margin-bottom: 4px;">PUMPING $CESS TO RAYDIUM GRADUATION</h2>
-              <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);">
-                Hosted by <strong id="theatreStreamHost" style="color: #fff;">0x88f...1a2</strong> • <span id="theatreStreamCoin" style="color: var(--pump-green); font-weight: 700;">$CESS</span>
+          <!-- Search Input with ⌘K -->
+          <div class="nav-search-wrapper">
+            <span class="nav-search-icon">🔍</span>
+            <input type="text" id="tokenSearchInput" class="nav-search-input" placeholder="Search for coins and users...">
+            <span class="nav-shortcut-kbd">⌘ K</span>
+            <span class="nav-trash-btn" onclick="document.getElementById('tokenSearchInput').value=''; window.launchpadManager.filterAndRenderTokens();">🗑</span>
+          </div>
+        </div>
+
+        <div class="nav-right-group">
+          <!-- + Create Button -->
+          <button class="btn-create-coin" id="btnNavbarCreate">
+            <span>+</span>
+            <span>Create</span>
+          </button>
+
+          <!-- Sign In Button (or Connected Wallet Pill) -->
+          <button class="btn-signin-mint" id="btnConnectWallet">
+            Sign in
+          </button>
+
+          <div class="wallet-connected-pill" id="walletConnectedPill" style="display: none;">
+            <span class="balance" id="navWalletBalance">6.20 SOL</span>
+            <span id="navWalletAddress">0x88f...1a2</span>
+            <button id="btnDisconnectWallet" style="color: var(--accent-red); margin-left: 6px;">✕</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- =========================================================
+           VIEW: EXPLORE / HOME VIEW (MAIN FEED)
+      ========================================================= -->
+      <main class="page-view active" id="viewBoard">
+        
+        <!-- "Trending now" Hero Carousel Section -->
+        <section class="trending-section">
+          <div class="section-header-row">
+            <h2 class="section-title">Trending now</h2>
+            <div class="carousel-nav-btns">
+              <button class="carousel-arrow-btn" onclick="window.launchpadManager.toast('Previous trending', 'info')">‹</button>
+              <button class="carousel-arrow-btn" onclick="window.launchpadManager.toast('Next trending', 'info')">›</button>
+            </div>
+          </div>
+
+          <div class="trending-cards-row">
+            <!-- Card 1: Jimothy The Raccoon -->
+            <div class="trending-card" onclick="window.launchpadManager.openTokenDetail('Jimothy')">
+              <div class="trending-thumb-wrapper">
+                <img src="https://images.unsplash.com/photo-1590425712287-c37340263300?w=500" class="trending-img" alt="Jimothy">
+                <div class="trending-badge-overlay">$7.82M</div>
+              </div>
+              <div class="trending-body">
+                <div class="trending-title-line">
+                  <span>Jimothy The Raccoon</span>
+                  <span class="ticker">Jimothy</span>
+                </div>
+                <div class="trending-desc-line">The Internet Isn't Done With Jimothy Yet</div>
               </div>
             </div>
-            <button class="btn-connect-wallet" id="btnTheatreOpenDetail" onclick="window.launchpadManager.openTokenDetail('CESS')">
-              📊 View Full Chart & Bonding Curve
-            </button>
+
+            <!-- Card 2: Chiikawa -->
+            <div class="trending-card" onclick="window.launchpadManager.openTokenDetail('Chiikawa')">
+              <div class="trending-thumb-wrapper">
+                <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500" class="trending-img" alt="Chiikawa">
+                <div class="trending-badge-overlay">$1.51M</div>
+              </div>
+              <div class="trending-body">
+                <div class="trending-title-line">
+                  <span>ちいかわ</span>
+                  <span class="ticker">Chiikawa</span>
+                </div>
+                <div class="trending-desc-line">The Little World of Chiikawa</div>
+              </div>
+            </div>
+
+            <!-- Card 3: Tung Tung Tung Sahur -->
+            <div class="trending-card" onclick="window.launchpadManager.openTokenDetail('TripleT')">
+              <div class="trending-thumb-wrapper">
+                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500" class="trending-img" alt="Tung Tung">
+                <div class="trending-badge-overlay">$10.7M</div>
+              </div>
+              <div class="trending-body">
+                <div class="trending-title-line">
+                  <span>Tung Tung Tung Sahur</span>
+                  <span class="ticker">TripleT</span>
+                </div>
+                <div class="trending-desc-line">Tung Tung Tung Sahur Passes $25M Market Cap</div>
+              </div>
+            </div>
+
+            <!-- Card 4: The Black Bull -->
+            <div class="trending-card" onclick="window.launchpadManager.openTokenDetail('ANSEM')">
+              <div class="trending-thumb-wrapper">
+                <img src="https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?w=500" class="trending-img" alt="The Black Bull">
+                <div class="trending-badge-overlay">$273M</div>
+              </div>
+              <div class="trending-body">
+                <div class="trending-title-line">
+                  <span>The Black Bull</span>
+                  <span class="ticker">ANSEM</span>
+                </div>
+                <div class="trending-desc-line">Golden Bull? Try Black Bull</div>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Live Chat Room -->
-        <div class="stream-chat-box">
-          <div class="stream-chat-header">
-            <span>💬 Live Stream Chat</span>
-            <span style="color: var(--pump-green); font-size: 11px;">● Connected</span>
+        <!-- "Explore coins" Section & Category Filter Matrix -->
+        <section class="explore-section">
+          <div class="section-header-row" style="margin-bottom: 12px;">
+            <h2 class="section-title">Explore coins</h2>
           </div>
 
-          <div class="stream-chat-messages" id="theatreChatStream">
-            <div class="stream-chat-msg"><span class="stream-chat-author">whale_trader:</span><span>LFG! Just bought 3 SOL! 🚀</span></div>
-            <div class="stream-chat-msg"><span class="stream-chat-author">sol_king:</span><span>Bonding curve is already 70% full!</span></div>
-            <div class="stream-chat-msg"><span class="stream-chat-author">anon_92:</span><span>Raydium migration incoming today!</span></div>
-            <div class="stream-chat-msg"><span class="stream-chat-author">crypto_chad:</span><span>Dev is cooking in the stream 🐸</span></div>
+          <!-- Category Pills & View Controls Bar -->
+          <div class="explore-controls-bar">
+            <!-- Left Category Filter Pills -->
+            <div class="category-pills-row" id="categoryPillsRow">
+              <button class="cat-pill-btn active" data-cat="movers">✨ Movers</button>
+              <button class="cat-pill-btn" data-cat="mayhem">🔥 Mayhem</button>
+              <button class="cat-pill-btn" data-cat="new">🌱 New</button>
+              <button class="cat-pill-btn" data-cat="charities">💖 Charities</button>
+              <button class="cat-pill-btn" data-cat="live">📹 Live</button>
+              <button class="cat-pill-btn" data-cat="market_cap">🔥 Market cap</button>
+              <button class="cat-pill-btn" data-cat="agents">🤖 Agents</button>
+              <button class="cat-pill-btn" data-cat="oldest">⏳ Oldest</button>
+              <button class="cat-pill-btn" data-cat="last_trade">⚡ Last trade</button>
+            </div>
+
+            <!-- Right Controls: Filter Funnel + Grid/Table Switcher + Settings -->
+            <div class="explore-view-controls">
+              <button class="btn-filter-funnel" id="btnFilterFunnel">
+                <span>⚙</span>
+                <span>Filter</span>
+              </button>
+
+              <div class="view-mode-toggle-group">
+                <button class="view-toggle-btn active" id="btnViewGrid">
+                  <span>⊞</span>
+                  <span>Grid</span>
+                </button>
+                <button class="view-toggle-btn" id="btnViewTable">
+                  <span>☷</span>
+                  <span>Table</span>
+                </button>
+              </div>
+
+              <button class="btn-settings-gear" id="btnSettingsGear" title="Settings">
+                ⚙
+              </button>
+            </div>
           </div>
 
-          <form id="formTheatreChat" class="stream-chat-input-bar">
-            <input type="text" id="theatreChatInput" class="form-input-pump" placeholder="send message to stream..." style="flex: 1;" required>
-            <button type="submit" class="btn-post-reply" style="padding: 0 12px;">Send</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </main>
+          <!-- Main Explore Coins Cards Grid -->
+          <div class="explore-coins-grid" id="exploreCoinsGrid">
+            <!-- Populated dynamically with Sparkline SVGs by launchpad.js -->
+          </div>
 
-  <!-- =========================================================
-       VIEW 4: LEADERBOARD PAGE
-  ========================================================= -->
-  <main class="page-view" id="viewLeaderboard">
-    <div class="leaderboard-container">
-      <div class="leaderboard-header">
-        <div>
-          <h1 class="live-page-title">
-            <span>🏆</span>
-            <span>Hall of Fame & Leaderboard</span>
-          </h1>
-          <p style="color: var(--text-secondary); font-size: 13px; font-family: var(--font-mono); margin-top: 4px;">
-            Top 24-hour profitable traders, coin creators, and graduated tokens.
+          <!-- Table View Mode Container -->
+          <div class="explore-table-container" id="exploreTableContainer">
+            <table class="pump-data-table">
+              <thead>
+                <tr>
+                  <th>Coin</th>
+                  <th>Ticker</th>
+                  <th>Price</th>
+                  <th>Market Cap</th>
+                  <th>24h Volume</th>
+                  <th>Creator</th>
+                  <th>Age</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="exploreTableBody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+
+      <!-- =========================================================
+           VIEW: LIVESTREAMS PAGE
+      ========================================================= -->
+      <main class="page-view" id="viewLive">
+        <section class="explore-section">
+          <div class="section-header-row">
+            <h2 class="section-title">🔴 Live Creator Streams</h2>
+            <button class="btn-signin-mint" id="btnOpenStreamStudio">📹 Go Live</button>
+          </div>
+          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">
+            Watch coin creators stream live on the bonding curve. Buy and chat directly from the stream.
           </p>
-        </div>
 
-        <div class="leaderboard-tabs">
-          <button class="leaderboard-tab-btn active" id="tabTopTraders">Top Traders</button>
-          <button class="leaderboard-tab-btn" id="tabTopCreators">Top Creators</button>
-          <button class="leaderboard-tab-btn" id="tabGraduatedCoins">Graduated Coins</button>
-        </div>
-      </div>
+          <div class="explore-coins-grid" id="livestreamsGrid">
+            <!-- Livestream cards rendered dynamically -->
+          </div>
+        </section>
+      </main>
 
-      <table class="pump-table" style="background: var(--bg-card); border-radius: var(--radius-sm); overflow: hidden;">
-        <thead id="leaderboardThead">
-          <tr>
-            <th>Rank</th>
-            <th>Trader</th>
-            <th>24h Profit (SOL)</th>
-            <th>24h Profit (USD)</th>
-            <th>Win Rate</th>
-            <th>Total Trades</th>
-          </tr>
-        </thead>
-        <tbody id="leaderboardTableBody">
-          <!-- Populated dynamically -->
-        </tbody>
-      </table>
+      <!-- =========================================================
+           VIEW: LEADERBOARD PAGE
+      ========================================================= -->
+      <main class="page-view" id="viewLeaderboard">
+        <section class="explore-section">
+          <div class="section-header-row">
+            <h2 class="section-title">🏆 Hall of Fame & Leaderboard</h2>
+            <div class="category-pills-row">
+              <button class="cat-pill-btn active" id="tabTopTraders">Top Traders</button>
+              <button class="cat-pill-btn" id="tabTopCreators">Top Creators</button>
+              <button class="cat-pill-btn" id="tabGraduatedCoins">Graduated Coins</button>
+            </div>
+          </div>
+
+          <div class="explore-table-container" style="display: block;">
+            <table class="pump-data-table">
+              <thead id="leaderboardThead">
+                <tr>
+                  <th>Rank</th>
+                  <th>Trader</th>
+                  <th>24h Profit (SOL)</th>
+                  <th>24h Profit (USD)</th>
+                  <th>Win Rate</th>
+                  <th>Total Trades</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboardTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+
+      <!-- =========================================================
+           VIEW: PROFILE & PORTFOLIO
+      ========================================================= -->
+      <main class="page-view" id="viewProfile">
+        <section class="explore-section">
+          <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+            <img id="profileAvatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=myprofile" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--pump-mint);" alt="Profile">
+            <div style="flex: 1;">
+              <div style="font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                <span id="profileAddressFull">0x88f4b23a910cd99e1a2f0093ba4210e76a011a2</span>
+                <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="navigator.clipboard.writeText(document.getElementById('profileAddressFull').textContent); window.launchpadManager.toast('Address copied', 'success');">copy</button>
+              </div>
+              <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">
+                Status: <span style="color: var(--pump-mint); font-weight: 700;">Active Sovereign Vault</span>
+              </div>
+              <div style="display: flex; gap: 24px; margin-top: 14px; font-family: var(--font-mono); font-size: 13px;">
+                <div>SOL Balance: <strong id="profileSolBalance" style="color: var(--pump-mint); font-size: 16px;">6.20 SOL</strong></div>
+                <div>$CESS Balance: <strong id="profileCessBalance" style="color: var(--pump-mint); font-size: 16px;">250,000 $CESS</strong></div>
+                <div>Portfolio Value: <strong style="color: #fff; font-size: 16px;">$1,842.50</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="category-pills-row" style="margin-bottom: 16px;">
+            <button class="cat-pill-btn active" id="tabProfileHeld">Coins Held</button>
+            <button class="cat-pill-btn" id="tabProfileCreated">Coins Created</button>
+            <button class="cat-pill-btn" id="tabProfileHistory">Trade History</button>
+          </div>
+
+          <div class="explore-table-container" style="display: block;">
+            <table class="pump-data-table">
+              <thead id="profileThead">
+                <tr>
+                  <th>Coin</th>
+                  <th>Amount Held</th>
+                  <th>Value (SOL)</th>
+                  <th>PnL</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="profileHoldingsBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+
     </div>
-  </main>
+  </div>
 
   <!-- =========================================================
-       VIEW 5: PROFILE & PORTFOLIO PAGE
+       "WE VALUE YOUR PRIVACY" COOKIE BANNER (EXACT TO SCREENSHOT)
   ========================================================= -->
-  <main class="page-view" id="viewProfile">
-    <div class="profile-container">
-      <div class="profile-card">
-        <img id="profileAvatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=myprofile" class="profile-avatar-lg" alt="Profile">
-        <div class="profile-details-col">
-          <div class="profile-address-row">
-            <span id="profileAddressFull">0x0000000000000000000000000000000000000000</span>
-            <button class="preset-pill" onclick="navigator.clipboard.writeText(document.getElementById('profileAddressFull').textContent); window.launchpadManager.toast('Address copied to clipboard', 'success');">copy</button>
-          </div>
-          <div style="color: var(--text-secondary); font-size: 12px; font-family: var(--font-mono);">
-            Status: <span style="color: var(--pump-green); font-weight: 700;">Active Sovereign Vault</span>
-          </div>
-          <div class="profile-balances-grid">
-            <div class="profile-balance-item">
-              <div>SOL Balance:</div>
-              <strong id="profileSolBalance">6.20 SOL</strong>
-            </div>
-            <div class="profile-balance-item">
-              <div>$CESS Balance:</div>
-              <strong id="profileCessBalance">250,000 $CESS</strong>
-            </div>
-            <div class="profile-balance-item">
-              <div>Portfolio Value:</div>
-              <strong style="color: #fff;">$1,842.50</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Profile Tabs -->
-      <div class="detail-tabs-bar" style="margin-bottom: 16px;">
-        <button class="detail-tab-btn active" id="tabProfileHeld">Coins Held</button>
-        <button class="detail-tab-btn" id="tabProfileCreated">Coins Created</button>
-        <button class="detail-tab-btn" id="tabProfileHistory">Trade History</button>
-      </div>
-
-      <table class="pump-table" style="background: var(--bg-card); border-radius: var(--radius-sm);">
-        <thead id="profileThead">
-          <tr>
-            <th>Coin</th>
-            <th>Amount Held</th>
-            <th>Value (SOL)</th>
-            <th>PnL</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="profileHoldingsBody">
-          <!-- Populated dynamically -->
-        </tbody>
-      </table>
+  <div class="privacy-cookie-banner" id="privacyCookieBanner">
+    <div class="cookie-title">We value your privacy</div>
+    <div class="cookie-desc">
+      This site uses cookies to improve your browsing experience, analyze site traffic, and show personalized content.
     </div>
-  </main>
+    <div class="cookie-btns-row">
+      <button class="cookie-link-btn" onclick="document.getElementById('privacyCookieBanner').style.display='none'">Reject all</button>
+      <button class="cookie-link-btn" onclick="document.getElementById('privacyCookieBanner').style.display='none'">Customize</button>
+      <button class="btn-accept-cookie" onclick="document.getElementById('privacyCookieBanner').style.display='none'">Accept all</button>
+    </div>
+  </div>
 
   <!-- =========================================================
-       TOKEN DETAIL VIEW MODAL (EXACT PUMP.FUN LAYOUT)
+       TOKEN DETAIL VIEW MODAL
   ========================================================= -->
-  <div class="detail-modal-overlay" id="tokenDetailModal">
-    <div class="detail-modal-container">
-      <button class="btn-go-back" id="btnCloseDetailModal">
-        <span>←</span>
-        <span>[go back]</span>
-      </button>
+  <div class="modal-overlay-generic" id="tokenDetailModal">
+    <div class="modal-box-pump" style="max-width: 1080px;">
+      <div class="modal-header-row">
+        <button class="cat-pill-btn" id="btnCloseDetailModal">← [go back to coins]</button>
+        <button class="btn-close-modal" onclick="document.getElementById('tokenDetailModal').style.display='none'">&times;</button>
+      </div>
 
-      <div class="detail-layout-grid">
-        <!-- Left Column: Chart, Progress, Tabs (Thread, Trades, Holders) -->
-        <div class="detail-left-col">
-          <div class="detail-token-headline">
-            <span class="detail-token-title" id="detailTokenName">Token Name</span>
-            <span class="detail-token-ticker" id="detailTokenSymbol">$TICKER</span>
-            <span class="detail-meta-text" id="detailTokenMeta">created by 0x000...000 • 5m ago</span>
+      <div style="display: grid; grid-template-columns: 1fr 360px; gap: 20px;">
+        <!-- Left Column: Chart & Tabs -->
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+            <h2 style="font-size: 20px; font-weight: 800; color: #fff;" id="detailTokenName">Token Name</h2>
+            <span style="color: var(--pump-mint); font-weight: 700; font-family: var(--font-mono);" id="detailTokenSymbol">$TICKER</span>
+            <span style="color: var(--text-muted); font-size: 12px;" id="detailTokenMeta">created by 0x88f...1a2 • 2d ago</span>
           </div>
 
-          <!-- Candlestick Chart -->
-          <div class="chart-wrapper-box">
-            <div class="chart-timeframe-toolbar">
-              <button class="tf-btn" data-tf="1m">1m</button>
-              <button class="tf-btn active" data-tf="5m">5m</button>
-              <button class="tf-btn" data-tf="15m">15m</button>
-              <button class="tf-btn" data-tf="1h">1h</button>
-              <button class="tf-btn" data-tf="1d">1d</button>
-            </div>
+          <!-- Chart Box -->
+          <div style="background-color: #090c12; border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px;">
             <div id="tradingviewChart" style="width: 100%; height: 320px;"></div>
           </div>
 
-          <!-- Bonding Curve Progress Card -->
-          <div class="bonding-progress-card">
-            <div class="bonding-progress-header">
-              <span>bonding curve progress: <span id="detailProgressPercent" style="color: var(--pump-green);">68%</span></span>
+          <!-- Bonding Curve Progress -->
+          <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 13px; font-weight: 700; margin-bottom: 6px;">
+              <span>bonding curve progress: <strong id="detailProgressPercent" style="color: var(--pump-mint);">84%</strong></span>
             </div>
-            <div class="bonding-progress-bar-bg">
-              <div class="bonding-progress-bar-fill" id="detailProgressBar" style="width: 68%;"></div>
+            <div style="width: 100%; height: 8px; background: var(--bg-input); border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
+              <div id="detailProgressBar" style="width: 84%; height: 100%; background: var(--pump-mint);"></div>
             </div>
-            <div class="bonding-progress-subtext" id="detailProgressText">
-              graduate this coin to Raydium at $69,420 market cap. there is 18.2 SOL in the bonding curve.
+            <div style="font-size: 12px; color: var(--text-secondary);" id="detailProgressText">
+              graduate this coin to Raydium at $69,420 market cap.
             </div>
           </div>
 
-          <!-- Tabs: Thread | Trades | Holders -->
-          <div class="detail-tabs-bar">
-            <button class="detail-tab-btn active" id="tabThread">thread</button>
-            <button class="detail-tab-btn" id="tabTrades">trades</button>
-            <button class="detail-tab-btn" id="tabHolders">holders</button>
+          <!-- Tabs: Thread, Trades, Holders -->
+          <div class="category-pills-row" style="margin-bottom: 14px;">
+            <button class="cat-pill-btn active" id="tabThread">thread</button>
+            <button class="cat-pill-btn" id="tabTrades">trades</button>
+            <button class="cat-pill-btn" id="tabHolders">holders</button>
           </div>
 
-          <!-- Thread Tab Content -->
-          <div class="thread-pane" id="paneThread">
-            <div class="reply-form-box">
-              <textarea class="reply-textarea" id="replyCommentText" placeholder="add a comment..."></textarea>
-              <div class="reply-actions-row">
-                <input type="text" class="form-input-pump" id="replyImageUrl" placeholder="image url (optional)" style="flex: 1; max-width: 240px; padding: 4px 8px; font-size: 11px;">
-                <button class="btn-post-reply" id="btnSubmitReply">post reply</button>
+          <div id="paneThread" style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+              <textarea id="replyCommentText" class="form-textarea-pump" placeholder="add a comment..." style="min-height: 50px;"></textarea>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <input type="text" id="replyImageUrl" class="form-input-pump" placeholder="meme image url (optional)" style="flex: 1; max-width: 240px; padding: 4px 8px; font-size: 11px;">
+                <button class="btn-signin-mint" id="btnSubmitReply" style="padding: 6px 14px;">post reply</button>
               </div>
             </div>
-            <div id="commentsList" style="display: flex; flex-direction: column; gap: 10px;">
-              <!-- Rendered dynamically -->
-            </div>
+            <div id="commentsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
           </div>
 
-          <!-- Trades Tab Content -->
-          <div class="trades-pane" id="paneTrades" style="display: none;">
-            <table class="pump-table">
+          <div id="paneTrades" style="display: none;">
+            <table class="pump-data-table">
               <thead>
-                <tr>
-                  <th>account</th>
-                  <th>type</th>
-                  <th>SOL</th>
-                  <th>Tokens</th>
-                  <th>date</th>
-                  <th>tx</th>
-                </tr>
+                <tr><th>Account</th><th>Type</th><th>SOL</th><th>Tokens</th><th>Time</th></tr>
               </thead>
-              <tbody id="tradesTableBody">
-                <!-- Rendered dynamically -->
-              </tbody>
+              <tbody id="tradesTableBody"></tbody>
             </table>
           </div>
 
-          <!-- Holders Tab Content -->
-          <div class="holders-pane" id="paneHolders" style="display: none;">
-            <table class="pump-table">
+          <div id="paneHolders" style="display: none;">
+            <table class="pump-data-table">
               <thead>
-                <tr>
-                  <th>rank</th>
-                  <th>holder address</th>
-                  <th>balance</th>
-                  <th>percentage</th>
-                </tr>
+                <tr><th>Rank</th><th>Holder</th><th>Balance</th><th>Percentage</th></tr>
               </thead>
-              <tbody id="holdersTableBody">
-                <!-- Rendered dynamically -->
-              </tbody>
+              <tbody id="holdersTableBody"></tbody>
             </table>
           </div>
-
         </div>
 
-        <!-- Right Column: Trade Box & Coin Info -->
-        <div class="detail-right-col">
-          <!-- Trade Box -->
-          <div class="trade-card">
-            <div class="trade-tabs-row">
-              <button class="trade-toggle-btn buy active" id="btnToggleBuy">buy</button>
-              <button class="trade-toggle-btn sell" id="btnToggleSell">sell</button>
+        <!-- Right Column: Trade Box -->
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 16px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;">
+              <button class="cat-pill-btn active" id="btnToggleBuy" style="justify-content: center;">Buy</button>
+              <button class="cat-pill-btn" id="btnToggleSell" style="justify-content: center;">Sell</button>
             </div>
 
-            <div class="slippage-row">
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
               <span>slippage: <strong id="currentSlippageVal">1.0%</strong></span>
-              <button class="btn-slippage" id="btnSetSlippage">[set max slippage]</button>
+              <button style="color: var(--pump-mint); cursor: pointer;" id="btnSetSlippage">[set slippage]</button>
             </div>
 
-            <div class="trade-input-box">
-              <input type="number" id="tradeAmountInput" class="trade-input-field" placeholder="0.0" step="any">
-              <span class="trade-unit-badge" id="tradeUnitLabel">SOL</span>
+            <div style="background-color: var(--bg-input); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <input type="number" id="tradeAmountInput" style="background: transparent; border: none; font-size: 18px; font-weight: 700; color: #fff; width: 100%; outline: none;" placeholder="0.0" step="any">
+              <span style="font-weight: 700; color: var(--pump-mint); font-family: var(--font-mono);" id="tradeUnitLabel">SOL</span>
             </div>
 
-            <!-- Quick Amount Presets -->
-            <div class="trade-presets-row">
-              <button class="preset-pill" onclick="window.tradingManager.setPreset(0)">reset</button>
-              <button class="preset-pill" onclick="window.tradingManager.setPreset(0.1)">0.1 SOL</button>
-              <button class="preset-pill" onclick="window.tradingManager.setPreset(0.5)">0.5 SOL</button>
-              <button class="preset-pill" onclick="window.tradingManager.setPreset(1.0)">1 SOL</button>
-              <button class="preset-pill" onclick="window.tradingManager.setPreset(5.0)">5 SOL</button>
-              <button class="preset-pill" onclick="window.tradingManager.setPreset('max')">max</button>
+            <!-- Quick Presets -->
+            <div style="display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap;">
+              <button class="cat-pill-btn" style="padding: 4px 8px; font-size: 11px;" onclick="window.tradingManager.setPreset(0)">reset</button>
+              <button class="cat-pill-btn" style="padding: 4px 8px; font-size: 11px;" onclick="window.tradingManager.setPreset(0.1)">0.1 SOL</button>
+              <button class="cat-pill-btn" style="padding: 4px 8px; font-size: 11px;" onclick="window.tradingManager.setPreset(0.5)">0.5 SOL</button>
+              <button class="cat-pill-btn" style="padding: 4px 8px; font-size: 11px;" onclick="window.tradingManager.setPreset(1.0)">1 SOL</button>
+              <button class="cat-pill-btn" style="padding: 4px 8px; font-size: 11px;" onclick="window.tradingManager.setPreset('max')">max</button>
             </div>
 
-            <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;" id="tradeOutputQuote">
+            <div id="tradeOutputQuote" style="font-size: 11px; color: var(--text-secondary); font-family: var(--font-mono); margin-bottom: 12px;">
               you receive: 0 tokens
             </div>
 
@@ -579,16 +525,11 @@
             </button>
           </div>
 
-          <!-- Coin Info Card -->
-          <div class="coin-info-card">
-            <img id="detailCoinImg" src="" class="coin-info-thumb" alt="Coin">
-            <div class="coin-info-name" id="detailCoinTitle">Name</div>
-            <div class="coin-info-desc" id="detailCoinDescription">Description</div>
-            <div class="coin-socials-row" id="detailSocialsRow">
-              <a href="#" target="_blank" id="detailSocialTwitter" class="social-pill-btn" style="display: none;">[twitter]</a>
-              <a href="#" target="_blank" id="detailSocialTelegram" class="social-pill-btn" style="display: none;">[telegram]</a>
-              <a href="#" target="_blank" id="detailSocialWebsite" class="social-pill-btn" style="display: none;">[website]</a>
-            </div>
+          <!-- Coin Details Card -->
+          <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+            <img id="detailCoinImg" src="" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: var(--radius-sm);" alt="Coin">
+            <div id="detailCoinTitle" style="font-size: 15px; font-weight: 800; color: #fff;">Name</div>
+            <div id="detailCoinDescription" style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">Description</div>
           </div>
         </div>
       </div>
@@ -596,176 +537,94 @@
   </div>
 
   <!-- =========================================================
-       START A NEW COIN MODAL (EXACT PUMP.FUN LAYOUT & COPY)
+       CREATE COIN MODAL
   ========================================================= -->
   <div class="modal-overlay-generic" id="deployModal">
     <div class="modal-box-pump">
       <div class="modal-header-row">
-        <span class="modal-title-text">start a new coin</span>
+        <span class="modal-title-text">+ Create a new coin</span>
         <button class="btn-close-modal" id="btnCloseDeployModal">&times;</button>
       </div>
 
       <form id="deployCoinForm">
         <div class="form-group-pump">
-          <label class="form-label-pump">name</label>
-          <input type="text" id="deployName" class="form-input-pump" placeholder="e.g. Pepe Coin" required>
+          <label class="form-label-pump">Coin name</label>
+          <input type="text" id="deployName" class="form-input-pump" placeholder="e.g. The Random Bull" required>
         </div>
 
         <div class="form-group-pump">
-          <label class="form-label-pump">ticker</label>
-          <input type="text" id="deploySymbol" class="form-input-pump" placeholder="e.g. PEPE" required>
+          <label class="form-label-pump">Ticker symbol</label>
+          <input type="text" id="deploySymbol" class="form-input-pump" placeholder="e.g. USER" required>
         </div>
 
         <div class="form-group-pump">
-          <label class="form-label-pump">description</label>
-          <textarea id="deployDesc" class="form-textarea-pump" placeholder="tell the story of this coin..." required></textarea>
+          <label class="form-label-pump">Description</label>
+          <textarea id="deployDesc" class="form-textarea-pump" placeholder="A random user. A nobody..." required></textarea>
         </div>
 
         <div class="form-group-pump">
-          <label class="form-label-pump">image or video url</label>
+          <label class="form-label-pump">Image URL</label>
           <input type="url" id="deployImage" class="form-input-pump" placeholder="https://..." required>
         </div>
 
-        <!-- Show More Options Toggle -->
-        <div>
-          <span class="expand-options-btn" id="btnToggleMoreDeployOptions">[show more options ▼]</span>
+        <div class="form-group-pump">
+          <label class="form-label-pump">Initial buy (optional in SOL)</label>
+          <input type="number" id="deployInitialBuy" class="form-input-pump" placeholder="0.1" step="any">
         </div>
 
-        <div id="deployMoreOptionsSection" style="display: none;">
-          <div class="form-group-pump">
-            <label class="form-label-pump">twitter link (optional)</label>
-            <input type="url" id="deployTwitter" class="form-input-pump" placeholder="https://x.com/...">
-          </div>
-
-          <div class="form-group-pump">
-            <label class="form-label-pump">telegram link (optional)</label>
-            <input type="url" id="deployTelegram" class="form-input-pump" placeholder="https://t.me/...">
-          </div>
-
-          <div class="form-group-pump">
-            <label class="form-label-pump">website (optional)</label>
-            <input type="url" id="deployWebsite" class="form-input-pump" placeholder="https://...">
-          </div>
-        </div>
-
-        <div class="form-group-pump" style="margin-top: 6px;">
-          <label class="form-label-pump">initial buy (optional)</label>
-          <input type="number" id="deployInitialBuy" class="form-input-pump" placeholder="amount in SOL" step="any">
-          <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">buy a small amount of coins to protect against snipers</span>
-        </div>
-
-        <div class="tip-text-box">
-          tip: coin data cannot be changed after creation.
-        </div>
-
-        <button type="submit" class="btn-place-trade" style="width: 100%;">
-          create coin
+        <button type="submit" class="btn-signin-mint" style="width: 100%; margin-top: 10px; padding: 12px;">
+          Launch on bonding curve
         </button>
       </form>
     </div>
   </div>
 
   <!-- =========================================================
-       HOW IT WORKS MODAL (EXACT PUMP.FUN COPY)
-  ========================================================= -->
-  <div class="modal-overlay-generic" id="howItWorksModal">
-    <div class="modal-box-pump" style="max-width: 520px;">
-      <div class="modal-header-row">
-        <span class="modal-title-text">how it works</span>
-        <button class="btn-close-modal" id="btnCloseHowItWorks">&times;</button>
-      </div>
-
-      <div style="font-size: 13px; line-height: 1.6; color: var(--text-secondary); display: flex; flex-direction: column; gap: 14px;">
-        <p style="color: #fff; font-weight: 600;">
-          pump.fun prevents rugs by making sure that all created tokens are safe. each coin on pump is a fair-launch with no presale and no team allocation.
-        </p>
-
-        <div>
-          <strong style="color: var(--pump-green);">step 1:</strong> pick a coin that you like
-        </div>
-        <div>
-          <strong style="color: var(--pump-green);">step 2:</strong> buy the coin on the bonding curve
-        </div>
-        <div>
-          <strong style="color: var(--pump-green);">step 3:</strong> sell at any time to lock in your profits or losses
-        </div>
-        <div>
-          <strong style="color: var(--pump-green);">step 4:</strong> when enough people buy on the bonding curve it reaches a market cap of $69k
-        </div>
-        <div>
-          <strong style="color: var(--pump-green);">step 5:</strong> $12k of liquidity is then deposited in raydium and burned
-        </div>
-
-        <button class="btn-place-trade" id="btnReadyToPump" style="margin-top: 10px;">
-          [I'm ready to pump]
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================================================
-       CONNECT WALLET MODAL
+       SIGN IN / WALLET MODAL
   ========================================================= -->
   <div class="modal-overlay-generic" id="walletModal">
-    <div class="modal-box-pump" style="max-width: 440px;">
+    <div class="modal-box-pump" style="max-width: 420px;">
       <div class="modal-header-row">
-        <span class="modal-title-text">[connect wallet]</span>
+        <span class="modal-title-text">Sign in with wallet</span>
         <button class="btn-close-modal" id="btnCloseWalletModal">&times;</button>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 10px;">
-        <button class="btn-place-trade" style="background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); text-align: left; display: flex; justify-content: space-between; align-items: center;" onclick="window.walletEngine.connectPhantom()">
+        <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between;" onclick="window.walletEngine.connectPhantom()">
           <span>👻 Phantom / Solflare (Solana)</span>
-          <span style="color: var(--pump-green); font-size: 12px;">connect &rarr;</span>
+          <span style="color: var(--pump-mint);">connect &rarr;</span>
         </button>
-
-        <button class="btn-place-trade" style="background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); text-align: left; display: flex; justify-content: space-between; align-items: center;" onclick="window.walletEngine.connectEVM('metamask')">
+        <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between;" onclick="window.walletEngine.connectEVM('metamask')">
           <span>🦊 MetaMask (EVM / Base)</span>
-          <span style="color: var(--pump-green); font-size: 12px;">connect &rarr;</span>
+          <span style="color: var(--pump-mint);">connect &rarr;</span>
         </button>
-
-        <button class="btn-place-trade" style="background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); text-align: left; display: flex; justify-content: space-between; align-items: center;" onclick="window.walletEngine.connectEVM('coinbase')">
-          <span>🔵 Coinbase Smart Wallet</span>
-          <span style="color: var(--pump-green); font-size: 12px;">connect &rarr;</span>
-        </button>
-
-        <button class="btn-place-trade" style="background: var(--pump-green-glow); color: var(--pump-green); border: 1px solid var(--pump-green); text-align: left; display: flex; justify-content: space-between; align-items: center;" onclick="window.walletEngine.generateNewVault(true)">
-          <span>⚡ 1-Click In-Browser Wallet</span>
-          <span style="font-size: 12px;">instant &rarr;</span>
+        <button class="btn-signin-mint" style="padding: 12px; font-size: 13px; text-align: center;" onclick="window.walletEngine.generateNewVault(true)">
+          ⚡ 1-Click Instant Vault Sign In
         </button>
       </div>
     </div>
   </div>
 
   <!-- =========================================================
-       SLIPPAGE CONFIGURATION MODAL
+       SLIPPAGE MODAL
   ========================================================= -->
   <div class="modal-overlay-generic" id="slippageModal">
-    <div class="modal-box-pump" style="max-width: 380px;">
+    <div class="modal-box-pump" style="max-width: 360px;">
       <div class="modal-header-row">
-        <span class="modal-title-text">set max slippage</span>
+        <span class="modal-title-text">Set max slippage</span>
         <button class="btn-close-modal" id="btnCloseSlippageModal">&times;</button>
       </div>
-
-      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">
-        this is the maximum amount of slippage you are willing to accept when placing a trade.
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px;">
+        <button class="cat-pill-btn" onclick="window.tradingManager.setSlippage(0.5)">0.5%</button>
+        <button class="cat-pill-btn" onclick="window.tradingManager.setSlippage(1.0)">1.0%</button>
+        <button class="cat-pill-btn" onclick="window.tradingManager.setSlippage(2.5)">2.5%</button>
+        <button class="cat-pill-btn" onclick="window.tradingManager.setSlippage(5.0)">5.0%</button>
       </div>
-
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">
-        <button class="preset-pill" style="padding: 8px;" onclick="window.tradingManager.setSlippage(0.5)">0.5%</button>
-        <button class="preset-pill" style="padding: 8px;" onclick="window.tradingManager.setSlippage(1.0)">1.0%</button>
-        <button class="preset-pill" style="padding: 8px;" onclick="window.tradingManager.setSlippage(2.5)">2.5%</button>
-        <button class="preset-pill" style="padding: 8px;" onclick="window.tradingManager.setSlippage(5.0)">5.0%</button>
-      </div>
-
       <div class="form-group-pump">
-        <label class="form-label-pump">custom slippage (%)</label>
-        <input type="number" id="customSlippageInput" class="form-input-pump" placeholder="e.g. 3.0" step="0.1">
+        <label class="form-label-pump">Custom slippage (%)</label>
+        <input type="number" id="customSlippageInput" class="form-input-pump" placeholder="3.0" step="0.1">
       </div>
-
-      <button class="btn-place-trade" style="width: 100%; margin-top: 10px;" id="btnSaveCustomSlippage">
-        save settings
-      </button>
+      <button class="btn-signin-mint" id="btnSaveCustomSlippage" style="width: 100%; margin-top: 8px;">Save</button>
     </div>
   </div>
 

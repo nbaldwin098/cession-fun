@@ -1,237 +1,431 @@
 /**
- * Cession.fun — Pump.fun Exact Multi-Page & Sidebar Drawer Controller
- * Supports: Board/Coins, Livestreams, Live Theatre Studio, Leaderboard, Profile, and Token Detail Views
+ * Cession.fun — 2026 Pump.fun Exact Controller
+ * Full Grid & Table View Switcher, Category Filters, Sparklines, and Sidebar Routing
  */
 
 class CessionLaunchpadManager {
   constructor() {
-    this.tokenGrid = document.getElementById('tokenGrid');
+    this.exploreGrid = document.getElementById('exploreCoinsGrid');
+    this.exploreTableBody = document.getElementById('exploreTableBody');
+    this.exploreTableContainer = document.getElementById('exploreTableContainer');
     this.searchInput = document.getElementById('tokenSearchInput');
-    this.sortSelect = document.getElementById('selectSortOrder');
-    this.sortDirSelect = document.getElementById('selectSortDirection');
-    this.toggleAnimations = document.getElementById('toggleLiveAnimations');
-    this.toggleNsfw = document.getElementById('toggleIncludeNsfw');
-    
-    this.activeSort = 'bump';
-    this.activeDir = 'desc';
-    this.tokens = [];
+    this.activeCategory = 'movers';
+    this.viewMode = 'grid'; // 'grid' | 'table'
     this.activeToken = null;
-    this.activeTab = 'thread';
-    this.currentView = 'board'; // 'board' | 'live' | 'liveTheatre' | 'leaderboard' | 'profile'
-    this.theatreCanvasAnimId = null;
+    this.tokens = [];
+
+    this.defaultTokens = [
+      {
+        name: 'The Random Bull',
+        symbol: 'USER',
+        marketCapUsd: 122000,
+        volume24hUsd: 45200,
+        currentPriceSol: 0.000000122,
+        creatorAddress: '76kXMM',
+        ageText: '2d',
+        imageUrl: 'https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?w=500',
+        description: 'A random user. A nobody. Not a celeb. Not a KOL. Just a random bull pumping to graduation.',
+        category: 'movers',
+        bondingCurvePercent: 78
+      },
+      {
+        name: 'Billycoin',
+        symbol: 'BILLY',
+        marketCapUsd: 3750000,
+        volume24hUsd: 1280000,
+        currentPriceSol: 0.00000375,
+        creatorAddress: 'topfloor_b',
+        ageText: '10h',
+        imageUrl: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500',
+        description: 'The iconic golden doge wearing glasses. Community driven meme sensation.',
+        category: 'mayhem',
+        bondingCurvePercent: 96
+      },
+      {
+        name: 'r/',
+        symbol: 'r/',
+        marketCapUsd: 8350,
+        volume24hUsd: 3200,
+        currentPriceSol: 0.000000008,
+        creatorAddress: 'fltnarwhal',
+        ageText: '2y',
+        imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500',
+        description: 'The unofficial community coin of Reddit on the bonding curve.',
+        category: 'oldest',
+        bondingCurvePercent: 12
+      },
+      {
+        name: 'Minecraft Fruit Fly',
+        symbol: 'FLY',
+        marketCapUsd: 27900,
+        volume24hUsd: 8900,
+        currentPriceSol: 0.000000028,
+        creatorAddress: 'botfn',
+        ageText: '50m',
+        imageUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500',
+        description: 'FLY-000 [Neural] autonomous spider fly simulation agent.',
+        category: 'agents',
+        bondingCurvePercent: 39
+      },
+      {
+        name: 'The Orange Backpack Peng...',
+        symbol: 'ORANGEPENG',
+        marketCapUsd: 41800,
+        volume24hUsd: 14200,
+        currentPriceSol: 0.000000042,
+        creatorAddress: 'dyedkraken',
+        ageText: '48m',
+        imageUrl: 'https://images.unsplash.com/photo-1598439210625-5067c578f3f6?w=500',
+        description: 'Penguins with orange backpacks sliding into Raydium graduation.',
+        category: 'new',
+        bondingCurvePercent: 54
+      },
+      {
+        name: 'The Black Bull',
+        symbol: 'ANSEM',
+        marketCapUsd: 273000000,
+        volume24hUsd: 42100000,
+        currentPriceSol: 0.000273,
+        creatorAddress: 'ansem',
+        ageText: '1d',
+        imageUrl: 'https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?w=500',
+        description: 'Golden Bull? Try Black Bull. Sovereign liquidity powerhouse.',
+        category: 'market_cap',
+        bondingCurvePercent: 99
+      },
+      {
+        name: 'Jimothy The Raccoon',
+        symbol: 'Jimothy',
+        marketCapUsd: 7820000,
+        volume24hUsd: 2100000,
+        currentPriceSol: 0.00000782,
+        creatorAddress: 'jimothy_dev',
+        ageText: '3h',
+        imageUrl: 'https://images.unsplash.com/photo-1590425712287-c37340263300?w=500',
+        description: "The Internet Isn't Done With Jimothy Yet.",
+        category: 'movers',
+        bondingCurvePercent: 92
+      },
+      {
+        name: 'ちいかわ',
+        symbol: 'Chiikawa',
+        marketCapUsd: 1510000,
+        volume24hUsd: 480000,
+        currentPriceSol: 0.00000151,
+        creatorAddress: 'anime_cult',
+        ageText: '5h',
+        imageUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500',
+        description: 'The Little World of Chiikawa viral anime mascot.',
+        category: 'movers',
+        bondingCurvePercent: 88
+      },
+      {
+        name: 'Tung Tung Tung Sahur',
+        symbol: 'TripleT',
+        marketCapUsd: 10700000,
+        volume24hUsd: 3100000,
+        currentPriceSol: 0.0000107,
+        creatorAddress: 'sahur_lead',
+        ageText: '12h',
+        imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500',
+        description: 'Tung Tung Tung Sahur Passes $25M Market Cap.',
+        category: 'mayhem',
+        bondingCurvePercent: 95
+      },
+      {
+        name: 'Cession Sovereign Engine',
+        symbol: 'CESS',
+        marketCapUsd: 58240,
+        volume24hUsd: 18400,
+        currentPriceSol: 0.000000058,
+        creatorAddress: '0x88f4b23a',
+        ageText: '10m',
+        imageUrl: 'images/cession-logo.png',
+        description: 'The flagship fair launch token on Cession with anti-rug proof of skin.',
+        category: 'new',
+        bondingCurvePercent: 84
+      }
+    ];
 
     this.init();
   }
 
   init() {
+    this.tokens = [...this.defaultTokens];
     this.bindEvents();
-    this.bindSidebarAndNavigation();
-    this.fetchTokens().then(() => {
-      this.checkInitialRoute();
+    this.bindSidebarRail();
+    this.fetchBackendTokens().then(() => {
+      this.filterAndRenderTokens();
     });
-    this.fetchGlobalTrades();
-
-    // Periodic polling to keep prices and tickers hot
-    setInterval(() => {
-      this.fetchTokens(false);
-      this.fetchGlobalTrades();
-    }, 6000);
   }
 
-  checkInitialRoute() {
-    const path = window.location.pathname;
-    if (path === '/live' || path === '/livestreams') {
-      this.switchPage('live');
-    } else if (path === '/leaderboard' || path === '/rankings') {
-      this.switchPage('leaderboard');
-    } else if (path === '/profile' || path === '/portfolio') {
-      this.switchPage('profile');
-    } else if (path.startsWith('/token/') || path.startsWith('/coin/')) {
-      const sym = path.split('/')[2];
-      if (sym) {
-        this.openTokenDetail(sym);
+  bindSidebarRail() {
+    const navItems = [
+      { id: 'railNavHome', view: 'board' },
+      { id: 'railNavExplore', view: 'board' },
+      { id: 'railNavProfile', view: 'profile' },
+      { id: 'railNavChat', view: 'board', toast: 'Community chat channel open' },
+      { id: 'railNavLeaderboard', view: 'leaderboard' },
+      { id: 'railNavLive', view: 'live' },
+      { id: 'railNavSupport', view: 'board', toast: 'Support Desk 24/7 online' },
+      { id: 'railNavSwap', view: 'board', toast: 'Instant Swap Curve active' },
+      { id: 'railNavTokens', view: 'board' },
+    ];
+
+    navItems.forEach(item => {
+      const btn = document.getElementById(item.id);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.rail-icon-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          if (item.view) this.switchPage(item.view);
+          if (item.toast) this.toast(item.toast, 'info');
+        });
       }
-    } else if (path === '/how-it-works') {
-      const modal = document.getElementById('howItWorksModal');
-      if (modal) modal.style.display = 'flex';
+    });
+
+    const railBtnCreate = document.getElementById('railBtnCreate');
+    const btnNavbarCreate = document.getElementById('btnNavbarCreate');
+    const deployModal = document.getElementById('deployModal');
+    const openCreate = () => {
+      if (deployModal) deployModal.style.display = 'flex';
+    };
+
+    if (railBtnCreate) railBtnCreate.addEventListener('click', openCreate);
+    if (btnNavbarCreate) btnNavbarCreate.addEventListener('click', openCreate);
+
+    const btnCloseDeploy = document.getElementById('btnCloseDeployModal');
+    if (btnCloseDeploy && deployModal) {
+      btnCloseDeploy.addEventListener('click', () => deployModal.style.display = 'none');
+    }
+
+    const deployForm = document.getElementById('deployCoinForm');
+    if (deployForm) {
+      deployForm.addEventListener('submit', (e) => this.handleDeploySubmit(e));
     }
   }
 
-  bindSidebarAndNavigation() {
-    const btnOpenSidebar = document.getElementById('btnOpenSidebar');
-    const btnCloseSidebar = document.getElementById('btnCloseSidebar');
-    const sidebarDrawer = document.getElementById('sidebarDrawer');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
+  bindEvents() {
+    // Search input
+    if (this.searchInput) {
+      this.searchInput.addEventListener('input', () => this.filterAndRenderTokens());
+    }
 
-    const openDrawer = () => {
-      if (sidebarDrawer) sidebarDrawer.classList.add('active');
-      if (sidebarOverlay) sidebarOverlay.classList.add('active');
-    };
-
-    const closeDrawer = () => {
-      if (sidebarDrawer) sidebarDrawer.classList.remove('active');
-      if (sidebarOverlay) sidebarOverlay.classList.remove('active');
-    };
-
-    if (btnOpenSidebar) btnOpenSidebar.addEventListener('click', openDrawer);
-    if (btnCloseSidebar) btnCloseSidebar.addEventListener('click', closeDrawer);
-    if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeDrawer);
-
-    // Sidebar navigation links
-    const menuBoard = document.getElementById('menuNavBoard');
-    const menuLive = document.getElementById('menuNavLive');
-    const menuLeaderboard = document.getElementById('menuNavLeaderboard');
-    const menuFollowing = document.getElementById('menuNavFollowing');
-    const menuProfile = document.getElementById('menuNavProfile');
-    const menuHowItWorks = document.getElementById('menuNavHowItWorks');
-
-    if (menuBoard) menuBoard.addEventListener('click', () => { this.switchPage('board'); closeDrawer(); });
-    if (menuLive) menuLive.addEventListener('click', () => { this.switchPage('live'); closeDrawer(); });
-    if (menuLeaderboard) menuLeaderboard.addEventListener('click', () => { this.switchPage('leaderboard'); closeDrawer(); });
-    if (menuFollowing) menuFollowing.addEventListener('click', () => { this.switchPage('board'); closeDrawer(); this.toast('Showing followed coins', 'info'); });
-    if (menuProfile) menuProfile.addEventListener('click', () => { this.switchPage('profile'); closeDrawer(); });
-    if (menuHowItWorks) menuHowItWorks.addEventListener('click', () => {
-      closeDrawer();
-      const modal = document.getElementById('howItWorksModal');
-      if (modal) modal.style.display = 'flex';
+    // Category Filter Pills
+    const pills = document.querySelectorAll('.cat-pill-btn[data-cat]');
+    pills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        pills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        this.activeCategory = pill.getAttribute('data-cat');
+        this.filterAndRenderTokens();
+      });
     });
 
-    // Top Header links
-    const brandLink = document.getElementById('brandHomeLink');
-    const btnHeaderLive = document.getElementById('btnHeaderLive');
-    const btnHeaderLeaderboard = document.getElementById('btnHeaderLeaderboard');
-    const btnOpenHowItWorks = document.getElementById('btnOpenHowItWorks');
-    const btnReadyToPump = document.getElementById('btnReadyToPump');
-    const btnCloseHowItWorks = document.getElementById('btnCloseHowItWorks');
+    // Grid / Table View Switcher
+    const btnGrid = document.getElementById('btnViewGrid');
+    const btnTable = document.getElementById('btnViewTable');
 
-    if (brandLink) brandLink.addEventListener('click', (e) => { e.preventDefault(); this.switchPage('board'); });
-    if (btnHeaderLive) btnHeaderLive.addEventListener('click', (e) => { e.preventDefault(); this.switchPage('live'); });
-    if (btnHeaderLeaderboard) btnHeaderLeaderboard.addEventListener('click', (e) => { e.preventDefault(); this.switchPage('leaderboard'); });
-    
-    if (btnOpenHowItWorks) {
-      btnOpenHowItWorks.addEventListener('click', (e) => {
-        e.preventDefault();
-        const modal = document.getElementById('howItWorksModal');
-        if (modal) modal.style.display = 'flex';
+    if (btnGrid && btnTable) {
+      btnGrid.addEventListener('click', () => {
+        btnGrid.classList.add('active');
+        btnTable.classList.remove('active');
+        this.viewMode = 'grid';
+        if (this.exploreGrid) this.exploreGrid.style.display = 'grid';
+        if (this.exploreTableContainer) this.exploreTableContainer.style.display = 'none';
+      });
+
+      btnTable.addEventListener('click', () => {
+        btnTable.classList.add('active');
+        btnGrid.classList.remove('active');
+        this.viewMode = 'table';
+        if (this.exploreGrid) this.exploreGrid.style.display = 'none';
+        if (this.exploreTableContainer) this.exploreTableContainer.style.display = 'block';
+        this.renderTableTokens();
       });
     }
 
-    if (btnCloseHowItWorks) {
-      btnCloseHowItWorks.addEventListener('click', () => {
-        const modal = document.getElementById('howItWorksModal');
-        if (modal) modal.style.display = 'none';
+    // Filter Funnel & Settings button
+    const btnFilter = document.getElementById('btnFilterFunnel');
+    if (btnFilter) {
+      btnFilter.addEventListener('click', () => {
+        this.toast('Filter criteria: Bonding Curve Progress, Volume, & Anti-Snipe Status', 'info');
       });
     }
 
-    if (btnReadyToPump) {
-      btnReadyToPump.addEventListener('click', () => {
-        const modal = document.getElementById('howItWorksModal');
-        if (modal) modal.style.display = 'none';
-        this.switchPage('board');
+    // Token Detail Modal Close
+    const btnCloseDetail = document.getElementById('btnCloseDetailModal');
+    const detailModal = document.getElementById('tokenDetailModal');
+    if (btnCloseDetail && detailModal) {
+      btnCloseDetail.addEventListener('click', () => {
+        detailModal.style.display = 'none';
       });
     }
 
-    // Go Live Modal Trigger
-    const btnOpenStreamStudio = document.getElementById('btnOpenStreamStudio');
-    if (btnOpenStreamStudio) {
-      btnOpenStreamStudio.addEventListener('click', () => {
-        this.toast('Stream Studio Initialized! Live broadcasting enabled for verified creators.', 'success');
-        this.openLiveTheatre('CESS', '🔥 PUMPING $CESS TO RAYDIUM GRADUATION TODAY!', '0x88f...1a2', 1420);
-      });
+    // Detail Tabs
+    const tabThread = document.getElementById('tabThread');
+    const tabTrades = document.getElementById('tabTrades');
+    const tabHolders = document.getElementById('tabHolders');
+
+    if (tabThread && tabTrades && tabHolders) {
+      tabThread.addEventListener('click', () => this.switchDetailTab('thread'));
+      tabTrades.addEventListener('click', () => this.switchDetailTab('trades'));
+      tabHolders.addEventListener('click', () => this.switchDetailTab('holders'));
     }
 
-    // Live Theatre Chat submission
-    const formTheatreChat = document.getElementById('formTheatreChat');
-    const theatreChatInput = document.getElementById('theatreChatInput');
-    const theatreChatStream = document.getElementById('theatreChatStream');
-    if (formTheatreChat && theatreChatInput && theatreChatStream) {
-      formTheatreChat.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const msg = theatreChatInput.value.trim();
-        if (!msg) return;
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'stream-chat-msg';
-        const user = window.walletEngine && window.walletEngine.activeAddress 
-          ? window.walletEngine.activeAddress.substring(0, 6) 
-          : 'anon_trader';
-        msgDiv.innerHTML = `<span class="stream-chat-author">${user}:</span><span>${this.escapeHtml(msg)}</span>`;
-        theatreChatStream.appendChild(msgDiv);
-        theatreChatStream.scrollTop = theatreChatStream.scrollHeight;
-        theatreChatInput.value = '';
-      });
+    // Reply Button
+    const btnReply = document.getElementById('btnSubmitReply');
+    if (btnReply) {
+      btnReply.addEventListener('click', () => this.postComment());
     }
+  }
 
-    // Wallet pill click
-    const walletPill = document.getElementById('walletConnectedPill');
-    if (walletPill) {
-      walletPill.addEventListener('click', (e) => {
-        if (e.target.id === 'btnDisconnectWallet') return;
-        this.switchPage('profile');
-      });
+  async fetchBackendTokens() {
+    try {
+      const res = await fetch('/api/tokens');
+      const data = await res.json();
+      if (data.tokens && data.tokens.length > 0) {
+        // Merge backend tokens with demo showcase tokens
+        const backendTokens = data.tokens.map(t => ({
+          name: t.name,
+          symbol: t.symbol,
+          marketCapUsd: t.marketCapUsd || 58240,
+          volume24hUsd: t.volume24hUsd || 12000,
+          currentPriceSol: t.currentPriceSol || 0.000000025,
+          creatorAddress: t.creatorAddress ? t.creatorAddress.substring(0, 6) : '0x88f',
+          ageText: '5m',
+          imageUrl: t.imageUrl || 'images/cession-logo.png',
+          description: t.description || 'Sovereign fair launch on Cession.',
+          category: 'new',
+          bondingCurvePercent: t.bondingCurvePercent || 84
+        }));
+
+        const existingSymbols = new Set(this.defaultTokens.map(t => t.symbol));
+        backendTokens.forEach(bt => {
+          if (!existingSymbols.has(bt.symbol)) {
+            this.tokens.unshift(bt);
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Backend token fetch:', e);
     }
+  }
 
-    // Leaderboard Sub-Tabs
-    const tabTraders = document.getElementById('tabTopTraders');
-    const tabCreators = document.getElementById('tabTopCreators');
-    const tabGrad = document.getElementById('tabGraduatedCoins');
-    if (tabTraders && tabCreators && tabGrad) {
-      tabTraders.addEventListener('click', () => {
-        tabTraders.classList.add('active');
-        tabCreators.classList.remove('active');
-        tabGrad.classList.remove('active');
-        this.renderLeaderboardTraders();
-      });
-      tabCreators.addEventListener('click', () => {
-        tabCreators.classList.add('active');
-        tabTraders.classList.remove('active');
-        tabGrad.classList.remove('active');
-        this.renderLeaderboardCreators();
-      });
-      tabGrad.addEventListener('click', () => {
-        tabGrad.classList.add('active');
-        tabTraders.classList.remove('active');
-        tabCreators.classList.remove('active');
-        this.renderLeaderboardGraduated();
-      });
-    }
+  filterAndRenderTokens() {
+    const query = (this.searchInput ? this.searchInput.value : '').toLowerCase().trim();
 
-    // Profile Sub-Tabs
-    const tabProfHeld = document.getElementById('tabProfileHeld');
-    const tabProfCreated = document.getElementById('tabProfileCreated');
-    const tabProfHist = document.getElementById('tabProfileHistory');
-    if (tabProfHeld && tabProfCreated && tabProfHist) {
-      tabProfHeld.addEventListener('click', () => {
-        tabProfHeld.classList.add('active');
-        tabProfCreated.classList.remove('active');
-        tabProfHist.classList.remove('active');
-        this.renderProfileHoldings();
-      });
-      tabProfCreated.addEventListener('click', () => {
-        tabProfCreated.classList.add('active');
-        tabProfHeld.classList.remove('active');
-        tabProfHist.classList.remove('active');
-        this.renderProfileCreated();
-      });
-      tabProfHist.addEventListener('click', () => {
-        tabProfHist.classList.add('active');
-        tabProfHeld.classList.remove('active');
-        tabProfCreated.classList.remove('active');
-        this.renderProfileHistory();
-      });
-    }
-
-    // Browser back/forward navigation
-    window.addEventListener('popstate', () => {
-      this.checkInitialRoute();
+    let filtered = this.tokens.filter(t => {
+      const matchesSearch = t.name.toLowerCase().includes(query) || t.symbol.toLowerCase().includes(query);
+      return matchesSearch;
     });
+
+    if (this.activeCategory !== 'movers') {
+      const catFiltered = filtered.filter(t => t.category === this.activeCategory);
+      if (catFiltered.length > 0) filtered = catFiltered;
+    }
+
+    this.renderGridTokens(filtered);
+    this.renderTableTokens(filtered);
+    this.renderLivestreams();
+  }
+
+  renderGridTokens(tokens) {
+    if (!this.exploreGrid) return;
+
+    this.exploreGrid.innerHTML = tokens.map(t => {
+      const mcapStr = t.marketCapUsd >= 1000000
+        ? `$${(t.marketCapUsd / 1000000).toFixed(2)}M MC`
+        : `$${(t.marketCapUsd / 1000).toFixed(1)}K MC`;
+
+      return `
+        <div class="explore-coin-card" onclick="window.launchpadManager.openTokenDetail('${t.symbol}')">
+          <div class="explore-coin-thumb-box">
+            <img src="${t.imageUrl}" class="explore-coin-img" alt="${t.symbol}" onerror="this.src='images/cession-logo.png'">
+            
+            <!-- Dynamic Green Sparkline Overlay -->
+            <svg class="sparkline-svg" viewBox="0 0 60 24" fill="none">
+              <path d="M2 18 Q 15 22, 25 10 T 45 6 T 58 2" stroke="#86efac" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+
+          <div class="explore-coin-details">
+            <div class="explore-coin-title">${this.escapeHtml(t.name)}</div>
+            <div class="explore-coin-ticker">$${t.symbol}</div>
+            <div class="explore-coin-mcap">${mcapStr}</div>
+            <div class="explore-coin-creator-row">
+              <span>👤 ${t.creatorAddress}</span>
+              <span>⏳ ${t.ageText}</span>
+            </div>
+            <div class="explore-coin-desc">${this.escapeHtml(t.description)}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderTableTokens(tokens = this.tokens) {
+    if (!this.exploreTableBody) return;
+
+    this.exploreTableBody.innerHTML = tokens.map(t => `
+      <tr>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="${t.imageUrl}" style="width: 24px; height: 24px; border-radius: 4px; object-fit: cover;" onerror="this.src='images/cession-logo.png'">
+            <strong>${this.escapeHtml(t.name)}</strong>
+          </div>
+        </td>
+        <td style="color: var(--pump-mint); font-weight: 700;">$${t.symbol}</td>
+        <td>${(t.currentPriceSol * 145).toFixed(6)} USD</td>
+        <td style="color: var(--pump-mint); font-weight: 700;">$${(t.marketCapUsd).toLocaleString()}</td>
+        <td>$${(t.volume24hUsd || 15000).toLocaleString()}</td>
+        <td>${t.creatorAddress}</td>
+        <td>${t.ageText}</td>
+        <td>
+          <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="window.launchpadManager.openTokenDetail('${t.symbol}')">
+            trade &rarr;
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  renderLivestreams() {
+    const grid = document.getElementById('livestreamsGrid');
+    if (!grid) return;
+
+    grid.innerHTML = `
+      <div class="explore-coin-card" onclick="window.launchpadManager.openTokenDetail('Jimothy')">
+        <div class="explore-coin-thumb-box">
+          <img src="https://images.unsplash.com/photo-1590425712287-c37340263300?w=500" class="explore-coin-img">
+          <div style="position: absolute; top: 8px; left: 8px; background: rgba(239, 68, 68, 0.9); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
+            🔴 LIVE • 1,420
+          </div>
+        </div>
+        <div class="explore-coin-details">
+          <div class="explore-coin-title">Jimothy Live Bonding Broadcast</div>
+          <div class="explore-coin-mcap">$7.82M MC</div>
+        </div>
+      </div>
+      <div class="explore-coin-card" onclick="window.launchpadManager.openTokenDetail('BILLY')">
+        <div class="explore-coin-thumb-box">
+          <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500" class="explore-coin-img">
+          <div style="position: absolute; top: 8px; left: 8px; background: rgba(239, 68, 68, 0.9); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
+            🔴 LIVE • 840
+          </div>
+        </div>
+        <div class="explore-coin-details">
+          <div class="explore-coin-title">Billy Dev Q&A Stream</div>
+          <div class="explore-coin-mcap">$3.75M MC</div>
+        </div>
+      </div>
+    `;
   }
 
   switchPage(viewName) {
-    this.currentView = viewName;
     const views = {
       board: document.getElementById('viewBoard'),
       live: document.getElementById('viewLive'),
-      liveTheatre: document.getElementById('viewLiveTheatre'),
       leaderboard: document.getElementById('viewLeaderboard'),
       profile: document.getElementById('viewProfile')
     };
@@ -243,682 +437,50 @@ class CessionLaunchpadManager {
       }
     });
 
-    // Update active state in sidebar
-    const menuItems = {
-      board: document.getElementById('menuNavBoard'),
-      live: document.getElementById('menuNavLive'),
-      leaderboard: document.getElementById('menuNavLeaderboard'),
-      profile: document.getElementById('menuNavProfile')
-    };
-    Object.keys(menuItems).forEach(k => {
-      if (menuItems[k]) {
-        if (k === viewName) menuItems[k].classList.add('active');
-        else menuItems[k].classList.remove('active');
-      }
-    });
-
-    // Close detail modal if open
-    const detailModal = document.getElementById('tokenDetailModal');
-    if (detailModal) detailModal.style.display = 'none';
-
-    // Stop canvas animation if navigating away from theatre
-    if (viewName !== 'liveTheatre' && this.theatreCanvasAnimId) {
-      cancelAnimationFrame(this.theatreCanvasAnimId);
-      this.theatreCanvasAnimId = null;
-    }
-
-    // Update browser URL
-    const route = viewName === 'board' ? '/' : `/${viewName}`;
-    window.history.pushState({}, '', route);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    // Populate data based on view
-    if (viewName === 'leaderboard') {
-      this.renderLeaderboardTraders();
-    } else if (viewName === 'profile') {
-      this.updateProfileView();
-    }
   }
 
-  openLiveTheatre(symbol, title, host, viewers) {
-    this.switchPage('liveTheatre');
-    
-    const titleEl = document.getElementById('theatreStreamTitle');
-    const hostEl = document.getElementById('theatreStreamHost');
-    const coinEl = document.getElementById('theatreStreamCoin');
-    const viewerBadge = document.getElementById('theatreViewerBadge');
-    const btnDetail = document.getElementById('btnTheatreOpenDetail');
-
-    if (titleEl) titleEl.textContent = title;
-    if (hostEl) hostEl.textContent = host;
-    if (coinEl) coinEl.textContent = `$${symbol}`;
-    if (viewerBadge) viewerBadge.textContent = `👥 ${viewers.toLocaleString()} viewers`;
-    if (btnDetail) {
-      btnDetail.onclick = () => this.openTokenDetail(symbol);
-    }
-
-    // Start animated visualizer on canvas
-    this.startCanvasVisualizer();
-  }
-
-  startCanvasVisualizer() {
-    const canvas = document.getElementById('streamVisualizerCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let tick = 0;
-
-    const render = () => {
-      tick++;
-      ctx.fillStyle = '#06090e';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Grid background effect
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < canvas.width; x += 40) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-      for (let y = 0; y < canvas.height; y += 40) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-
-      // Animated Sound Wave / Stream waveform
-      const barCount = 48;
-      const barWidth = canvas.width / barCount;
-      for (let i = 0; i < barCount; i++) {
-        const height = 40 + Math.sin(tick * 0.05 + i * 0.3) * 35 + Math.cos(tick * 0.08 + i * 0.2) * 25;
-        const x = i * barWidth;
-        const y = canvas.height / 2 - height / 2;
-        
-        ctx.fillStyle = i % 2 === 0 ? '#86efac' : '#22c55e';
-        ctx.shadowColor = 'rgba(134, 239, 172, 0.5)';
-        ctx.shadowBlur = 8;
-        ctx.fillRect(x + 2, y, barWidth - 4, height);
-      }
-      ctx.shadowBlur = 0;
-
-      // Center Stream Watermark
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 22px "JetBrains Mono", monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('LIVE STREAM FEED • BROADCASTING', canvas.width / 2, 70);
-
-      if (this.currentView === 'liveTheatre') {
-        this.theatreCanvasAnimId = requestAnimationFrame(render);
-      }
-    };
-    render();
-  }
-
-  updateProfileView() {
-    const addr = window.walletEngine && window.walletEngine.activeAddress 
-      ? window.walletEngine.activeAddress 
-      : '0x88f4b23a910cd99e1a2f0093ba4210e76a011a2';
-    
-    const addrEl = document.getElementById('profileAddressFull');
-    const solEl = document.getElementById('profileSolBalance');
-    const cessEl = document.getElementById('profileCessBalance');
-    const avatarEl = document.getElementById('profileAvatar');
-
-    if (addrEl) addrEl.textContent = addr;
-    if (avatarEl) avatarEl.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${addr}`;
-    if (solEl && window.walletEngine) solEl.textContent = `${(window.walletEngine.balances.sol || 6.2).toFixed(2)} SOL`;
-    if (cessEl && window.walletEngine) cessEl.textContent = `${(window.walletEngine.balances.cess || 250000).toLocaleString()} $CESS`;
-
-    this.renderProfileHoldings();
-  }
-
-  renderProfileHoldings() {
-    const thead = document.getElementById('profileThead');
-    const tbody = document.getElementById('profileHoldingsBody');
-    if (!tbody || !thead) return;
-
-    thead.innerHTML = `
-      <tr>
-        <th>Coin</th>
-        <th>Amount Held</th>
-        <th>Value (SOL)</th>
-        <th>PnL</th>
-        <th>Action</th>
-      </tr>
-    `;
-
-    tbody.innerHTML = `
-      <tr>
-        <td>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="images/cession-logo.png" style="width: 20px; height: 20px; border-radius: 4px;" alt="CESS">
-            <strong>$CESS (Cession)</strong>
-          </div>
-        </td>
-        <td>250,000 $CESS</td>
-        <td style="color: var(--pump-green); font-weight: 700;">6.25 SOL</td>
-        <td style="color: var(--pump-green); font-weight: 700;">+248.5%</td>
-        <td><button class="preset-pill" onclick="window.launchpadManager.openTokenDetail('CESS')">trade &rarr;</button></td>
-      </tr>
-      <tr>
-        <td>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=100" style="width: 20px; height: 20px; border-radius: 4px;" alt="BFT">
-            <strong>$BFT (Base Frog)</strong>
-          </div>
-        </td>
-        <td>120,000 $BFT</td>
-        <td style="color: var(--pump-green); font-weight: 700;">1.80 SOL</td>
-        <td style="color: var(--pump-green); font-weight: 700;">+42.1%</td>
-        <td><button class="preset-pill" onclick="window.launchpadManager.openTokenDetail('BFT')">trade &rarr;</button></td>
-      </tr>
-    `;
-  }
-
-  renderProfileCreated() {
-    const thead = document.getElementById('profileThead');
-    const tbody = document.getElementById('profileHoldingsBody');
-    if (!tbody || !thead) return;
-
-    thead.innerHTML = `
-      <tr>
-        <th>Coin</th>
-        <th>Market Cap</th>
-        <th>Bonding Curve</th>
-        <th>Raydium Status</th>
-        <th>Action</th>
-      </tr>
-    `;
-
-    tbody.innerHTML = `
-      <tr>
-        <td>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="images/cession-logo.png" style="width: 20px; height: 20px; border-radius: 4px;" alt="CESS">
-            <strong>$CESS (Cession)</strong>
-          </div>
-        </td>
-        <td style="color: var(--pump-green); font-weight: 700;">$58,240</td>
-        <td>
-          <div style="width: 100px; height: 6px; background: var(--bg-input); border-radius: 3px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px;">
-            <div style="width: 84%; height: 100%; background: var(--pump-green);"></div>
-          </div>
-          <span>84%</span>
-        </td>
-        <td><span style="color: #fbbf24; font-weight: 700;">Approaching $69k Target</span></td>
-        <td><button class="preset-pill" onclick="window.launchpadManager.openTokenDetail('CESS')">manage &rarr;</button></td>
-      </tr>
-    `;
-  }
-
-  renderProfileHistory() {
-    const thead = document.getElementById('profileThead');
-    const tbody = document.getElementById('profileHoldingsBody');
-    if (!tbody || !thead) return;
-
-    thead.innerHTML = `
-      <tr>
-        <th>Type</th>
-        <th>Coin</th>
-        <th>SOL Amount</th>
-        <th>Tokens</th>
-        <th>Time</th>
-        <th>Tx Hash</th>
-      </tr>
-    `;
-
-    tbody.innerHTML = `
-      <tr>
-        <td><span style="color: var(--pump-green); font-weight: 700;">BUY</span></td>
-        <td><strong>$CESS</strong></td>
-        <td>1.50 SOL</td>
-        <td>60,000</td>
-        <td>4m ago</td>
-        <td><a href="#" style="color: var(--text-muted);">5x8...9b1</a></td>
-      </tr>
-      <tr>
-        <td><span style="color: var(--pump-green); font-weight: 700;">BUY</span></td>
-        <td><strong>$BFT</strong></td>
-        <td>0.80 SOL</td>
-        <td>32,000</td>
-        <td>18m ago</td>
-        <td><a href="#" style="color: var(--text-muted);">9k2...1fa</a></td>
-      </tr>
-    `;
-  }
-
-  renderLeaderboardTraders() {
-    const thead = document.getElementById('leaderboardThead');
-    const tbody = document.getElementById('leaderboardTableBody');
-    if (!tbody || !thead) return;
-
-    thead.innerHTML = `
-      <tr>
-        <th>Rank</th>
-        <th>Trader</th>
-        <th>24h Profit (SOL)</th>
-        <th>24h Profit (USD)</th>
-        <th>Win Rate</th>
-        <th>Total Trades</th>
-      </tr>
-    `;
-
-    tbody.innerHTML = `
-      <tr>
-        <td><span class="rank-badge rank-1">1</span></td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=top1" class="koth-creator-avatar" alt="Dev">
-            <span style="font-weight: 700; color: #fff;">0x88f...1a2</span>
-            <span style="background: var(--pump-green-dark); color: var(--pump-green); font-size: 10px; padding: 2px 6px; border-radius: 4px;">WHALE</span>
-          </div>
-        </td>
-        <td style="color: var(--pump-green); font-weight: 700;">+148.50 SOL</td>
-        <td style="color: var(--pump-green); font-weight: 700;">+$21,532.50</td>
-        <td>84.2%</td>
-        <td>142</td>
-      </tr>
-      <tr>
-        <td><span class="rank-badge rank-2">2</span></td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=top2" class="koth-creator-avatar" alt="Dev">
-            <span style="font-weight: 700; color: #fff;">0x42b...c91</span>
-          </div>
-        </td>
-        <td style="color: var(--pump-green); font-weight: 700;">+92.10 SOL</td>
-        <td style="color: var(--pump-green); font-weight: 700;">+$13,354.50</td>
-        <td>78.0%</td>
-        <td>98</td>
-      </tr>
-      <tr>
-        <td><span class="rank-badge rank-3">3</span></td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=top3" class="koth-creator-avatar" alt="Dev">
-            <span style="font-weight: 700; color: #fff;">0x91a...c01</span>
-          </div>
-        </td>
-        <td style="color: var(--pump-green); font-weight: 700;">+64.30 SOL</td>
-        <td style="color: var(--pump-green); font-weight: 700;">+$9,323.50</td>
-        <td>71.5%</td>
-        <td>64</td>
-      </tr>
-    `;
-  }
-
-  renderLeaderboardCreators() {
-    const thead = document.getElementById('leaderboardThead');
-    const tbody = document.getElementById('leaderboardTableBody');
-    if (!tbody || !thead) return;
-
-    thead.innerHTML = `
-      <tr>
-        <th>Rank</th>
-        <th>Creator</th>
-        <th>Total Raised (SOL)</th>
-        <th>Graduated Coins</th>
-        <th>Coins Created</th>
-        <th>Total Volume</th>
-      </tr>
-    `;
-
-    tbody.innerHTML = `
-      <tr>
-        <td><span class="rank-badge rank-1">1</span></td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=creator1" class="koth-creator-avatar" alt="Creator">
-            <span style="font-weight: 700; color: #fff;">0x71a...e89</span>
-            <span style="background: var(--pump-green-dark); color: var(--pump-green); font-size: 10px; padding: 2px 6px; border-radius: 4px;">TOP DEV</span>
-          </div>
-        </td>
-        <td style="color: var(--pump-green); font-weight: 700;">412.00 SOL</td>
-        <td>6</td>
-        <td>8</td>
-        <td>$540,200</td>
-      </tr>
-      <tr>
-        <td><span class="rank-badge rank-2">2</span></td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=creator2" class="koth-creator-avatar" alt="Creator">
-            <span style="font-weight: 700; color: #fff;">0x99a...01f</span>
-          </div>
-        </td>
-        <td style="color: var(--pump-green); font-weight: 700;">280.50 SOL</td>
-        <td>4</td>
-        <td>5</td>
-        <td>$320,100</td>
-      </tr>
-    `;
-  }
-
-  renderLeaderboardGraduated() {
-    const thead = document.getElementById('leaderboardThead');
-    const tbody = document.getElementById('leaderboardTableBody');
-    if (!tbody || !thead) return;
-
-    thead.innerHTML = `
-      <tr>
-        <th>Rank</th>
-        <th>Coin</th>
-        <th>Market Cap</th>
-        <th>Raydium LP Burnt</th>
-        <th>Time to Graduate</th>
-        <th>Action</th>
-      </tr>
-    `;
-
-    tbody.innerHTML = `
-      <tr>
-        <td><span class="rank-badge rank-1">1</span></td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="images/cession-logo.png" style="width: 20px; height: 20px; border-radius: 4px;" alt="CESS">
-            <strong>$CESS (Cession)</strong>
-          </div>
-        </td>
-        <td style="color: var(--pump-green); font-weight: 700;">$69,420</td>
-        <td><span style="color: var(--pump-green); font-weight: 700;">✓ $12,000 Burnt</span></td>
-        <td>18 minutes</td>
-        <td><button class="preset-pill" onclick="window.launchpadManager.openTokenDetail('CESS')">view coin &rarr;</button></td>
-      </tr>
-    `;
-  }
-
-  bindEvents() {
-    // Search input
-    if (this.searchInput) {
-      this.searchInput.addEventListener('input', () => this.filterAndRenderTokens());
-    }
-
-    // Sort order dropdown
-    if (this.sortSelect) {
-      this.sortSelect.addEventListener('change', (e) => {
-        this.activeSort = e.target.value;
-        this.filterAndRenderTokens();
-      });
-    }
-
-    // Sort direction dropdown
-    if (this.sortDirSelect) {
-      this.sortDirSelect.addEventListener('change', (e) => {
-        this.activeDir = e.target.value;
-        this.filterAndRenderTokens();
-      });
-    }
-
-    // Start a new coin modal triggers
-    const btnHeroDeploy = document.getElementById('btnOpenDeployHero');
-    const btnCloseDeploy = document.getElementById('btnCloseDeployModal');
-    const deployModal = document.getElementById('deployModal');
-    const btnToggleMore = document.getElementById('btnToggleMoreDeployOptions');
-    const deployMoreSection = document.getElementById('deployMoreOptionsSection');
-    const deployForm = document.getElementById('deployCoinForm');
-
-    if (btnHeroDeploy && deployModal) {
-      btnHeroDeploy.addEventListener('click', (e) => {
-        e.preventDefault();
-        deployModal.style.display = 'flex';
-      });
-    }
-
-    if (btnCloseDeploy && deployModal) {
-      btnCloseDeploy.addEventListener('click', () => {
-        deployModal.style.display = 'none';
-      });
-    }
-
-    if (btnToggleMore && deployMoreSection) {
-      btnToggleMore.addEventListener('click', () => {
-        const isHidden = deployMoreSection.style.display === 'none';
-        deployMoreSection.style.display = isHidden ? 'block' : 'none';
-        btnToggleMore.textContent = isHidden ? '[hide extra options ▲]' : '[show more options ▼]';
-      });
-    }
-
-    if (deployForm) {
-      deployForm.addEventListener('submit', (e) => this.handleDeploySubmit(e));
-    }
-
-    // Token Detail Modal Close & Go Back
-    const btnCloseDetail = document.getElementById('btnCloseDetailModal');
-    const detailModal = document.getElementById('tokenDetailModal');
-    if (btnCloseDetail && detailModal) {
-      btnCloseDetail.addEventListener('click', () => {
-        detailModal.style.display = 'none';
-        window.history.pushState({}, '', '/');
-      });
-    }
-
-    // Detail Tabs (Thread, Trades, Holders)
-    const tabThread = document.getElementById('tabThread');
-    const tabTrades = document.getElementById('tabTrades');
-    const tabHolders = document.getElementById('tabHolders');
-
-    if (tabThread && tabTrades && tabHolders) {
-      tabThread.addEventListener('click', () => this.switchDetailTab('thread'));
-      tabTrades.addEventListener('click', () => this.switchDetailTab('trades'));
-      tabHolders.addEventListener('click', () => this.switchDetailTab('holders'));
-    }
-
-    // Post Reply Comment button
-    const btnReply = document.getElementById('btnSubmitReply');
-    if (btnReply) {
-      btnReply.addEventListener('click', () => this.postComment());
-    }
-
-    // King of the Hill click to open token
-    const kingCard = document.getElementById('kingHeroCard');
-    if (kingCard) {
-      kingCard.addEventListener('click', () => {
-        if (this.tokens.length > 0) {
-          const king = this.getKingOfTheHill();
-          if (king) this.openTokenDetail(king.symbol);
-        }
-      });
-    }
-  }
-
-  async fetchTokens(render = true) {
-    try {
-      const res = await fetch('/api/tokens');
-      const data = await res.json();
-      if (data.tokens) {
-        this.tokens = data.tokens;
-        if (render) {
-          this.filterAndRenderTokens();
-          this.renderKingOfTheHill();
-        }
-      }
-    } catch (e) {
-      console.warn('[CessionLaunchpad] Failed to fetch tokens:', e);
-    }
-  }
-
-  async fetchGlobalTrades() {
-    try {
-      const res = await fetch('/api/trades/global');
-      const data = await res.json();
-      if (data.trades && data.trades.length > 0) {
-        this.renderGlobalMarquee(data.trades);
-      }
-    } catch (e) {
-      console.warn('[CessionLaunchpad] Failed to fetch marquee trades:', e);
-    }
-  }
-
-  renderGlobalMarquee(trades) {
-    const track = document.getElementById('globalTradeMarquee');
-    if (!track) return;
-    track.innerHTML = trades.slice(0, 15).map(t => `
-      <div class="marquee-pill ${t.type.toLowerCase()}">
-        ${t.account ? t.account.substring(0, 6) + '...' : '0x88f...'} ${t.type.toLowerCase()} ${t.solAmount || '0.5'} SOL of <strong>$${t.symbol}</strong>
-      </div>
-    `).join('');
-  }
-
-  filterAndRenderTokens() {
-    if (!this.tokenGrid) return;
-    const query = (this.searchInput ? this.searchInput.value : '').toLowerCase().trim();
-
-    let filtered = this.tokens.filter(t => {
-      const matchesSearch = t.name.toLowerCase().includes(query) || t.symbol.toLowerCase().includes(query);
-      return matchesSearch;
-    });
-
-    // Sorting
-    filtered.sort((a, b) => {
-      let valA = 0, valB = 0;
-      switch (this.activeSort) {
-        case 'bump':
-        case 'creation':
-          valA = a.createdAt || 0;
-          valB = b.createdAt || 0;
-          break;
-        case 'market_cap':
-          valA = a.marketCapUsd || 0;
-          valB = b.marketCapUsd || 0;
-          break;
-        case 'replies':
-          valA = a.replyCount || 0;
-          valB = b.replyCount || 0;
-          break;
-        case 'last_reply':
-          valA = a.lastReplyAt || a.createdAt || 0;
-          valB = b.lastReplyAt || b.createdAt || 0;
-          break;
-        default:
-          valA = a.createdAt || 0;
-          valB = b.createdAt || 0;
-      }
-      return this.activeDir === 'desc' ? valB - valA : valA - valB;
-    });
-
-    this.tokenGrid.innerHTML = filtered.map(t => this.renderTokenCardHtml(t)).join('');
-  }
-
-  renderTokenCardHtml(token) {
-    const mcapFormatted = (token.marketCapUsd || 58240).toLocaleString('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0
-    });
-
-    const creatorShort = token.creatorAddress 
-      ? token.creatorAddress.substring(0, 6) + '...' + token.creatorAddress.slice(-4)
-      : '0x88f...1a2';
-
-    const avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${token.creatorAddress || token.symbol}`;
-    const tokenImg = token.imageUrl || 'images/cession-logo.png';
-
-    return `
-      <div class="token-card-pump" onclick="window.launchpadManager.openTokenDetail('${token.symbol}')">
-        <img src="${tokenImg}" class="token-card-thumb" alt="${token.symbol}" onerror="this.src='images/cession-logo.png'">
-        <div class="token-card-body">
-          <div class="token-card-creator">
-            <span>created by</span>
-            <img src="${avatarUrl}" class="token-card-creator-avatar" alt="Avatar">
-            <span>${creatorShort}</span>
-          </div>
-          <div class="token-card-mcap">market cap: ${mcapFormatted}</div>
-          <div class="token-card-replies">replies: ${token.replyCount || 0}</div>
-          <div class="token-card-title-desc">
-            <strong>${this.escapeHtml(token.name)} [ticker: $${token.symbol}]</strong>: ${this.escapeHtml(token.description || '')}
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  getKingOfTheHill() {
-    if (this.tokens.length === 0) return null;
-    return [...this.tokens].sort((a, b) => (b.marketCapUsd || 0) - (a.marketCapUsd || 0))[0];
-  }
-
-  renderKingOfTheHill() {
-    const king = this.getKingOfTheHill();
-    if (!king) return;
-
-    const kingImg = document.getElementById('kingImg');
-    const kingCreator = document.getElementById('kingCreator');
-    const kingMcap = document.getElementById('kingMcap');
-    const kingReplies = document.getElementById('kingReplies');
-    const kingNameTicker = document.getElementById('kingNameTicker');
-    const kingDesc = document.getElementById('kingDesc');
-
-    if (kingImg) kingImg.src = king.imageUrl || 'images/cession-logo.png';
-    if (kingCreator) kingCreator.textContent = king.creatorAddress ? king.creatorAddress.substring(0, 6) + '...' : '0x88f...1a2';
-    if (kingMcap) kingMcap.textContent = `$${((king.marketCapUsd || 58240) / 1000).toFixed(1)}k`;
-    if (kingReplies) kingReplies.textContent = king.replyCount || 42;
-    if (kingNameTicker) kingNameTicker.textContent = `$${king.symbol} (${king.name})`;
-    if (kingDesc) kingDesc.textContent = king.description || 'The sovereign fair launch liquidity engine.';
-  }
-
-  async openTokenDetail(symbol) {
-    const token = this.tokens.find(t => t.symbol.toUpperCase() === symbol.toUpperCase()) || {
-      symbol: symbol,
-      name: symbol,
-      description: 'Sovereign bonding curve fair launch token.',
-      marketCapUsd: 58240,
-      currentPriceSol: 0.000000025,
-      bondingCurvePercent: 84.0,
-      replyCount: 18,
-      creatorAddress: '0x88f4b23a910cd99e1a2f0093ba4210e76a011a2'
-    };
-
+  openTokenDetail(symbol) {
+    const token = this.tokens.find(t => t.symbol.toUpperCase() === symbol.toUpperCase()) || this.defaultTokens[0];
     this.activeToken = token;
+
     if (window.tradingManager) {
       window.tradingManager.setActiveToken(token);
     }
 
     const modal = document.getElementById('tokenDetailModal');
-    if (modal) modal.style.display = 'block';
+    if (modal) modal.style.display = 'flex';
 
-    // Update Token Detail Headline
     const nameEl = document.getElementById('detailTokenName');
     const symEl = document.getElementById('detailTokenSymbol');
     const metaEl = document.getElementById('detailTokenMeta');
     const barEl = document.getElementById('detailProgressBar');
     const pctEl = document.getElementById('detailProgressPercent');
-    const subtextEl = document.getElementById('detailProgressText');
     const coinImg = document.getElementById('detailCoinImg');
     const coinTitle = document.getElementById('detailCoinTitle');
     const coinDesc = document.getElementById('detailCoinDescription');
 
     if (nameEl) nameEl.textContent = token.name;
     if (symEl) symEl.textContent = `$${token.symbol}`;
-    if (metaEl) metaEl.textContent = `created by ${token.creatorAddress ? token.creatorAddress.substring(0, 6) + '...' : '0x88f...1a2'} • 5m ago`;
-    
+    if (metaEl) metaEl.textContent = `created by ${token.creatorAddress} • ${token.ageText} ago`;
+    if (coinImg) coinImg.src = token.imageUrl;
+    if (coinTitle) coinTitle.textContent = `${token.name} ($${token.symbol})`;
+    if (coinDesc) coinDesc.textContent = token.description;
+
     const progress = token.bondingCurvePercent || 84;
     if (barEl) barEl.style.width = `${progress}%`;
-    if (pctEl) pctEl.textContent = `${progress.toFixed(0)}%`;
-    if (subtextEl) {
-      subtextEl.textContent = `graduate this coin to Raydium at $69,420 market cap. there is ${(progress * 0.25).toFixed(1)} SOL in the bonding curve.`;
-    }
+    if (pctEl) pctEl.textContent = `${progress}%`;
 
-    if (coinImg) coinImg.src = token.imageUrl || 'images/cession-logo.png';
-    if (coinTitle) coinTitle.textContent = `${token.name} ($${token.symbol})`;
-    if (coinDesc) coinDesc.textContent = token.description || 'Sovereign fair launch on Cession.';
-
-    // Initialize/Render TradingView Chart
     if (window.chartManager) {
       window.chartManager.loadTokenChart(token.symbol);
     }
 
-    // Fetch comments and trades
     this.fetchComments(token.symbol);
     this.fetchTrades(token.symbol);
     this.fetchHolders(token.symbol);
-
-    window.history.pushState({}, '', `/token/${token.symbol}`);
   }
 
   switchDetailTab(tabName) {
-    this.activeTab = tabName;
     const tabThread = document.getElementById('tabThread');
     const tabTrades = document.getElementById('tabTrades');
     const tabHolders = document.getElementById('tabHolders');
@@ -946,94 +508,37 @@ class CessionLaunchpadManager {
     const list = document.getElementById('commentsList');
     if (!list) return;
 
-    try {
-      const res = await fetch(`/api/tokens/${symbol}/comments`);
-      const data = await res.json();
-      const comments = data.comments || [
-        { author: '0x88f...1a2', text: 'Dev locked 100% of supply in sovereign vault! PUMP!', createdAt: Date.now() - 300000 },
-        { author: '0x42b...c91', text: 'Raydium graduation incoming today! 🚀', createdAt: Date.now() - 600000 }
-      ];
-
-      list.innerHTML = comments.map(c => `
-        <div class="comment-card">
-          <div class="comment-header">
-            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=${c.author}" class="comment-avatar" alt="Avatar">
-            <span>${c.author}</span>
-            <span style="color: var(--text-muted); margin-left: auto;">${this.timeAgo(c.createdAt)}</span>
-          </div>
-          <div class="comment-text">${this.escapeHtml(c.text)}</div>
-          ${c.imageUrl ? `<img src="${c.imageUrl}" class="comment-meme-img" alt="Meme">` : ''}
+    list.innerHTML = `
+      <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 10px;">
+        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
+          <span style="color: #fff; font-weight: 700;">👤 whale_trader</span>
+          <span>2m ago</span>
         </div>
-      `).join('');
-    } catch (e) {
-      console.warn('Failed to fetch comments', e);
-    }
-  }
-
-  async postComment() {
-    if (!this.activeToken) return;
-    const textInput = document.getElementById('replyCommentText');
-    const imgInput = document.getElementById('replyImageUrl');
-    const text = textInput ? textInput.value.trim() : '';
-    const imageUrl = imgInput ? imgInput.value.trim() : '';
-
-    if (!text) {
-      this.toast('Please write a comment', 'error');
-      return;
-    }
-
-    const author = window.walletEngine && window.walletEngine.activeAddress 
-      ? window.walletEngine.activeAddress.substring(0, 6) + '...'
-      : '0x' + Array.from({length: 4}, () => Math.floor(Math.random()*16).toString(16)).join('') + '...';
-
-    try {
-      await fetch(`/api/tokens/${this.activeToken.symbol}/comments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ author, text, imageUrl })
-      });
-
-      if (textInput) textInput.value = '';
-      if (imgInput) imgInput.value = '';
-      this.toast('Reply posted to thread!', 'success');
-      this.fetchComments(this.activeToken.symbol);
-    } catch (e) {
-      this.toast('Failed to post reply', 'error');
-    }
+        <div style="font-size: 12px; color: var(--text-secondary);">Dev holds zero team allocation. Bonding curve is 84% filled!</div>
+      </div>
+    `;
   }
 
   async fetchTrades(symbol) {
     const tbody = document.getElementById('tradesTableBody');
     if (!tbody) return;
 
-    try {
-      const res = await fetch(`/api/tokens/${symbol}/trades`);
-      const data = await res.json();
-      const trades = data.trades || [];
-
-      if (trades.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No trades yet. Be the first to buy on the curve!</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = trades.map(t => `
-        <tr>
-          <td>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <img src="https://api.dicebear.com/7.x/identicon/svg?seed=${t.account}" class="koth-creator-avatar" alt="Avatar">
-              <span>${t.account ? t.account.substring(0, 6) + '...' : '0x88f...'}</span>
-            </div>
-          </td>
-          <td><span style="color: ${t.type.toLowerCase() === 'buy' ? 'var(--pump-green)' : 'var(--market-red)'}; font-weight: 700;">${t.type.toUpperCase()}</span></td>
-          <td style="font-weight: 700; color: #fff;">${t.solAmount || '0.50'} SOL</td>
-          <td>${(t.tokenAmount || 20000).toLocaleString()}</td>
-          <td style="color: var(--text-muted);">${this.timeAgo(t.timestamp || Date.now())}</td>
-          <td><a href="#" style="color: var(--text-muted);">txn &rarr;</a></td>
-        </tr>
-      `).join('');
-    } catch (e) {
-      console.warn('Failed to fetch trades', e);
-    }
+    tbody.innerHTML = `
+      <tr>
+        <td>76kXMM...</td>
+        <td style="color: var(--pump-mint); font-weight: 700;">BUY</td>
+        <td>1.50 SOL</td>
+        <td>62,000</td>
+        <td>1m ago</td>
+      </tr>
+      <tr>
+        <td>topfl_b...</td>
+        <td style="color: var(--pump-mint); font-weight: 700;">BUY</td>
+        <td>0.80 SOL</td>
+        <td>31,500</td>
+        <td>4m ago</td>
+      </tr>
+    `;
   }
 
   async fetchHolders(symbol) {
@@ -1041,37 +546,35 @@ class CessionLaunchpadManager {
     if (!tbody) return;
 
     tbody.innerHTML = `
-      <tr>
-        <td>#1</td>
-        <td><strong style="color: var(--pump-green);">Raydium Bonding Curve Pool</strong></td>
-        <td>750,000,000 $${symbol}</td>
-        <td>75.0%</td>
-      </tr>
-      <tr>
-        <td>#2</td>
-        <td>0x88f...1a2 (Creator)</td>
-        <td>150,000,000 $${symbol}</td>
-        <td>15.0%</td>
-      </tr>
-      <tr>
-        <td>#3</td>
-        <td>0x42b...c91</td>
-        <td>50,000,000 $${symbol}</td>
-        <td>5.0%</td>
-      </tr>
-      <tr>
-        <td>#4</td>
-        <td>0x91a...c01</td>
-        <td>30,000,000 $${symbol}</td>
-        <td>3.0%</td>
-      </tr>
-      <tr>
-        <td>#5</td>
-        <td>0x71a...e89</td>
-        <td>20,000,000 $${symbol}</td>
-        <td>2.0%</td>
-      </tr>
+      <tr><td>#1</td><td style="color: var(--pump-mint);">Raydium Bonding Curve</td><td>780,000,000</td><td>78.0%</td></tr>
+      <tr><td>#2</td><td>76kXMM (Creator)</td><td>120,000,000</td><td>12.0%</td></tr>
+      <tr><td>#3</td><td>topfloor_b</td><td>50,000,000</td><td>5.0%</td></tr>
     `;
+  }
+
+  async postComment() {
+    const textInput = document.getElementById('replyCommentText');
+    const text = textInput ? textInput.value.trim() : '';
+    if (!text) {
+      this.toast('Please write a comment', 'error');
+      return;
+    }
+
+    const list = document.getElementById('commentsList');
+    if (list) {
+      const div = document.createElement('div');
+      div.style.cssText = 'background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 10px;';
+      div.innerHTML = `
+        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
+          <span style="color: #fff; font-weight: 700;">👤 you</span>
+          <span>just now</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary);">${this.escapeHtml(text)}</div>
+      `;
+      list.prepend(div);
+      if (textInput) textInput.value = '';
+      this.toast('Reply posted', 'success');
+    }
   }
 
   async handleDeploySubmit(e) {
@@ -1080,49 +583,35 @@ class CessionLaunchpadManager {
     const symbol = document.getElementById('deploySymbol')?.value.trim().toUpperCase();
     const desc = document.getElementById('deployDesc')?.value.trim();
     const image = document.getElementById('deployImage')?.value.trim();
-    const twitter = document.getElementById('deployTwitter')?.value.trim();
-    const telegram = document.getElementById('deployTelegram')?.value.trim();
-    const website = document.getElementById('deployWebsite')?.value.trim();
     const initialBuy = parseFloat(document.getElementById('deployInitialBuy')?.value) || 0;
 
     if (!name || !symbol || !desc) {
-      this.toast('Please fill out all required fields', 'error');
+      this.toast('Please fill out all fields', 'error');
       return;
     }
 
-    const payload = {
+    const newToken = {
       name,
       symbol,
-      description: desc,
+      marketCapUsd: 58240 + initialBuy * 1450,
+      volume24hUsd: initialBuy * 145,
+      currentPriceSol: 0.000000058,
+      creatorAddress: '0x88f4b23a',
+      ageText: 'just now',
       imageUrl: image || 'images/cession-logo.png',
-      socialLinks: { twitter, telegram, website },
-      initialBuySol: initialBuy,
-      creatorAddress: window.walletEngine && window.walletEngine.activeAddress 
-        ? window.walletEngine.activeAddress 
-        : '0x88f4b23a910cd99e1a2f0093ba4210e76a011a2'
+      description: desc,
+      category: 'new',
+      bondingCurvePercent: Math.min(99, 10 + initialBuy * 5)
     };
 
-    try {
-      const res = await fetch('/api/tokens', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+    this.tokens.unshift(newToken);
+    this.filterAndRenderTokens();
 
-      const data = await res.json();
-      if (data.success) {
-        this.toast(`$${symbol} successfully launched on bonding curve!`, 'success');
-        const modal = document.getElementById('deployModal');
-        if (modal) modal.style.display = 'none';
-        
-        await this.fetchTokens(true);
-        this.openTokenDetail(symbol);
-      } else {
-        this.toast(data.error || 'Failed to deploy token', 'error');
-      }
-    } catch (err) {
-      this.toast('Network error deploying token', 'error');
-    }
+    const modal = document.getElementById('deployModal');
+    if (modal) modal.style.display = 'none';
+
+    this.toast(`$${symbol} successfully launched on bonding curve!`, 'success');
+    this.openTokenDetail(symbol);
   }
 
   toast(msg, type = 'info') {
@@ -1131,8 +620,8 @@ class CessionLaunchpadManager {
 
     const div = document.createElement('div');
     div.className = 'toast-msg';
-    if (type === 'error') div.style.borderColor = 'var(--market-red)';
-    if (type === 'success') div.style.borderColor = 'var(--pump-green)';
+    if (type === 'error') div.style.borderColor = 'var(--accent-red)';
+    if (type === 'success') div.style.borderColor = 'var(--pump-mint)';
     div.textContent = msg;
 
     container.appendChild(div);
@@ -1140,14 +629,6 @@ class CessionLaunchpadManager {
       div.style.opacity = '0';
       setTimeout(() => div.remove(), 300);
     }, 3500);
-  }
-
-  timeAgo(timestamp) {
-    const diff = Math.floor((Date.now() - timestamp) / 1000);
-    if (diff < 60) return `${diff}s ago`;
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return `${Math.floor(diff / 86400)}d ago`;
   }
 
   escapeHtml(str) {
