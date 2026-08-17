@@ -1,5 +1,5 @@
 /**
- * Cession Market Data, Orderbook & Leaderboard Routes
+ * Cession & Calabi Market Data, Orderbook & Crypto Directory Routes
  * Powered by TruePriceOracle Multi-Feed Aggregation
  */
 
@@ -10,7 +10,23 @@ const bondingCurve = require('../services/bondingCurve');
 const marketData = require('../services/marketData');
 
 /**
- * Get all real-time market tickers (including majors and top launchpad tokens)
+ * Get ALL Cryptocurrencies directory (50+ coins with live prices, 24h changes, volume, market cap, sparklines)
+ */
+router.get('/all-cryptos', (req, res) => {
+  const category = req.query.category || 'all';
+  const search = req.query.search || '';
+  const cryptos = marketData.getAllCryptos(category, search);
+  res.json({
+    success: true,
+    total: cryptos.length,
+    category,
+    search,
+    cryptos
+  });
+});
+
+/**
+ * Get all real-time market tickers
  */
 router.get('/tickers', (req, res) => {
   res.json({ success: true, tickers: priceEngine.getAllTickers() });
@@ -28,6 +44,11 @@ router.get('/tickers/:symbol', (req, res) => {
     return res.json({ success: true, ticker: metrics });
   }
 
+  const bench = marketData.getBenchmarkPrice(sym);
+  if (bench) {
+    return res.json({ success: true, ticker: { symbol: sym, ...bench } });
+  }
+
   const ticker = priceEngine.getTicker(sym);
   if (!ticker) {
     return res.status(404).json({ success: false, error: "Ticker not found." });
@@ -36,17 +57,13 @@ router.get('/tickers/:symbol', (req, res) => {
 });
 
 /**
- * Get Full Market Data Package for ANY Coin / Token (Candles, L2 Depth, True Price Oracle)
+ * Get Full Market Data Package for ANY Coin / Token
  */
 router.get('/token-data/:symbol', (req, res) => {
   const sym = req.params.symbol.toUpperCase();
   const key = req.query.key || null;
   const timeframe = req.query.timeframe || '15m';
-  const token = bondingCurve.getToken(sym, key);
-
-  if (!token) {
-    return res.status(404).json({ success: false, error: "Token not found." });
-  }
+  const token = bondingCurve.getToken(sym, key) || { symbol: sym, name: sym, chain: 'Solana' };
 
   const metrics = marketData.calculateTokenMarketMetrics(token);
   const candles = marketData.generateCandlesticks(token, timeframe, 60);
@@ -63,6 +80,29 @@ router.get('/token-data/:symbol', (req, res) => {
 });
 
 /**
+ * Get OHLCV candlestick time-series for charts
+ */
+router.get('/candles/:symbol', (req, res) => {
+  const sym = req.params.symbol.toUpperCase();
+  const timeframe = req.query.timeframe || '15m';
+  const token = bondingCurve.getToken(sym) || { symbol: sym, name: sym, chain: 'Solana' };
+
+  const candles = marketData.generateCandlesticks(token, timeframe, 60);
+  res.json({ success: true, symbol: sym, timeframe, count: candles.length, candles });
+});
+
+/**
+ * Get L2 Orderbook Depth
+ */
+router.get('/orderbook/:symbol', (req, res) => {
+  const sym = req.params.symbol.toUpperCase();
+  const token = bondingCurve.getToken(sym) || { symbol: sym, name: sym, chain: 'Solana' };
+
+  const depth = marketData.generateOrderBook(token);
+  res.json({ success: true, symbol: sym, depth });
+});
+
+/**
  * Get Top Traders Daily PnL Leaderboard
  */
 router.get('/leaderboard', (req, res) => {
@@ -71,7 +111,7 @@ router.get('/leaderboard', (req, res) => {
 });
 
 /**
- * Get Trending / Popular Coins (Closest to DEX Graduation)
+ * Get Trending / Popular Coins
  */
 router.get('/trending', (req, res) => {
   const limit = parseInt(req.query.limit) || 6;
@@ -95,39 +135,6 @@ router.get('/daily-gainers', (req, res) => {
   const limit = parseInt(req.query.limit) || 6;
   const gainers = bondingCurve.getCoinDailyGainers(limit);
   res.json({ success: true, count: gainers.length, gainers });
-});
-
-/**
- * Get OHLCV candlestick time-series for charts
- */
-router.get('/candles/:symbol', (req, res) => {
-  const sym = req.params.symbol.toUpperCase();
-  const timeframe = req.query.timeframe || '15m';
-  const token = bondingCurve.getToken(sym);
-
-  if (token) {
-    const candles = marketData.generateCandlesticks(token, timeframe, 60);
-    return res.json({ success: true, symbol: sym, timeframe, count: candles.length, candles });
-  }
-
-  const candles = priceEngine.getCandles(sym);
-  res.json({ success: true, symbol: sym, timeframe, count: candles.length, candles });
-});
-
-/**
- * Get L2 Orderbook Depth
- */
-router.get('/orderbook/:symbol', (req, res) => {
-  const sym = req.params.symbol.toUpperCase();
-  const token = bondingCurve.getToken(sym);
-
-  if (token) {
-    const depth = marketData.generateOrderBook(token);
-    return res.json({ success: true, symbol: sym, depth });
-  }
-
-  const depth = priceEngine.getOrderbook(sym);
-  res.json({ success: true, symbol: sym, depth });
 });
 
 module.exports = router;

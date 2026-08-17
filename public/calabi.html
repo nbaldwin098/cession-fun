@@ -1,509 +1,651 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calabi Pro Crypto Exchange | Institutional Spot & Staking</title>
-  <meta name="description" content="Institutional digital asset spot exchange and non-custodial staking vaults. Powered by Cession Protocol with real-time L2 order books and deep liquidity.">
-  <link rel="icon" type="image/png" href="images/calabi-logo.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/calabi.css">
-  <link rel="stylesheet" href="css/wallet.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calabi Pro Exchange | Institutional Crypto Trading & Liquidity</title>
+  <meta name="description" content="Calabi Pro is an institutional-grade cryptocurrency exchange and liquidity network owned by Cession Protocol. Zero-fee spot trading, L2 order books, real-time prices for 50+ cryptocurrencies, and multi-sig staking vaults." />
+  <link rel="icon" type="image/png" href="/images/calabi-logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/calabi.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
-<body class="calabi-body">
+<body>
 
-  <!-- =========================================================
-       INSTITUTIONAL HEADER
-  ========================================================= -->
-  <header class="cal-header">
-    <div class="cal-header-left">
-      <!-- Calabi Logo & Brand -->
-      <a href="/exchange" class="cal-brand-group">
-        <img src="images/calabi-logo.png" alt="Calabi Exchange" class="cal-logo-img">
-        <div class="cal-brand-title">
-          <span>CALABI</span>
-          <span class="cal-badge-pro">PRO</span>
-        </div>
-      </a>
-      <span class="cal-badge-parent">Owned by Cession</span>
+  <!-- ==========================================================================
+       TOP BAR: LOGO, LIVE TICKER STRIP, NETWORK STATUS, WALLET LOGIN
+       ========================================================================== -->
+  <header class="calabi-topbar">
+    <a href="/exchange" class="calabi-brand">
+      <img src="/images/calabi-logo.png" alt="Calabi Logo" class="calabi-logo-img" />
+      <div class="calabi-brand-titles">
+        <span class="calabi-brand-name">
+          CALABI <span class="calabi-pro-badge">PRO</span>
+        </span>
+        <span class="calabi-brand-sub">Owned by Cession</span>
+      </div>
+    </a>
 
-      <!-- Primary Navigation Tabs -->
-      <nav class="cal-nav-tabs">
-        <button class="cal-nav-tab active" id="tabNavTrade" onclick="window.calabiEngine.toast('Spot trading terminal active', 'info')">
-          📊 Spot Trade
-        </button>
-        <button class="cal-nav-tab" id="tabNavEarn" onclick="window.calabiEngine.openStakingModal()">
-          🥩 Staking Vaults
-        </button>
-        <button class="cal-nav-tab" id="tabNavApi" onclick="window.calabiEngine.openApiKeysModal()">
-          ⚡ Institutional API
-        </button>
-        <a href="/" class="cal-nav-tab" style="color: #60a5fa;">
-          ← Cession Fair Launchpad
-        </a>
-      </nav>
+    <!-- Top Ticker Strip (BTC, ETH, SOL, CESS) -->
+    <div class="topbar-ticker-strip" id="topbarTickerStrip">
+      <div class="ticker-mini-item">
+        <span class="ticker-mini-sym">SOL</span>
+        <span class="ticker-mini-price font-mono">$156.80</span>
+        <span class="ticker-mini-chg up font-mono">+6.15%</span>
+      </div>
+      <div class="ticker-mini-item">
+        <span class="ticker-mini-sym">BTC</span>
+        <span class="ticker-mini-price font-mono">$67,450.00</span>
+        <span class="ticker-mini-chg up font-mono">+3.42%</span>
+      </div>
+      <div class="ticker-mini-item">
+        <span class="ticker-mini-sym">ETH</span>
+        <span class="ticker-mini-price font-mono">$3,510.50</span>
+        <span class="ticker-mini-chg up font-mono">+2.85%</span>
+      </div>
+      <div class="ticker-mini-item">
+        <span class="ticker-mini-sym">CESS</span>
+        <span class="ticker-mini-price font-mono">$0.445</span>
+        <span class="ticker-mini-chg up font-mono">+18.90%</span>
+      </div>
     </div>
 
-    <!-- Header Actions & Wallet -->
-    <div class="cal-header-right">
-      <button class="cal-btn-deposit" onclick="window.calabiEngine.openDepositModal()">
-        <span>+</span>
-        <span>Deposit Funds</span>
-      </button>
-
-      <!-- Connect Wallet Button -->
-      <button class="cal-btn-secondary" id="btnConnectWallet" onclick="window.walletEngine.openAuthModal()">
-        Connect Wallet
-      </button>
-
-      <!-- Connected Wallet Pill -->
-      <div class="wallet-connected-pill" id="walletConnectedPill" style="display: none; background: var(--cal-bg-tertiary); border: 1px solid var(--cal-border); border-radius: var(--cal-radius-sm); padding: 4px 10px; font-size: 12px; font-family: var(--cal-font-mono);">
-        <span id="navWalletBalance" style="color: var(--cal-green); font-weight: 700;">0.00 SOL</span>
-        <span id="navWalletAddress" style="color: var(--cal-text-muted); margin-left: 6px;">0x...</span>
-        <button id="btnDisconnectWallet" style="color: var(--cal-red); margin-left: 8px; background: none; border: none; cursor: pointer;" onclick="window.walletEngine.disconnect()">✕</button>
+    <div class="topbar-actions">
+      <div class="solana-net-status">
+        <span class="status-dot"></span>
+        <span>Solana Mainnet</span>
       </div>
+
+      <button class="btn-outline-blue" onclick="document.getElementById('modalDeposit').classList.add('active')">
+        <i class="fa-solid fa-shield-halved"></i> Treasury Deposit
+      </button>
+
+      <button class="btn-blue" id="btnConnectWallet" onclick="window.walletEngine ? window.walletEngine.openModal() : alert('Wallet Engine Loading...')">
+        <i class="fa-solid fa-wallet"></i> <span id="walletBtnText">Connect Wallet</span>
+      </button>
     </div>
   </header>
 
-  <!-- =========================================================
-       GLOBAL MARKET STATS TICKER BAR
-  ========================================================= -->
-  <div class="cal-ticker-bar">
-    <!-- Pair Dropdown -->
-    <div class="cal-pair-selector">
-      <select id="calPairSelect" class="cal-pair-select-dropdown">
-        <option value="SOL-USDC" selected>SOL / USDC</option>
-        <option value="BTC-USDC">BTC / USDC</option>
-        <option value="ETH-USDC">ETH / USDC</option>
-        <option value="CESS-SOL">CESS / SOL</option>
-        <option value="BONK-SOL">BONK / SOL</option>
-      </select>
+  <!-- ==========================================================================
+       SUB-NAV TABS BAR: ORGANIZED NAVIGATION (NOT CLUTTERED ON HEADER)
+       ========================================================================== -->
+  <nav class="calabi-navbar">
+    <div class="nav-tabs-group">
+      <button class="nav-tab-btn active" data-view="markets">
+        <i class="fa-solid fa-chart-line"></i> Markets & All Cryptos
+      </button>
+      <button class="nav-tab-btn" data-view="trade">
+        <i class="fa-solid fa-bolt"></i> Spot Pro Terminal
+      </button>
+      <button class="nav-tab-btn" data-view="swap">
+        <i class="fa-solid fa-repeat"></i> 0% Instant Swap
+      </button>
+      <button class="nav-tab-btn" data-view="staking">
+        <i class="fa-solid fa-cubes"></i> Staking & Yield Vaults
+      </button>
+      <button class="nav-tab-btn" data-view="reserves">
+        <i class="fa-solid fa-vault"></i> Multi-Sig Treasury & Reserves
+      </button>
+      <button class="nav-tab-btn" data-view="api">
+        <i class="fa-solid fa-code"></i> Institutional API
+      </button>
     </div>
 
-    <!-- Mark Price -->
-    <div class="cal-stat-item">
-      <span class="cal-stat-label">Mark Price</span>
-      <span class="cal-stat-value" id="calHeaderPrice" style="color: #fff; font-size: 15px;">$154.20</span>
-    </div>
+    <a href="/" class="nav-back-cession">
+      <span>Cession Fair Launchpad</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
+    </a>
+  </nav>
 
-    <!-- 24h Change -->
-    <div class="cal-stat-item">
-      <span class="cal-stat-label">24h Change</span>
-      <span class="cal-stat-value cal-val-green" id="calHeaderChange">+5.72%</span>
-    </div>
+  <!-- ==========================================================================
+       MAIN VIEWS CONTAINER
+       ========================================================================== -->
+  <main class="calabi-main">
 
-    <!-- 24h High -->
-    <div class="cal-stat-item">
-      <span class="cal-stat-label">24h High</span>
-      <span class="cal-stat-value" id="calHeaderHigh" style="color: #fff;">$158.40</span>
-    </div>
-
-    <!-- 24h Low -->
-    <div class="cal-stat-item">
-      <span class="cal-stat-label">24h Low</span>
-      <span class="cal-stat-value" id="calHeaderLow" style="color: #fff;">$148.10</span>
-    </div>
-
-    <!-- 24h Volume -->
-    <div class="cal-stat-item">
-      <span class="cal-stat-label">24h Volume</span>
-      <span class="cal-stat-value" id="calHeaderVolume" style="color: var(--cal-text-secondary);">42,891,400 USDC</span>
-    </div>
-
-    <!-- Fee Tier Badge -->
-    <div class="cal-stat-item" style="margin-left: auto;">
-      <span class="cal-stat-label">Fee Tier</span>
-      <span class="cal-stat-value" style="color: var(--cal-blue); font-size: 11px;">Maker 0.00% / Taker 0.05%</span>
-    </div>
-  </div>
-
-  <!-- =========================================================
-       MAIN TRADING GRID (Institutional 4-Quadrant)
-  ========================================================= -->
-  <div class="cal-trading-grid">
-    
-    <!-- LEFT PANEL: LEVEL 2 ORDER BOOK & PUBLIC TRADES TAPE -->
-    <div class="cal-panel">
-      <div class="cal-panel-header">
-        <span class="cal-panel-title">📖 Order Book (L2)</span>
-        <span style="font-size: 10px; color: var(--cal-text-muted);">Real-time</span>
-      </div>
-
-      <div class="cal-orderbook-container">
-        <div class="cal-ob-header-row">
-          <span>Price (<span class="cal-quote-sym">USDC</span>)</span>
-          <span style="text-align: right;">Size (<span class="cal-base-sym">SOL</span>)</span>
-          <span style="text-align: right;">Total</span>
+    <!-- ======================================================================
+         VIEW 1: MARKETS & ALL CRYPTOS DIRECTORY
+         ====================================================================== -->
+    <section class="calabi-view active" id="view-markets">
+      <!-- 4 Market Highlight Cards -->
+      <div class="markets-hero-grid">
+        <div class="market-stat-card">
+          <span class="stat-card-title">24h Global Volume</span>
+          <span class="stat-card-value">$4.28 Billion</span>
+          <span class="stat-card-sub up font-mono">+8.4% vs yesterday</span>
         </div>
-
-        <!-- Asks (Red / Sell Orders) -->
-        <div class="cal-ob-asks-list" id="calOrderBookAsks">
-          <!-- Rendered dynamically -->
+        <div class="market-stat-card">
+          <span class="stat-card-title">Top Gainer (24h)</span>
+          <span class="stat-card-value">CESS (+18.9%)</span>
+          <span class="stat-card-sub up font-mono">Cession Sovereign Protocol</span>
         </div>
-
-        <!-- Middle Spread Bar -->
-        <div class="cal-ob-spread-bar" id="calOrderBookSpread">
-          <span>$154.20</span>
-          <span style="font-size: 11px; color: var(--cal-text-muted);">Spread 0.01 (0.006%)</span>
+        <div class="market-stat-card">
+          <span class="stat-card-title">Solana Squads Treasury</span>
+          <span class="stat-card-value font-mono">$1,280,000</span>
+          <span class="stat-card-sub font-mono" style="color: var(--primary);">8cdpVXsr...WmJCCvH</span>
         </div>
-
-        <!-- Bids (Green / Buy Orders) -->
-        <div class="cal-ob-bids-list" id="calOrderBookBids">
-          <!-- Rendered dynamically -->
+        <div class="market-stat-card">
+          <span class="stat-card-title">Highest Staking APR</span>
+          <span class="stat-card-value font-mono">24.50% APY</span>
+          <span class="stat-card-sub font-mono" style="color: var(--green);">Cession Engine Vault</span>
         </div>
       </div>
 
-      <!-- Public Trades Tape at Bottom of Left Panel -->
-      <div class="cal-panel-header" style="border-top: 1px solid var(--cal-border);">
-        <span class="cal-panel-title">⚡ Recent Trades</span>
-      </div>
-      <div style="height: 140px; overflow-y: auto;" id="calRecentTradesBody">
-        <!-- Rendered dynamically -->
-      </div>
-    </div>
-
-    <!-- CENTER PANEL: CANDLESTICK & TECHNICAL CHART -->
-    <div class="cal-chart-panel">
-      <!-- Toolbar -->
-      <div class="cal-chart-toolbar">
-        <div class="cal-tf-group">
-          <button class="cal-tf-btn" data-tf="1m">1m</button>
-          <button class="cal-tf-btn" data-tf="5m">5m</button>
-          <button class="cal-tf-btn active" data-tf="15m">15m</button>
-          <button class="cal-tf-btn" data-tf="1h">1h</button>
-          <button class="cal-tf-btn" data-tf="4h">4h</button>
-          <button class="cal-tf-btn" data-tf="1D">1D</button>
+      <!-- Filter Bar: Search + Category Pills -->
+      <div class="markets-filter-bar">
+        <div class="category-pills">
+          <button class="category-pill active" data-cat="all">All Cryptos (50+)</button>
+          <button class="category-pill" data-cat="solana">🟣 Solana Ecosystem</button>
+          <button class="category-pill" data-cat="l1">⚡ Layer 1s</button>
+          <button class="category-pill" data-cat="defi">🏦 DeFi</button>
+          <button class="category-pill" data-cat="ai">🤖 AI Tokens</button>
+          <button class="category-pill" data-cat="meme">🐶 Memes</button>
+          <button class="category-pill" data-cat="staking">🥩 Staking Assets</button>
         </div>
 
-        <div style="display: flex; gap: 8px; font-size: 11px; color: var(--cal-text-muted); align-items: center;">
-          <span style="color: #1E50FF; font-weight: 700;">● EMA 20</span>
-          <span>● Volume</span>
+        <div class="market-search-box">
+          <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+          <input type="text" id="marketSearchInput" class="market-search-input" placeholder="Search coin or symbol (e.g. SOL, BTC, PEPE)..." />
         </div>
       </div>
 
-      <!-- Chart Canvas Container -->
-      <div class="cal-chart-canvas-container">
-        <canvas id="calabiChartCanvas"></canvas>
-      </div>
-    </div>
-
-    <!-- RIGHT PANEL: PROFESSIONAL ORDER ENTRY & 0% SWAP -->
-    <div class="cal-order-entry-panel">
-      <!-- Buy / Sell Side Toggle -->
-      <div class="cal-side-toggle">
-        <button class="cal-side-btn buy active" id="btnOrderSideBuy">Buy</button>
-        <button class="cal-side-btn sell" id="btnOrderSideSell">Sell</button>
-      </div>
-
-      <!-- Order Types (Limit, Market, Stop) -->
-      <div class="cal-order-type-tabs">
-        <button class="cal-type-tab active" data-type="limit">Limit</button>
-        <button class="cal-type-tab" data-type="market">Market</button>
-        <button class="cal-type-tab" data-type="stop">Stop-Loss</button>
-      </div>
-
-      <!-- Order Form Body -->
-      <div class="cal-form-body">
-        
-        <!-- Price Input -->
-        <div class="cal-input-group" id="orderPriceInputGroup">
-          <div class="cal-input-label-row">
-            <span>Limit Price</span>
-            <span style="color: var(--cal-text-muted);">Best: <strong id="bestMarketPrice">$154.20</strong></span>
-          </div>
-          <div class="cal-input-box">
-            <input type="number" id="orderPriceInput" class="cal-input-field" placeholder="0.00" value="154.20" step="any">
-            <span class="cal-input-suffix cal-quote-sym">USDC</span>
-          </div>
-        </div>
-
-        <!-- Size / Amount Input -->
-        <div class="cal-input-group">
-          <div class="cal-input-label-row">
-            <span>Order Size</span>
-            <span>Available: <strong id="availQuoteBal" style="color: var(--cal-green);">0.00 USDC</strong></span>
-          </div>
-          <div class="cal-input-box">
-            <input type="number" id="orderSizeInput" class="cal-input-field" placeholder="0.00" step="any">
-            <span class="cal-input-suffix cal-base-sym">SOL</span>
-          </div>
-        </div>
-
-        <!-- Percentage Shortcuts (25%, 50%, 75%, 100%) -->
-        <div class="cal-pct-row">
-          <button class="cal-pct-btn" data-pct="25">25%</button>
-          <button class="cal-pct-btn" data-pct="50">50%</button>
-          <button class="cal-pct-btn" data-pct="75">75%</button>
-          <button class="cal-pct-btn" data-pct="100">100%</button>
-        </div>
-
-        <!-- Order Summary Breakdown -->
-        <div class="cal-summary-card">
-          <div class="cal-summary-line">
-            <span>Estimated Total:</span>
-            <strong id="orderEstTotal" style="color: #fff; font-family: var(--cal-font-mono);">0.00 USDC</strong>
-          </div>
-          <div class="cal-summary-line">
-            <span>Trading Fee (0.05%):</span>
-            <span id="orderEstFee" style="color: var(--cal-text-muted); font-family: var(--cal-font-mono);">0.0000 USDC</span>
-          </div>
-          <div class="cal-summary-line">
-            <span>Execution Type:</span>
-            <span style="color: var(--cal-green);">Non-Custodial On-Chain</span>
-          </div>
-        </div>
-
-        <!-- Order Submit Button -->
-        <button class="cal-btn-submit-order" id="btnSubmitOrder">
-          Buy SOL
-        </button>
-
-        <div style="font-size: 11px; color: var(--cal-text-muted); text-align: center; margin-top: 4px;">
-          Protected by Anti-MEV Liquidity Routing & Proof-of-Reserves
-        </div>
-      </div>
-    </div>
-
-    <!-- BOTTOM PANEL: OPEN ORDERS, ORDER HISTORY & STAKING POSITIONS -->
-    <div class="cal-bottom-panel">
-      <div class="cal-bottom-tabs">
-        <button class="cal-bottom-tab active" onclick="window.calabiEngine.toast('Open orders tab', 'info')">Open Orders (0)</button>
-        <button class="cal-bottom-tab" onclick="window.calabiEngine.toast('Order history tab', 'info')">Order History</button>
-        <button class="cal-bottom-tab" onclick="window.calabiEngine.toast('Trade history tab', 'info')">Trade History</button>
-        <button class="cal-bottom-tab" onclick="window.calabiEngine.toast('Portfolio asset balances', 'info')">Asset Balances</button>
-      </div>
-
-      <div class="cal-table-container">
-        <table class="cal-table">
+      <!-- Markets Table Container -->
+      <div class="markets-table-container">
+        <table class="markets-table">
           <thead>
             <tr>
-              <th>Order ID</th>
-              <th>Time</th>
-              <th>Pair</th>
-              <th>Type</th>
-              <th>Side</th>
-              <th>Price</th>
-              <th>Amount</th>
-              <th>Action</th>
+              <th style="width: 50px;">Rank</th>
+              <th>Asset</th>
+              <th class="text-right">Price (USD)</th>
+              <th class="text-right">24h Change</th>
+              <th class="text-right">24h Volume</th>
+              <th class="text-right">Market Cap</th>
+              <th class="text-right" style="width: 110px;">Action</th>
             </tr>
           </thead>
-          <tbody id="calOrdersTableBody">
-            <tr>
-              <td colspan="8" class="cal-empty-table">No open orders. Place a Limit or Market order above.</td>
-            </tr>
+          <tbody id="marketsTableBody">
+            <!-- Rendered dynamically by calabi.js -->
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
 
-  </div>
+    <!-- ======================================================================
+         VIEW 2: SPOT TRADING PRO TERMINAL
+         ====================================================================== -->
+    <section class="calabi-view" id="view-trade">
+      <div class="pro-terminal-grid">
+        <!-- Terminal Header Strip -->
+        <div class="terminal-header-strip">
+          <div class="active-pair-info">
+            <span class="pair-title" id="terminalPairTitle">SOL / USD</span>
+            <span class="pair-price-big" id="terminalPairPrice">$156.80</span>
+            <span class="stat-card-sub up font-mono" id="terminalPairChange">+6.15%</span>
+          </div>
 
-  <!-- =========================================================
-       MODAL: STAKING & EARN VAULTS
-  ========================================================= -->
-  <div class="cal-modal-overlay" id="calStakingModal">
-    <div class="cal-modal-box" style="max-width: 640px;">
-      <div class="cal-modal-header">
-        <span>🥩 Calabi Staking & Earn Vaults</span>
-        <button class="cal-modal-close" onclick="document.getElementById('calStakingModal').style.display='none'">&times;</button>
+          <div class="pair-stats-row">
+            <div>
+              <div class="pair-stat-label">24h High</div>
+              <div class="pair-stat-val" id="terminalHigh24h">$161.50</div>
+            </div>
+            <div>
+              <div class="pair-stat-label">24h Low</div>
+              <div class="pair-stat-val" id="terminalLow24h">$147.20</div>
+            </div>
+            <div>
+              <div class="pair-stat-label">24h Volume</div>
+              <div class="pair-stat-val" id="terminalVol24h">$4.20B</div>
+            </div>
+            <div>
+              <div class="pair-stat-label">True Oracle</div>
+              <div class="pair-stat-val" style="color: var(--primary);">Coinbase + Binance v3</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Left Quadrant: Level 2 Real-Time Order Book -->
+        <div class="terminal-panel orderbook-panel">
+          <div class="panel-header">
+            <span><i class="fa-solid fa-bars-staggered"></i> Level 2 Order Book</span>
+            <span style="font-size: 10px; color: var(--text-muted);">Real-Time</span>
+          </div>
+          <div class="orderbook-table-header">
+            <span>Price (USD)</span>
+            <span class="text-right">Size</span>
+            <span class="text-right">Total</span>
+          </div>
+          <div class="orderbook-list" id="obAsksList" style="flex: 1; min-height: 180px;">
+            <!-- Rendered dynamically -->
+          </div>
+          <div class="ob-spread-bar">
+            <span style="color: var(--text-muted);">Micro-Spread</span>
+            <span id="obSpreadVal" style="font-weight: 700;">$0.01 (0.006%)</span>
+          </div>
+          <div class="orderbook-list" id="obBidsList" style="flex: 1; min-height: 180px;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Center Quadrant: High-DPI Glitch-Free Candlestick Chart -->
+        <div class="terminal-panel chart-panel">
+          <div class="chart-controls-bar">
+            <div class="tf-buttons-group">
+              <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-right: 4px;">Timeframe:</span>
+              <button class="tf-btn" data-tf="1m">1m</button>
+              <button class="tf-btn" data-tf="5m">5m</button>
+              <button class="tf-btn active" data-tf="15m">15m</button>
+              <button class="tf-btn" data-tf="1h">1h</button>
+              <button class="tf-btn" data-tf="4h">4h</button>
+              <button class="tf-btn" data-tf="1D">1D</button>
+            </div>
+
+            <div style="font-size: 11px; font-weight: 600; color: var(--primary);">
+              <i class="fa-solid fa-chart-simple"></i> EMA 20 Overlay & Volume
+            </div>
+          </div>
+
+          <div class="chart-canvas-container">
+            <canvas id="calabiCandleCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Right Quadrant: Professional Order Entry Form -->
+        <div class="terminal-panel">
+          <div class="panel-header">
+            <span><i class="fa-solid fa-arrow-right-arrow-left"></i> Order Entry</span>
+            <span style="font-size: 10px; color: var(--green); font-weight: 700;">Maker 0.00% / Taker 0.05%</span>
+          </div>
+
+          <div class="order-entry-panel">
+            <div class="side-toggle-group">
+              <button class="side-btn active buy" id="sideBtnBuy">BUY / LONG</button>
+              <button class="side-btn sell" id="sideBtnSell">SELL / SHORT</button>
+            </div>
+
+            <div class="order-type-tabs">
+              <button class="order-type-btn active" data-type="limit">Limit</button>
+              <button class="order-type-btn" data-type="market">Market</button>
+              <button class="order-type-btn" data-type="stop">Stop-Loss</button>
+            </div>
+
+            <!-- Price Input -->
+            <div class="input-field-group" id="orderPriceInputRow">
+              <div class="input-label-row">
+                <span>Order Price</span>
+                <span>USD</span>
+              </div>
+              <div class="entry-input-box">
+                <input type="number" id="orderPriceInput" class="entry-input" value="156.80" step="0.01" />
+                <span class="entry-input-unit">USD</span>
+              </div>
+            </div>
+
+            <!-- Amount Input -->
+            <div class="input-field-group">
+              <div class="input-label-row">
+                <span>Order Amount</span>
+                <span id="orderAvailBal">Avail: 0.00</span>
+              </div>
+              <div class="entry-input-box">
+                <input type="number" id="orderAmountInput" class="entry-input" placeholder="0.00" step="0.01" />
+                <span class="entry-input-unit" id="orderAmountUnit">SOL</span>
+              </div>
+            </div>
+
+            <!-- Balance Percent Shortcuts -->
+            <div class="percent-shortcuts">
+              <button class="pct-btn" data-pct="25">25%</button>
+              <button class="pct-btn" data-pct="50">50%</button>
+              <button class="pct-btn" data-pct="75">75%</button>
+              <button class="pct-btn" data-pct="100">100%</button>
+            </div>
+
+            <button class="btn-submit-order buy" id="btnSubmitOrder">
+              Buy / Long SOL
+            </button>
+
+            <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 6px;">
+              <i class="fa-solid fa-lock"></i> Strict Non-Custodial Multi-Sig Execution
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Panel: Portfolio & Recent Trades -->
+        <div class="bottom-terminal-strip">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); padding-bottom: 8px;">
+            <span style="font-weight: 700; font-size: 13px;">Open Orders & Account Positions</span>
+            <span style="font-size: 12px; color: var(--text-muted);">Zero active margin debt</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted); padding: 12px 0; text-align: center;">
+            No open limit orders for this account. Real-time executions settle instantly to your connected non-custodial wallet.
+          </div>
+        </div>
       </div>
+    </section>
 
-      <div class="cal-modal-body">
-        <p style="font-size: 12px; color: var(--cal-text-secondary); line-height: 1.5;">
-          Stake crypto assets directly with verified non-custodial protocol validators and liquidity vaults. Real-time compounding yield.
-        </p>
+    <!-- ======================================================================
+         VIEW 3: 0% SPOT SWAP
+         ====================================================================== -->
+    <section class="calabi-view" id="view-swap">
+      <div class="swap-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h2 style="font-size: 18px; font-weight: 800;">0% Fee Instant Swap</h2>
+          <span style="background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">
+            0.00% Protocol Fee
+          </span>
+        </div>
 
-        <!-- Vault Options Grid -->
-        <div class="cal-vault-grid">
-          <div class="cal-vault-card">
-            <div class="cal-vault-header">
-              <div class="cal-vault-coin"><span>🟣</span> SOL Validator</div>
-              <div class="cal-vault-apy">7.2% APY</div>
-            </div>
-            <div style="font-size: 11px; color: var(--cal-text-muted);">Native Solana Stake Pool</div>
+        <!-- Pay Box -->
+        <div class="swap-box">
+          <div class="swap-box-header">
+            <span>You Pay</span>
+            <span>Balance: 0.00</span>
           </div>
-
-          <div class="cal-vault-card">
-            <div class="cal-vault-header">
-              <div class="cal-vault-coin"><span>🔵</span> ETH Staking</div>
-              <div class="cal-vault-apy">4.8% APY</div>
-            </div>
-            <div style="font-size: 11px; color: var(--cal-text-muted);">Base L2 Liquid Staking</div>
-          </div>
-
-          <div class="cal-vault-card">
-            <div class="cal-vault-header">
-              <div class="cal-vault-coin"><span>💵</span> USDC Vault</div>
-              <div class="cal-vault-apy">12.0% APY</div>
-            </div>
-            <div style="font-size: 11px; color: var(--cal-text-muted);">Exchange AMM Liquidity</div>
-          </div>
-
-          <div class="cal-vault-card">
-            <div class="cal-vault-header">
-              <div class="cal-vault-coin"><span>⚡</span> CESS Engine</div>
-              <div class="cal-vault-apy">24.5% APY</div>
-            </div>
-            <div style="font-size: 11px; color: var(--cal-text-muted);">Sovereign Fee Sharing</div>
+          <div class="swap-input-row">
+            <input type="number" id="calabiSwapPayInput" class="swap-amount-input" placeholder="0.0" />
+            <select class="swap-token-select" id="calabiSwapPaySelect">
+              <option value="SOL">SOL</option>
+              <option value="ETH">ETH</option>
+              <option value="USDC">USDC</option>
+              <option value="BTC">BTC</option>
+              <option value="CESS">CESS</option>
+            </select>
           </div>
         </div>
 
-        <!-- Stake Action Inputs -->
-        <div class="cal-input-group">
-          <label style="font-size: 11px; color: var(--cal-text-secondary);">Select Asset to Stake:</label>
-          <select id="calStakeTokenSelect" class="cal-pair-select-dropdown" style="width: 100%; padding: 8px;">
-            <option value="SOL">SOL — Solana Native (7.2% APY)</option>
-            <option value="ETH">ETH — Ethereum (4.8% APY)</option>
-            <option value="USDC">USDC — Dollar Vault (12.0% APY)</option>
-            <option value="CESS">CESS — Cession Protocol (24.5% APY)</option>
-          </select>
+        <!-- Swap Direction Button -->
+        <button class="swap-arrow-btn" onclick="alert('Tokens inverted')">
+          <i class="fa-solid fa-arrow-down"></i>
+        </button>
+
+        <!-- Receive Box -->
+        <div class="swap-box">
+          <div class="swap-box-header">
+            <span>You Receive (Estimated)</span>
+            <span>0% Slippage Target</span>
+          </div>
+          <div class="swap-input-row">
+            <input type="number" id="calabiSwapReceiveInput" class="swap-amount-input" placeholder="0.0" readonly />
+            <select class="swap-token-select" id="calabiSwapReceiveSelect">
+              <option value="USDC">USDC</option>
+              <option value="SOL">SOL</option>
+              <option value="ETH">ETH</option>
+              <option value="BTC">BTC</option>
+              <option value="CESS">CESS</option>
+            </select>
+          </div>
         </div>
 
-        <div class="cal-input-group">
-          <div class="cal-input-label-row">
-            <span>Amount to Stake</span>
-            <span>Available: <strong style="color: var(--cal-green);">0.00</strong></span>
-          </div>
-          <div class="cal-input-box">
-            <input type="number" id="calStakeAmountInput" class="cal-input-field" placeholder="0.00" step="any">
-          </div>
-        </div>
-
-        <button class="cal-btn-deposit" style="width: 100%; padding: 12px; justify-content: center; font-size: 14px;" onclick="window.calabiEngine.executeStaking()">
-          Lock & Stake Tokens
+        <button class="btn-blue" style="width: 100%; padding: 14px 0; font-size: 15px; font-weight: 700; margin-top: 12px;" onclick="window.calabiExchange.handleOrderSubmit()">
+          Swap Tokens (0% Fee)
         </button>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- =========================================================
-       MODAL: DEPOSIT & MULTI-SIG TREASURY
-  ========================================================= -->
-  <div class="cal-modal-overlay" id="calDepositModal">
-    <div class="cal-modal-box">
-      <div class="cal-modal-header">
-        <span>📥 Deposit Funds & Proof of Reserves</span>
-        <button class="cal-modal-close" onclick="document.getElementById('calDepositModal').style.display='none'">&times;</button>
+    <!-- ======================================================================
+         VIEW 4: STAKING & YIELD VAULTS
+         ====================================================================== -->
+    <section class="calabi-view" id="view-staking">
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size: 22px; font-weight: 800;">Staking & Yield Vaults</h2>
+        <p style="color: var(--text-muted); font-size: 13px;">Non-custodial proof-of-stake rewards and sovereign liquidity incentives.</p>
       </div>
 
-      <div class="cal-modal-body">
-        <div style="background: var(--cal-bg-input); border-left: 3px solid var(--cal-blue); padding: 12px; border-radius: var(--cal-radius-sm); font-size: 12px; color: var(--cal-text-secondary);">
-          Deposits are processed securely on-chain into the Solana Squads Multi-Sig Protocol Vault.
+      <div class="staking-vaults-grid">
+        <!-- SOL Vault -->
+        <div class="vault-card">
+          <div class="vault-header">
+            <div class="vault-asset-title">
+              <img src="https://assets.coingecko.com/coins/images/4128/small/solana.png" style="width: 28px; height: 28px; border-radius: 50%;" />
+              <span>Solana Validator</span>
+            </div>
+            <span class="vault-apy-badge">7.20% APY</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted);">
+            Native Solana validator delegation with zero lockup period and compound rewards distributed every epoch (~2 days).
+          </div>
+          <button class="btn-blue" onclick="window.calabiExchange.toast('Connect wallet with SOL balance to stake', 'info')">
+            Stake SOL
+          </button>
         </div>
 
-        <div>
-          <label style="font-size: 11px; color: var(--cal-text-secondary); display: block; margin-bottom: 6px;">
-            Official Solana Squads Multi-Sig Treasury Address:
-          </label>
-          <div style="display: flex; gap: 8px;">
-            <input type="text" class="cal-input-field" value="8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH" readonly style="background: var(--cal-bg-input); padding: 8px 10px; border: 1px solid var(--cal-border); border-radius: var(--cal-radius-sm); font-size: 11px; color: #fff;">
-            <button class="cal-btn-secondary" onclick="navigator.clipboard.writeText('8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH'); window.calabiEngine.toast('Treasury address copied!', 'success');">Copy</button>
+        <!-- ETH Vault -->
+        <div class="vault-card">
+          <div class="vault-header">
+            <div class="vault-asset-title">
+              <img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" style="width: 28px; height: 28px; border-radius: 50%;" />
+              <span>Ethereum Staking</span>
+            </div>
+            <span class="vault-apy-badge">4.80% APY</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted);">
+            Institutional Ethereum consensus staking with non-custodial smart contracts and automatic MEV boost rewards.
+          </div>
+          <button class="btn-blue" onclick="window.calabiExchange.toast('Connect wallet with ETH balance to stake', 'info')">
+            Stake ETH
+          </button>
+        </div>
+
+        <!-- USDC Vault -->
+        <div class="vault-card">
+          <div class="vault-header">
+            <div class="vault-asset-title">
+              <img src="https://assets.coingecko.com/coins/images/6319/small/usdc.png" style="width: 28px; height: 28px; border-radius: 50%;" />
+              <span>USDC High-Yield</span>
+            </div>
+            <span class="vault-apy-badge">12.00% APY</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted);">
+            Liquidity provision yield backed 100% by Cession automated market maker trade fees and zero impermanent loss.
+          </div>
+          <button class="btn-blue" onclick="window.calabiExchange.toast('Connect wallet with USDC balance to deposit', 'info')">
+            Deposit USDC
+          </button>
+        </div>
+
+        <!-- CESS Vault -->
+        <div class="vault-card">
+          <div class="vault-header">
+            <div class="vault-asset-title">
+              <img src="/images/cession-logo.png" style="width: 28px; height: 28px; border-radius: 50%;" />
+              <span>Cession Engine</span>
+            </div>
+            <span class="vault-apy-badge" style="background: rgba(30, 80, 255, 0.1); color: var(--primary); border-color: var(--primary-border);">24.50% APY</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted);">
+            Protocol governance and fee share token staking with daily auto-compounding distributions.
+          </div>
+          <button class="btn-blue" onclick="window.calabiExchange.toast('Connect wallet with CESS balance to stake', 'info')">
+            Stake CESS
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         VIEW 5: MULTI-SIG TREASURY & RESERVES
+         ====================================================================== -->
+    <section class="calabi-view" id="view-reserves">
+      <div style="max-width: 800px; margin: 0 auto; background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+          <i class="fa-solid fa-shield-halved" style="font-size: 28px; color: var(--primary);"></i>
+          <div>
+            <h2 style="font-size: 20px; font-weight: 800;">Solana Squads Multi-Sig Treasury</h2>
+            <p style="font-size: 12px; color: var(--text-muted);">Transparent, audited on-chain protocol reserves</p>
           </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; font-size: 12px; padding-top: 10px; border-top: 1px solid var(--cal-border);">
-          <span>Live Solscan Verification:</span>
-          <a href="https://solscan.io/account/8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH" target="_blank" rel="noopener noreferrer" style="color: var(--cal-blue); text-decoration: underline;">Verify On-Chain ↗</a>
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Official Solana Multi-Sig Vault Address</div>
+          <div style="font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--text-main); margin-top: 6px; word-break: break-all;">
+            8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH
+          </div>
         </div>
+
+        <a href="https://solscan.io/account/8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH" target="_blank" class="btn-blue" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+          <span>View on Solscan Explorer</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </a>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- =========================================================
-       MODAL: INSTITUTIONAL API KEYS
-  ========================================================= -->
-  <div class="cal-modal-overlay" id="calApiModal">
-    <div class="cal-modal-box">
-      <div class="cal-modal-header">
-        <span>⚡ Institutional API Management</span>
-        <button class="cal-modal-close" onclick="document.getElementById('calApiModal').style.display='none'">&times;</button>
-      </div>
+    <!-- ======================================================================
+         VIEW 6: INSTITUTIONAL API
+         ====================================================================== -->
+    <section class="calabi-view" id="view-api">
+      <div style="max-width: 800px; margin: 0 auto; background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; box-shadow: var(--shadow-sm);">
+        <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 8px;">Institutional HMAC-SHA256 API Keys</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">High-frequency REST and WebSocket API access with 10,000 requests/second rate limits.</p>
 
-      <div class="cal-modal-body">
-        <p style="font-size: 12px; color: var(--cal-text-secondary); line-height: 1.5;">
-          Connect your algorithmic trading bots and market-making infrastructure with low-latency REST and WebSocket feeds.
-        </p>
-
-        <button class="cal-btn-deposit" style="width: 100%; justify-content: center; padding: 10px;" onclick="window.calabiEngine.generateApiKey()">
-          + Generate New API Key
+        <button class="btn-blue" onclick="alert('Generated API Key: CALB-PRO-' + Math.random().toString(36).substring(2, 15).toUpperCase())">
+          <i class="fa-solid fa-key"></i> Generate New Institutional API Key
         </button>
-
-        <div id="calApiGeneratedSection" style="display: none; background: var(--cal-bg-input); padding: 14px; border-radius: var(--cal-radius-sm); border: 1px solid var(--cal-border);">
-          <div class="cal-input-group" style="margin-bottom: 10px;">
-            <label style="font-size: 10px; color: var(--cal-text-muted);">API KEY (PUBLIC):</label>
-            <input type="text" id="calApiKeyDisplay" class="cal-input-field" readonly style="font-size: 11px; color: #fff;">
-          </div>
-          <div class="cal-input-group">
-            <label style="font-size: 10px; color: var(--cal-text-muted);">API SECRET (HMAC-SHA256):</label>
-            <input type="password" id="calApiSecretDisplay" class="cal-input-field" readonly style="font-size: 11px; color: var(--cal-green);">
-          </div>
-        </div>
       </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       MODAL: MULTI-SIG TREASURY DEPOSIT
+       ========================================================================== -->
+  <div class="modal-overlay" id="modalDeposit">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Deposit to Solana Squads Treasury</h3>
+        <button class="modal-close-btn" onclick="document.getElementById('modalDeposit').classList.remove('active')">&times;</button>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted);">
+        Send SOL, USDC, or SPL tokens directly to the official Cession & Calabi Solana Multi-Sig Treasury:
+      </p>
+      <div style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-family: var(--font-mono); font-size: 12px; word-break: break-all; font-weight: 700;">
+        8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH
+      </div>
+      <button class="btn-blue" onclick="navigator.clipboard.writeText('8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH'); alert('Copied address to clipboard!')">
+        <i class="fa-solid fa-copy"></i> Copy Address
+      </button>
     </div>
   </div>
 
-  <!-- =========================================================
-       WALLET CONNECTION MODAL (Multi-Chain Phantom / Trust / EVM)
-  ========================================================= -->
-  <div class="modal-overlay-generic" id="authModal">
-    <div class="modal-box-pump" style="max-width: 440px; background: var(--cal-bg-secondary); border: 1px solid var(--cal-border); color: #fff;">
-      <div class="modal-header-row" style="border-bottom: 1px solid var(--cal-border); padding: 14px 18px;">
-        <span class="modal-title-text" style="color: #fff; font-weight: 800;">Connect Exchange Wallet</span>
-        <button class="btn-close-modal" id="btnCloseAuthModal" style="color: var(--cal-text-muted);">&times;</button>
+  <!-- ==========================================================================
+       MODAL: NON-CUSTODIAL WEB3 & VAULT AUTHENTICATION
+       ========================================================================== -->
+  <div class="modal-overlay-generic" id="walletModal">
+    <div class="modal-box-pump" style="max-width: 440px;">
+      <div class="modal-header-row">
+        <span class="modal-title-text">Connect Crypto Wallet</span>
+        <button class="btn-close-modal" id="btnCloseWalletModal" onclick="document.getElementById('walletModal').style.display = 'none';">&times;</button>
       </div>
 
-      <div style="padding: 18px; display: flex; flex-direction: column; gap: 10px;">
-        <!-- Phantom -->
-        <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between; background: rgba(171, 159, 242, 0.08); border: 1px solid rgba(171, 159, 242, 0.3);" onclick="window.walletEngine.connectPhantom()">
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;">
+        Connect your preferred non-custodial Web3 wallet to trade on the spot pro terminal, access the 0% swap engine, and stake assets.
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <!-- Phantom (Solana) -->
+        <button class="cat-pill-btn" style="padding: 12px; justify-content: space-between;" onclick="window.walletEngine.connectPhantom()">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 18px;">👻</span>
-            <div style="text-align: left;">
-              <strong style="color: #fff; display: block;">Phantom Wallet</strong>
-              <span style="font-size: 11px; color: var(--cal-text-secondary);">Solana Mainnet</span>
+            <span style="font-size: 20px;">👻</span>
+            <div>
+              <strong style="color: var(--text-main); display: block; font-size: 13px;">Phantom Wallet</strong>
+              <span style="font-size: 11px; color: var(--text-muted);">Solana Mainnet Native</span>
             </div>
           </div>
-          <span style="color: var(--cal-blue); font-weight: 700;">Connect &rarr;</span>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span id="badgePhantomDetected" style="display: none; font-size: 10px; background: rgba(5, 150, 105, 0.1); color: var(--green); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
+            <span style="color: var(--primary); font-weight: 700; font-size: 12px;">Connect &rarr;</span>
+          </div>
         </button>
 
-        <!-- Trust Wallet -->
-        <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between; background: rgba(51, 117, 255, 0.08); border: 1px solid rgba(51, 117, 255, 0.3);" onclick="window.walletEngine.connectTrustWallet()">
+        <!-- Trust Wallet (Solana & EVM) -->
+        <button class="cat-pill-btn" style="padding: 12px; justify-content: space-between;" onclick="window.walletEngine.connectTrustWallet()">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 18px;">🛡️</span>
-            <div style="text-align: left;">
-              <strong style="color: #fff; display: block;">Trust Wallet</strong>
-              <span style="font-size: 11px; color: var(--cal-text-secondary);">Solana & EVM Multi-Chain</span>
+            <span style="font-size: 20px;">🛡️</span>
+            <div>
+              <strong style="color: var(--text-main); display: block; font-size: 13px;">Trust Wallet</strong>
+              <span style="font-size: 11px; color: var(--text-muted);">Solana & Base Multi-Chain</span>
             </div>
           </div>
-          <span style="color: var(--cal-blue); font-weight: 700;">Connect &rarr;</span>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span id="badgeTrustDetected" style="display: none; font-size: 10px; background: rgba(5, 150, 105, 0.1); color: var(--green); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
+            <span style="color: var(--primary); font-weight: 700; font-size: 12px;">Connect &rarr;</span>
+          </div>
         </button>
 
-        <!-- Solflare -->
-        <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between; background: rgba(254, 185, 30, 0.08); border: 1px solid rgba(254, 185, 30, 0.3);" onclick="window.walletEngine.connectSolflare()">
+        <!-- MetaMask (Base / EVM) -->
+        <button class="cat-pill-btn" style="padding: 12px; justify-content: space-between;" onclick="window.walletEngine.connectEVM('metamask')">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 18px;">☀️</span>
-            <div style="text-align: left;">
-              <strong style="color: #fff; display: block;">Solflare</strong>
-              <span style="font-size: 11px; color: var(--cal-text-secondary);">Solana Native</span>
+            <span style="font-size: 20px;">🦊</span>
+            <div>
+              <strong style="color: var(--text-main); display: block; font-size: 13px;">MetaMask</strong>
+              <span style="font-size: 11px; color: var(--text-muted);">Base L2 & Ethereum</span>
             </div>
           </div>
-          <span style="color: var(--cal-blue); font-weight: 700;">Connect &rarr;</span>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span id="badgeMetaMaskDetected" style="display: none; font-size: 10px; background: rgba(5, 150, 105, 0.1); color: var(--green); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
+            <span style="color: var(--primary); font-weight: 700; font-size: 12px;">Connect &rarr;</span>
+          </div>
         </button>
 
-        <!-- 1-Click Instant Sovereign Vault -->
-        <button class="cal-btn-deposit" style="width: 100%; justify-content: center; padding: 12px; font-size: 13px; margin-top: 4px;" onclick="window.walletEngine.generateNewVault(true)">
-          ⚡ 1-Click Instant Non-Custodial Vault
+        <!-- Solflare (Solana) -->
+        <button class="cat-pill-btn" style="padding: 12px; justify-content: space-between;" onclick="window.walletEngine.connectSolflare()">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 20px;">☀️</span>
+            <div>
+              <strong style="color: var(--text-main); display: block; font-size: 13px;">Solflare</strong>
+              <span style="font-size: 11px; color: var(--text-muted);">Solana Mainnet</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span id="badgeSolflareDetected" style="display: none; font-size: 10px; background: rgba(5, 150, 105, 0.1); color: var(--green); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
+            <span style="color: var(--primary); font-weight: 700; font-size: 12px;">Connect &rarr;</span>
+          </div>
+        </button>
+
+        <!-- Coinbase Wallet -->
+        <button class="cat-pill-btn" style="padding: 12px; justify-content: space-between;" onclick="window.walletEngine.connectCoinbase()">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 20px;">🔵</span>
+            <div>
+              <strong style="color: var(--text-main); display: block; font-size: 13px;">Coinbase Wallet</strong>
+              <span style="font-size: 11px; color: var(--text-muted);">Base & Solana Smart Wallet</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span id="badgeCoinbaseDetected" style="display: none; font-size: 10px; background: rgba(5, 150, 105, 0.1); color: var(--green); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
+            <span style="color: var(--primary); font-weight: 700; font-size: 12px;">Connect &rarr;</span>
+          </div>
+        </button>
+
+        <!-- 1-Click Instant Vault Generation -->
+        <button class="btn-signin-mint" onclick="window.walletEngine.generateNewVault(true)">
+          ⚡ 1-Click Instant Sovereign Vault
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Toast Notification Container -->
-  <div class="cal-toast-container" id="calToastContainer"></div>
+  <!-- ==========================================================================
+       FOOTER
+       ========================================================================== -->
+  <footer class="calabi-footer">
+    <div class="footer-content">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <img src="/images/calabi-logo.png" style="height: 24px; width: auto;" />
+        <span style="font-weight: 800; color: var(--text-main);">CALABI PRO</span>
+        <span>&bull; Owned by Cession Protocol &bull; &copy; 2026 All Rights Reserved</span>
+      </div>
+
+      <div class="footer-links">
+        <a href="/terms" class="footer-link">Terms of Service</a>
+        <a href="/privacy" class="footer-link">Privacy Policy</a>
+        <a href="/transparency" class="footer-link">Transparency & Reserves</a>
+        <a href="/" class="footer-link">Cession Launchpad ↗</a>
+      </div>
+    </div>
+  </footer>
 
   <!-- Scripts -->
-  <script src="js/wallet.js"></script>
-  <script src="js/calabi.js"></script>
+  <script src="/js/wallet.js"></script>
+  <script src="/js/launchpad.js"></script>
+  <script src="/js/calabi.js"></script>
 </body>
 </html>
