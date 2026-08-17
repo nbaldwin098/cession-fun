@@ -133,8 +133,8 @@ router.post('/:symbol/chat', (req, res) => {
   res.json({ success: true, message: msg });
 });
 
-// Create/Deploy New Token (Meme Sprint OR Long-Term Sovereign Stack)
-router.post('/create', (req, res) => {
+// Create/Deploy New Token (0.1 SOL Mint Fee Standard)
+router.post(['/create', '/deploy', '/launch'], (req, res) => {
   try {
     const { 
       name, 
@@ -152,7 +152,8 @@ router.post('/create', (req, res) => {
       twitter = null,
       telegram = null,
       website = null,
-      initialBuySol = null
+      initialBuySol = null,
+      mintFeeSol = 0.1
     } = req.body;
 
     if (!name || !symbol) {
@@ -165,7 +166,7 @@ router.post('/create', (req, res) => {
       description,
       imageUrl,
       creator: creator || "0xCessionAnonDev",
-      chain: chain || "Base",
+      chain: chain || "Solana",
       devLockPercent: devLockPercent ? parseInt(devLockPercent) : 100,
       tokenType,
       isPrivate: isPrivate === true || isPrivate === 'true',
@@ -174,13 +175,15 @@ router.post('/create', (req, res) => {
       targetCapUsd: targetCapUsd ? parseFloat(targetCapUsd) : 25000,
       twitter,
       telegram,
-      website
+      website,
+      mintFeeSol: parseFloat(mintFeeSol) || 0.1
     });
 
     let initialBuyResult = null;
-    if (initialBuySol && parseFloat(initialBuySol) > 0) {
+    const initialAmount = initialBuySol ? parseFloat(initialBuySol) : 0;
+    if (initialAmount > 0) {
       try {
-        initialBuyResult = bondingCurve.buyTokens(token.symbol, parseFloat(initialBuySol), creator || "0xCessionAnonDev");
+        initialBuyResult = bondingCurve.buyTokens(token.symbol, initialAmount, creator || "0xCessionAnonDev");
       } catch (e) {
         console.warn('Initial buy execution error:', e.message);
       }
@@ -188,6 +191,7 @@ router.post('/create', (req, res) => {
 
     res.status(201).json({ 
       success: true, 
+      mintFee: 0.1,
       token: initialBuyResult ? initialBuyResult.token : token,
       initialTrade: initialBuyResult ? initialBuyResult.trade : null,
       inviteUrl: token.isPrivate ? `/coin/${token.symbol}?key=${token.inviteCode}` : `/coin/${token.symbol}`
@@ -200,14 +204,15 @@ router.post('/create', (req, res) => {
 // Buy on Bonding Curve
 router.post('/:symbol/buy', (req, res) => {
   try {
-    const { solAmount, buyerAddress } = req.body;
-    if (!solAmount || solAmount <= 0) {
-      return res.status(400).json({ success: false, error: 'Valid SOL / ETH amount is required.' });
+    const { solAmount, amount, buyerAddress, buyer } = req.body;
+    const buySol = parseFloat(solAmount || amount);
+    if (!buySol || buySol <= 0 || isNaN(buySol)) {
+      return res.status(400).json({ success: false, error: 'Valid SOL amount is required.' });
     }
     const result = bondingCurve.buyTokens(
       req.params.symbol,
-      solAmount,
-      buyerAddress || '0xCessionTrader'
+      buySol,
+      buyerAddress || buyer || '0xCessionTrader'
     );
     res.json({
       success: true,
@@ -223,18 +228,19 @@ router.post('/:symbol/buy', (req, res) => {
 // Sell on Bonding Curve (with Anti-Dump verification)
 router.post('/:symbol/sell', (req, res) => {
   try {
-    const { tokenAmount, sellerAddress } = req.body;
-    if (!tokenAmount || tokenAmount <= 0) {
+    const { tokenAmount, amount, sellerAddress, seller } = req.body;
+    const sellTokens = parseFloat(tokenAmount || amount);
+    if (!sellTokens || sellTokens <= 0 || isNaN(sellTokens)) {
       return res.status(400).json({ success: false, error: 'Valid token amount is required.' });
     }
     const result = bondingCurve.sellTokens(
       req.params.symbol,
-      tokenAmount,
-      sellerAddress || '0xCessionTrader'
+      sellTokens,
+      sellerAddress || seller || '0xCessionTrader'
     );
     res.json({
       success: true,
-      message: `Successfully sold ${tokenAmount} $${result.token.symbol} for ${result.solOut.toFixed(4)} SOL!`,
+      message: `Successfully sold ${sellTokens} $${result.token.symbol} for ${result.solOut.toFixed(4)} SOL!`,
       token: result.token,
       trade: result.trade
     });

@@ -299,30 +299,40 @@ class CessionLaunchpadManager {
     }
   }
 
+  async fetchTokens(render = true) {
+    await this.fetchBackendTokens();
+    if (render) this.filterAndRenderTokens();
+  }
+
   async fetchBackendTokens() {
     try {
       const res = await fetch('/api/tokens');
       const data = await res.json();
       if (data.tokens && data.tokens.length > 0) {
-        // Merge backend tokens with demo showcase tokens
         const backendTokens = data.tokens.map(t => ({
           name: t.name,
           symbol: t.symbol,
-          marketCapUsd: t.marketCapUsd || 58240,
-          volume24hUsd: t.volume24hUsd || 12000,
-          currentPriceSol: t.currentPriceSol || 0.000000025,
-          creatorAddress: t.creatorAddress ? t.creatorAddress.substring(0, 6) : '0x88f',
-          ageText: '5m',
+          marketCapUsd: t.marketCapUsd || 10000,
+          volume24hUsd: t.volume24hUsd || 1500,
+          currentPriceSol: t.currentPriceSol || 0.000000010,
+          currentPriceUsd: t.currentPriceUsd || (t.currentPriceSol ? t.currentPriceSol * 150 : 0.0000015),
+          creatorAddress: t.creator ? `${t.creator.substring(0, 6)}...` : (t.creatorAddress || '0x88f4b2'),
+          ageText: 'just now',
           imageUrl: t.imageUrl || 'images/cession-logo.png',
-          description: t.description || 'Sovereign fair launch on Cession.',
-          category: 'new',
-          bondingCurvePercent: t.bondingCurvePercent || 84
+          description: t.description || 'Sovereign fair launch on Cession bonding curve.',
+          category: t.category || 'new',
+          bondingCurvePercent: t.bondingCurveProgressPercent || t.curveProgressPercent || t.bondingCurvePercent || 5
         }));
 
         const existingSymbols = new Set(this.defaultTokens.map(t => t.symbol));
         backendTokens.forEach(bt => {
           if (!existingSymbols.has(bt.symbol)) {
-            this.tokens.unshift(bt);
+            const idx = this.tokens.findIndex(x => x.symbol === bt.symbol);
+            if (idx >= 0) {
+              this.tokens[idx] = { ...this.tokens[idx], ...bt };
+            } else {
+              this.tokens.unshift(bt);
+            }
           }
         });
       }
@@ -962,32 +972,78 @@ class CessionLaunchpadManager {
     const initialBuy = parseFloat(document.getElementById('deployInitialBuy')?.value) || 0;
 
     if (!name || !symbol || !desc) {
-      this.toast('Please fill out all fields', 'error');
+      this.toast('Please fill out all required fields', 'error');
       return;
     }
 
-    const newToken = {
-      name,
-      symbol,
-      marketCapUsd: 58240 + initialBuy * 1450,
-      volume24hUsd: initialBuy * 145,
-      currentPriceSol: 0.000000058,
-      creatorAddress: '0x88f4b23a',
-      ageText: 'just now',
-      imageUrl: image || 'images/cession-logo.png',
-      description: desc,
-      category: 'new',
-      bondingCurvePercent: Math.min(99, 10 + initialBuy * 5)
-    };
+    const creator = (window.walletEngine && window.walletEngine.activeAddress)
+      ? window.walletEngine.activeAddress
+      : '0x' + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
 
-    this.tokens.unshift(newToken);
-    this.filterAndRenderTokens();
+    const btnSubmit = document.querySelector('#deployCoinForm button[type="submit"]');
+    if (btnSubmit) btnSubmit.textContent = 'Minting 0.1 SOL on bonding curve...';
 
-    const modal = document.getElementById('deployModal');
-    if (modal) modal.style.display = 'none';
+    try {
+      const res = await fetch('/api/tokens/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          symbol,
+          description: desc,
+          imageUrl: image || 'images/cession-logo.png',
+          creator,
+          chain: 'Solana',
+          devLockPercent: 100,
+          tokenType: 'sprint',
+          mintFeeSol: 0.1,
+          initialBuySol: initialBuy
+        })
+      });
 
-    this.toast(`$${symbol} successfully launched on bonding curve!`, 'success');
-    this.openTokenDetail(symbol);
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to mint coin');
+      }
+
+      // Deduct mint fee + initial buy from connected wallet
+      if (window.walletEngine && window.walletEngine.balances) {
+        window.walletEngine.balances.sol = Math.max(0, (window.walletEngine.balances.sol || 6.2) - (0.1 + initialBuy));
+        window.walletEngine.renderState();
+      }
+
+      const newToken = {
+        name: data.token.name || name,
+        symbol: data.token.symbol || symbol,
+        marketCapUsd: data.token.marketCapUsd || 10000,
+        volume24hUsd: data.token.volume24hUsd || 1500,
+        currentPriceSol: data.token.currentPriceSol || 0.000000010,
+        currentPriceUsd: data.token.currentPriceUsd || 0.0000015,
+        creatorAddress: creator.substring(0, 6) + '...',
+        ageText: 'just now',
+        imageUrl: image || 'images/cession-logo.png',
+        description: desc,
+        category: 'new',
+        bondingCurvePercent: data.token.bondingCurveProgressPercent || data.token.curveProgressPercent || 5
+      };
+
+      this.tokens.unshift(newToken);
+      this.filterAndRenderTokens();
+
+      const modal = document.getElementById('deployModal');
+      if (modal) modal.style.display = 'none';
+
+      const deployForm = document.getElementById('deployCoinForm');
+      if (deployForm) deployForm.reset();
+
+      this.toast(`$${symbol} minted for 0.1 SOL! Fair bonding curve initialized.`, 'success');
+      this.openTokenDetail(symbol);
+    } catch (err) {
+      console.error('Mint error:', err);
+      this.toast(err.message || 'Error minting coin', 'error');
+    } finally {
+      if (btnSubmit) btnSubmit.textContent = 'Launch on bonding curve (0.1 SOL)';
+    }
   }
 
   toast(msg, type = 'info') {

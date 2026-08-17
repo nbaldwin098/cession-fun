@@ -116,6 +116,28 @@ class CessionWalletEngine {
   }
 
   bindEvents() {
+    // Pump.fun Top Navbar Connect Wallet button & Modal Triggers
+    const btnConnectWallet = document.getElementById('btnConnectWallet');
+    const btnCloseWalletModal = document.getElementById('btnCloseWalletModal');
+    const walletModal = document.getElementById('walletModal');
+
+    if (btnConnectWallet) {
+      btnConnectWallet.addEventListener('click', () => {
+        if (walletModal) walletModal.style.display = 'flex';
+      });
+    }
+
+    if (btnCloseWalletModal && walletModal) {
+      btnCloseWalletModal.addEventListener('click', () => {
+        walletModal.style.display = 'none';
+      });
+    }
+
+    const btnDisconnect = document.getElementById('btnDisconnectWallet');
+    if (btnDisconnect) {
+      btnDisconnect.addEventListener('click', () => this.logout());
+    }
+
     // Auth Modal triggers
     const btnOpenAuth = document.getElementById('btnOpenAuthModal');
     const btnCloseAuth = document.getElementById('btnCloseAuthModal');
@@ -185,6 +207,8 @@ class CessionWalletEngine {
   closeAuthModal() {
     const modal = document.getElementById('authModal');
     if (modal) modal.classList.remove('active');
+    const walletModal = document.getElementById('walletModal');
+    if (walletModal) walletModal.style.display = 'none';
   }
 
   switchAuthTab(tab) {
@@ -539,6 +563,11 @@ class CessionWalletEngine {
 }
 
 window.walletEngine = null;
+window.showToast = (msg, type = 'info') => {
+  if (window.launchpadManager) {
+    window.launchpadManager.toast(msg, type);
+  }
+};
 document.addEventListener('DOMContentLoaded', () => {
   window.walletEngine = new CessionWalletEngine();
 });
