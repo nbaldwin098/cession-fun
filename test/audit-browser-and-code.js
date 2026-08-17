@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 
 async function auditSite() {
   console.log('================================================================');
-  console.log('🤖 REAL-USER BROWSER AUDIT: PUMP.FUN REPLICA CESSION.FUN');
+  console.log('REAL-USER BROWSER AUDIT: PUMP.FUN REPLICA CESSION.FUN');
   console.log('Testing Every Button, Page, Form, Modal & User Flow');
   console.log('================================================================\n');
 
