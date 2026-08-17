@@ -11,7 +11,9 @@ const walletRoutes = require('./wallets');
 const marketRoutes = require('./market');
 const complianceRoutes = require('./compliance');
 const treasuryRoutes = require('./treasury');
+const authRoutes = require('./auth');
 
+router.use('/auth', authRoutes);
 router.use('/stripe', stripeRoutes);
 router.use('/tokens', tokenRoutes);
 router.use('/wallets', walletRoutes);

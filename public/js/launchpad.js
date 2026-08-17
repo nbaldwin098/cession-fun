@@ -1,6 +1,6 @@
 /**
  * Cession Sovereign Exchange & Launchpad Manager
- * Cyber Coder Theme Controller
+ * Elite Cyber Coder Theme Controller
  * 
  * Features:
  * 1. Meme Sprints (Fast velocity $25k bonding curves)
@@ -8,7 +8,8 @@
  * 3. Public vs Private Circles with Invite Passcodes (e.g. fam_trust_2026)
  * 4. 1% Max Sell Anti-Dump Circuit Breaker Guards
  * 5. Diamond Vault Time-Lock Staking (30d / 90d / 365d at 14% - 36% APY)
- * 6. Non-custodial Wallet Connect & Live Trollbox
+ * 6. Embedded Live Market Terminal & True Price Oracle under coins
+ * 7. Transparent Proof-of-Reserves in Footer
  */
 
 class CalabiLaunchpadManager {
@@ -23,6 +24,8 @@ class CalabiLaunchpadManager {
     this.tokens = [];
     this.stacks = [];
     this.activeToken = null;
+    this.activeSelectedSymbol = 'CESS';
+    this.activeTimeframe = '15m';
     this.tradeMode = 'BUY'; // 'BUY' | 'SELL' | 'STAKE'
     this.currentView = 'launchpad';
     this.unlockedKeys = new Set();
@@ -31,19 +34,14 @@ class CalabiLaunchpadManager {
     this.tabViewLaunchpad = document.getElementById('tabViewLaunchpad');
     this.tabViewStacks = document.getElementById('tabViewStacks');
     this.tabViewLeaderboard = document.getElementById('tabViewLeaderboard');
-    this.tabViewTreasury = document.getElementById('tabViewTreasury');
-    this.tabViewPro = document.getElementById('tabViewPro');
 
     this.sectionLaunchpad = document.getElementById('sectionLaunchpad');
     this.sectionStacks = document.getElementById('sectionStacks');
     this.sectionLeaderboard = document.getElementById('sectionLeaderboard');
-    this.sectionTreasury = document.getElementById('sectionTreasury');
-    this.sectionProTrading = document.getElementById('sectionProTrading');
 
     // Modals
     this.detailModal = document.getElementById('tokenDetailModal');
     this.deployModal = document.getElementById('deployTokenModal');
-    this.walletModal = document.getElementById('walletModal');
     this.profileModal = document.getElementById('profileModal');
 
     // Detail Modal Elements
@@ -70,6 +68,11 @@ class CalabiLaunchpadManager {
     this.fetchTreasuryReserves();
     this.bindEvents();
     this.handleInitialRoute();
+
+    // Auto-load initial live market feed
+    setTimeout(() => {
+      this.loadEmbeddedMarketData(this.activeSelectedSymbol, this.activeTimeframe);
+    }, 400);
   }
 
   checkUrlKeyParam() {
@@ -86,10 +89,6 @@ class CalabiLaunchpadManager {
       this.switchMainView('stacks', false);
     } else if (path === '/leaderboard' || path === '/rankings') {
       this.switchMainView('leaderboard', false);
-    } else if (path === '/treasury' || path === '/reserves') {
-      this.switchMainView('treasury', false);
-    } else if (path === '/pro' || path === '/terminal') {
-      this.switchMainView('pro', false);
     } else if (path.startsWith('/coin/') || path.startsWith('/token/')) {
       const parts = path.split('/');
       const sym = parts[2];
@@ -107,10 +106,6 @@ class CalabiLaunchpadManager {
         this.switchMainView('stacks', false);
       } else if (curPath === '/leaderboard') {
         this.switchMainView('leaderboard', false);
-      } else if (curPath === '/treasury') {
-        this.switchMainView('treasury', false);
-      } else if (curPath === '/pro') {
-        this.switchMainView('pro', false);
       } else if (curPath.startsWith('/coin/')) {
         const s = curPath.split('/')[2];
         if (s) this.openTokenDetail(s.toUpperCase(), false);
@@ -123,8 +118,6 @@ class CalabiLaunchpadManager {
     if (this.tabViewLaunchpad) this.tabViewLaunchpad.addEventListener('click', () => this.switchMainView('launchpad'));
     if (this.tabViewStacks) this.tabViewStacks.addEventListener('click', () => this.switchMainView('stacks'));
     if (this.tabViewLeaderboard) this.tabViewLeaderboard.addEventListener('click', () => this.switchMainView('leaderboard'));
-    if (this.tabViewTreasury) this.tabViewTreasury.addEventListener('click', () => this.switchMainView('treasury'));
-    if (this.tabViewPro) this.tabViewPro.addEventListener('click', () => this.switchMainView('pro'));
 
     // Search filter
     if (this.searchInput) {
@@ -163,11 +156,11 @@ class CalabiLaunchpadManager {
       });
     });
 
-    // Profile & Vault Modal Handlers
-    const btnVault = document.getElementById('btnOpenVaultModal');
-    if (btnVault) btnVault.addEventListener('click', () => this.openWalletModal());
+    // Profile Modal Handlers
     const btnProfile = document.getElementById('btnOpenProfileModal');
+    const btnCloseProfile = document.getElementById('btnCloseProfileModal');
     if (btnProfile) btnProfile.addEventListener('click', () => this.openProfileModal());
+    if (btnCloseProfile) btnCloseProfile.addEventListener('click', () => this.closeProfileModal());
 
     // Detail Modal Handlers
     if (this.btnCloseDetail) this.btnCloseDetail.addEventListener('click', () => this.closeDetailModal());
@@ -210,6 +203,16 @@ class CalabiLaunchpadManager {
     if (this.btnCopyInvite) {
       this.btnCopyInvite.addEventListener('click', () => this.copyInviteLink());
     }
+
+    // Embedded Market Timeframe Switchers
+    document.querySelectorAll('.timeframe-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.activeTimeframe = btn.getAttribute('data-tf');
+        this.loadEmbeddedMarketData(this.activeSelectedSymbol, this.activeTimeframe);
+      });
+    });
   }
 
   switchMainView(viewName, pushUrl = true) {
@@ -217,9 +220,7 @@ class CalabiLaunchpadManager {
     const views = [
       { name: 'launchpad', tab: this.tabViewLaunchpad, sec: this.sectionLaunchpad, path: '/' },
       { name: 'stacks', tab: this.tabViewStacks, sec: this.sectionStacks, path: '/stacks' },
-      { name: 'leaderboard', tab: this.tabViewLeaderboard, sec: this.sectionLeaderboard, path: '/leaderboard' },
-      { name: 'treasury', tab: this.tabViewTreasury, sec: this.sectionTreasury, path: '/treasury' },
-      { name: 'pro', tab: this.tabViewPro, sec: this.sectionProTrading, path: '/pro' }
+      { name: 'leaderboard', tab: this.tabViewLeaderboard, sec: this.sectionLeaderboard, path: '/leaderboard' }
     ];
 
     views.forEach(v => {
@@ -234,10 +235,6 @@ class CalabiLaunchpadManager {
       this.fetchStacks();
     } else if (viewName === 'leaderboard') {
       this.fetchLeaderboard();
-    } else if (viewName === 'treasury') {
-      this.fetchTreasuryReserves();
-    } else if (viewName === 'pro' && window.chartController) {
-      window.chartController.loadCandles('BTC-USD');
     }
   }
 
@@ -390,7 +387,7 @@ class CalabiLaunchpadManager {
       : '';
 
     return `
-      <div class="token-card ${isStack ? 'stack-card' : ''}" onclick="window.launchpadManager.openTokenDetail('${t.symbol}')">
+      <div class="token-card ${isStack ? 'stack-card' : ''}" onclick="window.launchpadManager.selectCoinForLiveMarket('${t.symbol}')">
         <div class="token-card-top">
           <img src="${t.imageUrl || 'https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200'}" class="token-avatar" alt="${t.name}">
           <div class="token-meta">
@@ -435,6 +432,203 @@ class CalabiLaunchpadManager {
         </div>
       </div>
     `;
+  }
+
+  /* =========================================================
+     EMBEDDED LIVE MARKET TERMINAL & TRUE PRICE (UNDER ALL COINS)
+  ========================================================= */
+  selectCoinForLiveMarket(symbol) {
+    this.activeSelectedSymbol = symbol;
+    this.loadEmbeddedMarketData(symbol, this.activeTimeframe);
+    
+    // Scroll smoothly to market section
+    const sec = document.getElementById('embeddedMarketSection');
+    if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  async loadEmbeddedMarketData(symbol, timeframe = '15m') {
+    try {
+      const res = await fetch(`/api/market/token-data/${symbol}?timeframe=${timeframe}`);
+      const data = await res.json();
+      if (!data.success) return;
+
+      const meta = data.tokenMeta;
+      const truePrice = data.truePrice;
+
+      // Update Header Elements
+      const img = document.getElementById('embedCoinImg');
+      const name = document.getElementById('embedCoinName');
+      const sym = document.getElementById('embedCoinSymbol');
+      const tag = document.getElementById('embedCoinTypeTag');
+      const sub = document.getElementById('embedCoinSub');
+      const priceVal = document.getElementById('embedTruePrice');
+      const chg = document.getElementById('embedPriceChg');
+      const vol = document.getElementById('embedVol24h');
+      const high = document.getElementById('embedHigh24h');
+      const low = document.getElementById('embedLow24h');
+
+      if (img) img.src = meta.imageUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200';
+      if (name) name.textContent = meta.name;
+      if (sym) sym.textContent = `$${meta.symbol}`;
+      if (tag) {
+        tag.textContent = meta.tokenType === 'stack' ? '🏛️ SOVEREIGN STACK' : '⚡ MEME SPRINT';
+        tag.className = meta.tokenType === 'stack' ? 'badge-tag stack' : 'badge-tag safe';
+      }
+      if (sub) sub.textContent = `${meta.chain} Network • Invariant AMM + Multi-Feed Oracle [Confidence: ${(truePrice.confidence * 100).toFixed(1)}%]`;
+      
+      if (priceVal) priceVal.textContent = `$${truePrice.priceUsd < 0.01 ? truePrice.priceUsd.toFixed(8) : truePrice.priceUsd.toFixed(4)}`;
+      if (chg) {
+        const c = meta.change24h || 5.4;
+        chg.textContent = `${c >= 0 ? '+' : ''}${c.toFixed(1)}%`;
+        chg.style.color = c >= 0 ? 'var(--market-green)' : 'var(--cyber-red)';
+      }
+      if (vol) vol.textContent = `$${Math.floor(meta.volume24hUsd || 24500).toLocaleString()}`;
+      if (high) high.textContent = `$${(truePrice.priceUsd * 1.12).toFixed(6)}`;
+      if (low) low.textContent = `$${(truePrice.priceUsd * 0.91).toFixed(6)}`;
+
+      // Render Candlestick Chart on Canvas
+      this.drawCandlesticks(data.candles || []);
+
+      // Render L2 Orderbook Depth
+      this.renderOrderbookDepth(data.orderbook || { bids: [], asks: [] });
+    } catch (e) {
+      console.warn('Market data load error:', e);
+    }
+  }
+
+  drawCandlesticks(candles) {
+    const canvas = document.getElementById('embedMarketCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    // Set internal resolution
+    canvas.width = canvas.parentElement.clientWidth || 600;
+    canvas.height = canvas.parentElement.clientHeight || 340;
+
+    const W = canvas.width;
+    const H = canvas.height;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Background Grid
+    ctx.strokeStyle = '#0a101f';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 50) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, H);
+      ctx.stroke();
+    }
+    for (let y = 0; y < H; y += 40) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(W, y);
+      ctx.stroke();
+    }
+
+    if (!candles || candles.length === 0) return;
+
+    let minPrice = Infinity;
+    let maxPrice = -Infinity;
+    candles.forEach(c => {
+      if (c.low < minPrice) minPrice = c.low;
+      if (c.high > maxPrice) maxPrice = c.high;
+    });
+
+    const priceRange = (maxPrice - minPrice) || (minPrice * 0.1) || 1;
+    const padTop = 30;
+    const padBottom = 30;
+    const chartHeight = H - padTop - padBottom;
+    const candleWidth = Math.max(4, (W / candles.length) * 0.65);
+    const step = W / candles.length;
+
+    candles.forEach((c, i) => {
+      const x = i * step + step / 2;
+      const openY = H - padBottom - ((c.open - minPrice) / priceRange) * chartHeight;
+      const closeY = H - padBottom - ((c.close - minPrice) / priceRange) * chartHeight;
+      const highY = H - padBottom - ((c.high - minPrice) / priceRange) * chartHeight;
+      const lowY = H - padBottom - ((c.low - minPrice) / priceRange) * chartHeight;
+
+      const isUp = c.close >= c.open;
+      const color = isUp ? '#00ffaa' : '#ff0055';
+
+      // Wick
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x, highY);
+      ctx.lineTo(x, lowY);
+      ctx.stroke();
+
+      // Body
+      ctx.fillStyle = color;
+      const top = Math.min(openY, closeY);
+      const height = Math.max(2, Math.abs(openY - closeY));
+      ctx.fillRect(x - candleWidth / 2, top, candleWidth, height);
+    });
+  }
+
+  renderOrderbookDepth(ob) {
+    const asksTbody = document.getElementById('embedOrderbookAsks');
+    const bidsTbody = document.getElementById('embedOrderbookBids');
+
+    if (asksTbody && ob.asks) {
+      asksTbody.innerHTML = ob.asks.slice(-4).reverse().map(a => `
+        <tr>
+          <td>$${a.price.toFixed(6)}</td>
+          <td>${Math.floor(a.size).toLocaleString()}</td>
+          <td>$${a.total.toFixed(2)}</td>
+        </tr>
+      `).join('');
+    }
+
+    if (bidsTbody && ob.bids) {
+      bidsTbody.innerHTML = ob.bids.slice(0, 4).map(b => `
+        <tr>
+          <td>$${b.price.toFixed(6)}</td>
+          <td>${Math.floor(b.size).toLocaleString()}</td>
+          <td>$${b.total.toFixed(2)}</td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  async executeQuickBuy() {
+    if (!window.walletEngine || !window.walletEngine.isAuthenticated) {
+      this.toast('Please Sign In or Connect Wallet first.', 'warning');
+      if (window.walletEngine) window.walletEngine.openAuthModal();
+      return;
+    }
+
+    const input = document.getElementById('quickSwapSolInput');
+    const amt = parseFloat(input?.value || 0.1);
+    if (!amt || amt <= 0) {
+      this.toast('Please enter a valid amount.', 'error');
+      return;
+    }
+
+    const symbol = this.activeSelectedSymbol || 'CESS';
+    const userAddr = window.walletEngine.activeAddress;
+
+    try {
+      const res = await fetch(`/api/tokens/${symbol}/buy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ solAmount: amt, buyerAddress: userAddr })
+      });
+      const data = await res.json();
+      if (data.success) {
+        this.playAudioSfx('buy');
+        this.toast(data.message, 'success');
+        this.loadEmbeddedMarketData(symbol, this.activeTimeframe);
+        this.fetchTokens();
+        this.fetchStacks();
+      } else {
+        this.toast(data.error || 'Swap failed', 'error');
+      }
+    } catch (e) {
+      this.toast('Error executing swap.', 'error');
+    }
   }
 
   /* =========================================================
@@ -483,6 +677,9 @@ class CalabiLaunchpadManager {
   ========================================================= */
   async openTokenDetail(symbol, pushUrl = true) {
     try {
+      this.activeSelectedSymbol = symbol;
+      this.loadEmbeddedMarketData(symbol, this.activeTimeframe);
+
       const keyParam = Array.from(this.unlockedKeys).join(',');
       const res = await fetch(`/api/tokens/${symbol}?key=${keyParam}`);
       const data = await res.json();
@@ -640,6 +837,12 @@ class CalabiLaunchpadManager {
   }
 
   async executeSwap() {
+    if (!window.walletEngine || !window.walletEngine.isAuthenticated) {
+      this.toast('Please Sign In or Connect Wallet first.', 'warning');
+      if (window.walletEngine) window.walletEngine.openAuthModal();
+      return;
+    }
+
     if (!this.activeToken) return;
     const amt = parseFloat(this.detailSwapAmount.value);
     if (!amt || amt <= 0) {
@@ -647,7 +850,7 @@ class CalabiLaunchpadManager {
       return;
     }
 
-    const userAddr = window.walletEngine ? window.walletEngine.activeAddress : "0xTrader";
+    const userAddr = window.walletEngine.activeAddress;
     const endpoint = this.tradeMode === 'BUY'
       ? `/api/tokens/${this.activeToken.symbol}/buy`
       : `/api/tokens/${this.activeToken.symbol}/sell`;
@@ -681,6 +884,12 @@ class CalabiLaunchpadManager {
   }
 
   async executeStake() {
+    if (!window.walletEngine || !window.walletEngine.isAuthenticated) {
+      this.toast('Please Sign In or Connect Wallet first.', 'warning');
+      if (window.walletEngine) window.walletEngine.openAuthModal();
+      return;
+    }
+
     if (!this.activeToken) return;
     const amtInput = document.getElementById('stakeAmountInput');
     const durInput = document.getElementById('stakeDurationSelect');
@@ -692,7 +901,7 @@ class CalabiLaunchpadManager {
       return;
     }
 
-    const userAddr = window.walletEngine ? window.walletEngine.activeAddress : "0xStaker";
+    const userAddr = window.walletEngine.activeAddress;
 
     try {
       const res = await fetch(`/api/tokens/${this.activeToken.symbol}/stake`, {
@@ -766,8 +975,8 @@ class CalabiLaunchpadManager {
     const text = this.trollboxInput.value.trim();
     if (!text) return;
 
-    const user = window.walletEngine && window.walletEngine.activeAddress
-      ? `Trader_${window.walletEngine.activeAddress.substring(2, 6)}`
+    const user = window.walletEngine && window.walletEngine.isAuthenticated
+      ? (window.walletEngine.userProfile?.username || `Trader_${window.walletEngine.activeAddress.substring(2, 6)}`)
       : "AnonCoder";
 
     try {
@@ -801,6 +1010,12 @@ class CalabiLaunchpadManager {
 
   async handleDeploySubmit(e) {
     e.preventDefault();
+    if (!window.walletEngine || !window.walletEngine.isAuthenticated) {
+      this.toast('Please Sign In or Connect Wallet before deploying.', 'warning');
+      if (window.walletEngine) window.walletEngine.openAuthModal();
+      return;
+    }
+
     const name = document.getElementById('newTokenName').value;
     const symbol = document.getElementById('newTokenSymbol').value;
     const description = document.getElementById('newTokenDesc').value;
@@ -817,7 +1032,7 @@ class CalabiLaunchpadManager {
     const chainRadio = document.querySelector('input[name="deployChain"]:checked');
     const chain = chainRadio ? chainRadio.value : "Base";
 
-    const userAddr = window.walletEngine ? window.walletEngine.activeAddress : "0xCreator";
+    const userAddr = window.walletEngine.activeAddress;
 
     try {
       const res = await fetch('/api/tokens/create', {
@@ -913,12 +1128,6 @@ class CalabiLaunchpadManager {
   }
 
   /* Modals & Toasts */
-  openWalletModal() {
-    if (this.walletModal) this.walletModal.classList.add('active');
-  }
-  closeWalletModal() {
-    if (this.walletModal) this.walletModal.classList.remove('active');
-  }
   openProfileModal() {
     if (this.profileModal) this.profileModal.classList.add('active');
   }

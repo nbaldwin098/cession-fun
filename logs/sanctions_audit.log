@@ -30,3 +30,11 @@
 {"timestamp":"2026-08-17T12:16:57.465Z","type":"GEOBLOCK_VIOLATION","ip":"185.10.0.1","country":"IR","region":"","reason":"OFAC_COMPREHENSIVE_SANCTIONED_JURISDICTION_IR","decision":"BLOCKED"}
 {"timestamp":"2026-08-17T12:17:07.127Z","type":"OFAC_SDN_WALLET_MATCH","address":"0x8576acc5c05d6ce88f4e49bf65bdf0c62f91353c","ip":"0.0.0.0","country":"UNKNOWN","decision":"REJECTED_AND_LOGGED"}
 {"timestamp":"2026-08-17T12:17:07.128Z","type":"GEOBLOCK_VIOLATION","ip":"185.10.0.1","country":"IR","region":"","reason":"OFAC_COMPREHENSIVE_SANCTIONED_JURISDICTION_IR","decision":"BLOCKED"}
+{"timestamp":"2026-08-17T12:43:25.188Z","type":"OFAC_SDN_WALLET_MATCH","address":"0x8576acc5c05d6ce88f4e49bf65bdf0c62f91353c","ip":"0.0.0.0","country":"UNKNOWN","decision":"REJECTED_AND_LOGGED"}
+{"timestamp":"2026-08-17T12:43:25.189Z","type":"GEOBLOCK_VIOLATION","ip":"185.10.0.1","country":"IR","region":"","reason":"OFAC_COMPREHENSIVE_SANCTIONED_JURISDICTION_IR","decision":"BLOCKED"}
+{"timestamp":"2026-08-17T12:50:55.098Z","type":"OFAC_SDN_WALLET_MATCH","address":"0x8576acc5c05d6ce88f4e49bf65bdf0c62f91353c","ip":"0.0.0.0","country":"UNKNOWN","decision":"REJECTED_AND_LOGGED"}
+{"timestamp":"2026-08-17T12:50:55.099Z","type":"GEOBLOCK_VIOLATION","ip":"185.10.0.1","country":"IR","region":"","reason":"OFAC_COMPREHENSIVE_SANCTIONED_JURISDICTION_IR","decision":"BLOCKED"}
+{"timestamp":"2026-08-17T12:52:07.979Z","type":"OFAC_SDN_WALLET_MATCH","address":"0x8576acc5c05d6ce88f4e49bf65bdf0c62f91353c","ip":"0.0.0.0","country":"UNKNOWN","decision":"REJECTED_AND_LOGGED"}
+{"timestamp":"2026-08-17T12:52:07.980Z","type":"GEOBLOCK_VIOLATION","ip":"185.10.0.1","country":"IR","region":"","reason":"OFAC_COMPREHENSIVE_SANCTIONED_JURISDICTION_IR","decision":"BLOCKED"}
+{"timestamp":"2026-08-17T12:52:21.457Z","type":"OFAC_SDN_WALLET_MATCH","address":"0x8576acc5c05d6ce88f4e49bf65bdf0c62f91353c","ip":"0.0.0.0","country":"UNKNOWN","decision":"REJECTED_AND_LOGGED"}
+{"timestamp":"2026-08-17T12:52:21.457Z","type":"GEOBLOCK_VIOLATION","ip":"185.10.0.1","country":"IR","region":"","reason":"OFAC_COMPREHENSIVE_SANCTIONED_JURISDICTION_IR","decision":"BLOCKED"}

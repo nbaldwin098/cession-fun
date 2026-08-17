@@ -257,6 +257,51 @@ async function main() {
     assert.strictEqual(threwAntiDump, true, "Selling >1% of pool must be blocked by Anti-Dump Shield");
   });
 
+  // Test 7: Multi-Feed True Price Oracle & L2 Market Data
+  console.log('\n[7] TRUE PRICE ORACLE & MARKET DATA ENGINE:');
+  const marketData = require('../services/marketData');
+  
+  await runAsyncTest('Multi-Feed Spot Price & True Price Composite Weighting', async () => {
+    const btcTrue = await marketData.calculateTruePrice('BTC-USD');
+    assert(btcTrue.priceUsd > 1000, "BTC True price must be positive and realistic");
+    assert(btcTrue.confidence >= 0.95, "Oracle confidence must be >= 95%");
+    assert(btcTrue.sources.length >= 2, "Oracle must aggregate multiple sources (Binance, CoinGecko, AMM)");
+
+    const cessTrue = await marketData.calculateTruePrice('CESS');
+    assert(cessTrue.priceUsd > 0, "CESS token true price must be computed");
+  });
+
+  runTest('Dynamic OHLCV Candlestick Multi-Timeframe Series Generation', () => {
+    ['1m', '5m', '15m', '1h', '1d'].forEach(tf => {
+      const candles = marketData.generateTokenCandles('CESS', tf, 30);
+      assert.strictEqual(candles.length, 30, `Must generate 30 candles for timeframe ${tf}`);
+      assert(candles[0].high >= candles[0].low, "Candle high must be >= low");
+      assert(candles[0].open > 0 && candles[0].close > 0, "Open/Close must be positive");
+    });
+  });
+
+  runTest('L2 Order Book Depth Generation & Spread', () => {
+    const ob = marketData.generateTokenOrderBook('CESS');
+    assert(Array.isArray(ob.bids) && ob.bids.length > 0, "Orderbook bids must be populated");
+    assert(Array.isArray(ob.asks) && ob.asks.length > 0, "Orderbook asks must be populated");
+    assert(ob.asks[0].price >= ob.bids[0].price, "Best ask must be >= best bid");
+  });
+
+  // Test 8: Non-Custodial Multi-Auth & Sovereign Session Derivation
+  console.log('\n[8] MULTI-AUTH & NON-CUSTODIAL IDENTITY:');
+  const authRoutes = require('../routes/auth');
+  
+  runTest('Deterministic Seed & Multi-Chain Vault Key Derivation', () => {
+    const seedA = authRoutes.deriveSovereignMnemonic('trader@example.com', 'SuperSecretPass123!');
+    assert.strictEqual(seedA.split(' ').length, 12, "Deterministic seed must be 12 words");
+
+    const seedB = authRoutes.deriveSovereignMnemonic('trader@example.com', 'SuperSecretPass123!');
+    assert.strictEqual(seedA, seedB, "Identical credentials must deterministically derive identical sovereign mnemonic");
+
+    const ethAddr = authRoutes.deriveAddressFromSeed(seedA, 'Base');
+    assert(ethAddr.startsWith('0x'), "EVM address must start with 0x");
+  });
+
   console.log('\n======================================================');
   console.log(`TEST RESULTS: ${passedTests} PASSED, ${failedTests} FAILED`);
   console.log('======================================================\n');
@@ -267,3 +312,4 @@ async function main() {
 }
 
 main();
+
