@@ -12,7 +12,7 @@
   <meta property="og:description" content="Meme Sprints + Sovereign Stacks for communities, friends & families. Un-ruggable bonding curves, 1% Anti-Dump shields, and Kraken-grade public reserves.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://cession.fun">
-  <meta property="og:image" content="images/calabi-logo.png">
+  <meta property="og:image" content="images/cession-logo.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="cession.fun Sovereign Exchange">
   <meta name="twitter:description" content="Elite crypto engine with Meme Sprints, Sovereign Stacks, Diamond Vaults & 100% Proof-of-Skin dev locks.">
@@ -31,9 +31,20 @@
 
   <!-- Custom Stylesheet (Black, Red & Blue Coder Theme) -->
   <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" type="image/png" href="images/calabi-logo.png">
+  <link rel="icon" type="image/png" href="images/cession-logo.png">
 </head>
 <body>
+
+  <!-- Pump.fun Live Trade Stream Marquee (Top of Page) -->
+  <div class="marquee-stream-container">
+    <div class="marquee-stream-track" id="globalTradeMarquee">
+      <div class="marquee-pill buy"><span style="color: var(--market-green);">🟢 [BUY]</span> 0x88f...1a2 bought 1.5 SOL of <strong>$CESS</strong> (Just now)</div>
+      <div class="marquee-pill buy"><span style="color: var(--market-green);">🟢 [BUY]</span> 4hJ...99a bought 2.0 SOL of <strong>$BFT</strong> (2m ago)</div>
+      <div class="marquee-pill buy"><span style="color: var(--market-green);">🟢 [BUY]</span> 0xBase...029 bought 0.8 ETH of <strong>$FAMSTACK</strong> (4m ago)</div>
+      <div class="marquee-pill sell"><span style="color: var(--cyber-red);">🔴 [SELL]</span> 7zK...33b sold 0.2 SOL of <strong>$SOLMEME</strong> (7m ago)</div>
+      <div class="marquee-pill buy"><span style="color: var(--market-green);">🟢 [BUY]</span> 0x91a...c01 bought 3.5 SOL of <strong>$CESS</strong> (8m ago)</div>
+    </div>
+  </div>
 
   <!-- Live Coder Ticker Ribbon with True Price Feeds -->
   <header class="ticker-ribbon">
@@ -60,9 +71,13 @@
         </div>
       </div>
 
-      <!-- Navigation Tabs (Pro & Reserves removed from Header) -->
+      <!-- Navigation Tabs -->
       <div class="nav-links-menu">
+        <button class="nav-tab-link" id="btnOpenHowItWorks" style="color: var(--cyber-blue); font-weight: 800;">
+          <span>[?]</span> how it works
+        </button>
         <button class="nav-tab-link active" id="tabViewLaunchpad">⚡ Meme Sprints</button>
+        <button class="nav-tab-link" id="tabViewCollections">🧺 Baskets & Playlists</button>
         <button class="nav-tab-link" id="tabViewStacks">🏛️ Sovereign Stacks</button>
         <button class="nav-tab-link" id="tabViewLeaderboard">🏆 Leaderboard</button>
       </div>
@@ -78,7 +93,7 @@
       </select>
 
       <button class="btn btn-launch" id="btnOpenDeployModal">
-        + Launch Coin / Stack
+        🚀 start a new coin
       </button>
 
       <!-- Auth State Control (Shows Sign In / Connect when unauthenticated) -->
@@ -155,22 +170,61 @@
         </div>
       </section>
 
-      <!-- Discovery Feed Controls -->
-      <div class="feed-controls">
-        <div class="search-box">
-          <span style="color: var(--cyber-blue); font-family: var(--font-mono); font-size: 11px;">[QUERY]</span>
-          <input type="text" id="tokenSearchInput" placeholder="Search by coin name, ticker ($), or dev address...">
+      <!-- Pump.fun Sorting & Filter Matrix Toolbar -->
+      <div class="sort-matrix-bar" id="sortMatrixBar">
+        <div class="sort-pills-group">
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-right: 4px;">SORT:</span>
+          <button class="sort-pill-btn active" data-sort="bump">⚡ bump order</button>
+          <button class="sort-pill-btn" data-sort="creation">✨ creation time</button>
+          <button class="sort-pill-btn" data-sort="replies">💬 last reply</button>
+          <button class="sort-pill-btn" data-sort="market_cap">💎 market cap</button>
+          <button class="sort-pill-btn" data-sort="progress">🚀 graduation progress</button>
         </div>
-        <div class="filter-buttons">
-          <button class="filter-btn active" data-filter="trending">🔥 Trending</button>
-          <button class="filter-btn" data-filter="progress">🚀 Near Graduation (>60%)</button>
-          <button class="filter-btn" data-filter="market_cap">💎 Market Cap</button>
-          <button class="filter-btn" data-filter="newest">✨ New Sprints</button>
+
+        <div class="matrix-toggles-group">
+          <label class="matrix-toggle-label">
+            <input type="checkbox" id="toggleShowGraduated" checked>
+            <span>include graduated</span>
+          </label>
+          <label class="matrix-toggle-label">
+            <input type="checkbox" id="toggleLiveAnimations" checked>
+            <span>live animations</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="feed-controls" style="margin-bottom: 16px;">
+        <div class="search-box" style="width: 100%;">
+          <span style="color: var(--cyber-blue); font-family: var(--font-mono); font-size: 11px;">[SEARCH]</span>
+          <input type="text" id="tokenSearchInput" placeholder="Search by token name, ticker ($), or dev address...">
         </div>
       </div>
 
       <!-- Token Grid -->
       <div class="token-grid" id="tokenGrid">
+        <!-- Rendered dynamically by launchpad.js -->
+      </div>
+    </div>
+
+    <!-- =========================================================
+         VIEW 1.5: TOKEN BASKETS & CURATED COLLECTIONS (PLAYLISTS)
+    ========================================================= -->
+    <div id="sectionCollections" style="display: none;">
+      <div class="section-header-bar">
+        <div>
+          <h2 class="section-title">🧺 Curated Baskets & Token Playlists</h2>
+          <p class="section-subtitle">
+            Curate bundles of coins and share with friends, family, or communities. <strong>1-Click "Buy Basket"</strong> routes capital simultaneously across bonding curves with instant proportional execution.
+          </p>
+        </div>
+        <button class="btn btn-launch" id="btnOpenCreateBasketModal">
+          + Create New Basket
+        </button>
+      </div>
+
+      <!-- Baskets Grid -->
+      <div class="collections-grid" id="collectionsGrid">
         <!-- Rendered dynamically by launchpad.js -->
       </div>
     </div>
@@ -526,12 +580,21 @@
           <div class="detail-token-header">
             <img id="detailTokenImgBig" src="" class="detail-token-avatar" alt="Avatar">
             <div style="flex: 1;">
-              <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px;">
+              <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px; flex-wrap: wrap;">
                 <span class="chain-badge-sm" id="detailTokenChain">🔵 Base L2</span>
                 <span class="badge-tag safe" id="detailDevLockBadge">🛡️ 100% DEV LOCKED</span>
                 <span class="badge-tag" id="detailAntiDumpBadge" style="background: var(--cyber-red-subtle); color: var(--cyber-red); display: none;">🛡️ 1% ANTI-DUMP SHIELD</span>
+                <span class="badge-tag" id="detailRepliesBadge" style="background: #091224; color: var(--text-secondary); border: 1px solid var(--border-color);">💬 0 replies</span>
               </div>
               <p id="detailTokenDesc" style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; margin-top: 6px;"></p>
+              
+              <!-- Social Links Row -->
+              <div class="social-links-row" id="detailSocialLinksRow">
+                <a href="#" target="_blank" id="detailTwitterLink" class="social-link-btn" style="display: none;">𝕏 Twitter</a>
+                <a href="#" target="_blank" id="detailTelegramLink" class="social-link-btn" style="display: none;">✈ Telegram</a>
+                <a href="#" target="_blank" id="detailWebsiteLink" class="social-link-btn" style="display: none;">🌐 Website</a>
+              </div>
+
               <div id="detailPrivateBanner" style="display: none; margin-top: 8px; background: #14050a; border: 1px solid var(--border-red); border-radius: 4px; padding: 6px 10px; font-family: var(--font-mono); font-size: 11px; color: var(--cyber-red);">
                 🔒 PRIVATE CIRCLE • Passcode Protected • <button class="btn-copy" id="btnCopyInviteLink" style="margin-left: 6px;">Copy Invite Link</button>
               </div>
@@ -572,17 +635,50 @@
             <div class="curve-bar-track" style="height: 8px;">
               <div class="curve-bar-fill" id="detailCurveBar" style="width: 72%;"></div>
             </div>
+            <div style="font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 6px; display: flex; justify-content: space-between;">
+              <span>When market cap hits $25k, $8,000 of liquidity is seeded to Raydium/Uniswap & LP burned.</span>
+              <span id="detailSolRemaining">~2.1 SOL needed</span>
+            </div>
           </div>
 
-          <!-- Live Trollbox -->
+          <!-- Top 10 Holders Distribution Table -->
+          <div class="holders-section" id="tokenHoldersSection">
+            <div style="font-size: 11px; font-weight: 800; font-family: var(--font-mono); color: var(--cyber-blue); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+              <span>📊 TOP 10 TOKEN HOLDERS & BUBBLE MAP</span>
+              <span style="color: var(--text-muted); font-size: 10px;">1,000,000,000 Total Supply</span>
+            </div>
+            <table class="holders-table">
+              <thead>
+                <tr>
+                  <th style="width: 30px;">#</th>
+                  <th>HOLDER</th>
+                  <th>PERCENTAGE</th>
+                  <th>BALANCE</th>
+                </tr>
+              </thead>
+              <tbody id="tokenHoldersTableBody">
+                <!-- Populated dynamically by launchpad.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Live Trollbox Discussion Forum with Meme Attachments -->
           <div class="trollbox-container">
             <div style="padding: 8px 12px; font-size: 11px; font-weight: 800; font-family: var(--font-mono); color: var(--text-muted); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-              <span>💬 TERMINAL CHAT (TROLLBOX)</span>
+              <span>💬 THREAD DISCUSSIONS & TROLLBOX</span>
               <span class="live-dot"></span>
             </div>
             <div class="trollbox-messages" id="trollboxFeed"></div>
+            
+            <!-- Attachment preview container -->
+            <div id="trollboxAttachmentPreview" style="display: none;" class="trollbox-attachment-preview">
+              <span>🖼️ Image Attached: <span id="trollboxAttachmentUrlText"></span></span>
+              <button class="btn-close" style="font-size: 12px; margin-left: auto;" onclick="window.launchpadManager.clearChatAttachment()">&times;</button>
+            </div>
+
             <div class="trollbox-input-row">
-              <input type="text" id="trollboxInput" class="trollbox-input" placeholder="Transmit message to terminal...">
+              <button class="btn btn-secondary btn-sm" id="btnAttachMeme" title="Attach Meme Image URL" style="padding: 6px 10px;">🖼️</button>
+              <input type="text" id="trollboxInput" class="trollbox-input" placeholder="Transmit thought or meme to coin thread...">
               <button class="btn btn-blue btn-sm" id="btnSendTrollbox">Send</button>
             </div>
           </div>
@@ -611,6 +707,7 @@
               <button class="btn btn-secondary btn-sm preset-btn" data-amt="0.5">+0.5</button>
               <button class="btn btn-secondary btn-sm preset-btn" data-amt="1.0">+1.0</button>
               <button class="btn btn-secondary btn-sm preset-btn" data-amt="5.0">+5.0</button>
+              <button class="btn btn-secondary btn-sm preset-btn" data-amt="max">Max</button>
             </div>
 
             <div id="detailSwapEstimate" style="background: #020408; border: 1px solid var(--border-color); border-radius: var(--radius-xs); padding: 10px; font-family: var(--font-mono); font-size: 11px; margin-bottom: 10px;">
@@ -668,6 +765,124 @@
   </div>
 
   <!-- =========================================================
+       MODAL: [HOW IT WORKS] PUMP.FUN ARCHITECTURE EXPLAINED
+  ========================================================= -->
+  <div class="modal-overlay" id="howItWorksModal">
+    <div class="modal-window" style="max-width: 640px;">
+      <div class="modal-header">
+        <div class="modal-title" style="color: var(--cyber-blue);">
+          <span>[?] How cession.fun Works</span>
+        </div>
+        <button class="btn-close" id="btnCloseHowItWorksModal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+          cession.fun guarantees that every coin is a <strong>fair-launch with 0 presale, 0 team tokens, and 0 initial liquidity needed</strong>.
+        </p>
+
+        <div class="how-it-works-grid">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-title">Deploy in 1-Click</div>
+            <div class="step-desc">Pick a coin name, ticker, and image. Deploy instantly onto Solana or Base with 0 creation fee.</div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-title">Trade Bonding Curve</div>
+            <div class="step-desc">Buy & sell on the constant product bonding curve. As buyers enter, the price increases along the curve.</div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-title">Graduation ($25k Cap)</div>
+            <div class="step-desc">When the bonding curve reaches 100% ($25,000 cap / ~8.0 SOL), $8,000 of liquidity is auto-deposited to Raydium/Uniswap.</div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">4</div>
+            <div class="step-title">LP Burn & Moat</div>
+            <div class="step-desc">All LP tokens are burned forever to <code>0xdead</code>. The coin is now permanently liquid and rug-proof.</div>
+          </div>
+        </div>
+
+        <div style="background: #030610; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; font-family: var(--font-mono); font-size: 11px; margin-top: 10px;">
+          <div style="color: var(--market-green); font-weight: 800; margin-bottom: 4px;">🛡️ 0.50% Zero-Rent Swap Distribution:</div>
+          <div style="color: var(--text-secondary); line-height: 1.5;">
+            • <strong>0.25%</strong> routed to Platform Liquidity & True Price Oracle Defense.<br>
+            • <strong>0.25%</strong> routed to automated Protocol Token Burn to permanently compress supply.
+          </div>
+        </div>
+
+        <button class="btn btn-launch" style="width: 100%; margin-top: 16px; padding: 12px;" onclick="window.launchpadManager.closeHowItWorksModal(); window.launchpadManager.openDeployModal();">
+          🚀 Ready to Launch a Coin
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL: CREATE CURATED TOKEN BASKET / PLAYLIST
+  ========================================================= -->
+  <div class="modal-overlay" id="createBasketModal">
+    <div class="modal-window" style="max-width: 540px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>🧺 Create Curated Token Basket (Playlist)</span>
+        </div>
+        <button class="btn-close" id="btnCloseCreateBasketModal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+          Curate a basket of high-conviction coins. Share your basket link with friends, family, or your community so they can buy all coins with 1 single transaction.
+        </p>
+
+        <form id="createBasketForm">
+          <div class="form-group">
+            <label class="form-label">Basket Title</label>
+            <input type="text" id="newBasketName" class="form-input" placeholder="e.g. Baldwin Family Bluechips" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description / Investment Rationale</label>
+            <textarea id="newBasketDesc" class="form-textarea" rows="2" placeholder="Explain why this basket is curated for long-term growth..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Cover Image URL</label>
+            <input type="url" id="newBasketImage" class="form-input" value="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Token Allocations (Ticker & Weight %)</label>
+            <div id="basketTokensSelector" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Dynamic token weight selector rows -->
+              <div class="basket-input-row" style="display: flex; gap: 8px;">
+                <input type="text" class="form-input basket-token-symbol" value="CESS" placeholder="Symbol (e.g. CESS)" style="flex: 2; text-transform: uppercase;">
+                <input type="number" class="form-input basket-token-weight" value="50" placeholder="Weight %" style="flex: 1;" min="1" max="100">
+              </div>
+              <div class="basket-input-row" style="display: flex; gap: 8px;">
+                <input type="text" class="form-input basket-token-symbol" value="BFT" placeholder="Symbol (e.g. BFT)" style="flex: 2; text-transform: uppercase;">
+                <input type="number" class="form-input basket-token-weight" value="30" placeholder="Weight %" style="flex: 1;" min="1" max="100">
+              </div>
+              <div class="basket-input-row" style="display: flex; gap: 8px;">
+                <input type="text" class="form-input basket-token-symbol" value="FAMSTACK" placeholder="Symbol (e.g. FAMSTACK)" style="flex: 2; text-transform: uppercase;">
+                <input type="number" class="form-input basket-token-weight" value="20" placeholder="Weight %" style="flex: 1;" min="1" max="100">
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-launch" style="width: 100%; margin-top: 10px; padding: 12px;">
+            Publish Basket & Generate Shareable Link
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
        MODAL 3: LAUNCH NEW COIN OR SOVEREIGN STACK
   ========================================================= -->
   <div class="modal-overlay" id="deployTokenModal">
@@ -700,34 +915,6 @@
                 </div>
               </label>
             </div>
-          </div>
-
-          <!-- Privacy Selector -->
-          <div class="form-group">
-            <label class="form-label">DISCOVERY & ACCESS CONTROL</label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-              <label style="background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                <input type="radio" name="privacySelect" value="public" checked>
-                <div>
-                  <div style="font-size: 12px; font-weight: 800; font-family: var(--font-mono); color: #fff;">🌐 Public Feed</div>
-                  <div style="font-size: 10px; color: var(--text-muted);">Visible to global traders</div>
-                </div>
-              </label>
-              <label style="background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                <input type="radio" name="privacySelect" value="private">
-                <div>
-                  <div style="font-size: 12px; font-weight: 800; font-family: var(--font-mono); color: var(--cyber-red);">🔒 Private Circle</div>
-                  <div style="font-size: 10px; color: var(--text-muted);">Passcode protected</div>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <!-- Private Circle Passcode Input (Visible when Private is selected) -->
-          <div class="form-group" id="privateCodeGroup" style="display: none;">
-            <label class="form-label" style="color: var(--cyber-red);">CUSTOM INVITE PASSCODE (FOR FRIENDS & FAMILY)</label>
-            <input type="text" id="newInviteCode" class="form-input" placeholder="e.g. fam_trust_2026 or dev_syndicate">
-            <span style="font-size: 10px; color: var(--text-muted);">Only individuals with this code or your private share link will be able to discover and trade.</span>
           </div>
 
           <div class="form-group">
@@ -763,6 +950,25 @@
           <div class="form-group">
             <label class="form-label">Image URL (Logo / Banner)</label>
             <input type="url" id="newTokenImage" class="form-input" value="https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200">
+          </div>
+
+          <!-- Social Links (Optional) -->
+          <div class="form-group">
+            <label class="form-label">Social Links (Optional)</label>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <input type="url" id="newTokenTwitter" class="form-input" placeholder="Twitter / X profile URL...">
+              <input type="url" id="newTokenTelegram" class="form-input" placeholder="Telegram group / channel URL...">
+              <input type="url" id="newTokenWebsite" class="form-input" placeholder="Website URL...">
+            </div>
+          </div>
+
+          <!-- Initial Buy / Snipe (Optional) -->
+          <div class="form-group">
+            <label class="form-label">
+              <span>Initial Buy Amount (Optional)</span>
+              <span style="color: var(--cyber-blue);">Snipe on Launch</span>
+            </label>
+            <input type="number" id="newInitialBuySol" class="form-input" placeholder="0.0 SOL / ETH" step="any">
           </div>
 
           <div class="form-group">

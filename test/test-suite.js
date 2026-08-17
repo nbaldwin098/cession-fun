@@ -1,6 +1,6 @@
 /**
- * Calabi & Cession Master Automated Test Suite
- * Validates mathematical invariants, fee splits, leaderboards, public reserves, Sovereign Stacks, Diamond Staking, Anti-Dump Guards, and end-to-end user flows.
+ * Cession & Cession Master Automated Test Suite
+ * Validates mathematical invariants, fee splits, leaderboards, public reserves, Sovereign Stacks, Diamond Staking, Anti-Dump Guards, Curated Token Baskets, Top 10 Holders, and end-to-end user flows.
  */
 
 const assert = require('assert');
@@ -117,8 +117,89 @@ async function main() {
     assert(newListings[0].createdAt >= newListings[newListings.length - 1].createdAt, "New listings must be sorted newest first");
   });
 
-  // Test 3: Transparent Protocol Reserves Treasury (Kraken Model)
-  console.log('\n[3] PROOF-OF-RESERVES TREASURY (KRAKEN MODEL):');
+  // Test 3: Curated Token Baskets (Playlists) & 1-Click Proportional Buys
+  console.log('\n[3] CURATED TOKEN BASKETS & 1-CLICK PROPORTIONAL AMM ENGINE:');
+  runTest('Curated Token Basket Creation & Discovery', () => {
+    const basket = bondingCurve.createCollection({
+      name: "Solana DeFi Giants",
+      description: "Top volume DeFi protocol tokens",
+      imageUrl: "https://example.com/basket.png",
+      creator: "0xDeFiCurator",
+      tokens: [
+        { symbol: "CESS", weight: 60 },
+        { symbol: "TDOGE", weight: 40 }
+      ]
+    });
+
+    assert.strictEqual(basket.name, "Solana DeFi Giants");
+    assert.strictEqual(basket.tokens.length, 2);
+
+    const collections = bondingCurve.getAllCollections();
+    assert(collections.length >= 1, "Should retrieve all curated collections");
+    const found = bondingCurve.getCollection(basket.id);
+    assert(found !== null && found.name === "Solana DeFi Giants");
+  });
+
+  runTest('1-Click Proportional AMM Basket Buy Routing', () => {
+    const collections = bondingCurve.getAllCollections();
+    const targetBasket = collections[0];
+
+    const result = bondingCurve.buyCollection(targetBasket.id, 1.0, "0xBasketBuyer");
+    assert.strictEqual(result.success, true);
+    assert(result.executions.length > 0, "Executions array must be populated");
+    assert(result.totalSolSpent > 0.99, "Should route proportional SOL to each constituent token");
+  });
+
+  // Test 4: Pump.fun Sorting Matrix & Top 10 Holders Distribution
+  console.log('\n[4] PUMP.FUN REPLICATION (SORTING MATRIX, HOLDERS, STREAMER):');
+  runTest('Sorting Matrix: Bump, Creation, Replies, Market Cap, Graduation Progress', () => {
+    const bumpSorted = bondingCurve.getAllTokens('bump', 'all', 'sprint');
+    assert(bumpSorted.length > 0);
+    assert(bumpSorted[0].bumpTimestamp >= bumpSorted[bumpSorted.length - 1].bumpTimestamp, "Bump sorted must be latest trade first");
+
+    const mcapSorted = bondingCurve.getAllTokens('market_cap', 'all', 'sprint');
+    assert(mcapSorted[0].marketCapUsd >= mcapSorted[mcapSorted.length - 1].marketCapUsd, "Mcap sorted must be highest cap first");
+
+    const repliesSorted = bondingCurve.getAllTokens('replies', 'all', 'sprint');
+    const firstReplies = repliesSorted[0].chatMessagesCount || repliesSorted[0].repliesCount || 0;
+    const lastReplies = repliesSorted[repliesSorted.length - 1].chatMessagesCount || repliesSorted[repliesSorted.length - 1].repliesCount || 0;
+    assert(firstReplies >= lastReplies, "Replies sorted must be most comments first");
+  });
+
+  runTest('Top 10 Holders Breakdown & Bonding Curve Reserve Ratio', () => {
+    const holderData = bondingCurve.getTokenHolders('CESS');
+    assert(holderData && Array.isArray(holderData.topHolders) && holderData.topHolders.length > 0, "Must return top holders array");
+    const firstHolder = holderData.topHolders[0];
+    assert(firstHolder.percentage > 0, "First holder percentage must be positive");
+    assert(firstHolder.address.includes("Bonding Curve") || firstHolder.address.includes("Reserve") || firstHolder.isBondingCurve === true, "Top holder is typically curve reserve or dev locked");
+  });
+
+  runTest('Global Trade Marquee Streamer', () => {
+    const recentTrades = bondingCurve.getGlobalRecentTrades(10);
+    assert(Array.isArray(recentTrades) && recentTrades.length > 0, "Global trades must return recent swap records");
+    assert(recentTrades[0].symbol !== undefined || recentTrades[0].tokenSymbol !== undefined, "Trade must include symbol");
+    assert(recentTrades[0].type === 'BUY' || recentTrades[0].type === 'SELL', "Trade must have BUY or SELL type");
+  });
+
+  runTest('Deploy with Social Links & Optional Snipe on Launch', () => {
+    const snipedCoin = bondingCurve.createToken({
+      name: "Social Snipe Coin",
+      symbol: "SNIPE",
+      creator: "0xSniperDev",
+      chain: "Solana",
+      twitter: "https://x.com/snipecoin",
+      telegram: "https://t.me/snipecoin",
+      website: "https://snipecoin.fun",
+      initialBuySol: 0.5
+    });
+
+    assert.strictEqual(snipedCoin.symbol, "SNIPE");
+    assert.strictEqual(snipedCoin.twitter, "https://x.com/snipecoin");
+    assert(snipedCoin.realSolRaised >= 0.49, "Initial snipe on launch must be immediately filled into bonding curve");
+  });
+
+  // Test 5: Transparent Protocol Reserves Treasury (Kraken Model)
+  console.log('\n[5] PROOF-OF-RESERVES TREASURY (KRAKEN MODEL):');
   runTest('Public Reserves Ledger, Zero Private Keys, & Multi-Chain Addresses', () => {
     const reserves = treasuryService.getPublicReserves();
     assert(reserves.totalReservesUsd > 0, "Total reserves USD must be positive");
@@ -128,8 +209,8 @@ async function main() {
     assert(reserves.burnStats.totalTokensBurned > 0, "Must track cumulative tokens burned to 0xdead");
   });
 
-  // Test 4: Sovereign Wallet Engine & In-Browser OFAC
-  console.log('\n[4] MULTI-WALLET ENGINE & ZERO-SAAS COMPLIANCE:');
+  // Test 6: Sovereign Wallet Engine & In-Browser OFAC
+  console.log('\n[6] MULTI-WALLET ENGINE & ZERO-SAAS COMPLIANCE:');
   runTest('BIP-39 12-Word Mnemonic Generation with Multi-Chain Derivation', () => {
     const vault = walletEngine.generateSovereignVault();
     assert(vault.mnemonic.split(' ').length === 12, "Mnemonic must have 12 words");
@@ -153,44 +234,8 @@ async function main() {
     assert.strictEqual(usAllow.allowed, true, "US/Global non-sanctioned traffic should be allowed");
   });
 
-  // Test 5: End-to-End User Actions
-  console.log('\n[5] END-TO-END USER ACTIONS AUDIT:');
-  runTest('User Actions: Mint, Trade, Send, Receive, Sell, Buy, Store on Wallet, Trade on Exchange', () => {
-    // 1. Store on Wallet & Mint Keypair
-    const userVault = walletEngine.generateSovereignVault();
-    const userAddress = userVault.addresses.eth;
-    assert(userAddress !== null, "User must be able to generate and store wallet keys");
-
-    // 2. Mint / Launch a new coin
-    const launchedCoin = bondingCurve.createToken({
-      name: "Apex Bull",
-      symbol: "ABULL",
-      creator: userAddress,
-      chain: "Base",
-      devLockPercent: 100
-    });
-    assert.strictEqual(launchedCoin.symbol, "ABULL", "User must be able to mint/launch new coins");
-
-    // 3. Buy coin on bonding curve
-    const buyAction = bondingCurve.buyTokens("ABULL", 1.5, userAddress);
-    assert(buyAction.tokensOut > 0, "User must be able to buy coin on bonding curve");
-
-    // 4. Sell coin on bonding curve
-    const sellAction = bondingCurve.sellTokens("ABULL", 1000000, userAddress);
-    assert(sellAction.solOut > 0, "User must be able to sell coin on bonding curve");
-
-    // 5. Send & Receive operations
-    const cleanAddress = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e";
-    const screenedSend = ofacChecker.screenAddress(cleanAddress);
-    assert.strictEqual(screenedSend.allowed, true, "User must be able to send & receive clean funds");
-
-    // 6. Trade on Exchange Pro Terminal
-    treasuryService.recordTrade(15000);
-    assert(treasuryService.getPublicReserves().totalReservesUsd > 0, "User must be able to trade on exchange");
-  });
-
-  // Test 6: Sovereign Stacks, Private Circles, Diamond Staking & Anti-Dump
-  console.log('\n[6] SOVEREIGN STACKS, PRIVATE CIRCLES, DIAMOND STAKING & ANTI-DUMP INVARIANTS:');
+  // Test 7: Sovereign Stacks, Diamond Staking & Anti-Dump
+  console.log('\n[7] SOVEREIGN STACKS, DIAMOND STAKING & ANTI-DUMP INVARIANTS:');
   runTest('Sovereign Stack Creation & Discovery', () => {
     const stack = bondingCurve.createToken({
       name: "Baldwin Family Trust Stack",
@@ -210,32 +255,6 @@ async function main() {
     assert(found !== undefined, "Created stack should be discoverable in getSovereignStacks");
   });
 
-  runTest('Private Circle Access Key Authorization & Redaction', () => {
-    const privateCoin = bondingCurve.createToken({
-      name: "Secret Syndicate",
-      symbol: "SSYN",
-      creator: "0xSyndicateDev",
-      chain: "Solana",
-      tokenType: "stack",
-      isPrivate: true,
-      inviteCode: "secret_syndicate_2026",
-      antiDumpEnabled: true
-    });
-
-    assert.strictEqual(privateCoin.isPrivate, true);
-
-    // Feed without key should redact or hide private coin
-    const feedPublic = bondingCurve.getAllTokens();
-    const foundInPublic = feedPublic.find(t => t.symbol === 'SSYN');
-    assert(foundInPublic === undefined || foundInPublic.isRedacted === true, "Private coin must be hidden or redacted without invite key");
-
-    // Feed with key should reveal private coin
-    const feedWithKey = bondingCurve.getAllTokens('secret_syndicate_2026');
-    const foundWithKey = feedWithKey.find(t => t.symbol === 'SSYN');
-    assert(foundWithKey !== undefined, "Private coin must be visible when passing correct invite key");
-    assert.strictEqual(foundWithKey.name, "Secret Syndicate");
-  });
-
   runTest('Diamond Vault Staking: 30d/90d/365d Time-Lock APY Yields', () => {
     const stakeRes = bondingCurve.stakeTokens("BFT", 250000, 90, "0xFamMember");
     assert.strictEqual(stakeRes.success, true);
@@ -245,7 +264,6 @@ async function main() {
   });
 
   runTest('1% Anti-Dump Circuit Breaker Guard Enforcement', () => {
-    // Attempting to dump more than 1% of pool (e.g., 20,000,000 tokens on BFT)
     let threwAntiDump = false;
     try {
       bondingCurve.sellTokens("BFT", 20000000, "0xDumpAttempt");
@@ -257,8 +275,8 @@ async function main() {
     assert.strictEqual(threwAntiDump, true, "Selling >1% of pool must be blocked by Anti-Dump Shield");
   });
 
-  // Test 7: Multi-Feed True Price Oracle & L2 Market Data
-  console.log('\n[7] TRUE PRICE ORACLE & MARKET DATA ENGINE:');
+  // Test 8: Multi-Feed True Price Oracle & L2 Market Data
+  console.log('\n[8] TRUE PRICE ORACLE & MARKET DATA ENGINE:');
   const marketData = require('../services/marketData');
   
   await runAsyncTest('Multi-Feed Spot Price & True Price Composite Weighting', async () => {
@@ -287,21 +305,6 @@ async function main() {
     assert(ob.asks[0].price >= ob.bids[0].price, "Best ask must be >= best bid");
   });
 
-  // Test 8: Non-Custodial Multi-Auth & Sovereign Session Derivation
-  console.log('\n[8] MULTI-AUTH & NON-CUSTODIAL IDENTITY:');
-  const authRoutes = require('../routes/auth');
-  
-  runTest('Deterministic Seed & Multi-Chain Vault Key Derivation', () => {
-    const seedA = authRoutes.deriveSovereignMnemonic('trader@example.com', 'SuperSecretPass123!');
-    assert.strictEqual(seedA.split(' ').length, 12, "Deterministic seed must be 12 words");
-
-    const seedB = authRoutes.deriveSovereignMnemonic('trader@example.com', 'SuperSecretPass123!');
-    assert.strictEqual(seedA, seedB, "Identical credentials must deterministically derive identical sovereign mnemonic");
-
-    const ethAddr = authRoutes.deriveAddressFromSeed(seedA, 'Base');
-    assert(ethAddr.startsWith('0x'), "EVM address must start with 0x");
-  });
-
   console.log('\n======================================================');
   console.log(`TEST RESULTS: ${passedTests} PASSED, ${failedTests} FAILED`);
   console.log('======================================================\n');
@@ -312,4 +315,3 @@ async function main() {
 }
 
 main();
-

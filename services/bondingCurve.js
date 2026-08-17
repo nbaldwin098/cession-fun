@@ -1,6 +1,6 @@
 /**
- * Calabi Sovereign Bonding Curve & Proof-of-Skin Automated Market Maker Engine
- * Dual Architecture:
+ * Cession Sovereign Bonding Curve & Proof-of-Skin Automated Market Maker Engine
+ * Dual-Chain (Base L2 + Solana) non-custodial issuance with continuous liquidity.
  * 1. ⚡ Meme Sprint: High-velocity fair launch with $25,000 sprint cap & automated DEX burn.
  * 2. 🏛️ Sovereign Stack: Grassroots long-term community assets with Diamond Vault staking,
  *    Public vs. Private Circle passcodes, and 1% Anti-Dump Protection.
@@ -15,6 +15,7 @@ class BondingCurveEngine {
     this.tokens = new Map();
     this.traders = new Map();
     this.chatMessages = new Map();
+    this.collections = new Map();
     this.totalProtocolBurnedUsd = 42890.50;
     this.loadStateFromDisk();
   }
@@ -27,6 +28,9 @@ class BondingCurveEngine {
         if (parsed.tokens && Array.isArray(parsed.tokens)) {
           parsed.tokens.forEach(t => this.tokens.set(t.symbol, t));
         }
+        if (parsed.collections && Array.isArray(parsed.collections)) {
+          parsed.collections.forEach(c => this.collections.set(c.id, c));
+        }
         if (parsed.totalProtocolBurnedUsd) {
           this.totalProtocolBurnedUsd = parsed.totalProtocolBurnedUsd;
         }
@@ -38,12 +42,17 @@ class BondingCurveEngine {
     if (this.tokens.size === 0) {
       this.initSampleTokens();
     }
+    if (this.collections.size === 0) {
+      this.initSampleCollections();
+    }
     this.initSampleTraders();
   }
 
   resetToCleanDefaults() {
     this.tokens.clear();
+    this.collections.clear();
     this.initSampleTokens();
+    this.initSampleCollections();
     this.saveStateToDisk();
   }
 
@@ -57,12 +66,52 @@ class BondingCurveEngine {
       if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
       const payload = {
         totalProtocolBurnedUsd: this.totalProtocolBurnedUsd,
-        tokens: Array.from(this.tokens.values())
+        tokens: Array.from(this.tokens.values()),
+        collections: Array.from(this.collections.values())
       };
       fs.writeFileSync(DATA_FILE, JSON.stringify(payload, null, 2), 'utf8');
     } catch (e) {
       console.warn('Error saving tokens to disk:', e.message);
     }
+  }
+
+  initSampleCollections() {
+    const sampleBaskets = [
+      {
+        id: "col_ai_sovereign",
+        name: "AI & Sovereign Intelligence Basket",
+        symbol: "AISYS",
+        description: "Curated portfolio of the highest velocity AI and sovereign governance tokens on Base and Solana.",
+        creator: "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
+        imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=200",
+        createdAt: Date.now() - 86400000,
+        tokens: [
+          { symbol: "CESS", weight: 40, name: "Cession Sovereign Network" },
+          { symbol: "SOLMEME", weight: 30, name: "Solana Speed Bull" },
+          { symbol: "BDOGE", weight: 30, name: "Based Doge" }
+        ],
+        totalVolumeUsd: 254800,
+        buyersCount: 142
+      },
+      {
+        id: "col_generational_stacks",
+        name: "Generational Wealth & Family Stacks",
+        symbol: "FAMBASKET",
+        description: "Curated long-term micro-endowments with 1% Anti-Dump protection and Diamond Staking yield.",
+        creator: "0x091A4B8290CC189108a798129034",
+        imageUrl: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200",
+        createdAt: Date.now() - 172800000,
+        tokens: [
+          { symbol: "FAMSTACK", weight: 50, name: "Baldwin Sovereign Family Stack" },
+          { symbol: "CESS", weight: 30, name: "Cession Sovereign Network" },
+          { symbol: "BDOGE", weight: 20, name: "Based Doge" }
+        ],
+        totalVolumeUsd: 112000,
+        buyersCount: 68
+      }
+    ];
+
+    sampleBaskets.forEach(b => this.collections.set(b.id, b));
   }
 
   initSampleTokens() {
@@ -382,12 +431,11 @@ class BondingCurveEngine {
     });
   }
 
-  getAllTokens(sortBy = 'trending', chain = 'all', tokenType = 'all', includePrivate = false, accessKey = null) {
-    // If a single string that isn't a known sort option is passed, treat it as an access key
-    const knownSorts = ['trending', 'market_cap', 'progress', 'hold_duration', 'locked_percent', 'newest', 'pnl_gainers', 'volume'];
+  getAllTokens(sortBy = 'bump', chain = 'all', tokenType = 'all', includePrivate = false, accessKey = null, showGraduated = true) {
+    const knownSorts = ['bump', 'creation', 'newest', 'replies', 'last_reply', 'market_cap', 'progress', 'trending', 'hold_duration', 'locked_percent', 'pnl_gainers', 'volume'];
     if (typeof sortBy === 'string' && !knownSorts.includes(sortBy) && !accessKey) {
       accessKey = sortBy;
-      sortBy = 'trending';
+      sortBy = 'bump';
     }
 
     let list = Array.from(this.tokens.values()).map(t => this._enrichTokenMetrics(t));
@@ -395,6 +443,11 @@ class BondingCurveEngine {
     // Privacy filtering: exclude private tokens unless authorized
     if (!includePrivate) {
       list = list.filter(t => !t.isPrivate || (accessKey && t.inviteCode === accessKey));
+    }
+
+    // Filter by graduated DEX status if requested
+    if (!showGraduated) {
+      list = list.filter(t => !t.isGraduated);
     }
 
     // Filter by type: 'all', 'sprint', 'stack'
@@ -406,7 +459,13 @@ class BondingCurveEngine {
       list = list.filter(t => t.chain.toLowerCase() === chain.toLowerCase());
     }
 
-    if (sortBy === 'market_cap') {
+    if (sortBy === 'bump') {
+      list.sort((a, b) => (b.lastBumpTime || b.createdAt) - (a.lastBumpTime || a.createdAt));
+    } else if (sortBy === 'creation' || sortBy === 'newest') {
+      list.sort((a, b) => b.createdAt - a.createdAt);
+    } else if (sortBy === 'replies' || sortBy === 'last_reply') {
+      list.sort((a, b) => (b.repliesCount || 0) - (a.repliesCount || 0));
+    } else if (sortBy === 'market_cap') {
       list.sort((a, b) => b.marketCapUsd - a.marketCapUsd);
     } else if (sortBy === 'progress') {
       list.sort((a, b) => b.curveProgressPercent - a.curveProgressPercent);
@@ -414,14 +473,12 @@ class BondingCurveEngine {
       list.sort((a, b) => (b.avgHoldDays || 0) - (a.avgHoldDays || 0));
     } else if (sortBy === 'locked_percent') {
       list.sort((a, b) => (b.timeLockedPercent || 0) - (a.timeLockedPercent || 0));
-    } else if (sortBy === 'newest') {
-      list.sort((a, b) => b.createdAt - a.createdAt);
     } else if (sortBy === 'pnl_gainers') {
       list.sort((a, b) => b.change24hPercent - a.change24hPercent);
     } else if (sortBy === 'volume') {
       list.sort((a, b) => b.volume24hUsd - a.volume24hUsd);
     } else {
-      // Trending
+      // Trending fallback
       list.sort((a, b) => (b.curveProgressPercent * 1.5 + b.safetyAudit.score) - (a.curveProgressPercent * 1.5 + a.safetyAudit.score));
     }
 
@@ -437,6 +494,8 @@ class BondingCurveEngine {
       ? (t.feePool.totalGenerated * 150)
       : (t.totalBurnedTokens ? (t.totalBurnedTokens * t.currentPriceUsd * 0.25) : 0);
 
+    const repliesCount = this.chatMessages.has(t.symbol) ? this.chatMessages.get(t.symbol).length : 2;
+
     return {
       ...t,
       change24hPercent,
@@ -446,7 +505,14 @@ class BondingCurveEngine {
       safetyScore: t.safetyAudit ? t.safetyAudit.score : 95,
       avgHoldDays: t.avgHoldDays || (t.tokenType === 'stack' ? 90 : 2),
       timeLockedPercent: t.timeLockedPercent || (t.tokenType === 'stack' ? 85 : 15),
-      stakingApy: t.stakingApy || (t.tokenType === 'stack' ? 24.5 : 12.0)
+      stakingApy: t.stakingApy || (t.tokenType === 'stack' ? 24.5 : 12.0),
+      repliesCount,
+      chatMessagesCount: repliesCount,
+      lastBumpTime: t.lastBumpTime || t.createdAt,
+      bumpTimestamp: t.lastBumpTime || t.createdAt,
+      twitter: t.twitter || null,
+      telegram: t.telegram || null,
+      website: t.website || null
     };
   }
 
@@ -502,6 +568,229 @@ class BondingCurveEngine {
     return this._enrichTokenMetrics(t);
   }
 
+  /**
+   * Top Holders & Bubble Distribution
+   */
+  getTokenHolders(symbol) {
+    const token = this.tokens.get(symbol.toUpperCase());
+    if (!token) throw new Error("Token not found.");
+
+    const curveSupplyPercent = Math.max(10, 100 - (token.curveProgressPercent || 0) * 0.7);
+    const topHolders = [
+      {
+        address: "Bonding Curve Reserve (AMM)",
+        shortAddress: "Bonding Curve AMM",
+        balance: Math.floor(1000000000 * (curveSupplyPercent / 100)),
+        percentage: Number(curveSupplyPercent.toFixed(1)),
+        isBondingCurve: true,
+        isDev: false,
+        locked: false
+      },
+      {
+        address: token.creator || "0xDevCreator771092Bca019",
+        shortAddress: token.creator ? `${token.creator.substring(0, 6)}...${token.creator.substring(token.creator.length - 4)} (Dev)` : "0xDev...6b3D",
+        balance: token.devTokensLocked || 50000000,
+        percentage: Number(((token.devTokensLocked || 50000000) / 1000000000 * 100).toFixed(1)),
+        isBondingCurve: false,
+        isDev: true,
+        locked: Boolean(token.devLockedPercent && token.devLockedPercent > 0)
+      },
+      {
+        address: "0xWhaleBull8912A0b329Fc881029487190",
+        shortAddress: "0xWhale...8719",
+        balance: 42000000,
+        percentage: 4.2,
+        isBondingCurve: false,
+        isDev: false,
+        locked: false
+      },
+      {
+        address: "0xDiamondKing4910298Bca7710293847a",
+        shortAddress: "0xDiamond...3847",
+        balance: 28000000,
+        percentage: 2.8,
+        isBondingCurve: false,
+        isDev: false,
+        locked: true
+      },
+      {
+        address: "0xEarlySniper1920384761029384756102",
+        shortAddress: "0xEarly...6102",
+        balance: 18500000,
+        percentage: 1.85,
+        isBondingCurve: false,
+        isDev: false,
+        locked: false
+      }
+    ];
+
+    return {
+      symbol: token.symbol,
+      totalSupply: 1000000000,
+      curveSupplyPercent: Number(curveSupplyPercent.toFixed(1)),
+      devLockedPercent: token.devLockedPercent || 0,
+      holdersCount: token.holdersCount || 184,
+      topHolders,
+      holders: topHolders
+    };
+  }
+
+  /**
+   * Global Live Trade Ticker Stream (for Top Marquee)
+   */
+  getGlobalRecentTrades(limit = 25) {
+    const allTrades = [];
+    this.tokens.forEach(t => {
+      if (t.recentTrades && Array.isArray(t.recentTrades)) {
+        t.recentTrades.forEach(tr => {
+          allTrades.push({
+            ...tr,
+            symbol: t.symbol,
+            tokenSymbol: t.symbol,
+            tokenName: t.name,
+            imageUrl: t.imageUrl,
+            tokenImageUrl: t.imageUrl,
+            chain: t.chain
+          });
+        });
+      }
+    });
+
+    // Fallback sample trades if empty
+    if (allTrades.length === 0) {
+      allTrades.push(
+        { id: "g1", type: "BUY", symbol: "CESS", tokenSymbol: "CESS", tokenName: "Cession", amountSol: 1.5, amountTokens: 42857142, user: "0x88f...1a2", time: "1m ago" },
+        { id: "g2", type: "BUY", symbol: "SOLMEME", tokenSymbol: "SOLMEME", tokenName: "Solana Bull", amountSol: 2.0, amountTokens: 60606060, user: "4hJ...99a", time: "2m ago" },
+        { id: "g3", type: "SELL", symbol: "BDOGE", tokenSymbol: "BDOGE", tokenName: "Based Doge", amountSol: 0.4, amountTokens: 10000000, user: "0xBase...029", time: "3m ago" },
+        { id: "g4", type: "BUY", symbol: "FAMSTACK", tokenSymbol: "FAMSTACK", tokenName: "Family Stack", amountSol: 0.8, amountTokens: 20000000, user: "0x091...9034", time: "4m ago" }
+      );
+    }
+
+    return allTrades.slice(0, limit);
+  }
+
+  /**
+   * Token Collections / Baskets Methods
+   */
+  getAllCollections() {
+    return Array.from(this.collections.values()).map(col => {
+      let aggregateMcap = 0;
+      let aggregateVolume = 0;
+      const enrichedTokens = col.tokens.map(item => {
+        const t = this.tokens.get(item.symbol.toUpperCase());
+        if (t) {
+          aggregateMcap += (t.marketCapUsd || 0) * (item.weight / 100);
+          aggregateVolume += (t.volume24hUsd || 0) * (item.weight / 100);
+          return {
+            ...item,
+            name: t.name,
+            imageUrl: t.imageUrl,
+            currentPriceUsd: t.currentPriceUsd,
+            curveProgressPercent: t.curveProgressPercent
+          };
+        }
+        return item;
+      });
+
+      return {
+        ...col,
+        tokens: enrichedTokens,
+        aggregateMcapUsd: Math.round(aggregateMcap),
+        aggregateVolumeUsd: Math.round(aggregateVolume)
+      };
+    });
+  }
+
+  getCollection(id) {
+    const col = this.collections.get(id);
+    if (!col) return null;
+    const all = this.getAllCollections();
+    return all.find(c => c.id === id) || col;
+  }
+
+  createCollection({ name, symbol, description, creator, tokens, imageUrl }) {
+    if (!name || !tokens || !Array.isArray(tokens) || tokens.length === 0) {
+      throw new Error("Collection name and valid tokens list are required.");
+    }
+
+    // Verify weights sum to 100
+    const totalWeight = tokens.reduce((sum, t) => sum + (parseFloat(t.weight) || 0), 0);
+    if (totalWeight <= 0) {
+      throw new Error("Token weights must be greater than zero.");
+    }
+
+    const normalizedTokens = tokens.map(t => ({
+      symbol: t.symbol.toUpperCase(),
+      weight: Number(((parseFloat(t.weight) / totalWeight) * 100).toFixed(1)),
+      name: t.name || t.symbol
+    }));
+
+    const id = "col_" + Date.now().toString(36);
+    const newCollection = {
+      id,
+      name,
+      symbol: (symbol || name.substring(0, 5)).toUpperCase(),
+      description: description || "Curated community token basket on Cession Sovereign Launchpad.",
+      creator: creator || "0xCreator",
+      imageUrl: imageUrl || "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=200",
+      createdAt: Date.now(),
+      tokens: normalizedTokens,
+      totalVolumeUsd: 0,
+      buyersCount: 1
+    };
+
+    this.collections.set(id, newCollection);
+    this.saveStateToDisk();
+    return this.getCollection(id);
+  }
+
+  /**
+   * 1-Click Buy Token Collection / Basket
+   * Proportioned across all tokens in the bundle
+   */
+  buyCollection(id, totalSolAmount, buyerAddress = "0xTrader") {
+    const col = this.collections.get(id);
+    if (!col) throw new Error("Collection not found.");
+    const totalSol = parseFloat(totalSolAmount);
+    if (totalSol <= 0 || isNaN(totalSol)) throw new Error("Invalid SOL purchase amount.");
+
+    const executions = [];
+    let totalUsd = 0;
+
+    for (const item of col.tokens) {
+      const tokenSol = totalSol * (item.weight / 100);
+      if (tokenSol > 0 && this.tokens.has(item.symbol.toUpperCase())) {
+        try {
+          const buyResult = this.buyTokens(item.symbol, tokenSol, buyerAddress);
+          executions.push({
+            symbol: item.symbol,
+            weight: item.weight,
+            solSpent: tokenSol,
+            tokensReceived: buyResult.tokensOut,
+            tradeId: buyResult.trade.id
+          });
+          totalUsd += parseFloat(buyResult.trade.usdVal);
+        } catch (e) {
+          console.warn(`Failed proportional buy for ${item.symbol}:`, e.message);
+        }
+      }
+    }
+
+    col.totalVolumeUsd = (col.totalVolumeUsd || 0) + totalUsd;
+    col.buyersCount = (col.buyersCount || 0) + 1;
+    this.saveStateToDisk();
+
+    return {
+      success: true,
+      collectionId: id,
+      collectionName: col.name,
+      totalSolSpent: totalSol,
+      totalUsdSpent: totalUsd.toFixed(2),
+      executions,
+      results: executions
+    };
+  }
+
   getChatMessages(symbol) {
     const sym = symbol.toUpperCase();
     if (!this.chatMessages.has(sym)) {
@@ -512,18 +801,26 @@ class BondingCurveEngine {
     return this.chatMessages.get(sym);
   }
 
-  addChatMessage(symbol, user, text, badge = "TRADER") {
+  addChatMessage(symbol, user, text, badge = "TRADER", imageUrl = null) {
     const sym = symbol.toUpperCase();
     if (!this.chatMessages.has(sym)) this.chatMessages.set(sym, []);
     const msg = {
+      id: "msg_" + Date.now().toString(36),
       user: user.substring(0, 8),
-      text: text.slice(0, 180),
+      text: text ? text.slice(0, 240) : "",
+      imageUrl: imageUrl || null,
       time: "Just now",
-      badge
+      badge: badge || "TRADER",
+      timestamp: Date.now()
     };
-    const list = this.chatMessages.get(sym);
-    list.push(msg);
-    if (list.length > 50) list.shift();
+    this.chatMessages.get(sym).push(msg);
+
+    // Update last bump time on token
+    const token = this.tokens.get(sym);
+    if (token) {
+      token.lastBumpTime = Date.now();
+      this.saveStateToDisk();
+    }
     return msg;
   }
 
@@ -540,7 +837,11 @@ class BondingCurveEngine {
       isPrivate = false,
       inviteCode = null,
       antiDumpEnabled = null,
-      targetCapUsd = 25000
+      targetCapUsd = 25000,
+      twitter = null,
+      telegram = null,
+      website = null,
+      initialBuySol = 0
     } = params;
 
     const cleanSym = symbol.toUpperCase().trim();
@@ -572,7 +873,7 @@ class BondingCurveEngine {
       },
       description: description || (isStack ? "Long-term community sovereign stack on cession.fun" : "Community fair launch token on cession.fun"),
       imageUrl: imageUrl || "https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200",
-      creator: creator || "0xCalabiAnonDev",
+      creator: creator || "0xCessionAnonDev",
       devLockedPercent: devLockPercent,
       devTokensLocked: Math.floor(1000000000 * (devLockPercent / 100) * 0.05),
       createdAt: Date.now(),
@@ -607,6 +908,10 @@ class BondingCurveEngine {
         top10HoldersPercent: 5.0,
         warnings: devLockPercent < 80 ? ["Dev did not lock 80%+ of allocation."] : []
       },
+      twitter: twitter || null,
+      telegram: telegram || null,
+      website: website || null,
+      lastBumpTime: Date.now(),
       recentTrades: []
     };
 
@@ -620,8 +925,17 @@ class BondingCurveEngine {
       }
     ]);
 
+    // Handle initial snipe if requested by deployer
+    if (initialBuySol && initialBuySol > 0) {
+      try {
+        this.buyTokens(cleanSym, initialBuySol, creator || "0xCessionAnonDev");
+      } catch (e) {
+        console.warn('Initial buy execution warning:', e);
+      }
+    }
+
     this.saveStateToDisk();
-    return this._enrichTokenMetrics(newToken);
+    return this._enrichTokenMetrics(this.tokens.get(cleanSym) || newToken);
   }
 
   buyTokens(symbol, solAmount, buyerAddress) {

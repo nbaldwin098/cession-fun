@@ -1,5 +1,5 @@
 /**
- * Calabi.fun — Real On-Chain Solana SPL Token Minting & Raydium DEX Migration Script
+ * Cession.fun — Real On-Chain Solana SPL Token Minting & Raydium DEX Migration Script
  * 
  * Functions:
  * 1. Creates a real SPL Token Mint with 9 decimals on Solana (Devnet or Mainnet-Beta).
@@ -88,8 +88,8 @@ class SolanaTokenFactory {
       metadataProgramId: "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s", // Metaplex Token Metadata Program
       instructions: [
         "1. CreateAccount(MintAccount, Space=82, Lamports=RentExempt)",
-        "2. InitializeMint(MintAccount, Decimals=9, MintAuthority=CalabiBondingCurve)",
-        "3. CreateAssociatedTokenAccount(VaultAccount, Owner=CalabiBondingCurve)",
+        "2. InitializeMint(MintAccount, Decimals=9, MintAuthority=CessionBondingCurve)",
+        "3. CreateAssociatedTokenAccount(VaultAccount, Owner=CessionBondingCurve)",
         `4. MintTo(VaultAccount, Amount=${totalSupply} * 10^9)`,
         "5. SetAuthority(MintAccount, AuthorityType=MintTokens, NewAuthority=None) [REVOKED RUG PROOF]",
         "6. CreateMetadataAccountV3(Name, Symbol, URI, IsMutable=false)"
@@ -107,7 +107,7 @@ class SolanaTokenFactory {
 // CLI Execution / Self Test
 async function main() {
   console.log("=========================================================");
-  console.log("⚡ CALABI.FUN SOLANA SPL TOKEN MINT & RAYDIUM DEX PIPELINE");
+  console.log("⚡ CESSION.FUN SOLANA SPL TOKEN MINT & RAYDIUM DEX PIPELINE");
   console.log("=========================================================");
 
   const factory = new SolanaTokenFactory('devnet');
@@ -115,7 +115,7 @@ async function main() {
   console.log(`[RPC Status] Network: ${conn.network} | Block Height: ${conn.blockHeight} | Connected: ${conn.connected}`);
 
   const tokenSpec = factory.createTokenMintPayload({
-    name: "Calabi Sovereign Pepe",
+    name: "Cession Sovereign Pepe",
     symbol: "CPEPE",
     creatorWallet: "SoLDev99xFaCe8721990172Bca9012377a0"
   });

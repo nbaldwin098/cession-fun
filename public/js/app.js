@@ -1,5 +1,5 @@
 /**
- * Calabi.fun — Master Application Orchestrator
+ * Cession.fun — Master Application Orchestrator
  * Connects WebSockets for live ticks & candles, manages global toasts.
  */
 
@@ -27,7 +27,7 @@ window.showToast = function(message, type = 'info') {
   }, 4000);
 };
 
-class CalabiApp {
+class CessionApp {
   constructor() {
     this.ws = null;
     this.initWebSocket();
@@ -41,7 +41,7 @@ class CalabiApp {
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log('[Calabi.fun WS] Connected to Sovereign Engine Gateway.');
+        console.log('[Cession.fun WS] Connected to Sovereign Engine Gateway.');
       };
 
       this.ws.onmessage = (evt) => {
@@ -49,20 +49,20 @@ class CalabiApp {
           const msg = JSON.parse(evt.data);
           this.handleSocketMessage(msg);
         } catch (e) {
-          console.warn('[Calabi WS] JSON parse error:', e);
+          console.warn('[Cession WS] JSON parse error:', e);
         }
       };
 
       this.ws.onerror = (err) => {
-        console.warn('[Calabi WS] Error:', err);
+        console.warn('[Cession WS] Error:', err);
       };
 
       this.ws.onclose = () => {
-        console.log('[Calabi WS] Disconnected. Reconnecting in 3s...');
+        console.log('[Cession WS] Disconnected. Reconnecting in 3s...');
         setTimeout(() => this.initWebSocket(), 3000);
       };
     } catch (err) {
-      console.warn('[Calabi WS] Failed to init WebSocket:', err);
+      console.warn('[Cession WS] Failed to init WebSocket:', err);
     }
   }
 
@@ -92,5 +92,5 @@ class CalabiApp {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  window.calabiApp = new CalabiApp();
+  window.cessionApp = new CessionApp();
 });

@@ -1,5 +1,5 @@
 /**
- * Calabi Corporate Treasury & Financial Tracking API
+ * Cession Corporate Treasury & Financial Tracking API
  */
 
 const express = require('express');

@@ -1,5 +1,5 @@
 /**
- * Calabi Multi-Chain Wallet API Routes
+ * Cession Multi-Chain Wallet API Routes
  */
 
 const express = require('express');

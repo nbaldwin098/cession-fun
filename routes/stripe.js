@@ -1,6 +1,6 @@
 /**
- * Calabi Stripe Integration Router
- * Handles Stripe Checkout for Calabi Pro ($19.99/mo SaaS),
+ * Cession Stripe Integration Router
+ * Handles Stripe Checkout for Cession Pro ($19.99/mo SaaS),
  * and Stripe Crypto Onramp Sessions for instant fiat-to-crypto purchases.
  */
 
@@ -18,7 +18,7 @@ if (process.env.STRIPE_SECRET_KEY) {
 }
 
 /**
- * Create Stripe Checkout Session for Calabi Pro ($19.99/mo)
+ * Create Stripe Checkout Session for Cession Pro ($19.99/mo)
  */
 router.post('/checkout-session', async (req, res) => {
   try {
@@ -32,7 +32,7 @@ router.post('/checkout-session', async (req, res) => {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: `Calabi Pro Terminal (${plan.toUpperCase()})`,
+              name: `Cession Pro Terminal (${plan.toUpperCase()})`,
               description: 'Real-Time Whale Tracking, AI Signals, 0.05% Trading Fee Discount & Tax Engine',
               images: ['https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=300']
             },
@@ -76,7 +76,7 @@ router.post('/crypto-onramp-session', async (req, res) => {
     const onrampSession = {
       id: `cos_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
       client_secret: `cos_secret_${Math.random().toString(36).substring(2, 12)}`,
-      wallet_address: walletAddress || "0xCalabiUser78b9A20fD99e1234567890ABCDEF",
+      wallet_address: walletAddress || "0xCessionUser78b9A20fD99e1234567890ABCDEF",
       destination_currencies: ["usdc", "eth", "sol"],
       destination_networks: ["ethereum", "base", "solana"],
       fixed_currency: destinationCurrency,

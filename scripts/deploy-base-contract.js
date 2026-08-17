@@ -1,9 +1,9 @@
 /**
- * Calabi.fun — Real On-Chain Base L2 / EVM Deployment & Uniswap V3 Migration Script
+ * Cession.fun — Real On-Chain Base L2 / EVM Deployment & Uniswap V3 Migration Script
  * 
  * Functions:
- * 1. Deploys CalabiToken.sol (ERC-20 with Proof-of-Skin dev vesting locks).
- * 2. Deploys CalabiBondingCurve.sol with Uniswap V3 Factory & NonfungiblePositionManager bindings.
+ * 1. Deploys CessionToken.sol (ERC-20 with Proof-of-Skin dev vesting locks).
+ * 2. Deploys CessionBondingCurve.sol with Uniswap V3 Factory & NonfungiblePositionManager bindings.
  * 3. Simulates / executes token graduation to real DEX pools on Base L2 (Uniswap V3 / Aerodrome).
  */
 
@@ -89,21 +89,21 @@ class BaseL2Deployer {
       network: this.network,
       contractsToDeploy: [
         {
-          contractName: "CalabiBondingCurve",
+          contractName: "CessionBondingCurve",
           constructorArgs: {
-            treasury: treasuryWallet || "0xCalabiTreasury00000000000000000000000001",
+            treasury: treasuryWallet || "0xCessionTreasury00000000000000000000000001",
             weth: BASE_WETH,
             uniswapV3Factory: BASE_UNISWAP_V3_FACTORY,
             positionManager: BASE_UNISWAP_V3_POSITION_MANAGER
           }
         },
         {
-          contractName: "CalabiToken",
+          contractName: "CessionToken",
           constructorArgs: {
             name: tokenName,
             symbol: tokenSymbol.toUpperCase(),
-            bondingCurve: "ADDRESS_OF_CALABI_BONDING_CURVE",
-            creator: devWallet || "0xCalabiCreatorWallet00000000000000000001",
+            bondingCurve: "ADDRESS_OF_CESSION_BONDING_CURVE",
+            creator: devWallet || "0xCessionCreatorWallet00000000000000000001",
             devLockPercent: devLockPercent
           }
         }
@@ -121,7 +121,7 @@ class BaseL2Deployer {
 
 async function main() {
   console.log("=========================================================");
-  console.log("🔵 CALABI.FUN BASE L2 TOKEN MINT & UNISWAP V3 DEPLOYER");
+  console.log("🔵 CESSION.FUN BASE L2 TOKEN MINT & UNISWAP V3 DEPLOYER");
   console.log("=========================================================");
 
   const deployer = new BaseL2Deployer('sepolia');
@@ -129,7 +129,7 @@ async function main() {
   console.log(`[RPC Status] Network: ${status.network} | Chain ID: ${status.chainId} | Block: ${status.currentBlock}`);
 
   const manifest = deployer.getDeploymentManifest({
-    tokenName: "Calabi Sovereign Doge",
+    tokenName: "Cession Sovereign Doge",
     tokenSymbol: "CDOGE",
     treasuryWallet: "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
     devWallet: "0x91823129841A8700019230912384910283419012"

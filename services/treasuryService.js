@@ -1,5 +1,5 @@
 /**
- * Calabi.us — Corporate Financial, Cost & Kraken-Grade Public Transparency Service
+ * Cession.us — Corporate Financial, Cost & Kraken-Grade Public Transparency Service
  * Tracks real-time revenues, cumulative swap volume, operational burn rates,
  * transparent public reserves, token holdings, and buyback & burn metrics.
  */
@@ -22,8 +22,8 @@ class TreasuryService {
       },
       solana: {
         network: "Solana Mainnet",
-        address: "9xCalabiTreasuryFeeReservesSovereignVaultSol1",
-        explorerUrl: "https://solscan.io/account/9xCalabiTreasuryFeeReservesSovereignVaultSol1",
+        address: "9xCessionTreasuryFeeReservesSovereignVaultSol1",
+        explorerUrl: "https://solscan.io/account/9xCessionTreasuryFeeReservesSovereignVaultSol1",
         multisigScheme: "Squads Protocol V4"
       }
     };
@@ -33,7 +33,7 @@ class TreasuryService {
       { symbol: "ETH", name: "Ethereum (Base)", amount: 18.45, priceUsd: 3450.00, valueUsd: 63652.50, change24h: 3.2, icon: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png" },
       { symbol: "SOL", name: "Solana", amount: 142.80, priceUsd: 152.40, valueUsd: 21762.72, change24h: 5.8, icon: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png" },
       { symbol: "USDC", name: "USD Coin", amount: 34210.00, priceUsd: 1.00, valueUsd: 34210.00, change24h: 0.0, icon: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png" },
-      { symbol: "CALB", name: "Calabi Sovereign", amount: 50000000, priceUsd: 0.00000525, valueUsd: 262.50, change24h: 40.0, icon: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=100" },
+      { symbol: "CALB", name: "Cession Sovereign", amount: 50000000, priceUsd: 0.00000525, valueUsd: 262.50, change24h: 40.0, icon: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=100" },
       { symbol: "QPEPE", name: "Quantum Pepe", amount: 12000000, priceUsd: 0.00000330, valueUsd: 39.60, change24h: 32.0, icon: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100" }
     ];
 
@@ -63,7 +63,7 @@ class TreasuryService {
 
     return {
       success: true,
-      protocol: "Calabi Sovereign Exchange",
+      protocol: "Cession Sovereign Exchange",
       lastUpdated: new Date().toISOString(),
       totalReservesUsd: Math.round(totalUsdValue * 100) / 100,
       change24hPercent: 4.15,
@@ -84,7 +84,7 @@ class TreasuryService {
     const burnedUsd = grossFeesGenerated * this.burnShare;
 
     return {
-      companyName: "Calabi Technologies Inc.",
+      companyName: "Cession Technologies Inc.",
       corporateJurisdiction: "Delaware C-Corp (USA)",
       complianceStatus: "FinCEN FIN-2019-G001 Non-Custodial Sovereign",
       reportingTimestamp: new Date().toISOString(),

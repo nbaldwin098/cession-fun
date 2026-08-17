@@ -1,5 +1,5 @@
 /**
- * Calabi Sovereign Authentication & User Session Router
+ * Cession Sovereign Authentication & User Session Router
  * 
  * Supports:
  * 1. Email & Password registration/login with local sovereign seed generation

@@ -1,5 +1,5 @@
 /**
- * Calabi US Sanctions, OFAC & Geoblock Compliance Routes
+ * Cession US Sanctions, OFAC & Geoblock Compliance Routes
  * 100% Free Zero-SaaS Compliance Architecture
  */
 
@@ -120,7 +120,7 @@ router.get('/cex-dossier/:symbol', (req, res) => {
     institutionalMarketMaking: {
       recommendedSpreadBps: 15,
       apiStandard: "FIX 4.4 & WebSocket Level 3 (Wintermute / Keyrock / GSR compatible)",
-      cexListingApplicationUrl: `https://calabi.us/api/compliance/cex-dossier/${token.symbol}`
+      cexListingApplicationUrl: `https://cession.fun/api/compliance/cex-dossier/${token.symbol}`
     }
   };
 

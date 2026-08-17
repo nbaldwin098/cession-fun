@@ -1,5 +1,5 @@
 /**
- * Calabi Master API Router
+ * Cession Master API Router
  */
 
 const express = require('express');
@@ -26,7 +26,7 @@ router.use('/treasury', treasuryRoutes);
 router.get('/status', (req, res) => {
   res.json({
     status: 'ONLINE',
-    exchange: 'Calabi.us Sovereign Engine',
+    exchange: 'Cession.us Sovereign Engine',
     version: '1.0.0-PRO',
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
@@ -34,7 +34,7 @@ router.get('/status', (req, res) => {
     regulatoryModel: 'Non-Custodial Hybrid Gateway (FinCEN FIN-2019-G001 Compliant)',
     features: [
       'BIP-39 Sovereign Wallet Minting',
-      'Calabi Ignition Fair-Launch Bonding Curve',
+      'Cession Ignition Fair-Launch Bonding Curve',
       'Stripe Crypto Onramp & Pro SaaS Subscriptions',
       'Live Coinbase Public WebSocket Price Feeds',
       'Automated OFAC SDN Sanctions Screening'

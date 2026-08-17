@@ -1279,3 +1279,391 @@ body {
   }
 }
 
+/* =========================================================
+   PUMP.FUN LIVE TRADE MARQUEE TICKER (TOP STREAM)
+========================================================= */
+.marquee-stream-container {
+  background: #010307;
+  border-bottom: 1px solid var(--border-color);
+  padding: 6px 12px;
+  overflow: hidden;
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.marquee-stream-track {
+  display: flex;
+  gap: 20px;
+  animation: marqueeScroll 45s linear infinite;
+  width: max-content;
+}
+
+.marquee-stream-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #040813;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+  transition: border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.marquee-pill:hover {
+  border-color: var(--cyber-blue);
+}
+
+.marquee-pill.buy {
+  border-color: rgba(0, 255, 170, 0.3);
+}
+
+.marquee-pill.sell {
+  border-color: rgba(255, 0, 85, 0.3);
+}
+
+.marquee-pill-img {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* =========================================================
+   PUMP.FUN SORTING & FILTER MATRIX TOOLBAR
+========================================================= */
+.sort-matrix-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  background: #04060e;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+}
+
+.sort-pills-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sort-pill-btn {
+  background: #070c18;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sort-pill-btn:hover {
+  border-color: var(--cyber-blue);
+  color: #fff;
+}
+
+.sort-pill-btn.active {
+  background: rgba(0, 240, 255, 0.12);
+  border-color: var(--cyber-blue);
+  color: var(--cyber-blue);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.matrix-toggles-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.matrix-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.matrix-toggle-label input[type="checkbox"] {
+  accent-color: var(--cyber-blue);
+}
+
+/* =========================================================
+   TOKEN COLLECTIONS & CURATED BASKETS (PLAYLISTS)
+========================================================= */
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.collection-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.collection-card:hover {
+  border-color: var(--cyber-blue);
+  box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.collection-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.collection-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-blue);
+  object-fit: cover;
+}
+
+.collection-tokens-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 14px 0;
+}
+
+.basket-token-chip {
+  background: #03060d;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xs);
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.basket-token-weight {
+  color: var(--cyber-blue);
+  font-weight: 800;
+}
+
+.btn-buy-basket {
+  background: linear-gradient(135deg, #00f0ff 0%, #2563eb 100%);
+  color: #000;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  border: none;
+  border-radius: var(--radius-xs);
+  padding: 10px 14px;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-buy-basket:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+}
+
+/* =========================================================
+   [HOW IT WORKS] MODAL & STEPS
+========================================================= */
+.how-it-works-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.step-card {
+  background: #03060e;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  position: relative;
+  transition: border-color 0.2s ease;
+}
+
+.step-card:hover {
+  border-color: var(--border-blue);
+}
+
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(0, 240, 255, 0.15);
+  color: var(--cyber-blue);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 12px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border-blue);
+}
+
+.step-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.step-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+/* =========================================================
+   TOP 10 HOLDERS & BUBBLE DISTRIBUTION
+========================================================= */
+.holders-section {
+  background: #03050a;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-top: 14px;
+}
+
+.holders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.holders-table th {
+  text-align: left;
+  padding: 6px 8px;
+  color: var(--text-muted);
+  font-size: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.holders-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(17, 23, 40, 0.6);
+}
+
+.holder-rank {
+  font-weight: 800;
+  color: var(--cyber-blue);
+}
+
+.holder-bar-wrap {
+  background: #080d1a;
+  border-radius: 2px;
+  height: 6px;
+  width: 100%;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.holder-bar-fill {
+  background: var(--cyber-blue);
+  height: 100%;
+  border-radius: 2px;
+}
+
+/* =========================================================
+   TROLLBOX FORUM & MEME / IMAGE ATTACHMENTS
+========================================================= */
+.trollbox-msg-img {
+  max-width: 180px;
+  max-height: 140px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-blue);
+  margin-top: 6px;
+  display: block;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.trollbox-msg-img:hover {
+  transform: scale(1.05);
+}
+
+.trollbox-attachment-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #040812;
+  border: 1px dashed var(--border-blue);
+  border-radius: var(--radius-xs);
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--cyber-blue);
+}
+
+.social-links-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.social-link-btn {
+  background: #060b17;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.social-link-btn:hover {
+  border-color: var(--cyber-blue);
+  color: #fff;
+}
+
+

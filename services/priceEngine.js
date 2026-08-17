@@ -1,5 +1,5 @@
 /**
- * Calabi Sovereign Real-Time Market Data & Price Engine
+ * Cession Sovereign Real-Time Market Data & Price Engine
  * Streams sub-second live ticks from Coinbase Public WebSocket,
  * maintains L2 orderbooks, and builds OHLCV candlestick time-series.
  */

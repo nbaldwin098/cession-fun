@@ -1,9 +1,9 @@
 /**
- * Calabi TradingView Lightweight Charts Controller
+ * Cession.fun TradingView Lightweight Charts Controller
  * Renders high-performance, real-time candlestick charts and volume bars.
  */
 
-class CalabiChartController {
+class CessionChartController {
   constructor() {
     this.chartContainer = document.getElementById('tradingviewChart');
     this.chart = null;
@@ -131,6 +131,7 @@ class CalabiChartController {
 }
 
 window.chartController = null;
+window.CessionChartController = CessionChartController;
 document.addEventListener('DOMContentLoaded', () => {
-  window.chartController = new CalabiChartController();
+  window.chartController = new CessionChartController();
 });

@@ -1,5 +1,5 @@
 /**
- * Calabi Sovereign Multi-Auth & Web3 Client-Side Engine
+ * Cession Sovereign Multi-Auth & Web3 Client-Side Engine
  * 
  * Authentication & Key Vault Providers:
  * 1. Email & Password (Deterministic AES-256 Vault / Server Session)
@@ -43,7 +43,7 @@ const SANCTIONED_ADDRESSES_LOCAL = new Set([
   "bc1qgdjqv0av3q56jvd82tkdjpy7gdp9ut8tlqmgrpmv24sq90ecnvqqjwvw97"
 ]);
 
-class CalabiWalletEngine {
+class CessionWalletEngine {
   constructor() {
     this.isAuthenticated = false;
     this.authMode = 'register'; // 'register' | 'login'
@@ -71,9 +71,9 @@ class CalabiWalletEngine {
   }
 
   _checkExistingSession() {
-    const token = localStorage.getItem('calabi_session_token');
-    const profile = localStorage.getItem('calabi_user_profile');
-    const vault = localStorage.getItem('calabi_vault_data');
+    const token = localStorage.getItem('cession_session_token');
+    const profile = localStorage.getItem('cession_user_profile');
+    const vault = localStorage.getItem('cession_vault_data');
 
     if (token && profile) {
       try {
@@ -81,7 +81,7 @@ class CalabiWalletEngine {
         this.userProfile = JSON.parse(profile);
         this.vaultData = vault ? JSON.parse(vault) : null;
         this.isAuthenticated = true;
-        this.activeWalletType = localStorage.getItem('calabi_wallet_type') || 'email';
+        this.activeWalletType = localStorage.getItem('cession_wallet_type') || 'email';
         this.activeAddress = this.userProfile.addresses?.eth || this.userProfile.addresses?.sol || this.vaultData?.addresses?.eth || '';
         this.activeChain = this.activeAddress.startsWith('0x') ? 'Base' : 'Solana';
       } catch (e) {
@@ -257,10 +257,10 @@ class CalabiWalletEngine {
         this.activeAddress = data.user.addresses?.eth || '';
         this.activeChain = 'Base';
 
-        localStorage.setItem('calabi_session_token', data.token);
-        localStorage.setItem('calabi_user_profile', JSON.stringify(this.userProfile));
-        localStorage.setItem('calabi_vault_data', JSON.stringify(this.vaultData));
-        localStorage.setItem('calabi_wallet_type', 'email');
+        localStorage.setItem('cession_session_token', data.token);
+        localStorage.setItem('cession_user_profile', JSON.stringify(this.userProfile));
+        localStorage.setItem('cession_vault_data', JSON.stringify(this.vaultData));
+        localStorage.setItem('cession_wallet_type', 'email');
 
         this.closeAuthModal();
         this.renderState();
@@ -300,10 +300,10 @@ class CalabiWalletEngine {
         this.activeAddress = data.user.addresses?.eth || '';
         this.activeChain = 'Base';
 
-        localStorage.setItem('calabi_session_token', data.token);
-        localStorage.setItem('calabi_user_profile', JSON.stringify(this.userProfile));
-        localStorage.setItem('calabi_vault_data', JSON.stringify(this.vaultData));
-        localStorage.setItem('calabi_wallet_type', 'google');
+        localStorage.setItem('cession_session_token', data.token);
+        localStorage.setItem('cession_user_profile', JSON.stringify(this.userProfile));
+        localStorage.setItem('cession_vault_data', JSON.stringify(this.vaultData));
+        localStorage.setItem('cession_wallet_type', 'google');
 
         this.closeAuthModal();
         this.renderState();
@@ -352,9 +352,9 @@ class CalabiWalletEngine {
       this.activeAddress = addr;
       this.activeChain = 'Base';
 
-      localStorage.setItem('calabi_session_token', this.sessionToken);
-      localStorage.setItem('calabi_user_profile', JSON.stringify(this.userProfile));
-      localStorage.setItem('calabi_wallet_type', walletName);
+      localStorage.setItem('cession_session_token', this.sessionToken);
+      localStorage.setItem('cession_user_profile', JSON.stringify(this.userProfile));
+      localStorage.setItem('cession_wallet_type', walletName);
 
       this.closeAuthModal();
       this.renderState();
@@ -404,9 +404,9 @@ class CalabiWalletEngine {
       this.activeAddress = pubkey;
       this.activeChain = 'Solana';
 
-      localStorage.setItem('calabi_session_token', this.sessionToken);
-      localStorage.setItem('calabi_user_profile', JSON.stringify(this.userProfile));
-      localStorage.setItem('calabi_wallet_type', 'phantom');
+      localStorage.setItem('cession_session_token', this.sessionToken);
+      localStorage.setItem('cession_user_profile', JSON.stringify(this.userProfile));
+      localStorage.setItem('cession_wallet_type', 'phantom');
 
       this.closeAuthModal();
       this.renderState();
@@ -454,10 +454,10 @@ class CalabiWalletEngine {
       this.activeAddress = ethAddress;
       this.activeChain = 'Base';
 
-      localStorage.setItem('calabi_session_token', this.sessionToken);
-      localStorage.setItem('calabi_user_profile', JSON.stringify(this.userProfile));
-      localStorage.setItem('calabi_vault_data', JSON.stringify(this.vaultData));
-      localStorage.setItem('calabi_wallet_type', 'vault');
+      localStorage.setItem('cession_session_token', this.sessionToken);
+      localStorage.setItem('cession_user_profile', JSON.stringify(this.userProfile));
+      localStorage.setItem('cession_vault_data', JSON.stringify(this.vaultData));
+      localStorage.setItem('cession_wallet_type', 'vault');
 
       this.closeAuthModal();
       this.renderState();
@@ -506,10 +506,10 @@ class CalabiWalletEngine {
     this.vaultData = null;
     this.sessionToken = null;
 
-    localStorage.removeItem('calabi_session_token');
-    localStorage.removeItem('calabi_user_profile');
-    localStorage.removeItem('calabi_vault_data');
-    localStorage.removeItem('calabi_wallet_type');
+    localStorage.removeItem('cession_session_token');
+    localStorage.removeItem('cession_user_profile');
+    localStorage.removeItem('cession_vault_data');
+    localStorage.removeItem('cession_wallet_type');
 
     this.renderState();
     if (window.showToast) window.showToast('Logged out successfully.', 'info');
@@ -566,5 +566,5 @@ class CalabiWalletEngine {
 
 window.walletEngine = null;
 document.addEventListener('DOMContentLoaded', () => {
-  window.walletEngine = new CalabiWalletEngine();
+  window.walletEngine = new CessionWalletEngine();
 });

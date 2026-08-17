@@ -1,9 +1,9 @@
 /**
- * Calabi Stripe Integration Controller
- * Handles Stripe Crypto Onramp sessions and Calabi Pro Subscriptions ($19.99/mo).
+ * Cession Stripe Integration Controller
+ * Handles Stripe Crypto Onramp sessions and Cession Pro Subscriptions ($19.99/mo).
  */
 
-class CalabiStripeManager {
+class CessionStripeManager {
   constructor() {
     this.btnInitiateOnramp = document.getElementById('btnInitiateOnramp');
     this.fiatAmountInput = document.getElementById('fiatAmountInput');
@@ -94,7 +94,7 @@ class CalabiStripeManager {
 
   async handleProSubscription(plan) {
     if (window.showToast) {
-      window.showToast(`Creating Stripe Checkout Session for Calabi Pro (${plan})...`, 'success');
+      window.showToast(`Creating Stripe Checkout Session for Cession Pro (${plan})...`, 'success');
     }
 
     try {
@@ -116,7 +116,7 @@ class CalabiStripeManager {
           // Sandbox active notification
           setTimeout(() => {
             if (window.showToast) {
-              window.showToast('Calabi Pro ($19.99/mo) Activated! VIP L2 Priority Enabled.', 'success');
+              window.showToast('Cession Pro ($19.99/mo) Activated! VIP L2 Priority Enabled.', 'success');
             }
           }, 800);
         }
@@ -129,5 +129,5 @@ class CalabiStripeManager {
 
 window.stripeManager = null;
 document.addEventListener('DOMContentLoaded', () => {
-  window.stripeManager = new CalabiStripeManager();
+  window.stripeManager = new CessionStripeManager();
 });

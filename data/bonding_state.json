@@ -1,5 +1,5 @@
 {
-  "totalProtocolBurnedUsd": 42925.9375,
+  "totalProtocolBurnedUsd": 42945.73750000002,
   "tokens": [
     {
       "name": "Cession Sovereign Network",
@@ -12,22 +12,22 @@
       "creator": "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
       "devLockedPercent": 100,
       "devTokensLocked": 50000000,
-      "createdAt": 1786884741441,
-      "virtualSolReserves": 28.5,
-      "virtualTokenReserves": 720000000,
-      "realSolRaised": 7.8,
-      "tokensSold": 280000000,
-      "currentPriceSol": 4.5e-8,
-      "currentPriceUsd": 0.00000675,
+      "createdAt": 1786886925034,
+      "virtualSolReserves": 28.898,
+      "virtualTokenReserves": 710083742,
+      "realSolRaised": 8.198,
+      "tokensSold": 289916258,
+      "currentPriceSol": 4.0696608429037935e-8,
+      "currentPriceUsd": 0.00610449126435569,
       "openPrice24hUsd": 0.00000375,
-      "marketCapUsd": 58240,
+      "marketCapUsd": 25618.75,
       "targetCapUsd": 25000,
-      "volume24hUsd": 148500,
+      "volume24hUsd": 148560,
       "high24hUsd": 0.0000072,
       "low24hUsd": 0.0000036,
-      "isGraduated": false,
-      "curveProgressPercent": 96,
-      "totalBurnedTokens": 4200000,
+      "isGraduated": true,
+      "curveProgressPercent": 100,
+      "totalBurnedTokens": 4224790,
       "holdersCount": 382,
       "avgHoldDays": 12,
       "timeLockedPercent": 25,
@@ -66,6 +66,16 @@
       },
       "recentTrades": [
         {
+          "id": "tx_msx9s25z",
+          "type": "BUY",
+          "amountSol": 0.4,
+          "amountTokens": 9916258,
+          "usdVal": "60.00",
+          "user": "0xBask...uyer",
+          "time": "Just now",
+          "mevShielded": true
+        },
+        {
           "id": "tx_1",
           "type": "BUY",
           "amountSol": 1.5,
@@ -85,7 +95,17 @@
           "time": "5m ago",
           "mevShielded": true
         }
-      ]
+      ],
+      "feePool": {
+        "totalGenerated": 0.002,
+        "holderRewardsDistributed": 0.001
+      },
+      "graduationData": {
+        "dexName": "Uniswap v3 (Base)",
+        "liquiditySolSeeded": 8.198,
+        "lpBurnTx": "0xdead4rzeb3o7r3q0000dead",
+        "timestamp": 1786973325047
+      }
     },
     {
       "name": "Baldwin Sovereign Family Stack",
@@ -98,7 +118,7 @@
       "creator": "0x091A4B8290CC189108a798129034",
       "devLockedPercent": 100,
       "devTokensLocked": 50000000,
-      "createdAt": 1785761541441,
+      "createdAt": 1785763725034,
       "virtualSolReserves": 28,
       "virtualTokenReserves": 750000000,
       "realSolRaised": 18.5,
@@ -180,7 +200,7 @@
       "creator": "0x98bA...2214",
       "devLockedPercent": 100,
       "devTokensLocked": 40000000,
-      "createdAt": 1786366341442,
+      "createdAt": 1786368525034,
       "virtualSolReserves": 21,
       "virtualTokenReserves": 840000000,
       "realSolRaised": 11,
@@ -235,7 +255,7 @@
       "creator": "SoLDev99xFaCe8721990172Bca9012377a0",
       "devLockedPercent": 100,
       "devTokensLocked": 30000000,
-      "createdAt": 1786927941442,
+      "createdAt": 1786930125034,
       "virtualSolReserves": 18.2,
       "virtualTokenReserves": 910000000,
       "realSolRaised": 9.6,
@@ -304,22 +324,22 @@
       "creator": "0xBaseDev7718910019230912",
       "devLockedPercent": 80,
       "devTokensLocked": 20000000,
-      "createdAt": 1786956741442,
-      "virtualSolReserves": 12,
-      "virtualTokenReserves": 980000000,
-      "realSolRaised": 6.4,
-      "tokensSold": 20000000,
-      "currentPriceSol": 1.5e-8,
-      "currentPriceUsd": 0.00000225,
+      "createdAt": 1786958925034,
+      "virtualSolReserves": 12.2985,
+      "virtualTokenReserves": 956214172,
+      "realSolRaised": 6.6985,
+      "tokensSold": 43785828,
+      "currentPriceSol": 1.286165836077987e-8,
+      "currentPriceUsd": 0.0019292487541169804,
       "openPrice24hUsd": 0.000002,
-      "marketCapUsd": 8000,
+      "marketCapUsd": 20932.8125,
       "targetCapUsd": 25000,
-      "volume24hUsd": 41200,
+      "volume24hUsd": 41245,
       "high24hUsd": 0.0000024,
       "low24hUsd": 0.0000019,
       "isGraduated": false,
-      "curveProgressPercent": 32,
-      "totalBurnedTokens": 850000,
+      "curveProgressPercent": 83,
+      "totalBurnedTokens": 909464,
       "holdersCount": 144,
       "avgHoldDays": 2,
       "timeLockedPercent": 5,
@@ -342,7 +362,22 @@
         "top10HoldersPercent": 14.5,
         "warnings": []
       },
-      "recentTrades": []
+      "recentTrades": [
+        {
+          "id": "tx_msx9s25z",
+          "type": "BUY",
+          "amountSol": 0.3,
+          "amountTokens": 23785828,
+          "usdVal": "45.00",
+          "user": "0xBask...uyer",
+          "time": "Just now",
+          "mevShielded": true
+        }
+      ],
+      "feePool": {
+        "totalGenerated": 0.0015,
+        "holderRewardsDistributed": 0.00075
+      }
     },
     {
       "name": "Test Doge",
@@ -364,7 +399,7 @@
       "creator": "0xDevTestAddress",
       "devLockedPercent": 100,
       "devTokensLocked": 50000000,
-      "createdAt": 1786971141446,
+      "createdAt": 1786973325037,
       "virtualSolReserves": 11.918548302,
       "virtualTokenReserves": 839028356,
       "realSolRaised": 1.9185483019999994,
@@ -402,9 +437,13 @@
         "top10HoldersPercent": 5,
         "warnings": []
       },
+      "twitter": null,
+      "telegram": null,
+      "website": null,
+      "lastBumpTime": 1786973325037,
       "recentTrades": [
         {
-          "id": "tx_msx8h9ah",
+          "id": "tx_msx9s25r",
           "type": "SELL",
           "amountSol": 0.07109443951000062,
           "amountTokens": 5000000,
@@ -414,7 +453,7 @@
           "mevShielded": true
         },
         {
-          "id": "tx_msx8h9ag",
+          "id": "tx_msx9s25q",
           "type": "BUY",
           "amountSol": 2,
           "amountTokens": 165971644,
@@ -445,7 +484,7 @@
       "creator": "0xDevGrad",
       "devLockedPercent": 100,
       "devTokensLocked": 50000000,
-      "createdAt": 1786971141450,
+      "createdAt": 1786973325040,
       "virtualSolReserves": 19.95,
       "virtualTokenReserves": 501253132,
       "realSolRaised": 9.95,
@@ -483,9 +522,13 @@
         "top10HoldersPercent": 5,
         "warnings": []
       },
+      "twitter": null,
+      "telegram": null,
+      "website": null,
+      "lastBumpTime": 1786973325040,
       "recentTrades": [
         {
-          "id": "tx_msx8h9aj",
+          "id": "tx_msx9s25t",
           "type": "BUY",
           "amountSol": 10,
           "amountTokens": 498746868,
@@ -498,14 +541,14 @@
       "graduationData": {
         "dexName": "Raydium CPMM",
         "liquiditySolSeeded": 9.95,
-        "lpBurnTx": "0xdeadkfpub8g3exf0000dead",
-        "timestamp": 1786971141451
+        "lpBurnTx": "0xdeade71vn6u3g5o0000dead",
+        "timestamp": 1786973325041
       }
     },
     {
-      "name": "Apex Bull",
-      "symbol": "ABULL",
-      "chain": "Base",
+      "name": "Social Snipe Coin",
+      "symbol": "SNIPE",
+      "chain": "Solana",
       "tokenType": "sprint",
       "isPrivate": false,
       "inviteCode": null,
@@ -519,33 +562,33 @@
       },
       "description": "Community fair launch token on cession.fun",
       "imageUrl": "https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200",
-      "creator": "0x0d057dbdb4753550001b6e8c4d12eb0ed3d6ed01",
+      "creator": "0xSniperDev",
       "devLockedPercent": 100,
       "devTokensLocked": 50000000,
-      "createdAt": 1786971141458,
-      "virtualSolReserves": 11.479307405,
-      "virtualTokenReserves": 871132695,
-      "realSolRaised": 1.4793074050000004,
-      "tokensSold": 128867305,
-      "totalBurnedTokens": 324668,
-      "currentPriceSol": 1.317744985452532e-8,
-      "currentPriceUsd": 0.001976617478178798,
+      "createdAt": 1786973325050,
+      "virtualSolReserves": 10.4975,
+      "virtualTokenReserves": 952607763,
+      "realSolRaised": 0.4975,
+      "tokensSold": 47392237,
+      "totalBurnedTokens": 118480,
+      "currentPriceSol": 1.1019750633713869e-8,
+      "currentPriceUsd": 0.0016529625950570802,
       "openPrice24hUsd": 0.0000015,
-      "marketCapUsd": 5000,
+      "marketCapUsd": 10000,
       "targetCapUsd": 25000,
-      "volume24hUsd": 226.97888924999995,
+      "volume24hUsd": 75,
       "high24hUsd": 0.0000015,
       "low24hUsd": 0.0000015,
       "isGraduated": false,
-      "curveProgressPercent": 18,
+      "curveProgressPercent": 6,
       "feePool": {
-        "totalGenerated": 0.0075,
-        "holderRewardsDistributed": 0.00375
+        "totalGenerated": 0.0025,
+        "holderRewardsDistributed": 0.00125
       },
       "holdersCount": 1,
       "holders": [
         {
-          "address": "0x0d05... (Dev Locked)",
+          "address": "0xSnip... (Dev Locked)",
           "balance": 50000000,
           "percentage": 5,
           "isDev": true,
@@ -560,24 +603,18 @@
         "top10HoldersPercent": 5,
         "warnings": []
       },
+      "twitter": "https://x.com/snipecoin",
+      "telegram": "https://t.me/snipecoin",
+      "website": "https://snipecoin.fun",
+      "lastBumpTime": 1786973325050,
       "recentTrades": [
         {
-          "id": "tx_msx8h9au",
-          "type": "SELL",
-          "amountSol": 0.013126632024999587,
-          "amountTokens": 1000000,
-          "usdVal": "1.97",
-          "user": "0x0d05...ed01",
-          "time": "Just now",
-          "mevShielded": true
-        },
-        {
-          "id": "tx_msx8h9ar",
+          "id": "tx_msx9s262",
           "type": "BUY",
-          "amountSol": 1.5,
-          "amountTokens": 129867305,
-          "usdVal": "225.00",
-          "user": "0x0d05...ed01",
+          "amountSol": 0.5,
+          "amountTokens": 47392237,
+          "usdVal": "75.00",
+          "user": "0xSnip...rDev",
           "time": "Just now",
           "mevShielded": true
         }
@@ -598,12 +635,12 @@
         "totalStakedTokens": 750250000,
         "stakers": [
           {
-            "id": "stake_msx8h9ay",
+            "id": "stake_msx9s26b",
             "user": "0xFamMember",
             "amount": 250000,
             "durationDays": 90,
-            "stakedAt": 1786971141466,
-            "unlockTime": 1794747141466,
+            "stakedAt": 1786973325059,
+            "unlockTime": 1794749325059,
             "apy": 22.5
           }
         ]
@@ -613,7 +650,7 @@
       "creator": "0xFamCreator",
       "devLockedPercent": 100,
       "devTokensLocked": 50000000,
-      "createdAt": 1786971141463,
+      "createdAt": 1786973325057,
       "virtualSolReserves": 10,
       "virtualTokenReserves": 1000000000,
       "realSolRaised": 0,
@@ -651,67 +688,92 @@
         "top10HoldersPercent": 5,
         "warnings": []
       },
+      "twitter": null,
+      "telegram": null,
+      "website": null,
+      "lastBumpTime": 1786973325057,
       "recentTrades": []
-    },
+    }
+  ],
+  "collections": [
     {
-      "name": "Secret Syndicate",
-      "symbol": "SSYN",
-      "chain": "Solana",
-      "tokenType": "stack",
-      "isPrivate": true,
-      "inviteCode": "secret_syndicate_2026",
-      "antiDumpEnabled": true,
-      "avgHoldDays": 30,
-      "timeLockedPercent": 75,
-      "stakingApy": 24.5,
-      "stakingPool": {
-        "totalStakedTokens": 750000000,
-        "stakers": []
-      },
-      "description": "Long-term community sovereign stack on cession.fun",
-      "imageUrl": "https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=200",
-      "creator": "0xSyndicateDev",
-      "devLockedPercent": 100,
-      "devTokensLocked": 50000000,
-      "createdAt": 1786971141464,
-      "virtualSolReserves": 10,
-      "virtualTokenReserves": 1000000000,
-      "realSolRaised": 0,
-      "tokensSold": 0,
-      "totalBurnedTokens": 0,
-      "currentPriceSol": 1e-8,
-      "currentPriceUsd": 0.0000015,
-      "openPrice24hUsd": 0.0000015,
-      "marketCapUsd": 10000,
-      "targetCapUsd": 25000,
-      "volume24hUsd": 0,
-      "high24hUsd": 0.0000015,
-      "low24hUsd": 0.0000015,
-      "isGraduated": false,
-      "curveProgressPercent": 5,
-      "feePool": {
-        "totalGenerated": 0,
-        "holderRewardsDistributed": 0
-      },
-      "holdersCount": 1,
-      "holders": [
+      "id": "col_ai_sovereign",
+      "name": "AI & Sovereign Intelligence Basket",
+      "symbol": "AISYS",
+      "description": "Curated portfolio of the highest velocity AI and sovereign governance tokens on Base and Solana.",
+      "creator": "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
+      "imageUrl": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=200",
+      "createdAt": 1786886925034,
+      "tokens": [
         {
-          "address": "0xSynd... (Dev Locked)",
-          "balance": 50000000,
-          "percentage": 5,
-          "isDev": true,
-          "locked": true
+          "symbol": "CESS",
+          "weight": 40,
+          "name": "Cession Sovereign Network"
+        },
+        {
+          "symbol": "SOLMEME",
+          "weight": 30,
+          "name": "Solana Speed Bull"
+        },
+        {
+          "symbol": "BDOGE",
+          "weight": 30,
+          "name": "Based Doge"
         }
       ],
-      "safetyAudit": {
-        "score": 98,
-        "grade": "A+",
-        "mevProtected": true,
-        "devVestingLocked": true,
-        "top10HoldersPercent": 5,
-        "warnings": []
-      },
-      "recentTrades": []
+      "totalVolumeUsd": 254905,
+      "buyersCount": 143
+    },
+    {
+      "id": "col_generational_stacks",
+      "name": "Generational Wealth & Family Stacks",
+      "symbol": "FAMBASKET",
+      "description": "Curated long-term micro-endowments with 1% Anti-Dump protection and Diamond Staking yield.",
+      "creator": "0x091A4B8290CC189108a798129034",
+      "imageUrl": "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200",
+      "createdAt": 1786800525034,
+      "tokens": [
+        {
+          "symbol": "FAMSTACK",
+          "weight": 50,
+          "name": "Baldwin Sovereign Family Stack"
+        },
+        {
+          "symbol": "CESS",
+          "weight": 30,
+          "name": "Cession Sovereign Network"
+        },
+        {
+          "symbol": "BDOGE",
+          "weight": 20,
+          "name": "Based Doge"
+        }
+      ],
+      "totalVolumeUsd": 112000,
+      "buyersCount": 68
+    },
+    {
+      "id": "col_msx9s25w",
+      "name": "Solana DeFi Giants",
+      "symbol": "SOLAN",
+      "description": "Top volume DeFi protocol tokens",
+      "creator": "0xDeFiCurator",
+      "imageUrl": "https://example.com/basket.png",
+      "createdAt": 1786973325044,
+      "tokens": [
+        {
+          "symbol": "CESS",
+          "weight": 60,
+          "name": "CESS"
+        },
+        {
+          "symbol": "TDOGE",
+          "weight": 40,
+          "name": "TDOGE"
+        }
+      ],
+      "totalVolumeUsd": 0,
+      "buyersCount": 1
     }
   ]
 }

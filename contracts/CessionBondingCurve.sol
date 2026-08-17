@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./CalabiToken.sol";
+import "./CessionToken.sol";
 
 /**
- * @title CalabiBondingCurve
+ * @title CessionBondingCurve
  * @notice Sovereign Fair-Launch Bonding Curve Protocol for Base L2 & EVM.
  * 
  * Features:
  * - Constant Product Virtual AMM (x * y = k)
  * - 0.50% Total Swap Fee:
- *   * 0.25% to Calabi Protocol Treasury
+ *   * 0.25% to Cession Protocol Treasury
  *   * 0.25% to Algorithmic Buyback & Burn (Burned directly to 0xdead)
  * - Proof-of-Skin: On-chain Dev Token Vesting Lock until DEX graduation
  * - ReentrancyGuard mutex & Checks-Effects-Interactions pattern
  * - Pull-Payment Creator DEX Graduation Bounty (Prevents graduation DOS)
  * - Automated Uniswap V3 LP Lock & Burn on graduation ($69,420 / 20 ETH Target)
  */
-contract CalabiBondingCurve {
+contract CessionBondingCurve {
     address public immutable treasury;
     address public constant DEAD_ADDRESS = address(0x000000000000000000000000000000000000dEaD);
 
@@ -78,7 +78,7 @@ contract CalabiBondingCurve {
     ) external returns (address) {
         require(devLockPercent <= 100, "Invalid dev lock percent");
 
-        CalabiToken token = new CalabiToken(name, symbol, msg.sender, devLockPercent);
+        CessionToken token = new CessionToken(name, symbol, msg.sender, devLockPercent);
         address tokenAddr = address(token);
 
         pools[tokenAddr] = TokenPool({
@@ -139,7 +139,7 @@ contract CalabiBondingCurve {
             if (burnTokens > 0 && pool.tokensSold + burnTokens <= CURVE_TOKEN_SUPPLY) {
                 pool.tokensSold += burnTokens;
                 pool.totalBurnedTokens += burnTokens;
-                CalabiToken(tokenAddr).transfer(DEAD_ADDRESS, burnTokens);
+                CessionToken(tokenAddr).transfer(DEAD_ADDRESS, burnTokens);
                 emit TokensBurned(tokenAddr, burnTokens, burnEthFee);
             }
         }
@@ -149,7 +149,7 @@ contract CalabiBondingCurve {
         require(sentTreasury, "Treasury transfer failed");
 
         // Transfer purchased tokens to buyer
-        CalabiToken(tokenAddr).transfer(msg.sender, tokensOut);
+        CessionToken(tokenAddr).transfer(msg.sender, tokensOut);
         emit TokensPurchased(tokenAddr, msg.sender, msg.value, tokensOut, totalFee);
 
         // Check for DEX Graduation ($69.4k / 20 ETH target)
@@ -173,7 +173,7 @@ contract CalabiBondingCurve {
         require(tokenAmount > 0, "Token amount must be > 0");
 
         // Transfer tokens from seller to curve contract
-        CalabiToken(tokenAddr).transferFrom(msg.sender, address(this), tokenAmount);
+        CessionToken(tokenAddr).transferFrom(msg.sender, address(this), tokenAmount);
 
         uint256 k = pool.virtualEth * pool.virtualTokens;
         uint256 newTokens = pool.virtualTokens + tokenAmount;
@@ -212,7 +212,7 @@ contract CalabiBondingCurve {
         TokenPool storage pool = pools[tokenAddr];
         pool.isGraduated = true;
 
-        CalabiToken token = CalabiToken(tokenAddr);
+        CessionToken token = CessionToken(tokenAddr);
         token.setGraduated();
         token.unlockDevTokens();
 

@@ -2,12 +2,12 @@
 pragma solidity ^0.8.20;
 
 /**
- * @title CalabiToken
- * @dev Standard ERC-20 token minted exclusively through CalabiBondingCurve.
+ * @title CessionToken
+ * @dev Standard ERC-20 token minted exclusively through CessionBondingCurve.
  * Fixed supply of 1,000,000,000 tokens. 0% transfer tax.
  * Enforces Proof-of-Skin dev token lock until DEX graduation.
  */
-contract CalabiToken {
+contract CessionToken {
     string public name;
     string public symbol;
     uint8 public constant decimals = 18;

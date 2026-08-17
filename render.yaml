@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: calabi-exchange
+    name: cession-fun
     env: node
     plan: free
     buildCommand: npm install

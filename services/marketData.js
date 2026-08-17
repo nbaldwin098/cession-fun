@@ -1,5 +1,5 @@
 /**
- * Calabi True Price Oracle & Multi-Exchange Market Data Aggregator
+ * Cession True Price Oracle & Multi-Exchange Market Data Aggregator
  * 
  * Aggregates live price feeds from:
  * 1. Coinbase Public API & WebSocket
@@ -42,7 +42,7 @@ class TruePriceOracle {
   _httpGet(url) {
     return new Promise((resolve, reject) => {
       const client = url.startsWith('https') ? https : http;
-      const req = client.get(url, { headers: { 'User-Agent': 'CalabiExchange/1.0' }, timeout: 4000 }, (res) => {
+      const req = client.get(url, { headers: { 'User-Agent': 'CessionExchange/1.0' }, timeout: 4000 }, (res) => {
         let data = '';
         res.on('data', chunk => data += chunk);
         res.on('end', () => {
@@ -201,8 +201,8 @@ class TruePriceOracle {
       low24hUsd: Math.min(currentPriceUsd * 0.85, token.low24hUsd || currentPriceUsd),
       curveProgressPercent: token.curveProgressPercent || 5,
       oracleVerification: {
-        engine: 'Calabi Sovereign True-Price Multi-Oracle',
-        sources: ['Binance v3', 'CoinGecko API', 'Coinbase Web3 Feed', 'Calabi Invariant AMM'],
+        engine: 'Cession Sovereign True-Price Multi-Oracle',
+        sources: ['Binance v3', 'CoinGecko API', 'Coinbase Web3 Feed', 'Cession Invariant AMM'],
         confidenceScore: 0.998,
         latencyMs: 18,
         timestamp: Date.now()
@@ -318,7 +318,7 @@ class TruePriceOracle {
         symbol: cleanSym,
         priceUsd: metrics.priceUsd,
         confidence: 0.995,
-        sources: ['Binance v3 Benchmark', 'CoinGecko API', 'Calabi Invariant AMM'],
+        sources: ['Binance v3 Benchmark', 'CoinGecko API', 'Cession Invariant AMM'],
         change24h: metrics.change24hPercent,
         volume24h: metrics.volume24hUsd
       };
@@ -328,7 +328,7 @@ class TruePriceOracle {
       symbol: cleanSym,
       priceUsd: 1.00,
       confidence: 0.95,
-      sources: ['Calabi Default Fallback'],
+      sources: ['Cession Default Fallback'],
       change24h: 0,
       volume24h: 10000
     };

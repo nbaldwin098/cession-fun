@@ -1,10 +1,10 @@
 /**
- * Calabi Pro Trading Terminal Controller
+ * Cession Pro Trading Terminal Controller
  * Handles orderbook depth rendering, instant swap execution,
  * pair switching, and real-time trade tape updates.
  */
 
-class CalabiTradingManager {
+class CessionTradingManager {
   constructor() {
     this.currentPair = 'BTC/USD';
     this.currentPrice = 65420.50;
@@ -189,5 +189,5 @@ class CalabiTradingManager {
 
 window.tradingManager = null;
 document.addEventListener('DOMContentLoaded', () => {
-  window.tradingManager = new CalabiTradingManager();
+  window.tradingManager = new CessionTradingManager();
 });

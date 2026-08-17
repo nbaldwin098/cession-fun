@@ -1,5 +1,5 @@
 /**
- * Calabi Sovereign Multi-Chain Wallet & Cryptography Engine
+ * Cession Sovereign Multi-Chain Wallet & Cryptography Engine
  * Implements BIP-39 mnemonic seed generation, deterministic multi-chain HD derivations
  * (EVM, Bitcoin SegWit, Solana), and zero-knowledge balance verification.
  */
@@ -141,7 +141,7 @@ class WalletEngine {
         { name: "Bitcoin", symbol: "BTC", balance: 0.125, priceUsd: 65420.00, valueUsd: 8177.50, chain: "Bitcoin" },
         { name: "Ethereum", symbol: "ETH", balance: 0.850, priceUsd: 3480.50, valueUsd: 2958.42, chain: "Base L2" },
         { name: "Solana", symbol: "SOL", balance: 6.200, priceUsd: 154.20, valueUsd: 956.04, chain: "Solana" },
-        { name: "Calabi Network", symbol: "CALB", balance: 915.00, priceUsd: 0.425, valueUsd: 388.87, chain: "Base L2" }
+        { name: "Cession Network", symbol: "CALB", balance: 915.00, priceUsd: 0.425, valueUsd: 388.87, chain: "Base L2" }
       ]
     };
   }

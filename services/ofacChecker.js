@@ -1,5 +1,5 @@
 /**
- * Calabi Sovereign Compliance & OFAC Sanctions Screening Engine
+ * Cession Sovereign Compliance & OFAC Sanctions Screening Engine
  * 100% Free, Zero-SaaS Architecture ($0/month)
  *
  * Capabilities:
