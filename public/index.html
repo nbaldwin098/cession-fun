@@ -54,7 +54,12 @@
           <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
         </button>
 
-        <!-- 3. Profile / Portfolio -->
+        <!-- 3. Buy & Sell Crypto / Live Exchange -->
+        <button class="rail-icon-btn" id="railNavExchange" title="Buy & Sell Crypto (0% Fee Live Exchange)">
+          <svg viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
+        </button>
+
+        <!-- 4. Profile / Portfolio -->
         <button class="rail-icon-btn" id="railNavProfile" title="Profile">
           <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
         </button>
@@ -292,6 +297,351 @@
                 <!-- Populated dynamically -->
               </tbody>
             </table>
+          </div>
+        </section>
+      </main>
+
+      <!-- =========================================================
+           VIEW: SOVEREIGN LIVE CRYPTO EXCHANGE & 0% FEE SWAP
+      ========================================================= -->
+      <main class="page-view" id="viewExchange">
+        <section class="explore-section">
+          <!-- Top Header Row -->
+          <div class="section-header-row" style="flex-wrap: wrap; gap: 14px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h2 class="section-title">💱 Sovereign Live Crypto Exchange</h2>
+                <span style="background: rgba(134, 239, 172, 0.12); color: var(--pump-mint); border: 1px solid var(--pump-mint); font-size: 11px; font-weight: 800; font-family: var(--font-mono); padding: 2px 8px; border-radius: 12px;">0.00% FEE FREE</span>
+              </div>
+              <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                Live on-chain spot swap, real-time Coinbase oracle feeds, and instant non-custodial wallet execution.
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button class="cat-pill-btn active" id="btnExchangeTabSwap" onclick="window.exchangeManager.switchTab('swap')">💱 0% Swap</button>
+              <button class="cat-pill-btn" id="btnExchangeTabBuy" onclick="window.exchangeManager.switchTab('buy')">💳 Buy with Card</button>
+              <button class="cat-pill-btn" id="btnExchangeTabTransfer" onclick="window.exchangeManager.switchTab('transfer')">📥 Send / Receive</button>
+            </div>
+          </div>
+
+          <!-- Real-Time Ticker Strip -->
+          <div class="exchange-ticker-strip" id="exchangeTickerStrip">
+            <div class="exchange-ticker-chip active" data-pair="SOL-USDC" onclick="window.exchangeManager.selectPair('SOL-USDC')">
+              <span style="font-weight: 700; color: #fff;">SOL/USDC</span>
+              <span id="stripSolPrice" style="color: var(--pump-mint); font-weight: 700;">$154.20</span>
+              <span style="color: var(--pump-mint); font-size: 11px;">+5.72%</span>
+            </div>
+            <div class="exchange-ticker-chip" data-pair="ETH-USDC" onclick="window.exchangeManager.selectPair('ETH-USDC')">
+              <span style="font-weight: 700; color: #fff;">ETH/USDC</span>
+              <span id="stripEthPrice" style="color: var(--pump-mint); font-weight: 700;">$3,480.50</span>
+              <span style="color: var(--pump-mint); font-size: 11px;">+3.15%</span>
+            </div>
+            <div class="exchange-ticker-chip" data-pair="BTC-USDC" onclick="window.exchangeManager.selectPair('BTC-USDC')">
+              <span style="font-weight: 700; color: #fff;">BTC/USDC</span>
+              <span id="stripBtcPrice" style="color: var(--pump-mint); font-weight: 700;">$65,420.00</span>
+              <span style="color: var(--pump-mint); font-size: 11px;">+2.84%</span>
+            </div>
+            <div class="exchange-ticker-chip" data-pair="SOL-ETH" onclick="window.exchangeManager.selectPair('SOL-ETH')">
+              <span style="font-weight: 700; color: #fff;">SOL/ETH</span>
+              <span id="stripSolEthPrice" style="color: #fff; font-weight: 700;">0.0443 ETH</span>
+              <span style="color: var(--pump-mint); font-size: 11px;">+2.45%</span>
+            </div>
+            <div class="exchange-ticker-chip" data-pair="CESS-SOL" onclick="window.exchangeManager.selectPair('CESS-SOL')">
+              <span style="font-weight: 700; color: #fff;">CESS/SOL</span>
+              <span id="stripCessPrice" style="color: var(--pump-mint); font-weight: 700;">0.0027 SOL</span>
+              <span style="color: var(--pump-mint); font-size: 11px;">+14.80%</span>
+            </div>
+          </div>
+
+          <!-- Main Exchange Grid: Left Chart/Orderbook vs Right Swap Terminal -->
+          <div class="exchange-grid-container">
+            
+            <!-- LEFT COLUMN: Dynamic Interactive Chart & Orderbook -->
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              
+              <!-- Chart Card -->
+              <div class="exchange-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                  <div style="display: flex; align-items: baseline; gap: 10px;">
+                    <span id="activePairDisplay" style="font-size: 18px; font-weight: 800; color: #fff; font-family: var(--font-mono);">SOL/USDC</span>
+                    <span id="activePairPriceDisplay" style="font-size: 18px; font-weight: 800; color: var(--pump-mint); font-family: var(--font-mono);">$154.20</span>
+                    <span id="activePairChangeDisplay" style="font-size: 11px; font-weight: 700; color: var(--pump-mint); background: rgba(134,239,172,0.1); padding: 2px 6px; border-radius: 8px;">+5.72% 24h</span>
+                  </div>
+                  <div class="category-pills-row" style="margin: 0;">
+                    <button class="cat-pill-btn active" style="padding: 2px 8px; font-size: 11px;" onclick="window.exchangeManager.setTimeframe('1m', this)">1m</button>
+                    <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="window.exchangeManager.setTimeframe('5m', this)">5m</button>
+                    <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="window.exchangeManager.setTimeframe('15m', this)">15m</button>
+                    <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="window.exchangeManager.setTimeframe('1h', this)">1h</button>
+                    <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="window.exchangeManager.setTimeframe('1D', this)">1D</button>
+                  </div>
+                </div>
+
+                <!-- Canvas Chart Area -->
+                <div style="background: #090c12; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); height: 300px; position: relative; overflow: hidden;">
+                  <canvas id="exchangeCandleCanvas" width="700" height="300" style="width: 100%; height: 100%; display: block;"></canvas>
+                </div>
+
+                <!-- Market Stats Bar -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; font-size: 11px; font-family: var(--font-mono); background: var(--bg-input); padding: 10px; border-radius: var(--radius-sm);">
+                  <div><span style="color: var(--text-muted);">24h High:</span> <strong id="stat24hHigh" style="color: #fff;">$158.40</strong></div>
+                  <div><span style="color: var(--text-muted);">24h Low:</span> <strong id="stat24hLow" style="color: #fff;">$144.10</strong></div>
+                  <div><span style="color: var(--text-muted);">24h Volume:</span> <strong id="stat24hVol" style="color: #fff;">$1.42M</strong></div>
+                  <div><span style="color: var(--text-muted);">Oracle:</span> <strong style="color: var(--pump-mint);">Coinbase Live</strong></div>
+                </div>
+              </div>
+
+              <!-- L2 Orderbook & Recent Trades Grid -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <!-- L2 Depth Orderbook -->
+                <div class="exchange-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-weight: 700; color: #fff; font-size: 13px;">📊 L2 Order Book</span>
+                    <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">Spread: <strong id="orderbookSpread" style="color: var(--pump-mint);">0.05</strong></span>
+                  </div>
+                  <table class="pump-data-table" style="font-size: 11px;">
+                    <thead>
+                      <tr><th>Price ($)</th><th>Size</th><th>Total</th></tr>
+                    </thead>
+                    <tbody id="exchangeOrderbookBody">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Recent Live Trades -->
+                <div class="exchange-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-weight: 700; color: #fff; font-size: 13px;">⚡ Market Trades</span>
+                    <span style="font-size: 11px; color: var(--pump-mint); font-weight: 700;">● Live Stream</span>
+                  </div>
+                  <table class="pump-data-table" style="font-size: 11px;">
+                    <thead>
+                      <tr><th>Time</th><th>Type</th><th>Price ($)</th><th>Amount</th></tr>
+                    </thead>
+                    <tbody id="exchangeRecentTradesBody">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Sovereign Swap & Buy Crypto Terminal -->
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              
+              <!-- Active Connected Wallet Card -->
+              <div class="exchange-card" style="border-left: 3px solid var(--pump-mint);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <div style="font-weight: 800; font-size: 13px; color: #fff; display: flex; align-items: center; gap: 6px;">
+                    <span>💼 Active Trading Wallet</span>
+                  </div>
+                  <span id="exchangeWalletBadge" style="font-size: 10px; font-weight: 700; font-family: var(--font-mono); color: var(--pump-mint); background: rgba(134,239,172,0.1); padding: 2px 6px; border-radius: 10px;">CONNECTED</span>
+                </div>
+                
+                <div style="display: flex; align-items: center; justify-content: space-between; font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
+                  <span id="exchangeWalletAddressDisplay">0x082...004c (Sovereign Vault)</span>
+                  <button class="cat-pill-btn" style="padding: 1px 6px; font-size: 10px;" onclick="window.launchpadManager.copyCurrentAddress()">copy</button>
+                </div>
+
+                <!-- Live Balance Pills -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-family: var(--font-mono); font-size: 11px;">
+                  <div style="background: var(--bg-input); padding: 6px 10px; border-radius: var(--radius-xs);">
+                    <span style="color: var(--text-muted);">SOL:</span> <strong id="exchangeBalSol" style="color: var(--pump-mint);">6.20 SOL</strong>
+                  </div>
+                  <div style="background: var(--bg-input); padding: 6px 10px; border-radius: var(--radius-xs);">
+                    <span style="color: var(--text-muted);">ETH:</span> <strong id="exchangeBalEth" style="color: #fff;">1.45 ETH</strong>
+                  </div>
+                  <div style="background: var(--bg-input); padding: 6px 10px; border-radius: var(--radius-xs);">
+                    <span style="color: var(--text-muted);">USDC:</span> <strong id="exchangeBalUsdc" style="color: #fff;">$1,250.00</strong>
+                  </div>
+                  <div style="background: var(--bg-input); padding: 6px 10px; border-radius: var(--radius-xs);">
+                    <span style="color: var(--text-muted);">CESS:</span> <strong id="exchangeBalCess" style="color: var(--pump-mint);">250,000</strong>
+                  </div>
+                </div>
+
+                <!-- Quick Action if Disconnected or Want to Create New -->
+                <div id="exchangeWalletActionsRow" style="display: flex; gap: 8px; margin-top: 10px;">
+                  <button class="btn-signin-mint" style="flex: 1; padding: 6px; font-size: 11px;" onclick="window.walletEngine.generateNewVault()">+ New 1-Click Vault</button>
+                  <button class="cat-pill-btn" style="flex: 1; padding: 6px; font-size: 11px; justify-content: center;" onclick="window.walletEngine.openAuthModal()">Connect Wallet</button>
+                </div>
+              </div>
+
+              <!-- PANE 1: 0% FEE INSTANT SWAP -->
+              <div class="exchange-card" id="paneExchangeSwap">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <h3 style="font-size: 15px; font-weight: 800; color: #fff;">💱 0% Fee Instant Swap</h3>
+                  <span style="font-size: 11px; color: var(--pump-mint); font-family: var(--font-mono);">Slippage: <strong>0.5%</strong></span>
+                </div>
+
+                <!-- YOU PAY INPUT -->
+                <div class="exchange-input-box">
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 6px;">
+                    <span>You Pay</span>
+                    <span>Balance: <strong id="swapPayBalanceDisplay" style="color: #fff;">6.20 SOL</strong> <button class="cat-pill-btn" style="padding: 1px 4px; font-size: 10px; margin-left: 4px;" onclick="window.exchangeManager.setPayMax()">MAX</button></span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="number" id="swapPayAmountInput" placeholder="0.0" step="any" style="background: transparent; border: none; font-size: 22px; font-weight: 800; color: #fff; width: 100%; outline: none; font-family: var(--font-mono);" oninput="window.exchangeManager.updateQuote()">
+                    <select id="swapPayTokenSelect" class="exchange-select" onchange="window.exchangeManager.updateQuote()">
+                      <option value="SOL">SOL (Solana)</option>
+                      <option value="ETH">ETH (Base / EVM)</option>
+                      <option value="BTC">BTC (Bitcoin)</option>
+                      <option value="USDC">USDC (USD Coin)</option>
+                      <option value="USDT">USDT (Tether)</option>
+                      <option value="CESS">CESS (Cession)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- FLIP BUTTON -->
+                <button class="exchange-swap-flip-btn" id="btnFlipSwapTokens" title="Flip Direction" onclick="window.exchangeManager.flipTokens()">
+                  ⇅
+                </button>
+
+                <!-- YOU RECEIVE INPUT -->
+                <div class="exchange-input-box" style="margin-top: -8px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 6px;">
+                    <span>You Receive (Estimated)</span>
+                    <span id="swapRatePill" style="font-family: var(--font-mono); color: var(--pump-mint);">1 SOL = 154.20 USDC</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="number" id="swapReceiveAmountInput" placeholder="0.0" readonly style="background: transparent; border: none; font-size: 22px; font-weight: 800; color: var(--pump-mint); width: 100%; outline: none; font-family: var(--font-mono);">
+                    <select id="swapReceiveTokenSelect" class="exchange-select" onchange="window.exchangeManager.updateQuote()">
+                      <option value="USDC">USDC (USD Coin)</option>
+                      <option value="SOL">SOL (Solana)</option>
+                      <option value="ETH">ETH (Base / EVM)</option>
+                      <option value="BTC">BTC (Bitcoin)</option>
+                      <option value="USDT">USDT (Tether)</option>
+                      <option value="CESS">CESS (Cession)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- ROUTE & FEE SUMMARY -->
+                <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 10px; margin: 12px 0; font-size: 11px; display: flex; flex-direction: column; gap: 6px;">
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Protocol Exchange Fee:</span>
+                    <strong style="color: var(--pump-mint);">0.00% ($0.00 FREE)</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Estimated Network Gas:</span>
+                    <span style="color: #fff; font-family: var(--font-mono);">~$0.0002 (Solana/Base)</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Routing Method:</span>
+                    <span style="color: #fff;">Direct Sovereign Non-Custodial Route</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Price Impact:</span>
+                    <span style="color: var(--pump-mint);">&lt; 0.01%</span>
+                  </div>
+                </div>
+
+                <button class="btn-signin-mint" id="btnExecuteSwap" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 800;" onclick="window.exchangeManager.executeSwap()">
+                  💱 Execute Instant 0% Swap
+                </button>
+              </div>
+
+              <!-- PANE 2: BUY CRYPTO WITH CARD / ON-RAMP -->
+              <div class="exchange-card" id="paneExchangeBuy" style="display: none;">
+                <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 6px;">💳 Buy Real Crypto with Card</h3>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 14px;">Instant zero-fee on-ramp deposited straight into your connected wallet.</div>
+
+                <div class="form-group-pump">
+                  <label class="form-label-pump">Select Crypto to Purchase</label>
+                  <select id="buyCryptoTargetSelect" class="form-input-pump" style="cursor: pointer;" onchange="window.exchangeManager.updateBuyQuote()">
+                    <option value="SOL">SOL — Solana ($154.20)</option>
+                    <option value="ETH">ETH — Base / Ethereum ($3,480.50)</option>
+                  </select>
+                </div>
+
+                <div class="form-group-pump">
+                  <label class="form-label-pump">Amount (USD)</label>
+                  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px;">
+                    <button class="cat-pill-btn active" onclick="window.exchangeManager.setBuyAmount(50, this)">$50</button>
+                    <button class="cat-pill-btn" onclick="window.exchangeManager.setBuyAmount(100, this)">$100</button>
+                    <button class="cat-pill-btn" onclick="window.exchangeManager.setBuyAmount(250, this)">$250</button>
+                    <button class="cat-pill-btn" onclick="window.exchangeManager.setBuyAmount(500, this)">$500</button>
+                  </div>
+                  <input type="number" id="buyCryptoUsdInput" class="form-input-pump" value="50" placeholder="Custom USD" oninput="window.exchangeManager.updateBuyQuote()">
+                </div>
+
+                <div class="exchange-input-box" style="margin-top: 8px;">
+                  <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">You Will Receive:</div>
+                  <div style="font-size: 20px; font-weight: 800; color: var(--pump-mint); font-family: var(--font-mono);" id="buyCryptoReceiveQuote">
+                    ≈ 0.3242 SOL
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                    Destination: <span id="buyCryptoDestinationDisplay" style="color: #fff; font-family: var(--font-mono);">0x082...004c</span>
+                  </div>
+                </div>
+
+                <button class="btn-signin-mint" id="btnExecuteCardBuy" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 800; margin-top: 12px;" onclick="window.exchangeManager.executeCardBuy()">
+                  ⚡ Instant Buy Crypto (0% Fee)
+                </button>
+              </div>
+
+              <!-- PANE 3: SEND & RECEIVE / TRANSFER -->
+              <div class="exchange-card" id="paneExchangeTransfer" style="display: none;">
+                <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 6px;">📥 Deposit & Withdraw</h3>
+                
+                <!-- Deposit / Receive Tab Box -->
+                <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px;">
+                  <div style="font-weight: 700; color: var(--pump-mint); font-size: 12px; margin-bottom: 6px;">🟢 Receive Crypto from Coinbase / Binance / Phantom</div>
+                  <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 8px;">
+                    Send any SOL, ETH, or USDC to your sovereign vault address below to fund your live trading balance.
+                  </div>
+                  <div class="wallet-addr-box" style="margin-bottom: 6px;">
+                    <span>SOL Address:</span>
+                    <strong id="depositSolAddr" style="color: var(--pump-mint);">CessVault99xSol00119284019284019283</strong>
+                    <button class="cat-pill-btn" style="padding: 2px 6px; font-size: 10px;" onclick="navigator.clipboard.writeText(document.getElementById('depositSolAddr').textContent); window.launchpadManager.toast('SOL address copied', 'success');">copy</button>
+                  </div>
+                  <div class="wallet-addr-box">
+                    <span>EVM Address:</span>
+                    <strong id="depositEthAddr" style="color: #fff;">0x0824b23a910cd99e1a2f0093ba4210e76a01004c</strong>
+                    <button class="cat-pill-btn" style="padding: 2px 6px; font-size: 10px;" onclick="navigator.clipboard.writeText(document.getElementById('depositEthAddr').textContent); window.launchpadManager.toast('EVM address copied', 'success');">copy</button>
+                  </div>
+                </div>
+
+                <!-- Send / Withdraw Section -->
+                <div>
+                  <div style="font-weight: 700; color: #fff; font-size: 13px; margin-bottom: 8px;">📤 Send / Withdraw to External Address</div>
+                  <div class="form-group-pump">
+                    <label class="form-label-pump">Token</label>
+                    <select id="transferTokenSelect" class="form-input-pump">
+                      <option value="SOL">SOL (Solana)</option>
+                      <option value="ETH">ETH (Base L2)</option>
+                      <option value="USDC">USDC (USD Coin)</option>
+                    </select>
+                  </div>
+                  <div class="form-group-pump">
+                    <label class="form-label-pump">Recipient Address</label>
+                    <input type="text" id="transferRecipientInput" class="form-input-pump" placeholder="e.g. Phantom / Coinbase deposit address">
+                  </div>
+                  <div class="form-group-pump">
+                    <label class="form-label-pump">Amount</label>
+                    <input type="number" id="transferAmountInput" class="form-input-pump" placeholder="0.0" step="any">
+                  </div>
+                  <button class="btn-signin-mint" style="width: 100%; padding: 12px; font-weight: 800;" onclick="window.exchangeManager.executeTransfer()">
+                    Confirm & Send Crypto
+                  </button>
+                </div>
+              </div>
+
+              <!-- RECENT SESSION SWAP HISTORY -->
+              <div class="exchange-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <span style="font-weight: 700; color: #fff; font-size: 13px;">📋 Your Exchange Activity</span>
+                  <span style="font-size: 11px; color: var(--text-muted);">Live On-Chain Receipts</span>
+                </div>
+                <div id="exchangeRecentHistoryList" style="display: flex; flex-direction: column; gap: 8px; font-family: var(--font-mono); font-size: 11px;">
+                  <div style="color: var(--text-muted); text-align: center; padding: 12px;">No swaps executed in this session yet.</div>
+                </div>
+              </div>
+
+            </div>
+
           </div>
         </section>
       </main>
@@ -708,10 +1058,12 @@
             </div>
           </div>
 
-          <!-- Column 2: Markets & Launchpad -->
+          <!-- Column 2: Markets & Trade -->
           <div>
             <div class="footer-col-title">Markets & Trade</div>
             <ul class="footer-links-list">
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('exchange')">💱 Live 0% Crypto Exchange</button></li>
+              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('exchange')">💳 Buy Crypto with Card</button></li>
               <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('board')">Coins Board</button></li>
               <li class="footer-link-item"><button onclick="window.launchpadManager.openDeployModal()">+ Create a Coin (0.1 SOL)</button></li>
               <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('bundles')">Bundles & Baskets</button></li>
@@ -1119,6 +1471,7 @@
 
   <!-- Client JavaScript Controllers -->
   <script src="js/wallet.js"></script>
+  <script src="js/exchange.js"></script>
   <script src="js/charts.js"></script>
   <script src="js/trading.js"></script>
   <script src="js/launchpad.js"></script>

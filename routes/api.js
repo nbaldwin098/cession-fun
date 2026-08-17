@@ -12,6 +12,7 @@ const marketRoutes = require('./market');
 const complianceRoutes = require('./compliance');
 const treasuryRoutes = require('./treasury');
 const authRoutes = require('./auth');
+const exchangeRoutes = require('./exchange');
 
 router.use('/auth', authRoutes);
 router.use('/stripe', stripeRoutes);
@@ -20,6 +21,7 @@ router.use('/wallets', walletRoutes);
 router.use('/market', marketRoutes);
 router.use('/compliance', complianceRoutes);
 router.use('/treasury', treasuryRoutes);
+router.use('/exchange', exchangeRoutes);
 
 
 // Health & System Info

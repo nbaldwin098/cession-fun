@@ -1213,3 +1213,113 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   transform: translateX(2px);
 }
 
+/* =========================================================
+   LIVE CRYPTO EXCHANGE & 0% FEE SWAP TERMINAL
+========================================================= */
+.exchange-grid-container {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 20px;
+  margin-top: 16px;
+}
+
+@media (max-width: 1080px) {
+  .exchange-grid-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.exchange-ticker-strip {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 16px;
+}
+
+.exchange-ticker-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.exchange-ticker-chip:hover, .exchange-ticker-chip.active {
+  border-color: var(--pump-mint);
+  background: rgba(134, 239, 172, 0.08);
+}
+
+.exchange-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+
+.exchange-input-box {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin: 8px 0;
+  transition: border-color 0.15s ease;
+}
+
+.exchange-input-box:focus-within {
+  border-color: var(--pump-mint);
+}
+
+.exchange-select {
+  background: var(--bg-pill);
+  color: #fff;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-weight: 700;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  outline: none;
+}
+
+.exchange-swap-flip-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  color: var(--pump-mint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: -8px auto;
+  z-index: 2;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.exchange-swap-flip-btn:hover {
+  transform: rotate(180deg) scale(1.08);
+  background: rgba(134, 239, 172, 0.15);
+  border-color: var(--pump-mint);
+}
+
+.exchange-depth-bar-bid {
+  background: rgba(134, 239, 172, 0.15);
+  border-left: 2px solid var(--pump-mint);
+}
+
+.exchange-depth-bar-ask {
+  background: rgba(248, 113, 113, 0.15);
+  border-right: 2px solid var(--accent-red);
+}
+
+

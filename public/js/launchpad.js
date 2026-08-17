@@ -164,8 +164,17 @@ class CessionLaunchpadManager {
     });
     this.fetchBundles();
 
-    // Check if initial URL is /bundles or #bundles
-    if (window.location.pathname.startsWith('/bundles') || window.location.hash === '#bundles' || window.location.pathname.startsWith('/collections')) {
+    // Check initial URL routing
+    const path = window.location.pathname;
+    const hash = window.location.hash;
+    if (path.startsWith('/exchange') || hash === '#exchange' || path.startsWith('/swap') || path.startsWith('/trade')) {
+      const btn = document.getElementById('railNavExchange');
+      if (btn) {
+        document.querySelectorAll('.rail-icon-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+      this.switchPage('exchange');
+    } else if (path.startsWith('/bundles') || hash === '#bundles' || path.startsWith('/collections')) {
       const btn = document.getElementById('railNavBundles');
       if (btn) {
         document.querySelectorAll('.rail-icon-btn').forEach(b => b.classList.remove('active'));
@@ -179,6 +188,7 @@ class CessionLaunchpadManager {
     const navItems = [
       { id: 'railNavHome', view: 'board', url: '/' },
       { id: 'railNavExplore', view: 'board', url: '/' },
+      { id: 'railNavExchange', view: 'exchange', url: '/exchange' },
       { id: 'railNavProfile', view: 'profile', url: '/profile' },
       { id: 'railNavChat', view: 'board', toast: 'Community chat & trollbox active' },
       { id: 'railNavLeaderboard', view: 'leaderboard', url: '/leaderboard' },
@@ -887,6 +897,7 @@ class CessionLaunchpadManager {
   switchPage(viewName) {
     const views = {
       board: document.getElementById('viewBoard'),
+      exchange: document.getElementById('viewExchange'),
       bundles: document.getElementById('viewBundles'),
       staking: document.getElementById('viewStaking'),
       transparency: document.getElementById('viewTransparency'),
@@ -902,7 +913,14 @@ class CessionLaunchpadManager {
       }
     });
 
-    if (viewName === 'bundles') {
+    if (viewName === 'exchange') {
+      if (window.exchangeManager) {
+        window.exchangeManager.fetchTickers();
+        window.exchangeManager.fetchCandles(window.exchangeManager.activePair, window.exchangeManager.activeTimeframe);
+        window.exchangeManager.updateWalletDisplay();
+        setTimeout(() => window.exchangeManager.renderCandleChart(), 100);
+      }
+    } else if (viewName === 'bundles') {
       this.fetchBundles();
     } else if (viewName === 'transparency') {
       this.refreshTransparency();
