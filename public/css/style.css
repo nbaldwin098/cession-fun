@@ -1,18 +1,20 @@
 /* =========================================================
    PUMP.FUN EXACT REPLICA DESIGN SYSTEM & STYLESHEET
-   cession.fun — Sovereign Asset Fair Launch Protocol
+   Complete Multi-Page UI: Hamburger Sidebar, Board, Live, 
+   Leaderboard, Profile, Token Detail, and Modals
    ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap');
 
 :root {
-  /* Pump.fun Signature Palette */
+  /* Pump.fun Signature Dark & Neon Palette */
   --bg-main: #10141e;
   --bg-darker: #0b0e14;
   --bg-card: #181f2c;
   --bg-card-hover: #1f283a;
   --bg-input: #121824;
   --bg-modal: #161c28;
+  --bg-sidebar: #131822;
 
   /* Brand Accents */
   --pump-green: #86efac;
@@ -141,13 +143,13 @@ button {
 }
 
 /* =========================================================
-   HEADER / NAVBAR (PUMP.FUN EXACT PLACEMENT)
+   HEADER / NAVBAR WITH HAMBURGER (PUMP.FUN EXACT PLACEMENT)
 ========================================================= */
 .header-pump {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 24px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-main);
   position: sticky;
@@ -158,7 +160,27 @@ button {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
+}
+
+.btn-hamburger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-hamburger:hover {
+  border-color: var(--pump-green);
+  color: var(--pump-green);
 }
 
 .brand-link {
@@ -174,7 +196,7 @@ button {
 .header-links-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   font-family: var(--font-mono);
   font-size: 13px;
 }
@@ -183,8 +205,9 @@ button {
   color: var(--text-secondary);
   transition: color 0.15s ease;
   padding: 4px 6px;
+  cursor: pointer;
 }
-.bracket-link:hover {
+.bracket-link:hover, .bracket-link.active {
   color: var(--pump-green);
 }
 
@@ -225,6 +248,7 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
+  cursor: pointer;
 }
 
 .wallet-connected-pill .balance {
@@ -233,11 +257,142 @@ button {
 }
 
 /* =========================================================
+   LEFT SLIDE-OUT HAMBURGER SIDEBAR DRAWER
+========================================================= */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 11, 16, 0.7);
+  backdrop-filter: blur(3px);
+  z-index: 250;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+.sidebar-drawer {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: 280px;
+  height: 100vh;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  z-index: 260;
+  display: flex;
+  flex-direction: column;
+  transition: left 0.25s ease;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar-drawer.active {
+  left: 0;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--pump-green);
+}
+
+.btn-close-sidebar {
+  font-size: 18px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.btn-close-sidebar:hover {
+  color: #fff;
+}
+
+.sidebar-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 10px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.sidebar-menu-item:hover, .sidebar-menu-item.active {
+  background: var(--bg-card);
+  color: var(--pump-green);
+  border-left: 3px solid var(--pump-green);
+}
+
+.sidebar-menu-item .icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-social-links {
+  display: flex;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.sidebar-legal-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* =========================================================
+   PAGE SECTIONS & VIEW CONTAINERS
+========================================================= */
+.page-view {
+  display: none;
+}
+.page-view.active {
+  display: block;
+}
+
+/* =========================================================
    HERO / CALL TO ACTION (START A NEW COIN)
 ========================================================= */
 .hero-cta-section {
   text-align: center;
-  padding: 32px 16px 18px;
+  padding: 28px 16px 16px;
 }
 
 .btn-start-coin-hero {
@@ -264,7 +419,7 @@ button {
 ========================================================= */
 .koth-container {
   max-width: 900px;
-  margin: 0 auto 24px;
+  margin: 0 auto 20px;
   padding: 0 16px;
 }
 
@@ -350,12 +505,8 @@ button {
   text-overflow: ellipsis;
 }
 
-.koth-desc-row strong {
-  color: #fff;
-}
-
 /* =========================================================
-   SEARCH & FILTER CONTROLS (PUMP.FUN EXACT MATCH)
+   SEARCH & FILTER CONTROLS
 ========================================================= */
 .controls-container {
   max-width: 1280px;
@@ -540,6 +691,231 @@ button {
 
 .token-card-title-desc strong {
   color: var(--text-primary);
+}
+
+/* =========================================================
+   LIVESTREAMS PAGE VIEW
+========================================================= */
+.live-page-container {
+  max-width: 1280px;
+  margin: 0 auto 40px;
+  padding: 24px 20px;
+}
+
+.live-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.live-page-title {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+.stream-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.stream-card:hover {
+  border-color: var(--pump-green);
+  transform: translateY(-2px);
+}
+
+.stream-video-preview {
+  width: 100%;
+  height: 200px;
+  background: #090c12;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.stream-video-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.65;
+}
+
+.stream-badge-live {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--market-red);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stream-badge-viewers {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+}
+
+.stream-card-body {
+  padding: 14px;
+}
+
+.stream-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.stream-creator-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* =========================================================
+   LEADERBOARD PAGE VIEW
+========================================================= */
+.leaderboard-container {
+  max-width: 1180px;
+  margin: 0 auto 40px;
+  padding: 24px 20px;
+}
+
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.leaderboard-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.leaderboard-tab-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+}
+
+.leaderboard-tab-btn.active {
+  background: var(--pump-green);
+  color: #0b0e14;
+  font-weight: 700;
+  border-color: var(--pump-green);
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-weight: 800;
+  font-size: 11px;
+}
+.rank-badge.rank-1 { background: #fbbf24; color: #000; }
+.rank-badge.rank-2 { background: #94a3b8; color: #000; }
+.rank-badge.rank-3 { background: #b45309; color: #fff; }
+
+/* =========================================================
+   PROFILE & PORTFOLIO PAGE VIEW
+========================================================= */
+.profile-container {
+  max-width: 1000px;
+  margin: 0 auto 40px;
+  padding: 24px 20px;
+}
+
+.profile-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.profile-avatar-lg {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid var(--pump-green);
+}
+
+.profile-details-col {
+  flex: 1;
+}
+
+.profile-address-row {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.profile-balances-grid {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.profile-balance-item strong {
+  color: var(--pump-green);
+  font-size: 16px;
 }
 
 /* =========================================================
@@ -1001,7 +1377,7 @@ button {
 }
 
 /* =========================================================
-   MODAL POPUPS: START A NEW COIN & HOW IT WORKS
+   MODALS: START COIN, HOW IT WORKS, WALLET
 ========================================================= */
 .modal-overlay-generic {
   position: fixed;
@@ -1109,7 +1485,7 @@ button {
   margin-bottom: 16px;
 }
 
-/* Table styles for holders & trades */
+/* Table styles */
 .pump-table {
   width: 100%;
   border-collapse: collapse;
@@ -1119,14 +1495,14 @@ button {
 
 .pump-table th {
   text-align: left;
-  padding: 8px 10px;
+  padding: 10px 12px;
   color: var(--text-muted);
   border-bottom: 1px solid var(--border-color);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .pump-table td {
-  padding: 8px 10px;
+  padding: 10px 12px;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-subtle);
 }
@@ -1160,6 +1536,6 @@ button {
 }
 
 @keyframes slideIn {
-  from { transform: translateX(50px); opacity: 0; }
+  from { transform: translateX(50px); opacity: 1; }
   to { transform: translateX(0); opacity: 1; }
 }

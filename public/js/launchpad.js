@@ -1,5 +1,6 @@
 /**
- * Cession.fun — Exact Pump.fun UI & Launchpad Controller
+ * Cession.fun — Multi-Page & Sidebar Drawer Controller
+ * Exact Pump.fun UI for Board, Livestreams, Leaderboard, and Profile
  */
 
 class CessionLaunchpadManager {
@@ -15,21 +16,264 @@ class CessionLaunchpadManager {
     this.activeDir = 'desc';
     this.tokens = [];
     this.activeToken = null;
-    this.activeTab = 'thread'; // 'thread' | 'trades' | 'holders'
+    this.activeTab = 'thread';
+    this.currentView = 'board'; // 'board' | 'live' | 'leaderboard' | 'profile'
 
     this.init();
   }
 
   init() {
     this.bindEvents();
+    this.bindSidebarAndNavigation();
     this.fetchTokens();
     this.fetchGlobalTrades();
+    this.checkInitialRoute();
 
     // Auto refresh every 6 seconds
     setInterval(() => {
       this.fetchTokens(false);
       this.fetchGlobalTrades();
     }, 6000);
+  }
+
+  checkInitialRoute() {
+    const path = window.location.pathname;
+    if (path === '/live' || path === '/livestreams') {
+      this.switchPage('live');
+    } else if (path === '/leaderboard' || path === '/rankings') {
+      this.switchPage('leaderboard');
+    } else if (path === '/profile' || path === '/portfolio') {
+      this.switchPage('profile');
+    } else if (path.startsWith('/token/') || path.startsWith('/coin/')) {
+      const sym = path.split('/')[2];
+      if (sym) {
+        setTimeout(() => this.openTokenDetail(sym), 300);
+      }
+    }
+  }
+
+  bindSidebarAndNavigation() {
+    const btnOpenSidebar = document.getElementById('btnOpenSidebar');
+    const btnCloseSidebar = document.getElementById('btnCloseSidebar');
+    const sidebarDrawer = document.getElementById('sidebarDrawer');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    const openDrawer = () => {
+      if (sidebarDrawer) sidebarDrawer.classList.add('active');
+      if (sidebarOverlay) sidebarOverlay.classList.add('active');
+    };
+
+    const closeDrawer = () => {
+      if (sidebarDrawer) sidebarDrawer.classList.remove('active');
+      if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+    };
+
+    if (btnOpenSidebar) btnOpenSidebar.addEventListener('click', openDrawer);
+    if (btnCloseSidebar) btnCloseSidebar.addEventListener('click', closeDrawer);
+    if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeDrawer);
+
+    // Sidebar navigation menu items
+    const menuBoard = document.getElementById('menuNavBoard');
+    const menuLive = document.getElementById('menuNavLive');
+    const menuLeaderboard = document.getElementById('menuNavLeaderboard');
+    const menuFollowing = document.getElementById('menuNavFollowing');
+    const menuProfile = document.getElementById('menuNavProfile');
+    const menuHowItWorks = document.getElementById('menuNavHowItWorks');
+
+    if (menuBoard) menuBoard.addEventListener('click', () => { this.switchPage('board'); closeDrawer(); });
+    if (menuLive) menuLive.addEventListener('click', () => { this.switchPage('live'); closeDrawer(); });
+    if (menuLeaderboard) menuLeaderboard.addEventListener('click', () => { this.switchPage('leaderboard'); closeDrawer(); });
+    if (menuFollowing) menuFollowing.addEventListener('click', () => { this.switchPage('board'); closeDrawer(); this.toast('Showing followed tokens', 'info'); });
+    if (menuProfile) menuProfile.addEventListener('click', () => { this.switchPage('profile'); closeDrawer(); });
+    if (menuHowItWorks) menuHowItWorks.addEventListener('click', () => {
+      closeDrawer();
+      const modal = document.getElementById('howItWorksModal');
+      if (modal) modal.style.display = 'flex';
+    });
+
+    // Top Header links
+    const brandLink = document.getElementById('brandHomeLink');
+    const btnHeaderLive = document.getElementById('btnHeaderLive');
+    const btnHeaderLeaderboard = document.getElementById('btnHeaderLeaderboard');
+
+    if (brandLink) brandLink.addEventListener('click', (e) => { e.preventDefault(); this.switchPage('board'); });
+    if (btnHeaderLive) btnHeaderLive.addEventListener('click', (e) => { e.preventDefault(); this.switchPage('live'); });
+    if (btnHeaderLeaderboard) btnHeaderLeaderboard.addEventListener('click', (e) => { e.preventDefault(); this.switchPage('leaderboard'); });
+
+    // Wallet pill click to open profile
+    const walletPill = document.getElementById('walletConnectedPill');
+    if (walletPill) {
+      walletPill.addEventListener('click', (e) => {
+        if (e.target.id === 'btnDisconnectWallet') return;
+        this.switchPage('profile');
+      });
+    }
+
+    // Leaderboard sub-tabs
+    const tabTraders = document.getElementById('tabTopTraders');
+    const tabCreators = document.getElementById('tabTopCreators');
+    if (tabTraders && tabCreators) {
+      tabTraders.addEventListener('click', () => {
+        tabTraders.classList.add('active');
+        tabCreators.classList.remove('active');
+        this.renderLeaderboardTraders();
+      });
+      tabCreators.addEventListener('click', () => {
+        tabCreators.classList.add('active');
+        tabTraders.classList.remove('active');
+        this.renderLeaderboardCreators();
+      });
+    }
+
+    // Browser back/forward navigation
+    window.addEventListener('popstate', () => {
+      this.checkInitialRoute();
+    });
+  }
+
+  switchPage(viewName) {
+    this.currentView = viewName;
+    const views = {
+      board: document.getElementById('viewBoard'),
+      live: document.getElementById('viewLive'),
+      leaderboard: document.getElementById('viewLeaderboard'),
+      profile: document.getElementById('viewProfile')
+    };
+
+    Object.keys(views).forEach(k => {
+      if (views[k]) {
+        if (k === viewName) {
+          views[k].classList.add('active');
+        } else {
+          views[k].classList.remove('active');
+        }
+      }
+    });
+
+    // Update active state in sidebar
+    const menuItems = {
+      board: document.getElementById('menuNavBoard'),
+      live: document.getElementById('menuNavLive'),
+      leaderboard: document.getElementById('menuNavLeaderboard'),
+      profile: document.getElementById('menuNavProfile')
+    };
+    Object.keys(menuItems).forEach(k => {
+      if (menuItems[k]) {
+        if (k === viewName) menuItems[k].classList.add('active');
+        else menuItems[k].classList.remove('active');
+      }
+    });
+
+    // Close any active detail modal if switching pages
+    const detailModal = document.getElementById('tokenDetailModal');
+    if (detailModal) detailModal.style.display = 'none';
+
+    // Update browser URL history
+    const route = viewName === 'board' ? '/' : `/${viewName}`;
+    window.history.pushState({}, '', route);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Populate profile if navigating to profile
+    if (viewName === 'profile') {
+      this.updateProfileView();
+    }
+  }
+
+  updateProfileView() {
+    const addr = window.walletEngine && window.walletEngine.activeAddress 
+      ? window.walletEngine.activeAddress 
+      : '0x88f4b23a910cd99e1a2f0093ba4210e76a011a2';
+    
+    const addrEl = document.getElementById('profileAddressFull');
+    const solEl = document.getElementById('profileSolBalance');
+    const cessEl = document.getElementById('profileCessBalance');
+    const avatarEl = document.getElementById('profileAvatar');
+
+    if (addrEl) addrEl.textContent = addr;
+    if (avatarEl) avatarEl.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${addr}`;
+    if (solEl && window.walletEngine) solEl.textContent = `${(window.walletEngine.balances.sol || 6.2).toFixed(2)} SOL`;
+    if (cessEl && window.walletEngine) cessEl.textContent = `${(window.walletEngine.balances.cess || 250000).toLocaleString()} $CESS`;
+  }
+
+  renderLeaderboardTraders() {
+    const tbody = document.getElementById('leaderboardTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = `
+      <tr>
+        <td><span class="rank-badge rank-1">1</span></td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=top1" class="koth-creator-avatar" alt="Dev">
+            <span style="font-weight: 700; color: #fff;">0x88f...1a2</span>
+            <span style="background: var(--pump-green-dark); color: var(--pump-green); font-size: 10px; padding: 2px 6px; border-radius: 4px;">WHALE</span>
+          </div>
+        </td>
+        <td style="color: var(--pump-green); font-weight: 700;">+148.50 SOL</td>
+        <td style="color: var(--pump-green); font-weight: 700;">+$21,532.50</td>
+        <td>84.2%</td>
+        <td>142</td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge rank-2">2</span></td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=top2" class="koth-creator-avatar" alt="Dev">
+            <span style="font-weight: 700; color: #fff;">0x42b...c91</span>
+          </div>
+        </td>
+        <td style="color: var(--pump-green); font-weight: 700;">+92.10 SOL</td>
+        <td style="color: var(--pump-green); font-weight: 700;">+$13,354.50</td>
+        <td>78.0%</td>
+        <td>98</td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge rank-3">3</span></td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=top3" class="koth-creator-avatar" alt="Dev">
+            <span style="font-weight: 700; color: #fff;">0x91a...c01</span>
+          </div>
+        </td>
+        <td style="color: var(--pump-green); font-weight: 700;">+64.30 SOL</td>
+        <td style="color: var(--pump-green); font-weight: 700;">+$9,323.50</td>
+        <td>71.5%</td>
+        <td>64</td>
+      </tr>
+    `;
+  }
+
+  renderLeaderboardCreators() {
+    const tbody = document.getElementById('leaderboardTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = `
+      <tr>
+        <td><span class="rank-badge rank-1">1</span></td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=creator1" class="koth-creator-avatar" alt="Dev">
+            <span style="font-weight: 700; color: #fff;">0x33a...99f</span>
+            <span style="background: #fbbf24; color: #000; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">TOP CREATOR</span>
+          </div>
+        </td>
+        <td style="color: var(--pump-green); font-weight: 700;">+210.00 SOL</td>
+        <td style="color: var(--pump-green); font-weight: 700;">+$30,450.00</td>
+        <td>6 Graduated</td>
+        <td>12 Coins</td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge rank-2">2</span></td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=creator2" class="koth-creator-avatar" alt="Dev">
+            <span style="font-weight: 700; color: #fff;">0x77b...11d</span>
+          </div>
+        </td>
+        <td style="color: var(--pump-green); font-weight: 700;">+115.40 SOL</td>
+        <td style="color: var(--pump-green); font-weight: 700;">+$16,733.00</td>
+        <td>4 Graduated</td>
+        <td>8 Coins</td>
+      </tr>
+    `;
   }
 
   bindEvents() {
@@ -136,6 +380,7 @@ class CessionLaunchpadManager {
       btnCloseDetail.addEventListener('click', () => {
         detailModal.style.display = 'none';
         this.activeToken = null;
+        window.history.pushState({}, '', '/');
       });
     }
 
@@ -207,7 +452,6 @@ class CessionLaunchpadManager {
 
   updateKingOfTheHill(tokens) {
     if (!tokens || tokens.length === 0) return;
-    // King is top non-graduated token by market cap
     const sorted = [...tokens].sort((a, b) => (b.marketCapUsd || 0) - (a.marketCapUsd || 0));
     const king = sorted[0];
     if (!king) return;
@@ -299,6 +543,9 @@ class CessionLaunchpadManager {
     this.activeToken = token;
     const modal = document.getElementById('tokenDetailModal');
     if (!modal) return;
+
+    // Update browser URL
+    window.history.pushState({}, '', `/token/${token.symbol}`);
 
     // Populate metadata
     document.getElementById('detailTokenName').textContent = token.name;

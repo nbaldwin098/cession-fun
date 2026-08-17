@@ -48,3 +48,5 @@
 {"timestamp":"2026-08-17T13:28:45.056Z","type":"GEOBLOCK_VIOLATION","ip":"185.10.0.1","country":"IR","region":"","reason":"OFAC_COMPREHENSIVE_SANCTIONED_JURISDICTION_IR","decision":"BLOCKED"}
 {"timestamp":"2026-08-17T13:41:08.893Z","type":"OFAC_SDN_WALLET_MATCH","address":"0x8576acc5c05d6ce88f4e49bf65bdf0c62f91353c","ip":"0.0.0.0","country":"UNKNOWN","decision":"REJECTED_AND_LOGGED"}
 {"timestamp":"2026-08-17T13:41:08.894Z","type":"GEOBLOCK_VIOLATION","ip":"185.10.0.1","country":"IR","region":"","reason":"OFAC_COMPREHENSIVE_SANCTIONED_JURISDICTION_IR","decision":"BLOCKED"}
+{"timestamp":"2026-08-17T13:54:10.079Z","type":"OFAC_SDN_WALLET_MATCH","address":"0x8576acc5c05d6ce88f4e49bf65bdf0c62f91353c","ip":"0.0.0.0","country":"UNKNOWN","decision":"REJECTED_AND_LOGGED"}
+{"timestamp":"2026-08-17T13:54:10.080Z","type":"GEOBLOCK_VIOLATION","ip":"185.10.0.1","country":"IR","region":"","reason":"OFAC_COMPREHENSIVE_SANCTIONED_JURISDICTION_IR","decision":"BLOCKED"}

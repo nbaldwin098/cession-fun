@@ -8,7 +8,7 @@
   <!-- Meta & SEO Tags -->
   <meta name="description" content="pump.fun prevents rugs by making sure that all created tokens are safe. each coin on pump is a fair-launch with no presale and no team allocation.">
   <meta property="og:title" content="pump.fun">
-  <meta property="og:description" content="Trade and create fair launch coins on the bonding curve.">
+  <meta property="og:description" content="Trade, stream, and create fair launch coins on the bonding curve.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://cession.fun">
   <meta property="og:image" content="images/cession-logo.png">
@@ -40,18 +40,76 @@
     </div>
   </div>
 
-  <!-- Header / Navbar (Exact Pump.fun Placement) -->
+  <!-- Left Slide-Out Hamburger Sidebar Drawer -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar-drawer" id="sidebarDrawer">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <img src="images/cession-logo.png" alt="Logo" style="width: 22px; height: 22px; border-radius: 4px;">
+        <span>pump.fun</span>
+      </div>
+      <button class="btn-close-sidebar" id="btnCloseSidebar">&times;</button>
+    </div>
+
+    <nav class="sidebar-menu-list">
+      <div class="sidebar-menu-item active" id="menuNavBoard">
+        <span class="icon">🪙</span>
+        <span>board / coins</span>
+      </div>
+      <div class="sidebar-menu-item" id="menuNavLive">
+        <span class="icon">📹</span>
+        <span>livestreams</span>
+      </div>
+      <div class="sidebar-menu-item" id="menuNavLeaderboard">
+        <span class="icon">🏆</span>
+        <span>leaderboard</span>
+      </div>
+      <div class="sidebar-menu-item" id="menuNavFollowing">
+        <span class="icon">⭐</span>
+        <span>following</span>
+      </div>
+      <div class="sidebar-menu-item" id="menuNavProfile">
+        <span class="icon">👤</span>
+        <span>profile / portfolio</span>
+      </div>
+      <div class="sidebar-menu-item" id="menuNavHowItWorks">
+        <span class="icon">❓</span>
+        <span>how it works</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-social-links">
+        <a href="https://x.com" target="_blank" class="bracket-link">[twitter]</a>
+        <a href="https://t.me" target="_blank" class="bracket-link">[telegram]</a>
+        <a href="#" onclick="alert('Support channel active on Telegram and Discord.'); return false;" class="bracket-link">[support]</a>
+      </div>
+      <div class="sidebar-legal-text">
+        &copy; 2026 pump.fun • Sovereign Fair Launch Protocol
+      </div>
+    </div>
+  </aside>
+
+  <!-- Header / Navbar -->
   <header class="header-pump">
     <div class="header-left">
-      <a href="/" class="brand-link">
+      <!-- Hamburger Menu Button -->
+      <button class="btn-hamburger" id="btnOpenSidebar" title="Menu">
+        ☰
+      </button>
+
+      <a href="/" class="brand-link" id="brandHomeLink">
         <img src="images/cession-logo.png" alt="Logo" style="width: 24px; height: 24px; border-radius: 4px;">
         <span>pump.fun</span>
       </a>
+
       <div class="header-links-group">
         <a href="#" class="bracket-link" id="btnOpenHowItWorks">[ [?] how it works ]</a>
-        <a href="https://x.com" target="_blank" class="bracket-link" id="btnTwitterLink">[twitter]</a>
-        <a href="https://t.me" target="_blank" class="bracket-link" id="btnTelegramLink">[telegram]</a>
-        <a href="#" class="bracket-link" id="btnSupportLink" onclick="alert('Support channel active on Telegram and Discord.'); return false;">[support]</a>
+        <a href="#" class="bracket-link" id="btnHeaderLive">[livestreams]</a>
+        <a href="#" class="bracket-link" id="btnHeaderLeaderboard">[leaderboard]</a>
+        <a href="https://x.com" target="_blank" class="bracket-link">[twitter]</a>
+        <a href="https://t.me" target="_blank" class="bracket-link">[telegram]</a>
+        <a href="#" class="bracket-link" onclick="alert('Support channel active on Telegram and Discord.'); return false;">[support]</a>
       </div>
     </div>
 
@@ -70,9 +128,10 @@
     </div>
   </header>
 
-  <!-- Main Feed Container -->
-  <main>
-
+  <!-- =========================================================
+       VIEW 1: BOARD / COINS FEED (DEFAULT HOME)
+  ========================================================= -->
+  <main class="page-view active" id="viewBoard">
     <!-- Hero / Start a new coin -->
     <section class="hero-cta-section">
       <a href="#" class="btn-start-coin-hero" id="btnOpenDeployHero">
@@ -150,7 +209,226 @@
     <section class="cards-grid-container" id="tokenGrid">
       <!-- Tokens rendered dynamically by launchpad.js -->
     </section>
+  </main>
 
+  <!-- =========================================================
+       VIEW 2: LIVESTREAMS PAGE
+  ========================================================= -->
+  <main class="page-view" id="viewLive">
+    <div class="live-page-container">
+      <div class="live-page-header">
+        <div>
+          <h1 class="live-page-title">
+            <span>🔴</span>
+            <span>Live Creator Streams</span>
+          </h1>
+          <p style="color: var(--text-secondary); font-size: 13px; font-family: var(--font-mono); margin-top: 4px;">
+            Watch coin creators stream live on the bonding curve. Buy and chat directly from the stream.
+          </p>
+        </div>
+        <button class="btn-connect-wallet" onclick="alert('Streaming studio active! Connect camera & microphone.');">
+          📹 Go Live
+        </button>
+      </div>
+
+      <div class="live-grid" id="livestreamsGrid">
+        <!-- Stream 1 -->
+        <div class="stream-card" onclick="window.launchpadManager.openTokenDetail('CESS')">
+          <div class="stream-video-preview">
+            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600" class="stream-video-bg" alt="Streamer">
+            <div class="stream-badge-live">🔴 LIVE</div>
+            <div class="stream-badge-viewers">👥 1,420 viewers</div>
+          </div>
+          <div class="stream-card-body">
+            <div class="stream-title">🔥 PUMPING $CESS TO RAYDIUM GRADUATION TODAY!</div>
+            <div class="stream-creator-info">
+              <img src="https://api.dicebear.com/7.x/identicon/svg?seed=streamer1" class="koth-creator-avatar" alt="Avatar">
+              <span>0x88f...1a2</span>
+              <span style="color: var(--pump-green); font-weight: 700; margin-left: auto;">$CESS • $58.2k mcap</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stream 2 -->
+        <div class="stream-card" onclick="window.launchpadManager.openTokenDetail('BFT')">
+          <div class="stream-video-preview">
+            <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600" class="stream-video-bg" alt="Streamer">
+            <div class="stream-badge-live">🔴 LIVE</div>
+            <div class="stream-badge-viewers">👥 830 viewers</div>
+          </div>
+          <div class="stream-card-body">
+            <div class="stream-title">🐸 Base Pepe Frog Token Memes & Dev Q&A</div>
+            <div class="stream-creator-info">
+              <img src="https://api.dicebear.com/7.x/identicon/svg?seed=streamer2" class="koth-creator-avatar" alt="Avatar">
+              <span>0x42b...c91</span>
+              <span style="color: var(--pump-green); font-weight: 700; margin-left: auto;">$BFT • $32.4k mcap</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stream 3 -->
+        <div class="stream-card" onclick="window.launchpadManager.openTokenDetail('DOGE')">
+          <div class="stream-video-preview">
+            <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600" class="stream-video-bg" alt="Streamer">
+            <div class="stream-badge-live">🔴 LIVE</div>
+            <div class="stream-badge-viewers">👥 612 viewers</div>
+          </div>
+          <div class="stream-card-body">
+            <div class="stream-title">🚀 Doge Sovereign Fair Launch Community Stream</div>
+            <div class="stream-creator-info">
+              <img src="https://api.dicebear.com/7.x/identicon/svg?seed=streamer3" class="koth-creator-avatar" alt="Avatar">
+              <span>0x99a...01f</span>
+              <span style="color: var(--pump-green); font-weight: 700; margin-left: auto;">$DOGE • $19.8k mcap</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================================
+       VIEW 3: LEADERBOARD PAGE
+  ========================================================= -->
+  <main class="page-view" id="viewLeaderboard">
+    <div class="leaderboard-container">
+      <div class="leaderboard-header">
+        <div>
+          <h1 class="live-page-title">
+            <span>🏆</span>
+            <span>Hall of Fame & Leaderboard</span>
+          </h1>
+          <p style="color: var(--text-secondary); font-size: 13px; font-family: var(--font-mono); margin-top: 4px;">
+            Top 24-hour profitable traders and coin creators on the bonding curve.
+          </p>
+        </div>
+
+        <div class="leaderboard-tabs">
+          <button class="leaderboard-tab-btn active" id="tabTopTraders">Top Traders</button>
+          <button class="leaderboard-tab-btn" id="tabTopCreators">Top Creators</button>
+        </div>
+      </div>
+
+      <table class="pump-table" style="background: var(--bg-card); border-radius: var(--radius-sm); overflow: hidden;">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Trader / Creator</th>
+            <th>24h Profit (SOL)</th>
+            <th>24h Profit (USD)</th>
+            <th>Win Rate</th>
+            <th>Total Trades</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardTableBody">
+          <!-- Trader 1 -->
+          <tr>
+            <td><span class="rank-badge rank-1">1</span></td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="https://api.dicebear.com/7.x/identicon/svg?seed=top1" class="koth-creator-avatar" alt="Dev">
+                <span style="font-weight: 700; color: #fff;">0x88f...1a2</span>
+                <span style="background: var(--pump-green-dark); color: var(--pump-green); font-size: 10px; padding: 2px 6px; border-radius: 4px;">WHALE</span>
+              </div>
+            </td>
+            <td style="color: var(--pump-green); font-weight: 700;">+148.50 SOL</td>
+            <td style="color: var(--pump-green); font-weight: 700;">+$21,532.50</td>
+            <td>84.2%</td>
+            <td>142</td>
+          </tr>
+          <!-- Trader 2 -->
+          <tr>
+            <td><span class="rank-badge rank-2">2</span></td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="https://api.dicebear.com/7.x/identicon/svg?seed=top2" class="koth-creator-avatar" alt="Dev">
+                <span style="font-weight: 700; color: #fff;">0x42b...c91</span>
+              </div>
+            </td>
+            <td style="color: var(--pump-green); font-weight: 700;">+92.10 SOL</td>
+            <td style="color: var(--pump-green); font-weight: 700;">+$13,354.50</td>
+            <td>78.0%</td>
+            <td>98</td>
+          </tr>
+          <!-- Trader 3 -->
+          <tr>
+            <td><span class="rank-badge rank-3">3</span></td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="https://api.dicebear.com/7.x/identicon/svg?seed=top3" class="koth-creator-avatar" alt="Dev">
+                <span style="font-weight: 700; color: #fff;">0x91a...c01</span>
+              </div>
+            </td>
+            <td style="color: var(--pump-green); font-weight: 700;">+64.30 SOL</td>
+            <td style="color: var(--pump-green); font-weight: 700;">+$9,323.50</td>
+            <td>71.5%</td>
+            <td>64</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- =========================================================
+       VIEW 4: PROFILE / PORTFOLIO PAGE
+  ========================================================= -->
+  <main class="page-view" id="viewProfile">
+    <div class="profile-container">
+      <div class="profile-card">
+        <img id="profileAvatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=myprofile" class="profile-avatar-lg" alt="Profile">
+        <div class="profile-details-col">
+          <div class="profile-address-row">
+            <span id="profileAddressFull">0x0000000000000000000000000000000000000000</span>
+            <button class="preset-pill" onclick="navigator.clipboard.writeText(document.getElementById('profileAddressFull').textContent); window.launchpadManager.toast('Address copied to clipboard', 'success');">copy</button>
+          </div>
+          <div style="color: var(--text-secondary); font-size: 12px; font-family: var(--font-mono);">
+            Status: <span style="color: var(--pump-green); font-weight: 700;">Active Sovereign Vault</span>
+          </div>
+          <div class="profile-balances-grid">
+            <div class="profile-balance-item">
+              <div>SOL Balance:</div>
+              <strong id="profileSolBalance">6.20 SOL</strong>
+            </div>
+            <div class="profile-balance-item">
+              <div>$CESS Balance:</div>
+              <strong id="profileCessBalance">250,000 $CESS</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Tabs -->
+      <div class="detail-tabs-bar" style="margin-bottom: 16px;">
+        <button class="detail-tab-btn active" id="tabProfileHeld">Coins Held</button>
+        <button class="detail-tab-btn" id="tabProfileCreated">Coins Created</button>
+        <button class="detail-tab-btn" id="tabProfileHistory">Trade History</button>
+      </div>
+
+      <table class="pump-table" style="background: var(--bg-card); border-radius: var(--radius-sm);">
+        <thead>
+          <tr>
+            <th>Coin</th>
+            <th>Amount Held</th>
+            <th>Value (SOL)</th>
+            <th>PnL</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="profileHoldingsBody">
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100" style="width: 28px; height: 28px; border-radius: 4px;" alt="Cess">
+                <strong>$CESS (Cession)</strong>
+              </div>
+            </td>
+            <td>250,000</td>
+            <td>4.25 SOL</td>
+            <td style="color: var(--pump-green); font-weight: 700;">+1.45 SOL (+51.7%)</td>
+            <td><button class="preset-pill" onclick="window.launchpadManager.openTokenDetail('CESS')">trade &rarr;</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </main>
 
   <!-- =========================================================
