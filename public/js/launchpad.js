@@ -465,29 +465,54 @@ class CessionLaunchpadManager {
     if (bundleSearch) {
       bundleSearch.addEventListener('input', () => this.filterAndRenderBundles());
     }
+
+    // Category Tabs Filter (Memes, Politics, Trends, Whale, AI Agents)
+    const catPills = document.querySelectorAll('#bundleCategoryTabs .bundle-cat-pill');
+    catPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        catPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const cat = pill.getAttribute('data-category') || 'all';
+        this.activeBundleCategory = cat;
+        this.fetchBundles(cat);
+      });
+    });
   }
 
-  async fetchBundles() {
+  async fetchBundles(category = 'all') {
     try {
+      this.activeBundleCategory = category;
+      const catQuery = (category && category !== 'all') ? `?category=${category}` : '';
+      const limitQuery = (category && category !== 'all') ? `?category=${category}&limit=5` : '?limit=5';
+
       const [allRes, topRes, worstRes] = await Promise.all([
-        fetch('/api/tokens/bundles').then(r => r.json()).catch(() => ({ success: false })),
-        fetch('/api/tokens/bundles/top').then(r => r.json()).catch(() => ({ success: false })),
-        fetch('/api/tokens/bundles/worst').then(r => r.json()).catch(() => ({ success: false }))
+        fetch(`/api/tokens/bundles${catQuery}`).then(r => r.json()).catch(() => ({ success: false })),
+        fetch(`/api/tokens/bundles/top${limitQuery}`).then(r => r.json()).catch(() => ({ success: false })),
+        fetch(`/api/tokens/bundles/worst${limitQuery}`).then(r => r.json()).catch(() => ({ success: false }))
       ]);
 
       if (allRes.success && allRes.bundles) {
         this.bundles = allRes.bundles;
       }
       if (topRes.success && topRes.bundles) {
-        this.topBundles = topRes.bundles;
+        this.topBundles = topRes.bundles.slice(0, 5);
       } else {
-        this.topBundles = [...this.bundles].sort((a, b) => (b.roi24h || 0) - (a.roi24h || 0)).slice(0, 3);
+        this.topBundles = [...this.bundles].sort((a, b) => (b.roi24h || 0) - (a.roi24h || 0)).slice(0, 5);
       }
       if (worstRes.success && worstRes.bundles) {
-        this.worstBundles = worstRes.bundles;
+        this.worstBundles = worstRes.bundles.slice(0, 5);
       } else {
-        this.worstBundles = [...this.bundles].sort((a, b) => (a.roi24h || 0) - (b.roi24h || 0)).slice(0, 3);
+        this.worstBundles = [...this.bundles].sort((a, b) => (a.roi24h || 0) - (b.roi24h || 0)).slice(0, 5);
       }
+
+      // Update badge labels
+      const topBadge = document.getElementById('topCatBadge');
+      const worstBadge = document.getElementById('worstCatBadge');
+      const titleSec = document.getElementById('allBundlesSectionTitle');
+      const catLabel = category.toUpperCase();
+      if (topBadge) topBadge.textContent = catLabel === 'ALL' ? 'ALL (TOP 5)' : `${catLabel} (TOP 5)`;
+      if (worstBadge) worstBadge.textContent = catLabel === 'ALL' ? 'BUY DIP (5)' : `${catLabel} (DIP 5)`;
+      if (titleSec) titleSec.textContent = category === 'all' ? 'All Community Bundles' : `${category.charAt(0).toUpperCase() + category.slice(1)} Baskets & Packs`;
 
       this.renderBundlesPage();
     } catch (e) {
@@ -507,13 +532,14 @@ class CessionLaunchpadManager {
     if (!list) return;
 
     if (!this.topBundles || this.topBundles.length === 0) {
-      list.innerHTML = `<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px;">No top bundles recorded yet.</div>`;
+      list.innerHTML = `<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px;">No top bundles recorded yet for this category.</div>`;
       return;
     }
 
     list.innerHTML = this.topBundles.map((b, idx) => {
       const roi = b.roi24h !== undefined ? b.roi24h : 150.0;
       const roiBadge = `<span style="color: var(--pump-mint); font-weight: 800; font-family: var(--font-mono); font-size: 13px;">+${roi.toFixed(1)}%</span>`;
+      const catBadge = `<span style="background: rgba(134,239,172,0.12); color: var(--pump-mint); border: 1px solid rgba(134,239,172,0.3); padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">${b.category || 'memes'}</span>`;
       
       const tokensPills = (b.tokens || []).map(t => 
         `<span style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #e2e8f0; font-family: var(--font-mono);">$${t.symbol} ${t.weight}%</span>`
@@ -525,8 +551,10 @@ class CessionLaunchpadManager {
             <span style="font-weight: 800; color: var(--pump-mint); font-family: var(--font-mono); font-size: 14px;">#${idx + 1}</span>
             <img src="${b.imageUrl || 'images/cession-logo.png'}" style="width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-card);" onerror="this.src='images/cession-logo.png'">
             <div style="min-width: 0;">
-              <div style="font-weight: 700; font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                ${this.escapeHtml(b.name)} <span style="color: var(--pump-mint); font-size: 11px;">$${b.symbol}</span>
+              <div style="font-weight: 700; font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px;">
+                <span>${this.escapeHtml(b.name)}</span>
+                <span style="color: var(--pump-mint); font-size: 11px;">$${b.symbol}</span>
+                ${catBadge}
               </div>
               <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
                 ${tokensPills}
@@ -555,13 +583,14 @@ class CessionLaunchpadManager {
     if (!list) return;
 
     if (!this.worstBundles || this.worstBundles.length === 0) {
-      list.innerHTML = `<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px;">No dip hunter packs active.</div>`;
+      list.innerHTML = `<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px;">No dip hunter packs active for this category.</div>`;
       return;
     }
 
     list.innerHTML = this.worstBundles.map((b, idx) => {
       const roi = b.roi24h !== undefined ? b.roi24h : -35.0;
       const roiBadge = `<span style="color: var(--accent-red); font-weight: 800; font-family: var(--font-mono); font-size: 13px;">${roi > 0 ? '-' + roi.toFixed(1) : roi.toFixed(1)}%</span>`;
+      const catBadge = `<span style="background: rgba(248,113,113,0.12); color: var(--accent-red); border: 1px solid rgba(248,113,113,0.3); padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">${b.category || 'memes'}</span>`;
       
       const tokensPills = (b.tokens || []).map(t => 
         `<span style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #e2e8f0; font-family: var(--font-mono);">$${t.symbol} ${t.weight}%</span>`
@@ -573,8 +602,10 @@ class CessionLaunchpadManager {
             <span style="font-weight: 800; color: var(--accent-red); font-family: var(--font-mono); font-size: 14px;">#${idx + 1}</span>
             <img src="${b.imageUrl || 'images/cession-logo.png'}" style="width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-card);" onerror="this.src='images/cession-logo.png'">
             <div style="min-width: 0;">
-              <div style="font-weight: 700; font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                ${this.escapeHtml(b.name)} <span style="color: var(--accent-red); font-size: 11px;">$${b.symbol}</span>
+              <div style="font-weight: 700; font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px;">
+                <span>${this.escapeHtml(b.name)}</span>
+                <span style="color: var(--accent-red); font-size: 11px;">$${b.symbol}</span>
+                ${catBadge}
               </div>
               <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
                 ${tokensPills}
@@ -607,12 +638,13 @@ class CessionLaunchpadManager {
       if (!query) return true;
       const matchName = (b.name || '').toLowerCase().includes(query);
       const matchSym = (b.symbol || '').toLowerCase().includes(query);
+      const matchCat = (b.category || '').toLowerCase().includes(query);
       const matchTokens = (b.tokens || []).some(t => t.symbol.toLowerCase().includes(query) || (t.name || '').toLowerCase().includes(query));
-      return matchName || matchSym || matchTokens;
+      return matchName || matchSym || matchCat || matchTokens;
     });
 
     if (filtered.length === 0) {
-      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No matching token bundles found. Click <strong>+ Create Bundle</strong> to launch your own!</div>`;
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No matching token bundles found in this category. Click <strong>+ Create Bundle</strong> to launch your own!</div>`;
       return;
     }
 
@@ -621,6 +653,7 @@ class CessionLaunchpadManager {
       const isPositive = roi >= 0;
       const roiColor = isPositive ? 'var(--pump-mint)' : 'var(--accent-red)';
       const roiSign = isPositive ? '+' : '';
+      const catLabel = (b.category || 'memes').toUpperCase();
 
       const tokensBadges = (b.tokens || []).map(t => `
         <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 2px;">
@@ -634,6 +667,9 @@ class CessionLaunchpadManager {
           <div>
             <div class="explore-coin-thumb-box" style="position: relative;">
               <img src="${b.imageUrl || 'images/cession-logo.png'}" class="explore-coin-img" onerror="this.src='images/cession-logo.png'">
+              <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-card); color: #fff; font-weight: 700; font-size: 10px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">
+                ${catLabel}
+              </div>
               <div style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.85); border: 1px solid ${roiColor}; color: ${roiColor}; font-weight: 800; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono);">
                 ${roiSign}${roi.toFixed(1)}% 24h
               </div>
@@ -741,6 +777,7 @@ class CessionLaunchpadManager {
     const name = document.getElementById('bundleNameInput')?.value.trim();
     const symbol = document.getElementById('bundleSymbolInput')?.value.trim().toUpperCase();
     const description = document.getElementById('bundleDescInput')?.value.trim();
+    const category = document.getElementById('bundleCategorySelect')?.value || 'memes';
     const imageUrl = document.getElementById('bundleImageInput')?.value.trim();
 
     const symInputs = document.querySelectorAll('.token-alloc-sym');
@@ -775,6 +812,7 @@ class CessionLaunchpadManager {
           name,
           symbol,
           description,
+          category,
           imageUrl,
           tokens,
           creator: window.walletEngine?.activeAddress || '0xCreator'
@@ -783,10 +821,10 @@ class CessionLaunchpadManager {
 
       const data = await res.json();
       if (data.success) {
-        this.toast(`🎉 Bundle $${symbol} deployed! Shareable at cession.fun/bundles/${data.bundle.id}`, 'success');
+        this.toast(`🎉 Bundle $${symbol} deployed in [${category.toUpperCase()}]! Shareable at cession.fun/bundles/${data.bundle.id}`, 'success');
         const modal = document.getElementById('createBundleModal');
         if (modal) modal.style.display = 'none';
-        this.fetchBundles();
+        this.fetchBundles(this.activeBundleCategory || 'all');
       } else {
         this.toast(data.error || 'Failed to create bundle', 'error');
       }

@@ -123,16 +123,19 @@ class BondingCurveEngine {
 
   initSampleCollections() {
     const sampleBaskets = [
+      // ==========================================
+      // 1. MEMES CATEGORY (Top 5 Best & Top 5 Worst)
+      // ==========================================
       {
-        id: "col_moonshot_alpha",
+        id: "col_apex_memes",
         name: "Solana Apex Moonshot Pack",
         symbol: "APEX",
+        category: "memes",
         description: "The top trending alpha meme coins on Solana & Base with verified anti-rug parameters.",
         creator: "0x88f4b23a109823",
         imageUrl: "https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?w=500",
         createdAt: Date.now() - (86400000 * 2),
         roi24h: 342.8,
-        isTopPerformer: true,
         tokens: [
           { symbol: "USER", weight: 40, name: "The Random Bull" },
           { symbol: "BILLY", weight: 30, name: "Billycoin" },
@@ -142,33 +145,15 @@ class BondingCurveEngine {
         buyersCount: 312
       },
       {
-        id: "col_ai_sovereign",
-        name: "AI & Autonomous Agent Basket",
-        symbol: "AISYS",
-        description: "Curated portfolio of high-velocity AI agent tokens and sovereign liquidity engines.",
-        creator: "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
-        imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=200",
-        createdAt: Date.now() - 86400000,
-        roi24h: 185.2,
-        isTopPerformer: true,
-        tokens: [
-          { symbol: "CESS", weight: 40, name: "Cession Sovereign Engine" },
-          { symbol: "FLY", weight: 30, name: "Minecraft Fruit Fly" },
-          { symbol: "USER", weight: 30, name: "The Random Bull" }
-        ],
-        totalVolumeUsd: 254800,
-        buyersCount: 198
-      },
-      {
         id: "col_animal_cult",
         name: "Animal Meme Cult Index",
         symbol: "ANIMALZ",
+        category: "memes",
         description: "The internet's favorite viral animal mascots combined into a single 1-click swap basket.",
         creator: "topfloor_b",
         imageUrl: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500",
         createdAt: Date.now() - (86400000 * 3),
         roi24h: 94.6,
-        isTopPerformer: true,
         tokens: [
           { symbol: "BILLY", weight: 50, name: "Billycoin" },
           { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." }
@@ -177,15 +162,66 @@ class BondingCurveEngine {
         buyersCount: 145
       },
       {
-        id: "col_deep_dip_pack",
-        name: "Contrarian Dip Hunters (Oversold Gem Basket)",
-        symbol: "DIPBUY",
-        description: "Deep discount basket of temporarily oversold meme coins for aggressive dip-buyers seeking 10x mean reversion.",
+        id: "col_viral_pepe",
+        name: "Viral Pepe & Green Frog Cult",
+        symbol: "PEPEPAK",
+        category: "memes",
+        description: "Classic green pepe meme variants bonded on sovereign zero-gas curves.",
+        creator: "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
+        imageUrl: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500",
+        createdAt: Date.now() - (86400000 * 1.5),
+        roi24h: 78.4,
+        tokens: [
+          { symbol: "USER", weight: 60, name: "The Random Bull" },
+          { symbol: "BILLY", weight: 40, name: "Billycoin" }
+        ],
+        totalVolumeUsd: 142000,
+        buyersCount: 118
+      },
+      {
+        id: "col_doge_clan",
+        name: "Shiba & Golden Doge Clan",
+        symbol: "DOGECLAN",
+        category: "memes",
+        description: "Community-driven canine cult coins with zero team allocation.",
+        creator: "0x091A4B8290CC189108a798129034",
+        imageUrl: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500",
+        createdAt: Date.now() - (86400000 * 4),
+        roi24h: 54.2,
+        tokens: [
+          { symbol: "BILLY", weight: 60, name: "Billycoin" },
+          { symbol: "CESS", weight: 40, name: "Cession Sovereign Engine" }
+        ],
+        totalVolumeUsd: 98000,
+        buyersCount: 84
+      },
+      {
+        id: "col_generational_stacks",
+        name: "Baldwin Sovereign Family Stack",
+        symbol: "FAMBASKET",
+        category: "memes",
+        description: "Curated long-term micro-endowments with 1% Anti-Dump protection and Staking yield.",
+        creator: "0x091A4B8290CC189108a798129034",
+        imageUrl: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200",
+        createdAt: Date.now() - 172800000,
+        roi24h: 42.5,
+        tokens: [
+          { symbol: "CESS", weight: 50, name: "Cession Sovereign Engine" },
+          { symbol: "BILLY", weight: 50, name: "Billycoin" }
+        ],
+        totalVolumeUsd: 112000,
+        buyersCount: 68
+      },
+      {
+        id: "col_memes_dip1",
+        name: "Contrarian Meme Dip Hunters",
+        symbol: "MEMEDIP",
+        category: "memes",
+        description: "Deep discount basket of temporarily oversold meme coins for aggressive dip-buyers.",
         creator: "fltnarwhal",
         imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500",
         createdAt: Date.now() - (86400000 * 4),
         roi24h: -48.2,
-        isWorstPerformer: true,
         tokens: [
           { symbol: "r/", weight: 40, name: "r/" },
           { symbol: "ORANGEPENG", weight: 30, name: "The Orange Backpack Peng..." },
@@ -195,15 +231,15 @@ class BondingCurveEngine {
         buyersCount: 92
       },
       {
-        id: "col_bleeding_edge_dip",
-        name: "High Volatility Dip Scalper",
-        symbol: "BOTTOM",
-        description: "Extreme drawdown coins at historical curve support. High risk, high reward bottom hunting.",
+        id: "col_memes_dip2",
+        name: "Oversold Animal Scalpers",
+        symbol: "BLEEDDOG",
+        category: "memes",
+        description: "Extreme animal mascot drawdown basket at historical bonding curve floor support.",
         creator: "botfn",
         imageUrl: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500",
         createdAt: Date.now() - (86400000 * 5),
-        roi24h: -31.0,
-        isWorstPerformer: true,
+        roi24h: -36.5,
         tokens: [
           { symbol: "r/", weight: 60, name: "r/" },
           { symbol: "USER", weight: 40, name: "The Random Bull" }
@@ -212,21 +248,754 @@ class BondingCurveEngine {
         buyersCount: 64
       },
       {
-        id: "col_generational_stacks",
-        name: "Baldwin Sovereign Family Stack",
-        symbol: "FAMBASKET",
-        description: "Curated long-term micro-endowments with 1% Anti-Dump protection and Staking yield.",
-        creator: "0x091A4B8290CC189108a798129034",
-        imageUrl: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200",
-        createdAt: Date.now() - 172800000,
-        roi24h: 42.5,
-        isTopPerformer: false,
+        id: "col_memes_dip3",
+        name: "Micro-Cap Meme Floor Pack",
+        symbol: "FLOOR",
+        category: "memes",
+        description: "High beta micro-cap meme assets with asymmetric upside potential.",
+        creator: "fltnarwhal",
+        imageUrl: "https://images.unsplash.com/photo-1598439210625-5067c578f3f6?w=500",
+        createdAt: Date.now() - (86400000 * 3),
+        roi24h: -29.0,
+        tokens: [
+          { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." },
+          { symbol: "FLY", weight: 50, name: "Minecraft Fruit Fly" }
+        ],
+        totalVolumeUsd: 41000,
+        buyersCount: 47
+      },
+      {
+        id: "col_memes_dip4",
+        name: "Fallen Frog Rebound Basket",
+        symbol: "FROGREB",
+        category: "memes",
+        description: "Heavily oversold frog tokens consolidating before next leg up.",
+        creator: "0x88f4b23a109823",
+        imageUrl: "https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?w=500",
+        createdAt: Date.now() - (86400000 * 2),
+        roi24h: -22.4,
+        tokens: [
+          { symbol: "USER", weight: 50, name: "The Random Bull" },
+          { symbol: "r/", weight: 50, name: "r/" }
+        ],
+        totalVolumeUsd: 38000,
+        buyersCount: 39
+      },
+      {
+        id: "col_memes_dip5",
+        name: "Late Stage Pump Dip",
+        symbol: "LATEDIP",
+        category: "memes",
+        description: "Post-graduation pullback coins entering secondary accumulation zone.",
+        creator: "topfloor_b",
+        imageUrl: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500",
+        createdAt: Date.now() - (86400000 * 1),
+        roi24h: -15.8,
+        tokens: [
+          { symbol: "BILLY", weight: 50, name: "Billycoin" },
+          { symbol: "USER", weight: 50, name: "The Random Bull" }
+        ],
+        totalVolumeUsd: 31000,
+        buyersCount: 33
+      },
+
+      // ==========================================
+      // 2. POLITICS CATEGORY (Top 5 Best & Top 5 Worst)
+      // ==========================================
+      {
+        id: "col_pol_patriot",
+        name: "Executive Commander PolitiFi Pack",
+        symbol: "PATRIOT",
+        category: "politics",
+        description: "High-conviction political sentiment tokens leading election cycle volume.",
+        creator: "0xPolitico99",
+        imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=500",
+        createdAt: Date.now() - (86400000 * 2),
+        roi24h: 285.4,
+        tokens: [
+          { symbol: "USER", weight: 50, name: "The Random Bull" },
+          { symbol: "CESS", weight: 50, name: "Cession Sovereign Engine" }
+        ],
+        totalVolumeUsd: 340000,
+        buyersCount: 260
+      },
+      {
+        id: "col_pol_doge",
+        name: "D.O.G.E Efficiency Index",
+        symbol: "DOGEDEPT",
+        category: "politics",
+        description: "Department of Government Efficiency parody & meme governance basket.",
+        creator: "0xGovEff99",
+        imageUrl: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=500",
+        createdAt: Date.now() - (86400000 * 1.8),
+        roi24h: 194.0,
+        tokens: [
+          { symbol: "BILLY", weight: 50, name: "Billycoin" },
+          { symbol: "USER", weight: 50, name: "The Random Bull" }
+        ],
+        totalVolumeUsd: 280000,
+        buyersCount: 215
+      },
+      {
+        id: "col_pol_hill",
+        name: "Capitol Hill Bipartisan Basket",
+        symbol: "HILL",
+        category: "politics",
+        description: "Balanced PolitiFi index tracking viral Washington D.C. memes.",
+        creator: "0xHillAlpha",
+        imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?w=500",
+        createdAt: Date.now() - (86400000 * 3),
+        roi24h: 112.5,
+        tokens: [
+          { symbol: "CESS", weight: 60, name: "Cession Sovereign Engine" },
+          { symbol: "FLY", weight: 40, name: "Minecraft Fruit Fly" }
+        ],
+        totalVolumeUsd: 195000,
+        buyersCount: 160
+      },
+      {
+        id: "col_pol_vote",
+        name: "Global Election Momentum Index",
+        symbol: "VOTE2026",
+        category: "politics",
+        description: "Worldwide democratic voting narratives & election cycle tokens.",
+        creator: "0xVoteGlobal",
+        imageUrl: "https://images.unsplash.com/photo-1494178270175-e96de2971df9?w=500",
+        createdAt: Date.now() - (86400000 * 2.5),
+        roi24h: 67.8,
+        tokens: [
+          { symbol: "USER", weight: 50, name: "The Random Bull" },
+          { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." }
+        ],
+        totalVolumeUsd: 130000,
+        buyersCount: 95
+      },
+      {
+        id: "col_pol_states",
+        name: "Sovereign States Rights Stack",
+        symbol: "STATES",
+        category: "politics",
+        description: "Grassroots state sovereignty and anti-centralization governance tokens.",
+        creator: "0xStateFed",
+        imageUrl: "https://images.unsplash.com/photo-1508849789987-4e5333c12b78?w=500",
+        createdAt: Date.now() - (86400000 * 4),
+        roi24h: 45.0,
+        tokens: [
+          { symbol: "CESS", weight: 70, name: "Cession Sovereign Engine" },
+          { symbol: "BILLY", weight: 30, name: "Billycoin" }
+        ],
+        totalVolumeUsd: 85000,
+        buyersCount: 72
+      },
+      {
+        id: "col_pol_dip1",
+        name: "Post-Debate PolitiFi Dip Hunters",
+        symbol: "DEBATEDIP",
+        category: "politics",
+        description: "Oversold political tokens immediately following intense public debates.",
+        creator: "0xDebateScalper",
+        imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=500",
+        createdAt: Date.now() - (86400000 * 5),
+        roi24h: -52.4,
+        tokens: [
+          { symbol: "r/", weight: 50, name: "r/" },
+          { symbol: "FLY", weight: 50, name: "Minecraft Fruit Fly" }
+        ],
+        totalVolumeUsd: 74000,
+        buyersCount: 61
+      },
+      {
+        id: "col_pol_dip2",
+        name: "Oversold Campaign PAC Gems",
+        symbol: "PACDIP",
+        category: "politics",
+        description: "Deep discount PAC meme coins with high potential mean reversion.",
+        creator: "0xPACWatcher",
+        imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?w=500",
+        createdAt: Date.now() - (86400000 * 4.5),
+        roi24h: -41.2,
+        tokens: [
+          { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." },
+          { symbol: "r/", weight: 50, name: "r/" }
+        ],
+        totalVolumeUsd: 59000,
+        buyersCount: 52
+      },
+      {
+        id: "col_pol_dip3",
+        name: "Fallen Candidate Reversal Pack",
+        symbol: "POLLDROP",
+        category: "politics",
+        description: "Tokens oversold after temporary polling drops seeking rebound bounce.",
+        creator: "0xPollHunter",
+        imageUrl: "https://images.unsplash.com/photo-1494178270175-e96de2971df9?w=500",
+        createdAt: Date.now() - (86400000 * 3.8),
+        roi24h: -33.6,
+        tokens: [
+          { symbol: "FLY", weight: 50, name: "Minecraft Fruit Fly" },
+          { symbol: "USER", weight: 50, name: "The Random Bull" }
+        ],
+        totalVolumeUsd: 48000,
+        buyersCount: 44
+      },
+      {
+        id: "col_pol_dip4",
+        name: "Filibuster Floor Pack",
+        symbol: "FILIBUST",
+        category: "politics",
+        description: "Stalled legislative meme tokens trading at pure curve floor valuation.",
+        creator: "0xHillAlpha",
+        imageUrl: "https://images.unsplash.com/photo-1508849789987-4e5333c12b78?w=500",
+        createdAt: Date.now() - (86400000 * 3),
+        roi24h: -26.0,
+        tokens: [
+          { symbol: "r/", weight: 60, name: "r/" },
+          { symbol: "BILLY", weight: 40, name: "Billycoin" }
+        ],
+        totalVolumeUsd: 36000,
+        buyersCount: 35
+      },
+      {
+        id: "col_pol_dip5",
+        name: "Geopolitical Red-Wave Dip",
+        symbol: "REDDIP",
+        category: "politics",
+        description: "Pullback political tokens accumulating on sovereign curve support.",
+        creator: "0xPolitico99",
+        imageUrl: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=500",
+        createdAt: Date.now() - (86400000 * 2),
+        roi24h: -18.5,
+        tokens: [
+          { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." },
+          { symbol: "CESS", weight: 50, name: "Cession Sovereign Engine" }
+        ],
+        totalVolumeUsd: 29000,
+        buyersCount: 28
+      },
+
+      // ==========================================
+      // 3. TRENDS CATEGORY (Top 5 Best & Top 5 Worst)
+      // ==========================================
+      {
+        id: "col_trend_viral",
+        name: "TikTok & Reels Viral Explosion",
+        symbol: "VIRAL",
+        category: "trends",
+        description: "Top-ranking viral audio memes and cultural moments breaking short-form video records.",
+        creator: "0xTikTokAlpha",
+        imageUrl: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500",
+        createdAt: Date.now() - (86400000 * 1.2),
+        roi24h: 412.0,
+        tokens: [
+          { symbol: "USER", weight: 40, name: "The Random Bull" },
+          { symbol: "BILLY", weight: 30, name: "Billycoin" },
+          { symbol: "FLY", weight: 30, name: "Minecraft Fruit Fly" }
+        ],
+        totalVolumeUsd: 520000,
+        buyersCount: 420
+      },
+      {
+        id: "col_trend_stream",
+        name: "Pop Culture & Streaming Memes",
+        symbol: "STREAM",
+        category: "trends",
+        description: "Live streaming moments, Twitch clips, and creator economy assets.",
+        creator: "0xStreamCult",
+        imageUrl: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500",
+        createdAt: Date.now() - (86400000 * 2),
+        roi24h: 220.5,
+        tokens: [
+          { symbol: "BILLY", weight: 50, name: "Billycoin" },
+          { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." }
+        ],
+        totalVolumeUsd: 310000,
+        buyersCount: 240
+      },
+      {
+        id: "col_trend_news",
+        name: "Breaking News Wave Scalpers",
+        symbol: "HEADLINE",
+        category: "trends",
+        description: "Rapid event-driven narrative tokens riding immediate social media headlines.",
+        creator: "0xNewsHype",
+        imageUrl: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=500",
+        createdAt: Date.now() - (86400000 * 1.5),
+        roi24h: 135.0,
+        tokens: [
+          { symbol: "USER", weight: 60, name: "The Random Bull" },
+          { symbol: "CESS", weight: 40, name: "Cession Sovereign Engine" }
+        ],
+        totalVolumeUsd: 215000,
+        buyersCount: 180
+      },
+      {
+        id: "col_trend_lore",
+        name: "Global Internet Lore Index",
+        symbol: "RIZZLORE",
+        category: "trends",
+        description: "Deep internet lore, nostalgic copy-pastas, and underground web culture.",
+        creator: "0xWebLore",
+        imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500",
+        createdAt: Date.now() - (86400000 * 3),
+        roi24h: 82.4,
+        tokens: [
+          { symbol: "FLY", weight: 50, name: "Minecraft Fruit Fly" },
+          { symbol: "BILLY", weight: 50, name: "Billycoin" }
+        ],
+        totalVolumeUsd: 140000,
+        buyersCount: 110
+      },
+      {
+        id: "col_trend_night",
+        name: "Midnight Hype Momentum Pack",
+        symbol: "NIGHTOWL",
+        category: "trends",
+        description: "Late-night Asian & US timezone transition pump basket.",
+        creator: "0xNightOwl",
+        imageUrl: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=500",
+        createdAt: Date.now() - (86400000 * 2.2),
+        roi24h: 51.2,
+        tokens: [
+          { symbol: "USER", weight: 50, name: "The Random Bull" },
+          { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." }
+        ],
+        totalVolumeUsd: 92000,
+        buyersCount: 75
+      },
+      {
+        id: "col_trend_dip1",
+        name: "Post-Hype Crash Dip Hunters",
+        symbol: "POSTHYPE",
+        category: "trends",
+        description: "Aggressive bottom buying on viral trends experiencing violent 24h pullbacks.",
+        creator: "0xCrashHunter",
+        imageUrl: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500",
+        createdAt: Date.now() - (86400000 * 4),
+        roi24h: -58.0,
+        tokens: [
+          { symbol: "r/", weight: 50, name: "r/" },
+          { symbol: "FLY", weight: 50, name: "Minecraft Fruit Fly" }
+        ],
+        totalVolumeUsd: 82000,
+        buyersCount: 70
+      },
+      {
+        id: "col_trend_dip2",
+        name: "Oversold Viral Wave Pack",
+        symbol: "FADED",
+        category: "trends",
+        description: "Faded trend tokens ready for round-two viral cycles on social feeds.",
+        creator: "0xStreamCult",
+        imageUrl: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500",
+        createdAt: Date.now() - (86400000 * 3.5),
+        roi24h: -44.5,
+        tokens: [
+          { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." },
+          { symbol: "r/", weight: 50, name: "r/" }
+        ],
+        totalVolumeUsd: 64000,
+        buyersCount: 56
+      },
+      {
+        id: "col_trend_dip3",
+        name: "Fallen TikTok Trend Basket",
+        symbol: "CLOUTDIP",
+        category: "trends",
+        description: "Short-form video assets consolidating at multi-day support lines.",
+        creator: "0xTikTokAlpha",
+        imageUrl: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=500",
+        createdAt: Date.now() - (86400000 * 3),
+        roi24h: -35.0,
+        tokens: [
+          { symbol: "FLY", weight: 50, name: "Minecraft Fruit Fly" },
+          { symbol: "USER", weight: 50, name: "The Random Bull" }
+        ],
+        totalVolumeUsd: 51000,
+        buyersCount: 46
+      },
+      {
+        id: "col_trend_dip4",
+        name: "Exhausted Momentum Dip Scalper",
+        symbol: "EXHAUST",
+        category: "trends",
+        description: "Momentum exhaustion tokens trading at extreme RSI discounts.",
+        creator: "0xWebLore",
+        imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500",
+        createdAt: Date.now() - (86400000 * 2.8),
+        roi24h: -28.2,
+        tokens: [
+          { symbol: "r/", weight: 60, name: "r/" },
+          { symbol: "BILLY", weight: 40, name: "Billycoin" }
+        ],
+        totalVolumeUsd: 39000,
+        buyersCount: 38
+      },
+      {
+        id: "col_trend_dip5",
+        name: "Algorithm Shift Recovery Pack",
+        symbol: "ALGODIP",
+        category: "trends",
+        description: "Tokens repositioning following recommendation algorithm shifts.",
+        creator: "0xNightOwl",
+        imageUrl: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=500",
+        createdAt: Date.now() - (86400000 * 2),
+        roi24h: -19.4,
+        tokens: [
+          { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." },
+          { symbol: "CESS", weight: 50, name: "Cession Sovereign Engine" }
+        ],
+        totalVolumeUsd: 31000,
+        buyersCount: 30
+      },
+
+      // ==========================================
+      // 4. WHALE CATEGORY (Top 5 Best & Top 5 Worst)
+      // ==========================================
+      {
+        id: "col_whale_top",
+        name: "Tier-1 Whale Accumulation Basket",
+        symbol: "WHALEPICK",
+        category: "whale",
+        description: "The highest net-worth wallet inflows on Solana verified via on-chain balance deltas.",
+        creator: "0xWhaleTracker",
+        imageUrl: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=500",
+        createdAt: Date.now() - (86400000 * 1.8),
+        roi24h: 368.0,
+        tokens: [
+          { symbol: "CESS", weight: 40, name: "Cession Sovereign Engine" },
+          { symbol: "USER", weight: 35, name: "The Random Bull" },
+          { symbol: "BILLY", weight: 25, name: "Billycoin" }
+        ],
+        totalVolumeUsd: 610000,
+        buyersCount: 490
+      },
+      {
+        id: "col_whale_smart",
+        name: "Smart Money High-Conviction Index",
+        symbol: "SMARTCAP",
+        category: "whale",
+        description: "Elite traders with >80% 30-day win rate heavily loading on bonding curves.",
+        creator: "0xSmartMoneyHQ",
+        imageUrl: "https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=500",
+        createdAt: Date.now() - (86400000 * 2.5),
+        roi24h: 245.8,
+        tokens: [
+          { symbol: "USER", weight: 50, name: "The Random Bull" },
+          { symbol: "CESS", weight: 50, name: "Cession Sovereign Engine" }
+        ],
+        totalVolumeUsd: 430000,
+        buyersCount: 310
+      },
+      {
+        id: "col_whale_deep",
+        name: "Deep Liquidity Institutional Vault",
+        symbol: "DEEPFLOW",
+        category: "whale",
+        description: "High volume, low slippage baskets curated for large-size SOL execution.",
+        creator: "0xDeepLiquidity",
+        imageUrl: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=500",
+        createdAt: Date.now() - (86400000 * 3),
+        roi24h: 160.2,
+        tokens: [
+          { symbol: "BILLY", weight: 50, name: "Billycoin" },
+          { symbol: "USER", weight: 50, name: "The Random Bull" }
+        ],
+        totalVolumeUsd: 295000,
+        buyersCount: 220
+      },
+      {
+        id: "col_whale_inflow",
+        name: "On-Chain Smart Inflow Pack",
+        symbol: "INFLOW",
+        category: "whale",
+        description: "Tokens seeing sustained >50 SOL single-tx buy orders over 12 hours.",
+        creator: "0xInflowRadar",
+        imageUrl: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=500",
+        createdAt: Date.now() - (86400000 * 2),
+        roi24h: 98.0,
+        tokens: [
+          { symbol: "FLY", weight: 40, name: "Minecraft Fruit Fly" },
+          { symbol: "BILLY", weight: 60, name: "Billycoin" }
+        ],
+        totalVolumeUsd: 180000,
+        buyersCount: 140
+      },
+      {
+        id: "col_whale_stake",
+        name: "Sovereign Staker Whale Pack",
+        symbol: "SOLSTAKE",
+        category: "whale",
+        description: "Whale tokens with >70% supply time-locked in Staking Vaults.",
+        creator: "0xWhaleTracker",
+        imageUrl: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=500",
+        createdAt: Date.now() - (86400000 * 4),
+        roi24h: 64.5,
+        tokens: [
+          { symbol: "CESS", weight: 60, name: "Cession Sovereign Engine" },
+          { symbol: "USER", weight: 40, name: "The Random Bull" }
+        ],
+        totalVolumeUsd: 120000,
+        buyersCount: 96
+      },
+      {
+        id: "col_whale_dip1",
+        name: "Whale Profit-Taking Dip Gem Basket",
+        symbol: "DUMPDIP",
+        category: "whale",
+        description: "Temporary dip caused by massive whale de-risking into waiting limit orders.",
+        creator: "0xDipWhale",
+        imageUrl: "https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=500",
+        createdAt: Date.now() - (86400000 * 4),
+        roi24h: -46.0,
+        tokens: [
+          { symbol: "r/", weight: 50, name: "r/" },
+          { symbol: "FLY", weight: 50, name: "Minecraft Fruit Fly" }
+        ],
+        totalVolumeUsd: 95000,
+        buyersCount: 78
+      },
+      {
+        id: "col_whale_dip2",
+        name: "Capitulation Liquidation Rebound Pack",
+        symbol: "REBOUND",
+        category: "whale",
+        description: "Post-cascade liquidation tokens ready for violent snapback recoveries.",
+        creator: "0xSmartMoneyHQ",
+        imageUrl: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=500",
+        createdAt: Date.now() - (86400000 * 3.5),
+        roi24h: -39.8,
+        tokens: [
+          { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." },
+          { symbol: "r/", weight: 50, name: "r/" }
+        ],
+        totalVolumeUsd: 76000,
+        buyersCount: 63
+      },
+      {
+        id: "col_whale_dip3",
+        name: "Smart Money Stop-Hunt Floor Pack",
+        symbol: "STOPHUNT",
+        category: "whale",
+        description: "Tokens bouncing off calculated stop-hunt zones with renewed buy pressure.",
+        creator: "0xInflowRadar",
+        imageUrl: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=500",
+        createdAt: Date.now() - (86400000 * 3),
+        roi24h: -31.4,
+        tokens: [
+          { symbol: "FLY", weight: 50, name: "Minecraft Fruit Fly" },
+          { symbol: "USER", weight: 50, name: "The Random Bull" }
+        ],
+        totalVolumeUsd: 58000,
+        buyersCount: 51
+      },
+      {
+        id: "col_whale_dip4",
+        name: "High-Volume Whale Dip Scalper",
+        symbol: "VOLHUNTER",
+        category: "whale",
+        description: "Heavy volume drawdown assets with institutional market maker absorption.",
+        creator: "0xDeepLiquidity",
+        imageUrl: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=500",
+        createdAt: Date.now() - (86400000 * 2.5),
+        roi24h: -24.0,
+        tokens: [
+          { symbol: "r/", weight: 60, name: "r/" },
+          { symbol: "BILLY", weight: 40, name: "Billycoin" }
+        ],
+        totalVolumeUsd: 46000,
+        buyersCount: 42
+      },
+      {
+        id: "col_whale_dip5",
+        name: "Oversold Institutional Flow Basket",
+        symbol: "FLOWDIP",
+        category: "whale",
+        description: "Institutional assets undergoing minor technical retracements.",
+        creator: "0xWhaleTracker",
+        imageUrl: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=500",
+        createdAt: Date.now() - (86400000 * 2),
+        roi24h: -17.5,
+        tokens: [
+          { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." },
+          { symbol: "CESS", weight: 50, name: "Cession Sovereign Engine" }
+        ],
+        totalVolumeUsd: 38000,
+        buyersCount: 34
+      },
+
+      // ==========================================
+      // 5. AI AGENTS CATEGORY (Top 5 Best & Top 5 Worst)
+      // ==========================================
+      {
+        id: "col_ai_sovereign",
+        name: "AI & Autonomous Agent Basket",
+        symbol: "AISYS",
+        category: "ai",
+        description: "Curated portfolio of high-velocity AI agent tokens and sovereign liquidity engines.",
+        creator: "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
+        imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=200",
+        createdAt: Date.now() - 86400000,
+        roi24h: 310.5,
+        tokens: [
+          { symbol: "CESS", weight: 40, name: "Cession Sovereign Engine" },
+          { symbol: "FLY", weight: 30, name: "Minecraft Fruit Fly" },
+          { symbol: "USER", weight: 30, name: "The Random Bull" }
+        ],
+        totalVolumeUsd: 480000,
+        buyersCount: 380
+      },
+      {
+        id: "col_ai_swarm",
+        name: "Neural LLM Agent Swarm Index",
+        symbol: "SWARM",
+        category: "ai",
+        description: "Multi-agent autonomous cognitive systems trading on continuous bonding curves.",
+        creator: "0xNeuralSwarm",
+        imageUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=500",
+        createdAt: Date.now() - (86400000 * 1.5),
+        roi24h: 235.0,
+        tokens: [
+          { symbol: "FLY", weight: 50, name: "Minecraft Fruit Fly" },
+          { symbol: "USER", weight: 50, name: "The Random Bull" }
+        ],
+        totalVolumeUsd: 360000,
+        buyersCount: 290
+      },
+      {
+        id: "col_ai_bots",
+        name: "Autonomous Bot Trading Scalper",
+        symbol: "BOTNET",
+        category: "ai",
+        description: "Algorithmic bot tokens with autonomous liquidity provisioning capabilities.",
+        creator: "0xBotCluster",
+        imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500",
+        createdAt: Date.now() - (86400000 * 2),
+        roi24h: 142.6,
         tokens: [
           { symbol: "CESS", weight: 50, name: "Cession Sovereign Engine" },
           { symbol: "BILLY", weight: 50, name: "Billycoin" }
         ],
-        totalVolumeUsd: 112000,
-        buyersCount: 68
+        totalVolumeUsd: 240000,
+        buyersCount: 195
+      },
+      {
+        id: "col_ai_compute",
+        name: "Decentralized Compute & GPU Cluster",
+        symbol: "COMPUTE",
+        category: "ai",
+        description: "Decentralized GPU inference nodes and zero-knowledge compute tokens.",
+        creator: "0xGpuInference",
+        imageUrl: "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=500",
+        createdAt: Date.now() - (86400000 * 3),
+        roi24h: 88.4,
+        tokens: [
+          { symbol: "FLY", weight: 60, name: "Minecraft Fruit Fly" },
+          { symbol: "USER", weight: 40, name: "The Random Bull" }
+        ],
+        totalVolumeUsd: 165000,
+        buyersCount: 130
+      },
+      {
+        id: "col_ai_synth",
+        name: "Self-Synthesizing Algorithmic Pack",
+        symbol: "SYNTH",
+        category: "ai",
+        description: "Automated reinforcement learning agents managing internal supply schedules.",
+        creator: "0xSynthAI",
+        imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=500",
+        createdAt: Date.now() - (86400000 * 2.5),
+        roi24h: 59.0,
+        tokens: [
+          { symbol: "CESS", weight: 60, name: "Cession Sovereign Engine" },
+          { symbol: "ORANGEPENG", weight: 40, name: "The Orange Backpack Peng..." }
+        ],
+        totalVolumeUsd: 110000,
+        buyersCount: 88
+      },
+      {
+        id: "col_ai_dip1",
+        name: "AI Model Hallucination Dip Hunters",
+        symbol: "GLITCH",
+        category: "ai",
+        description: "Deep discount entry on oversold algorithmic tokens after temporary agent glitches.",
+        creator: "0xGlitchScalper",
+        imageUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=500",
+        createdAt: Date.now() - (86400000 * 4),
+        roi24h: -55.2,
+        tokens: [
+          { symbol: "r/", weight: 50, name: "r/" },
+          { symbol: "FLY", weight: 50, name: "Minecraft Fruit Fly" }
+        ],
+        totalVolumeUsd: 87000,
+        buyersCount: 72
+      },
+      {
+        id: "col_ai_dip2",
+        name: "Overbought Agent Cooling Basket",
+        symbol: "COOLDOWN",
+        category: "ai",
+        description: "Healthy technical pullback on autonomous AI agents entering secondary consolidation.",
+        creator: "0xBotCluster",
+        imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500",
+        createdAt: Date.now() - (86400000 * 3.5),
+        roi24h: -42.0,
+        tokens: [
+          { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." },
+          { symbol: "r/", weight: 50, name: "r/" }
+        ],
+        totalVolumeUsd: 69000,
+        buyersCount: 58
+      },
+      {
+        id: "col_ai_dip3",
+        name: "Compute GPU Oversold Gem Pack",
+        symbol: "GPUFLOOR",
+        category: "ai",
+        description: "Compute cluster tokens trading near raw hardware cost basis on bonding curves.",
+        creator: "0xGpuInference",
+        imageUrl: "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=500",
+        createdAt: Date.now() - (86400000 * 3),
+        roi24h: -32.8,
+        tokens: [
+          { symbol: "FLY", weight: 50, name: "Minecraft Fruit Fly" },
+          { symbol: "USER", weight: 50, name: "The Random Bull" }
+        ],
+        totalVolumeUsd: 53000,
+        buyersCount: 47
+      },
+      {
+        id: "col_ai_dip4",
+        name: "Fallen Autonomous Swarm Basket",
+        symbol: "OFFLINE",
+        category: "ai",
+        description: "Agent swarms preparing for firmware upgrades with high upside volatility.",
+        creator: "0xNeuralSwarm",
+        imageUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=500",
+        createdAt: Date.now() - (86400000 * 2.8),
+        roi24h: -25.5,
+        tokens: [
+          { symbol: "r/", weight: 60, name: "r/" },
+          { symbol: "BILLY", weight: 40, name: "Billycoin" }
+        ],
+        totalVolumeUsd: 42000,
+        buyersCount: 39
+      },
+      {
+        id: "col_ai_dip5",
+        name: "Neural Weight Pruning Dip Scalper",
+        symbol: "PRUNEDIP",
+        category: "ai",
+        description: "Pruned model tokens finding support on protocol reserve curves.",
+        creator: "0xSynthAI",
+        imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=500",
+        createdAt: Date.now() - (86400000 * 2),
+        roi24h: -16.0,
+        tokens: [
+          { symbol: "ORANGEPENG", weight: 50, name: "The Orange Backpack Peng..." },
+          { symbol: "CESS", weight: 50, name: "Cession Sovereign Engine" }
+        ],
+        totalVolumeUsd: 34000,
+        buyersCount: 31
       }
     ];
 
@@ -791,8 +1560,8 @@ class BondingCurveEngine {
   /**
    * Token Collections / Baskets Methods
    */
-  getAllCollections() {
-    return Array.from(this.collections.values()).map(col => {
+  getAllCollections(category = 'all') {
+    let list = Array.from(this.collections.values()).map(col => {
       let aggregateMcap = 0;
       let aggregateVolume = 0;
       let calculatedRoi = 0;
@@ -817,32 +1586,62 @@ class BondingCurveEngine {
 
       return {
         ...col,
+        category: col.category || 'memes',
         roi24h,
         tokens: enrichedTokens,
         aggregateMcapUsd: Math.round(aggregateMcap) || 58000,
         aggregateVolumeUsd: Math.round(aggregateVolume) || (col.totalVolumeUsd || 15000)
       };
     });
+
+    if (category && category !== 'all') {
+      list = list.filter(c => (c.category || '').toLowerCase() === category.toLowerCase());
+    }
+
+    return list;
   }
 
-  getTopPerformingBundles(limit = 5) {
-    const cols = this.getAllCollections();
+  getTopPerformingBundles(category = 'all', limit = 5) {
+    const cols = this.getAllCollections(category);
     return cols.sort((a, b) => (b.roi24h || 0) - (a.roi24h || 0)).slice(0, limit);
   }
 
-  getWorstPerformingBundles(limit = 5) {
-    const cols = this.getAllCollections();
+  getWorstPerformingBundles(category = 'all', limit = 5) {
+    const cols = this.getAllCollections(category);
     return cols.sort((a, b) => (a.roi24h || 0) - (b.roi24h || 0)).slice(0, limit);
+  }
+
+  getBundleMatrix(category = 'all') {
+    const categories = ['memes', 'politics', 'trends', 'whale', 'ai'];
+    if (category && category !== 'all' && categories.includes(category.toLowerCase())) {
+      return {
+        category: category.toLowerCase(),
+        top5: this.getTopPerformingBundles(category, 5),
+        worst5: this.getWorstPerformingBundles(category, 5)
+      };
+    }
+    return {
+      category: 'all',
+      top5: this.getTopPerformingBundles('all', 5),
+      worst5: this.getWorstPerformingBundles('all', 5),
+      byCategory: {
+        memes: { top5: this.getTopPerformingBundles('memes', 5), worst5: this.getWorstPerformingBundles('memes', 5) },
+        politics: { top5: this.getTopPerformingBundles('politics', 5), worst5: this.getWorstPerformingBundles('politics', 5) },
+        trends: { top5: this.getTopPerformingBundles('trends', 5), worst5: this.getWorstPerformingBundles('trends', 5) },
+        whale: { top5: this.getTopPerformingBundles('whale', 5), worst5: this.getWorstPerformingBundles('whale', 5) },
+        ai: { top5: this.getTopPerformingBundles('ai', 5), worst5: this.getWorstPerformingBundles('ai', 5) }
+      }
+    };
   }
 
   getCollection(id) {
     const col = this.collections.get(id);
     if (!col) return null;
-    const all = this.getAllCollections();
+    const all = this.getAllCollections('all');
     return all.find(c => c.id === id) || col;
   }
 
-  createCollection({ name, symbol, description, creator, tokens, imageUrl }) {
+  createCollection({ name, symbol, description, category, creator, tokens, imageUrl }) {
     if (!name || !tokens || !Array.isArray(tokens) || tokens.length === 0) {
       throw new Error("Collection name and valid tokens list are required.");
     }
@@ -865,6 +1664,7 @@ class BondingCurveEngine {
       name,
       symbol: (symbol || name.substring(0, 5)).toUpperCase(),
       description: description || "Curated community token basket on Cession Sovereign Launchpad.",
+      category: category || "memes",
       creator: creator || "0xCreator",
       imageUrl: imageUrl || "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=200",
       createdAt: Date.now(),

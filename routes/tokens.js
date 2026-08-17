@@ -20,22 +20,32 @@ router.get(['/transparency', '/treasury'], (req, res) => {
   res.json(data);
 });
 
-// Get Token Bundles / Curated Baskets
+// Get Token Bundles / Curated Baskets (supports ?category=memes|politics|trends|whale|ai)
 router.get(['/collections', '/bundles'], (req, res) => {
-  const collections = bondingCurve.getAllCollections();
-  res.json({ success: true, count: collections.length, collections, bundles: collections });
+  const { category = 'all' } = req.query;
+  const collections = bondingCurve.getAllCollections(category);
+  res.json({ success: true, count: collections.length, category, collections, bundles: collections });
 });
 
-// Get Top Performing Bundles
+// Get Top Performing Bundles (supports ?category=...&limit=5)
 router.get(['/collections/top', '/bundles/top'], (req, res) => {
-  const top = bondingCurve.getTopPerformingBundles();
-  res.json({ success: true, count: top.length, bundles: top });
+  const { category = 'all', limit = 5 } = req.query;
+  const top = bondingCurve.getTopPerformingBundles(category, parseInt(limit) || 5);
+  res.json({ success: true, count: top.length, category, bundles: top });
 });
 
-// Get Worst Performing Bundles (Dip Hunters)
+// Get Worst Performing Bundles (Dip Hunters, supports ?category=...&limit=5)
 router.get(['/collections/worst', '/bundles/worst'], (req, res) => {
-  const worst = bondingCurve.getWorstPerformingBundles();
-  res.json({ success: true, count: worst.length, bundles: worst });
+  const { category = 'all', limit = 5 } = req.query;
+  const worst = bondingCurve.getWorstPerformingBundles(category, parseInt(limit) || 5);
+  res.json({ success: true, count: worst.length, category, bundles: worst });
+});
+
+// Get Top 5 Best & Top 5 Worst Matrix across Categories
+router.get(['/collections/matrix', '/bundles/matrix'], (req, res) => {
+  const { category = 'all' } = req.query;
+  const matrix = bondingCurve.getBundleMatrix(category);
+  res.json({ success: true, matrix });
 });
 
 // Get Single Token Bundle
@@ -50,11 +60,12 @@ router.get(['/collections/:id', '/bundles/:id'], (req, res) => {
 // Create Token Bundle
 router.post(['/collections/create', '/bundles/create'], (req, res) => {
   try {
-    const { name, symbol, description, creator, tokens, imageUrl } = req.body;
+    const { name, symbol, description, category, creator, tokens, imageUrl } = req.body;
     const newCollection = bondingCurve.createCollection({
       name,
       symbol,
       description,
+      category: category || "memes",
       creator: creator || "0xCreator",
       tokens,
       imageUrl

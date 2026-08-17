@@ -313,39 +313,67 @@
             </button>
           </div>
 
-          <!-- Performance Leaderboard Matrices: Top vs Worst (Dip Hunters) -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin: 24px 0;">
-            <!-- TOP PERFORMERS -->
+          <!-- Category Selector Tabs: All, Memes, Politics, Trends, Whale, AI Agents -->
+          <div class="bundle-category-bar" id="bundleCategoryTabs" style="display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0 12px 0;">
+            <button class="bundle-cat-pill active" data-category="all">
+              <span>🌐 All Categories</span>
+            </button>
+            <button class="bundle-cat-pill" data-category="memes">
+              <span>🎭 Memes</span>
+            </button>
+            <button class="bundle-cat-pill" data-category="politics">
+              <span>🏛️ Politics</span>
+            </button>
+            <button class="bundle-cat-pill" data-category="trends">
+              <span>📈 Trends</span>
+            </button>
+            <button class="bundle-cat-pill" data-category="whale">
+              <span>🐋 Whale</span>
+            </button>
+            <button class="bundle-cat-pill" data-category="ai">
+              <span>🤖 AI Agents</span>
+            </button>
+          </div>
+
+          <!-- Performance Leaderboard Matrices: Top 5 Best vs Top 5 Worst (Dip Hunters) -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin: 16px 0 28px 0;">
+            <!-- TOP 5 BEST PERFORMERS -->
             <div style="background: var(--bg-card); border: 1px solid rgba(134, 239, 172, 0.25); border-radius: var(--radius-md); padding: 18px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border-card); padding-bottom: 10px;">
-                <div style="font-weight: 800; font-size: 14px; color: var(--pump-mint); display: flex; align-items: center; gap: 6px;">
-                  <span>🚀 Top Performing Bundles (24h)</span>
+                <div>
+                  <div style="font-weight: 800; font-size: 15px; color: var(--pump-mint); display: flex; align-items: center; gap: 6px;">
+                    <span>🚀 Top 5 Best Performing Bundles</span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Highest 24h ROI gainers in selected category</div>
                 </div>
-                <span style="font-size: 11px; color: var(--pump-mint); font-weight: 700; font-family: var(--font-mono); background: rgba(134, 239, 172, 0.1); padding: 2px 8px; border-radius: 12px;">HIGHEST GAINS</span>
+                <span id="topCatBadge" style="font-size: 11px; color: var(--pump-mint); font-weight: 700; font-family: var(--font-mono); background: rgba(134, 239, 172, 0.1); padding: 3px 8px; border-radius: 12px;">ALL</span>
               </div>
               <div id="topBundlesList" style="display: flex; flex-direction: column; gap: 10px;">
-                <!-- Rendered dynamically -->
+                <!-- Rendered dynamically (Top 5) -->
               </div>
             </div>
 
-            <!-- WORST PERFORMERS (DIP HUNTERS) -->
+            <!-- TOP 5 WORST PERFORMERS (DIP HUNTERS) -->
             <div style="background: var(--bg-card); border: 1px solid rgba(248, 113, 113, 0.25); border-radius: var(--radius-md); padding: 18px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border-card); padding-bottom: 10px;">
-                <div style="font-weight: 800; font-size: 14px; color: var(--accent-red); display: flex; align-items: center; gap: 6px;">
-                  <span>📉 Dip Hunter Packs (Worst Performing)</span>
+                <div>
+                  <div style="font-weight: 800; font-size: 15px; color: var(--accent-red); display: flex; align-items: center; gap: 6px;">
+                    <span>📉 Top 5 Worst Performing Bundles</span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Dip hunter discount entries at curve floor</div>
                 </div>
-                <span style="font-size: 11px; color: var(--accent-red); font-weight: 700; font-family: var(--font-mono); background: rgba(248, 113, 113, 0.1); padding: 2px 8px; border-radius: 12px;">BUY THE DIP</span>
+                <span id="worstCatBadge" style="font-size: 11px; color: var(--accent-red); font-weight: 700; font-family: var(--font-mono); background: rgba(248, 113, 113, 0.1); padding: 3px 8px; border-radius: 12px;">BUY DIP</span>
               </div>
               <div id="worstBundlesList" style="display: flex; flex-direction: column; gap: 10px;">
-                <!-- Rendered dynamically -->
+                <!-- Rendered dynamically (Top 5 Worst) -->
               </div>
             </div>
           </div>
 
-          <!-- All Community Bundles Explorer -->
-          <div class="section-header-row" style="margin-top: 32px; border-top: 1px solid var(--border-card); padding-top: 24px;">
+          <!-- All Community Bundles Explorer for Selected Category -->
+          <div class="section-header-row" style="margin-top: 28px; border-top: 1px solid var(--border-card); padding-top: 24px;">
             <div>
-              <h3 style="font-size: 16px; font-weight: 700; color: #fff;">All Community Bundles</h3>
+              <h3 style="font-size: 16px; font-weight: 700; color: #fff;" id="allBundlesSectionTitle">All Community Bundles</h3>
               <span style="font-size: 12px; color: var(--text-muted);">Explore user-created baskets or share your own</span>
             </div>
             <div class="search-input-wrapper" style="width: 280px;">
@@ -1000,6 +1028,17 @@
         <div class="form-group-pump">
           <label class="form-label-pump">Description</label>
           <textarea id="bundleDescInput" class="form-textarea-pump" placeholder="Curated basket of the strongest momentum tokens..." required></textarea>
+        </div>
+
+        <div class="form-group-pump">
+          <label class="form-label-pump">Bundle Category</label>
+          <select id="bundleCategorySelect" class="form-input-pump" style="cursor: pointer; background: var(--bg-input); color: #fff;">
+            <option value="memes" selected>🎭 Memes (Viral & Animals)</option>
+            <option value="politics">🏛️ Politics (PolitiFi & Elections)</option>
+            <option value="trends">📈 Trends (Social Media & Meta)</option>
+            <option value="whale">🐋 Whale (Smart Money & Inflows)</option>
+            <option value="ai">🤖 AI Agents (Autonomous Swarms)</option>
+          </select>
         </div>
 
         <div class="form-group-pump">

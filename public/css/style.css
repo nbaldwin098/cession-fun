@@ -1157,3 +1157,59 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   color: #fff;
   word-break: break-all;
 }
+
+/* Bundle Category Selector Pills */
+.bundle-category-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.bundle-cat-pill {
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bundle-cat-pill:hover {
+  border-color: rgba(134, 239, 172, 0.4);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.bundle-cat-pill.active {
+  background: rgba(134, 239, 172, 0.12);
+  border-color: var(--pump-mint);
+  color: var(--pump-mint);
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(134, 239, 172, 0.15);
+}
+
+.bundle-row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.bundle-row-item:hover {
+  border-color: var(--border-card);
+  background: rgba(255, 255, 255, 0.03);
+  transform: translateX(2px);
+}
+
