@@ -117,6 +117,18 @@
             <span>Create</span>
           </button>
 
+          <!-- ⚡ Create Sovereign Wallet Button -->
+          <button class="cat-pill-btn" id="btnNavCreateWallet" onclick="window.walletEngine.openCreateWalletModal()" style="font-weight: 700; color: #fff; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); display: inline-flex; align-items: center; gap: 4px;">
+            <span>⚡</span>
+            <span>Create Wallet</span>
+          </button>
+
+          <!-- 📥 Deposit Crypto Button -->
+          <button class="cat-pill-btn" id="btnNavDeposit" onclick="window.walletEngine.openDepositModal()" style="font-weight: 700; color: var(--pump-mint); background: rgba(134, 239, 172, 0.12); border: 1px solid rgba(134, 239, 172, 0.4); display: inline-flex; align-items: center; gap: 4px;">
+            <span>📥</span>
+            <span>Deposit</span>
+          </button>
+
           <!-- Sign In Button (or Connected Wallet Pill) -->
           <button class="btn-signin-mint" id="btnConnectWallet" onclick="window.walletEngine.openAuthModal()">
             Sign in
@@ -574,23 +586,34 @@
 
               <!-- PANE 3: SEND & RECEIVE / TRANSFER -->
               <div class="exchange-card" id="paneExchangeTransfer" style="display: none;">
-                <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 6px;">📥 Deposit & Withdraw</h3>
+                <h3 style="font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 6px;">📥 Deposit & Withdraw Hub</h3>
                 
                 <!-- Deposit / Receive Tab Box -->
                 <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px;">
-                  <div style="font-weight: 700; color: var(--pump-mint); font-size: 12px; margin-bottom: 6px;">🟢 Receive Crypto from Coinbase / Binance / Phantom</div>
-                  <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 8px;">
-                    Send any SOL, ETH, or USDC to your sovereign vault address below to fund your live trading balance.
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div style="font-weight: 700; color: var(--pump-mint); font-size: 12px;">🟢 Deposit Crypto (Solana / Base / Bitcoin)</div>
+                    <button class="btn-signin-mint" style="padding: 4px 10px; font-size: 11px;" onclick="window.walletEngine.openDepositModal()">📥 Full Deposit & QR Modal</button>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 10px;">
+                    Send any SOL, ETH, or USDC to your sovereign vault address below or fund with 1-click testnet simulation:
                   </div>
                   <div class="wallet-addr-box" style="margin-bottom: 6px;">
                     <span>SOL Address:</span>
-                    <strong id="depositSolAddr" style="color: var(--pump-mint);">CessVault99xSol00119284019284019283</strong>
-                    <button class="cat-pill-btn" style="padding: 2px 6px; font-size: 10px;" onclick="navigator.clipboard.writeText(document.getElementById('depositSolAddr').textContent); window.launchpadManager.toast('SOL address copied', 'success');">copy</button>
+                    <strong id="depositSolAddr" style="color: var(--pump-mint); font-size: 11px; word-break: break-all;">Not Connected</strong>
+                    <button class="cat-pill-btn" style="padding: 2px 6px; font-size: 10px;" onclick="if(document.getElementById('depositSolAddr').textContent!=='Not Connected'){navigator.clipboard.writeText(document.getElementById('depositSolAddr').textContent); window.launchpadManager.toast('SOL address copied', 'success');}else{window.walletEngine.openAuthModal();}">copy</button>
                   </div>
-                  <div class="wallet-addr-box">
+                  <div class="wallet-addr-box" style="margin-bottom: 10px;">
                     <span>EVM Address:</span>
-                    <strong id="depositEthAddr" style="color: #fff;">0x0824b23a910cd99e1a2f0093ba4210e76a01004c</strong>
-                    <button class="cat-pill-btn" style="padding: 2px 6px; font-size: 10px;" onclick="navigator.clipboard.writeText(document.getElementById('depositEthAddr').textContent); window.launchpadManager.toast('EVM address copied', 'success');">copy</button>
+                    <strong id="depositEthAddr" style="color: #fff; font-size: 11px; word-break: break-all;">Not Connected</strong>
+                    <button class="cat-pill-btn" style="padding: 2px 6px; font-size: 10px;" onclick="if(document.getElementById('depositEthAddr').textContent!=='Not Connected'){navigator.clipboard.writeText(document.getElementById('depositEthAddr').textContent); window.launchpadManager.toast('EVM address copied', 'success');}else{window.walletEngine.openAuthModal();}">copy</button>
+                  </div>
+
+                  <!-- Quick Sandbox Deposit Faucet -->
+                  <div style="display: flex; gap: 6px; align-items: center; border-top: 1px solid var(--border-card); padding-top: 10px; flex-wrap: wrap;">
+                    <span style="font-size: 11px; color: var(--text-secondary);">🚰 Instant Test Deposit:</span>
+                    <button class="cat-pill-btn" style="padding: 3px 8px; font-size: 11px; color: var(--pump-mint);" onclick="window.walletEngine.depositFunds('SOL', 1.0)">+1.0 SOL</button>
+                    <button class="cat-pill-btn" style="padding: 3px 8px; font-size: 11px; color: var(--accent-purple);" onclick="window.walletEngine.depositFunds('ETH', 0.5)">+0.5 ETH</button>
+                    <button class="cat-pill-btn" style="padding: 3px 8px; font-size: 11px; color: #60a5fa;" onclick="window.walletEngine.depositFunds('USDC', 500)">+$500 USDC</button>
                   </div>
                 </div>
 
@@ -780,6 +803,14 @@
                 <div>SOL Balance: <strong id="profileSolBalance" style="color: var(--pump-mint); font-size: 16px;">0.00 SOL</strong></div>
                 <div>$CESS Balance: <strong id="profileCessBalance" style="color: var(--pump-mint); font-size: 16px;">0 $CESS</strong></div>
                 <div>Portfolio Value: <strong id="profilePortfolioValue" style="color: #fff; font-size: 16px;">$0.00</strong></div>
+              </div>
+
+              <!-- Profile Sovereign Wallet Action Row -->
+              <div style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; border-top: 1px solid var(--border-card); padding-top: 14px;">
+                <button class="cat-pill-btn" style="color: #fff; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); font-weight: 700;" onclick="window.walletEngine.openCreateWalletModal()">⚡ Create Sovereign Vault</button>
+                <button class="btn-signin-mint" style="padding: 6px 14px; font-size: 12px; font-weight: 700;" onclick="window.walletEngine.openDepositModal()">📥 Deposit Crypto</button>
+                <button class="cat-pill-btn" style="color: var(--pump-mint); border: 1px solid rgba(134, 239, 172, 0.4);" onclick="window.walletEngine.depositFunds('SOL', 1.0)">🚰 Faucet (+1.0 SOL)</button>
+                <button class="cat-pill-btn" style="color: var(--text-secondary);" onclick="window.walletEngine.exportSecretPhrase()">🔑 Export Backup Phrase</button>
               </div>
             </div>
           </div>
@@ -1441,7 +1472,130 @@
       </div>
 
       <button class="btn-signin-mint" id="btnConfirmBuyBundle" style="width: 100%; padding: 12px; font-weight: 800; font-size: 14px;">
-        ⚡ Execute 1-Click Bundle Purchase
+  <!-- =========================================================
+       CREATE SOVEREIGN VAULT MODAL (1-CLICK HD WALLET GENERATION)
+  ========================================================= -->
+  <div class="modal-overlay-generic" id="createVaultModal">
+    <div class="modal-box-pump" style="max-width: 520px;">
+      <div class="modal-header-row">
+        <span class="modal-title-text">⚡ Create Sovereign Multi-Chain Vault</span>
+        <button class="btn-close-modal" id="btnCloseCreateVaultModal" onclick="document.getElementById('createVaultModal').style.display='none'">&times;</button>
+      </div>
+
+      <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 14px;">
+        Your sovereign vault is 100% non-custodial and generated securely in your browser. Write down or copy these 12 secret backup words in order:
+      </div>
+
+      <!-- 12-Word Seed Phrase Badges Grid -->
+      <div id="seedWordsGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; background: var(--bg-input); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+        <!-- 12 words populated dynamically -->
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+        <button class="cat-pill-btn" style="flex: 1; justify-content: center; font-size: 12px; color: var(--pump-mint);" id="btnCopySeedPhrase" onclick="window.walletEngine.copyGeneratedMnemonic()">
+          📋 Copy 12 Words
+        </button>
+        <button class="cat-pill-btn" style="flex: 1; justify-content: center; font-size: 12px; color: var(--text-secondary);" onclick="window.walletEngine.regenerateNewVaultMnemonic()">
+          🔄 Generate New
+        </button>
+      </div>
+
+      <!-- Derived Multi-Chain Addresses Preview -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px;">
+        <div style="font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 6px;">Derived Multi-Chain Addresses:</div>
+        <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
+          <div>🟣 Solana (Ed25519): <span id="derivedSolAddrPreview" style="color: var(--pump-mint);">...</span></div>
+          <div>🔵 Base / EVM (secp256k1): <span id="derivedEthAddrPreview" style="color: #60a5fa;">...</span></div>
+        </div>
+      </div>
+
+      <button class="btn-signin-mint" id="btnConfirmUnlockVault" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 800;" onclick="window.walletEngine.confirmCreateVault()">
+        ✓ I've Saved My Seed Phrase — Unlock Sovereign Vault
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       DEPOSIT & FUND CRYPTO MODAL (QR CODE + FAUCET + ADDRESSES)
+  ========================================================= -->
+  <div class="modal-overlay-generic" id="depositCryptoModal">
+    <div class="modal-box-pump" style="max-width: 480px;">
+      <div class="modal-header-row">
+        <span class="modal-title-text">📥 Deposit Crypto & Fund Wallet</span>
+        <button class="btn-close-modal" id="btnCloseDepositModal" onclick="document.getElementById('depositCryptoModal').style.display='none'">&times;</button>
+      </div>
+
+      <!-- Chain / Network Switcher Tabs -->
+      <div class="category-pills-row" style="margin-bottom: 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+        <button class="cat-pill-btn active" id="depositTabSol" onclick="window.walletEngine.switchDepositTab('SOL', this)">Solana (SOL)</button>
+        <button class="cat-pill-btn" id="depositTabEth" onclick="window.walletEngine.switchDepositTab('ETH', this)">Base (ETH)</button>
+        <button class="cat-pill-btn" id="depositTabUsdc" onclick="window.walletEngine.switchDepositTab('USDC', this)">USDC</button>
+        <button class="cat-pill-btn" id="depositTabBtc" onclick="window.walletEngine.switchDepositTab('BTC', this)">Bitcoin</button>
+      </div>
+
+      <!-- Live QR Code & Network Details Container -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 16px; text-align: center; margin-bottom: 14px;">
+        <div style="background: #ffffff; padding: 10px; border-radius: var(--radius-sm); display: inline-block; margin-bottom: 12px;">
+          <img id="depositQrCodeImg" src="" alt="Deposit QR" style="width: 160px; height: 160px; display: block;">
+        </div>
+
+        <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 6px;" id="depositNetworkHint">
+          Send only SOL (Solana Mainnet) to this address:
+        </div>
+
+        <div class="wallet-address-box" style="word-break: break-all; font-family: var(--font-mono); font-size: 12px; margin-bottom: 10px; padding: 8px 12px; background: var(--bg-input); border-radius: var(--radius-sm);">
+          <span id="depositModalAddressText" style="color: var(--pump-mint);">...</span>
+        </div>
+
+        <button class="cat-pill-btn" style="width: 100%; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; background: rgba(134, 239, 172, 0.15); border: 1px solid var(--pump-mint);" onclick="navigator.clipboard.writeText(document.getElementById('depositModalAddressText').textContent); window.launchpadManager.toast('Deposit address copied!', 'success');">
+          📋 Copy Deposit Address
+        </button>
+      </div>
+
+      <!-- Instant Sandbox Faucet Deposit Section -->
+      <div style="background: rgba(134, 239, 172, 0.05); border: 1px dashed rgba(134, 239, 172, 0.3); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-weight: 700; font-size: 12px; color: var(--pump-mint);">🚰 Instant Sandbox Faucet</span>
+          <span style="font-size: 10px; color: var(--text-muted);">Free Testnet/Devnet Liquidity</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+          <button class="cat-pill-btn" style="justify-content: center; font-size: 11px; color: var(--pump-mint);" onclick="window.walletEngine.depositFunds('SOL', 1.0)">+1.0 SOL</button>
+          <button class="cat-pill-btn" style="justify-content: center; font-size: 11px; color: var(--accent-purple);" onclick="window.walletEngine.depositFunds('ETH', 0.5)">+0.5 ETH</button>
+          <button class="cat-pill-btn" style="justify-content: center; font-size: 11px; color: #60a5fa;" onclick="window.walletEngine.depositFunds('USDC', 500)">+$500 USDC</button>
+        </div>
+      </div>
+
+      <!-- Fiat Card Buy Option -->
+      <button class="btn-signin-mint" style="width: 100%; padding: 12px; font-size: 13px; font-weight: 700; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: none; color: #fff;" onclick="document.getElementById('depositCryptoModal').style.display='none'; window.location.href='/exchange';">
+        💳 Buy with Card / Apple Pay (0% Fee On-Ramp) &rarr;
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       BACKUP SEED PHRASE MODAL
+  ========================================================= -->
+  <div class="modal-overlay-generic" id="backupSeedModal">
+    <div class="modal-box-pump" style="max-width: 480px;">
+      <div class="modal-header-row">
+        <span class="modal-title-text">🔑 Secret Recovery Phrase</span>
+        <button class="btn-close-modal" onclick="document.getElementById('backupSeedModal').style.display='none'">&times;</button>
+      </div>
+
+      <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 14px;">
+        Never share this phrase with anyone. Anyone with these 12 words can access all your funds across Solana, Base, and Bitcoin.
+      </div>
+
+      <div id="backupSeedWordsGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; background: var(--bg-input); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+        <!-- populated dynamically -->
+      </div>
+
+      <button class="cat-pill-btn" style="width: 100%; justify-content: center; font-size: 12px; color: var(--pump-mint); margin-bottom: 8px;" onclick="window.walletEngine.copyCurrentMnemonic()">
+        📋 Copy Seed Phrase to Clipboard
+      </button>
+
+      <button class="btn-signin-mint" style="width: 100%; padding: 10px;" onclick="document.getElementById('backupSeedModal').style.display='none'">
+        Close
       </button>
     </div>
   </div>

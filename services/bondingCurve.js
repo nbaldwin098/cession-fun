@@ -306,6 +306,12 @@ class BondingCurveEngine {
     return this.getCoinDailyGainers(limit);
   }
 
+  getDailyLosers(limit = 6) {
+    const list = this.getAllTokens('all', 'all', 'all', false);
+    list.sort((a, b) => (a.change24hPercent || 0) - (b.change24hPercent || 0));
+    return list.slice(0, limit);
+  }
+
   getNewListings(limit = 6) {
     return this.getNewCoins(limit);
   }
@@ -532,18 +538,32 @@ class BondingCurveEngine {
     return all.find(c => c.id === id) || col;
   }
 
-  createCollection({ name, symbol, description, category, creator, tokens, imageUrl }) {
-    if (!name || !tokens || !Array.isArray(tokens) || tokens.length === 0) {
+  getCollectionById(id) {
+    return this.getCollection(id);
+  }
+
+  createCollection({ name, symbol, description, category, creator, tokens, tokenSymbols, imageUrl }) {
+    let rawTokens = tokens;
+    if ((!rawTokens || !Array.isArray(rawTokens) || rawTokens.length === 0) && Array.isArray(tokenSymbols) && tokenSymbols.length > 0) {
+      const equalWeight = Number((100 / tokenSymbols.length).toFixed(1));
+      rawTokens = tokenSymbols.map(sym => ({
+        symbol: typeof sym === 'string' ? sym : sym.symbol,
+        weight: equalWeight,
+        name: typeof sym === 'string' ? sym : (sym.name || sym.symbol)
+      }));
+    }
+
+    if (!name || !rawTokens || !Array.isArray(rawTokens) || rawTokens.length === 0) {
       throw new Error("Collection name and valid tokens list are required.");
     }
 
     // Verify weights sum to 100
-    const totalWeight = tokens.reduce((sum, t) => sum + (parseFloat(t.weight) || 0), 0);
+    const totalWeight = rawTokens.reduce((sum, t) => sum + (parseFloat(t.weight) || 0), 0);
     if (totalWeight <= 0) {
       throw new Error("Token weights must be greater than zero.");
     }
 
-    const normalizedTokens = tokens.map(t => ({
+    const normalizedTokens = rawTokens.map(t => ({
       symbol: t.symbol.toUpperCase(),
       weight: Number(((parseFloat(t.weight) / totalWeight) * 100).toFixed(1)),
       name: t.name || t.symbol

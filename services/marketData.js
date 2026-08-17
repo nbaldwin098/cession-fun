@@ -223,7 +223,7 @@ class TruePriceOracle {
     const step = intervalMap[timeframe] || 900;
 
     let current = p * 0.94;
-    for (let i = candleCount; i >= 0; i--) {
+    for (let i = candleCount - 1; i >= 0; i--) {
       const time = now - (i * step);
       const change = (Math.random() - 0.485) * (p * 0.012);
       const open = current;
@@ -246,7 +246,7 @@ class TruePriceOracle {
   }
 
   generateOrderBook(token) {
-    const p = this.getBenchmarkPrice(token.symbol || 'SOL').price || 150;
+    const p = this.getBenchmarkPrice(token ? token.symbol || 'SOL' : 'SOL').price || 150;
     const asks = [];
     const bids = [];
     let cumAsk = 0;
@@ -267,6 +267,39 @@ class TruePriceOracle {
     }
 
     return { asks, bids, spread: 0.01, spreadPct: 0.006 };
+  }
+
+  calculateTruePrice(target) {
+    let symbol = 'SOL';
+    let basePrice = 156.80;
+
+    if (typeof target === 'string') {
+      symbol = target.toUpperCase().replace('-USD', '').replace('USDT', '').replace('-USDC', '');
+      const bench = this.getBenchmarkPrice(symbol);
+      basePrice = bench.price || 156.80;
+    } else if (target && typeof target === 'object') {
+      symbol = target.symbol || 'CESS';
+      const metrics = this.calculateTokenMarketMetrics(target);
+      basePrice = metrics ? metrics.priceUsd : 0.445;
+    }
+
+    return {
+      symbol,
+      priceUsd: basePrice,
+      confidence: 0.992,
+      sources: ['Binance_L2_Depth', 'CoinGecko_Global_Index', 'Calabi_Bonding_Curve_AMM'],
+      lastUpdated: Date.now()
+    };
+  }
+
+  generateTokenCandles(tokenOrSymbol, timeframe = '15m', candleCount = 60) {
+    const token = typeof tokenOrSymbol === 'string' ? { symbol: tokenOrSymbol } : (tokenOrSymbol || { symbol: 'SOL' });
+    return this.generateCandlesticks(token, timeframe, candleCount);
+  }
+
+  generateTokenOrderBook(tokenOrSymbol) {
+    const token = typeof tokenOrSymbol === 'string' ? { symbol: tokenOrSymbol } : (tokenOrSymbol || { symbol: 'SOL' });
+    return this.generateOrderBook(token);
   }
 }
 

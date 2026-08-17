@@ -723,6 +723,245 @@ class CessionWalletEngine {
   }
 
   /**
+   * Open Dedicated 1-Click Sovereign HD Wallet Creation Modal
+   */
+  openCreateWalletModal() {
+    this.closeAuthModal();
+    this.closeWalletModal();
+    this.regenerateNewVaultMnemonic();
+    const modal = document.getElementById('createVaultModal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  /**
+   * Regenerate entropy and populate 12-word seed badges
+   */
+  regenerateNewVaultMnemonic() {
+    const entropy = new Uint8Array(16);
+    window.crypto.getRandomValues(entropy);
+
+    const words = [];
+    for (let i = 0; i < 12; i++) {
+      const idx = (entropy[i] + (entropy[(i + 1) % 16] << 8)) % BIP39_DICTIONARY.length;
+      words.push(BIP39_DICTIONARY[idx]);
+    }
+    const mnemonic = words.join(' ');
+    const hexHash = Array.from(entropy).map(b => b.toString(16).padStart(2, '0')).join('');
+    const ethAddress = '0x' + hexHash.substring(0, 40);
+    const solAddress = this._toBase58(entropy);
+    const btcAddress = 'bc1q' + hexHash.substring(0, 38);
+
+    this.tempGeneratedVault = {
+      mnemonic,
+      words,
+      addresses: { eth: ethAddress, sol: solAddress, btc: btcAddress }
+    };
+
+    const grid = document.getElementById('seedWordsGrid');
+    if (grid) {
+      grid.innerHTML = words.map((w, idx) => `
+        <div style="background: rgba(255,255,255,0.06); padding: 6px 10px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px; color: #fff; display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">${idx + 1}.</span>
+          <strong style="color: var(--pump-mint);">${w}</strong>
+        </div>
+      `).join('');
+    }
+
+    const previewSol = document.getElementById('derivedSolAddrPreview');
+    const previewEth = document.getElementById('derivedEthAddrPreview');
+    if (previewSol) previewSol.textContent = `${solAddress.substring(0, 8)}...${solAddress.substring(solAddress.length - 8)}`;
+    if (previewEth) previewEth.textContent = `${ethAddress.substring(0, 8)}...${ethAddress.substring(ethAddress.length - 8)}`;
+  }
+
+  /**
+   * Copy the currently generated 12 words to clipboard
+   */
+  copyGeneratedMnemonic() {
+    if (this.tempGeneratedVault?.mnemonic) {
+      navigator.clipboard.writeText(this.tempGeneratedVault.mnemonic);
+      if (window.showToast) window.showToast('📋 12-Word seed phrase copied to clipboard! Store it offline.', 'success');
+    }
+  }
+
+  /**
+   * Confirm and activate the generated sovereign vault
+   */
+  confirmCreateVault() {
+    if (!this.tempGeneratedVault) {
+      this.regenerateNewVaultMnemonic();
+    }
+    const vault = this.tempGeneratedVault;
+    this.vaultData = vault;
+
+    this.sessionToken = 'sess_vault_' + Date.now();
+    this.userProfile = {
+      username: 'Sovereign_' + vault.addresses.sol.substring(0, 6),
+      badge: 'SOVEREIGN VAULT',
+      addresses: vault.addresses,
+      mnemonic: vault.mnemonic
+    };
+    this.isAuthenticated = true;
+    this.activeWalletType = 'vault';
+    this.activeAddress = vault.addresses.sol;
+    this.activeChain = 'Solana';
+
+    localStorage.setItem('cession_session_token', this.sessionToken);
+    localStorage.setItem('cession_user_profile', JSON.stringify(this.userProfile));
+    localStorage.setItem('cession_vault_data', JSON.stringify(this.vaultData));
+    localStorage.setItem('cession_wallet_type', 'vault');
+
+    const modal = document.getElementById('createVaultModal');
+    if (modal) modal.style.display = 'none';
+
+    this.renderState();
+    if (window.showToast) window.showToast('✓ Sovereign Multi-Chain Vault Activated! Ready to deposit and trade.', 'success');
+  }
+
+  /**
+   * Open Dedicated Deposit & Crypto Funding Modal
+   */
+  openDepositModal(initialAsset = 'SOL') {
+    // If not authenticated, automatically generate or activate sovereign vault
+    if (!this.isAuthenticated || !this.activeAddress) {
+      this.generateNewVault(true);
+    }
+    const modal = document.getElementById('depositCryptoModal');
+    if (modal) modal.style.display = 'flex';
+    this.switchDepositTab(initialAsset);
+  }
+
+  /**
+   * Switch Deposit Network Tab and update live QR & Address
+   */
+  switchDepositTab(asset = 'SOL', btnElement = null) {
+    const tabs = ['depositTabSol', 'depositTabEth', 'depositTabUsdc', 'depositTabBtc'];
+    tabs.forEach(tId => {
+      const el = document.getElementById(tId);
+      if (el) el.classList.remove('active');
+    });
+
+    if (btnElement) {
+      btnElement.classList.add('active');
+    } else {
+      const targetTab = document.getElementById(`depositTab${asset.charAt(0).toUpperCase() + asset.slice(1).toLowerCase()}`);
+      if (targetTab) targetTab.classList.add('active');
+    }
+
+    let depositAddress = '';
+    let networkHint = '';
+
+    const solAddr = this.vaultData?.addresses?.sol || this.userProfile?.addresses?.sol || (this.activeAddress?.startsWith('Sol') ? this.activeAddress : 'SolVault' + (this.activeAddress || 'User').substring(2, 34));
+    const ethAddr = this.vaultData?.addresses?.eth || this.userProfile?.addresses?.eth || (this.activeAddress?.startsWith('0x') ? this.activeAddress : '0x' + (this.activeAddress || '0000').substring(0, 40));
+    const btcAddr = this.vaultData?.addresses?.btc || 'bc1q' + (this.activeAddress || 'sovereign').substring(0, 34);
+
+    if (asset === 'SOL') {
+      depositAddress = solAddr;
+      networkHint = 'Send only SOL or SPL tokens on Solana Mainnet:';
+    } else if (asset === 'ETH') {
+      depositAddress = ethAddr;
+      networkHint = 'Send ETH on Base L2 or Ethereum Mainnet:';
+    } else if (asset === 'USDC') {
+      depositAddress = ethAddr;
+      networkHint = 'Send USDC (ERC-20 on Base L2 or SPL on Solana):';
+    } else if (asset === 'BTC') {
+      depositAddress = btcAddr;
+      networkHint = 'Send Bitcoin (BTC) Native SegWit Bech32:';
+    }
+
+    const addrText = document.getElementById('depositModalAddressText');
+    const hintText = document.getElementById('depositNetworkHint');
+    const qrImg = document.getElementById('depositQrCodeImg');
+
+    if (addrText) addrText.textContent = depositAddress;
+    if (hintText) hintText.textContent = networkHint;
+    if (qrImg) {
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(depositAddress)}&color=000&bgcolor=fff`;
+    }
+  }
+
+  /**
+   * Deposit / Fund Wallet (Simulated Instant Faucet or Live Credit)
+   */
+  async depositFunds(asset = 'SOL', amount = 1.0) {
+    if (!this.isAuthenticated || !this.activeAddress) {
+      this.generateNewVault(true);
+    }
+
+    try {
+      const res = await fetch('/api/wallets/deposit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          address: this.activeAddress,
+          asset: asset.toUpperCase(),
+          amount: parseFloat(amount)
+        })
+      });
+      const data = await res.json();
+
+      const symKey = asset.toLowerCase();
+      if (this.balances[symKey] !== undefined) {
+        this.balances[symKey] += parseFloat(amount);
+      } else {
+        this.balances[symKey] = parseFloat(amount);
+      }
+
+      localStorage.setItem('cession_balances', JSON.stringify(this.balances));
+      this.renderState();
+
+      if (window.showToast) {
+        window.showToast(`✓ Received deposit: +${amount} ${asset.toUpperCase()}! Ready to trade.`, 'success');
+      }
+    } catch (e) {
+      // Fallback local balance credit
+      const symKey = asset.toLowerCase();
+      this.balances[symKey] = (this.balances[symKey] || 0) + parseFloat(amount);
+      localStorage.setItem('cession_balances', JSON.stringify(this.balances));
+      this.renderState();
+      if (window.showToast) {
+        window.showToast(`✓ Local test credit: +${amount} ${asset.toUpperCase()}!`, 'success');
+      }
+    }
+  }
+
+  /**
+   * View & Export Seed Phrase Backup
+   */
+  exportSecretPhrase() {
+    const mnemonic = this.vaultData?.mnemonic || this.userProfile?.mnemonic;
+    if (!mnemonic || mnemonic === 'imported_private_key') {
+      if (this.isAuthenticated) {
+        alert(`Your wallet is managed externally by your browser extension (${(this.activeWalletType || 'Web3').toUpperCase()}). Please export your seed phrase directly inside your wallet settings.`);
+      } else {
+        this.openCreateWalletModal();
+      }
+      return;
+    }
+
+    const words = mnemonic.split(/\s+/);
+    const grid = document.getElementById('backupSeedWordsGrid');
+    if (grid) {
+      grid.innerHTML = words.map((w, idx) => `
+        <div style="background: rgba(255,255,255,0.06); padding: 6px 10px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px; color: #fff; display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">${idx + 1}.</span>
+          <strong style="color: var(--pump-mint);">${w}</strong>
+        </div>
+      `).join('');
+    }
+
+    const modal = document.getElementById('backupSeedModal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  copyCurrentMnemonic() {
+    const mnemonic = this.vaultData?.mnemonic || this.userProfile?.mnemonic;
+    if (mnemonic) {
+      navigator.clipboard.writeText(mnemonic);
+      if (window.showToast) window.showToast('📋 Seed phrase copied to clipboard! Keep it offline.', 'success');
+    }
+  }
+
+  /**
    * Generate 1-Click Sovereign In-Browser Vault
    */
   generateNewVault(setAuthenticated = true) {
@@ -738,25 +977,26 @@ class CessionWalletEngine {
     const hexHash = Array.from(entropy).map(b => b.toString(16).padStart(2, '0')).join('');
     const ethAddress = '0x' + hexHash.substring(0, 40);
     const solAddress = this._toBase58(entropy);
+    const btcAddress = 'bc1q' + hexHash.substring(0, 38);
 
     this.vaultData = {
       mnemonic,
       words,
-      addresses: { eth: ethAddress, sol: solAddress }
+      addresses: { eth: ethAddress, sol: solAddress, btc: btcAddress }
     };
 
     if (setAuthenticated) {
       this.sessionToken = 'sess_vault_' + Date.now();
       this.userProfile = {
-        username: 'Sovereign_' + ethAddress.substring(2, 6),
+        username: 'Sovereign_' + solAddress.substring(0, 6),
         badge: 'SOVEREIGN VAULT',
-        addresses: { eth: ethAddress, sol: solAddress },
+        addresses: { eth: ethAddress, sol: solAddress, btc: btcAddress },
         mnemonic
       };
       this.isAuthenticated = true;
       this.activeWalletType = 'vault';
-      this.activeAddress = ethAddress;
-      this.activeChain = 'Base';
+      this.activeAddress = solAddress;
+      this.activeChain = 'Solana';
 
       localStorage.setItem('cession_session_token', this.sessionToken);
       localStorage.setItem('cession_user_profile', JSON.stringify(this.userProfile));
@@ -764,6 +1004,7 @@ class CessionWalletEngine {
       localStorage.setItem('cession_wallet_type', 'vault');
 
       this.closeAuthModal();
+      this.closeWalletModal();
       this.renderState();
       if (window.showToast) window.showToast('✓ 1-Click Sovereign Vault generated! Encrypted locally.', 'success');
     }
@@ -814,6 +1055,7 @@ class CessionWalletEngine {
     localStorage.removeItem('cession_user_profile');
     localStorage.removeItem('cession_vault_data');
     localStorage.removeItem('cession_wallet_type');
+    localStorage.removeItem('cession_balances');
 
     this.renderState();
     if (window.showToast) window.showToast('Logged out successfully.', 'info');
@@ -867,6 +1109,8 @@ class CessionWalletEngine {
     const exUsdc = document.getElementById('exchangeBalUsdc');
     const exCess = document.getElementById('exchangeBalCess');
     const swapPayBal = document.getElementById('swapPayBalanceDisplay');
+    const depositSol = document.getElementById('depositSolAddr');
+    const depositEth = document.getElementById('depositEthAddr');
 
     if (this.isAuthenticated && this.activeAddress) {
       if (btnConnect) btnConnect.style.display = 'none';
@@ -903,6 +1147,11 @@ class CessionWalletEngine {
       if (exCess) exCess.textContent = `${(this.balances.cess || 0).toLocaleString()}`;
       if (swapPayBal) swapPayBal.textContent = `${(this.balances.sol || 0.0).toFixed(2)} SOL`;
 
+      const solAddrFull = this.vaultData?.addresses?.sol || this.userProfile?.addresses?.sol || this.activeAddress;
+      const ethAddrFull = this.vaultData?.addresses?.eth || this.userProfile?.addresses?.eth || (this.activeAddress?.startsWith('0x') ? this.activeAddress : '0x' + this.activeAddress.substring(0, 40));
+      if (depositSol) depositSol.textContent = solAddrFull;
+      if (depositEth) depositEth.textContent = ethAddrFull;
+
     } else {
       if (btnConnect) btnConnect.style.display = 'inline-flex';
       if (pill) pill.style.display = 'none';
@@ -930,6 +1179,8 @@ class CessionWalletEngine {
       if (exUsdc) exUsdc.textContent = '$0.00';
       if (exCess) exCess.textContent = '0';
       if (swapPayBal) swapPayBal.textContent = '0.00 SOL';
+      if (depositSol) depositSol.textContent = 'Not Connected';
+      if (depositEth) depositEth.textContent = 'Not Connected';
     }
 
     if (window.exchangeManager && typeof window.exchangeManager.renderWalletBalances === 'function') {

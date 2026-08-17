@@ -131,17 +131,86 @@ class WalletEngine {
     return digits.reverse().map(d => ALPHABET[d]).join('');
   }
 
+  constructor() {
+    this.addressBalances = new Map();
+  }
+
+  /**
+   * Deposit crypto to an address (simulated/faucet/card onramp credit)
+   */
+  deposit(address, asset = 'SOL', amount = 1.0) {
+    if (!address) throw new Error("Address is required");
+    const cleanAddr = address.trim().toLowerCase();
+    const current = this.addressBalances.get(cleanAddr) || {
+      BTC: 0.0,
+      ETH: 0.0,
+      SOL: 0.0,
+      USDC: 0.0,
+      CESS: 0.0
+    };
+
+    const sym = asset.toUpperCase();
+    if (current[sym] !== undefined) {
+      current[sym] += parseFloat(amount);
+    } else {
+      current[sym] = parseFloat(amount);
+    }
+
+    this.addressBalances.set(cleanAddr, current);
+    return current;
+  }
+
   /**
    * Get portfolio balances across chains for an address
    */
-  getPortfolioBalances(ethAddress) {
+  getPortfolioBalances(address) {
+    if (!address) {
+      return {
+        usdTotal: 0.00,
+        assets: [
+          { name: "Bitcoin", symbol: "BTC", balance: 0.00, priceUsd: 65420.00, valueUsd: 0.00, chain: "Bitcoin" },
+          { name: "Ethereum", symbol: "ETH", balance: 0.00, priceUsd: 3480.50, valueUsd: 0.00, chain: "Base L2" },
+          { name: "Solana", symbol: "SOL", balance: 0.00, priceUsd: 154.20, valueUsd: 0.00, chain: "Solana" },
+          { name: "USD Coin", symbol: "USDC", balance: 0.00, priceUsd: 1.00, valueUsd: 0.00, chain: "Base / Solana" },
+          { name: "Cession Network", symbol: "CESS", balance: 0.00, priceUsd: 0.001, valueUsd: 0.00, chain: "Solana" }
+        ]
+      };
+    }
+
+    const cleanAddr = address.trim().toLowerCase();
+    const bal = this.addressBalances.get(cleanAddr) || {
+      BTC: 0.0,
+      ETH: 0.0,
+      SOL: 0.0,
+      USDC: 0.0,
+      CESS: 0.0
+    };
+
+    const prices = {
+      BTC: 65420.00,
+      ETH: 3480.50,
+      SOL: 154.20,
+      USDC: 1.00,
+      CESS: 0.001
+    };
+
+    const btcVal = (bal.BTC || 0) * prices.BTC;
+    const ethVal = (bal.ETH || 0) * prices.ETH;
+    const solVal = (bal.SOL || 0) * prices.SOL;
+    const usdcVal = (bal.USDC || 0) * prices.USDC;
+    const cessVal = (bal.CESS || 0) * prices.CESS;
+
+    const totalUsd = btcVal + ethVal + solVal + usdcVal + cessVal;
+
     return {
-      usdTotal: 0.00,
+      usdTotal: parseFloat(totalUsd.toFixed(2)),
+      balances: bal,
       assets: [
-        { name: "Bitcoin", symbol: "BTC", balance: 0.00, priceUsd: 65420.00, valueUsd: 0.00, chain: "Bitcoin" },
-        { name: "Ethereum", symbol: "ETH", balance: 0.00, priceUsd: 3480.50, valueUsd: 0.00, chain: "Base L2" },
-        { name: "Solana", symbol: "SOL", balance: 0.00, priceUsd: 154.20, valueUsd: 0.00, chain: "Solana" },
-        { name: "Cession Network", symbol: "CESS", balance: 0.00, priceUsd: 0.001, valueUsd: 0.00, chain: "Solana" }
+        { name: "Bitcoin", symbol: "BTC", balance: bal.BTC || 0, priceUsd: prices.BTC, valueUsd: parseFloat(btcVal.toFixed(2)), chain: "Bitcoin" },
+        { name: "Ethereum", symbol: "ETH", balance: bal.ETH || 0, priceUsd: prices.ETH, valueUsd: parseFloat(ethVal.toFixed(2)), chain: "Base L2" },
+        { name: "Solana", symbol: "SOL", balance: bal.SOL || 0, priceUsd: prices.SOL, valueUsd: parseFloat(solVal.toFixed(2)), chain: "Solana" },
+        { name: "USD Coin", symbol: "USDC", balance: bal.USDC || 0, priceUsd: prices.USDC, valueUsd: parseFloat(usdcVal.toFixed(2)), chain: "Base / Solana" },
+        { name: "Cession Network", symbol: "CESS", balance: bal.CESS || 0, priceUsd: prices.CESS, valueUsd: parseFloat(cessVal.toFixed(2)), chain: "Solana" }
       ]
     };
   }

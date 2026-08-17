@@ -47,4 +47,31 @@ router.get('/portfolio/:address', (req, res) => {
   }
 });
 
+/**
+ * Deposit / Faucet test funds to wallet
+ */
+router.post('/deposit', (req, res) => {
+  try {
+    const { address, asset, amount } = req.body;
+    if (!address) {
+      return res.status(400).json({ success: false, error: "Wallet address is required." });
+    }
+    const depositAmount = parseFloat(amount) || 1.0;
+    const depositAsset = (asset || 'SOL').toUpperCase();
+
+    const updatedBalances = walletEngine.deposit(address, depositAsset, depositAmount);
+    const portfolio = walletEngine.getPortfolioBalances(address);
+
+    res.json({
+      success: true,
+      message: `Successfully deposited ${depositAmount} ${depositAsset} to ${address}`,
+      address,
+      balances: updatedBalances,
+      portfolio
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;
