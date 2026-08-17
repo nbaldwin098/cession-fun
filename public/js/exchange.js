@@ -418,10 +418,10 @@ class CessionExchangeManager {
     if (depositSol) depositSol.textContent = solAddr;
     if (depositEth) depositEth.textContent = address;
 
-    const solBal = (we && we.balances && we.balances.sol !== undefined) ? we.balances.sol : 6.20;
-    const ethBal = (we && we.balances && we.balances.eth !== undefined) ? we.balances.eth : 1.45;
-    const usdcBal = (we && we.balances && we.balances.usdc !== undefined) ? we.balances.usdc : 1250.00;
-    const cessBal = (we && we.balances && we.balances.cess !== undefined) ? we.balances.cess : 250000;
+    const solBal = (we && we.balances && we.balances.sol !== undefined) ? we.balances.sol : 0.00;
+    const ethBal = (we && we.balances && we.balances.eth !== undefined) ? we.balances.eth : 0.00;
+    const usdcBal = (we && we.balances && we.balances.usdc !== undefined) ? we.balances.usdc : 0.00;
+    const cessBal = (we && we.balances && we.balances.cess !== undefined) ? we.balances.cess : 0.00;
 
     if (balSolEl) balSolEl.textContent = `${solBal.toFixed(2)} SOL`;
     if (balEthEl) balEthEl.textContent = `${ethBal.toFixed(2)} ETH`;
@@ -442,10 +442,10 @@ class CessionExchangeManager {
   setPayMax() {
     const payToken = document.getElementById('swapPayTokenSelect')?.value || 'SOL';
     const we = window.walletEngine;
-    let b = (we && we.balances && we.balances.sol !== undefined) ? we.balances.sol : 6.20;
-    if (payToken === 'ETH') b = (we && we.balances?.eth !== undefined) ? we.balances.eth : 1.45;
-    if (payToken === 'USDC' || payToken === 'USDT') b = (we && we.balances?.usdc !== undefined) ? we.balances.usdc : 1250;
-    if (payToken === 'CESS') b = (we && we.balances?.cess !== undefined) ? we.balances.cess : 250000;
+    let b = (we && we.balances && we.balances.sol !== undefined) ? we.balances.sol : 0.00;
+    if (payToken === 'ETH') b = (we && we.balances?.eth !== undefined) ? we.balances.eth : 0.00;
+    if (payToken === 'USDC' || payToken === 'USDT') b = (we && we.balances?.usdc !== undefined) ? we.balances.usdc : 0.00;
+    if (payToken === 'CESS') b = (we && we.balances?.cess !== undefined) ? we.balances.cess : 0.00;
 
     const input = document.getElementById('swapPayAmountInput');
     if (input) {
@@ -531,7 +531,14 @@ class CessionExchangeManager {
     }
 
     const we = window.walletEngine;
-    const sender = (we && we.activeAddress) ? we.activeAddress : '0x0824b23a910cd99e1a2f0093ba4210e76a01004c';
+    const sender = (we && we.activeAddress) ? we.activeAddress : null;
+    const key = fromToken.toLowerCase();
+    const available = (we && we.balances && we.balances[key] !== undefined) ? we.balances[key] : 0.00;
+
+    if (!sender || available <= 0 || available < amount) {
+      window.launchpadManager.toast(`❌ Insufficient ${fromToken} balance. Available: ${available.toFixed(2)} ${fromToken}. Please connect wallet or deposit funds.`, 'error');
+      return;
+    }
 
     if (btn) btn.textContent = '⚡ Executing 0% Swap on-chain...';
 
@@ -661,7 +668,14 @@ class CessionExchangeManager {
     }
 
     const we = window.walletEngine;
-    const sender = (we && we.activeAddress) ? we.activeAddress : '0x0824b23a910cd99e1a2f0093ba4210e76a01004c';
+    const sender = (we && we.activeAddress) ? we.activeAddress : null;
+    const key = token.toLowerCase();
+    const available = (we && we.balances && we.balances[key] !== undefined) ? we.balances[key] : 0.00;
+
+    if (!sender || available <= 0 || available < amount) {
+      window.launchpadManager.toast(`❌ Insufficient ${token} balance. Available: ${available.toFixed(2)} ${token}. Cannot transfer unowned funds.`, 'error');
+      return;
+    }
 
     try {
       const res = await fetch('/api/exchange/transfer', {

@@ -14,144 +14,13 @@ class CessionLaunchpadManager {
     this.activeToken = null;
     this.tokens = [];
 
-    this.defaultTokens = [
-      {
-        name: 'The Random Bull',
-        symbol: 'USER',
-        marketCapUsd: 122000,
-        volume24hUsd: 45200,
-        currentPriceSol: 0.000000122,
-        creatorAddress: '76kXMM',
-        ageText: '2d',
-        imageUrl: 'https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?w=500',
-        description: 'A random user. A nobody. Not a celeb. Not a KOL. Just a random bull pumping to graduation.',
-        category: 'movers',
-        bondingCurvePercent: 78
-      },
-      {
-        name: 'Billycoin',
-        symbol: 'BILLY',
-        marketCapUsd: 3750000,
-        volume24hUsd: 1280000,
-        currentPriceSol: 0.00000375,
-        creatorAddress: 'topfloor_b',
-        ageText: '10h',
-        imageUrl: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500',
-        description: 'The iconic golden doge wearing glasses. Community driven meme sensation.',
-        category: 'mayhem',
-        bondingCurvePercent: 96
-      },
-      {
-        name: 'r/',
-        symbol: 'r/',
-        marketCapUsd: 8350,
-        volume24hUsd: 3200,
-        currentPriceSol: 0.000000008,
-        creatorAddress: 'fltnarwhal',
-        ageText: '2y',
-        imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500',
-        description: 'The unofficial community coin of Reddit on the bonding curve.',
-        category: 'oldest',
-        bondingCurvePercent: 12
-      },
-      {
-        name: 'Minecraft Fruit Fly',
-        symbol: 'FLY',
-        marketCapUsd: 27900,
-        volume24hUsd: 8900,
-        currentPriceSol: 0.000000028,
-        creatorAddress: 'botfn',
-        ageText: '50m',
-        imageUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500',
-        description: 'FLY-000 [Neural] autonomous spider fly simulation agent.',
-        category: 'agents',
-        bondingCurvePercent: 39
-      },
-      {
-        name: 'The Orange Backpack Peng...',
-        symbol: 'ORANGEPENG',
-        marketCapUsd: 41800,
-        volume24hUsd: 14200,
-        currentPriceSol: 0.000000042,
-        creatorAddress: 'dyedkraken',
-        ageText: '48m',
-        imageUrl: 'https://images.unsplash.com/photo-1598439210625-5067c578f3f6?w=500',
-        description: 'Penguins with orange backpacks sliding into Raydium graduation.',
-        category: 'new',
-        bondingCurvePercent: 54
-      },
-      {
-        name: 'The Black Bull',
-        symbol: 'ANSEM',
-        marketCapUsd: 273000000,
-        volume24hUsd: 42100000,
-        currentPriceSol: 0.000273,
-        creatorAddress: 'ansem',
-        ageText: '1d',
-        imageUrl: 'https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?w=500',
-        description: 'Golden Bull? Try Black Bull. Sovereign liquidity powerhouse.',
-        category: 'market_cap',
-        bondingCurvePercent: 99
-      },
-      {
-        name: 'Jimothy The Raccoon',
-        symbol: 'Jimothy',
-        marketCapUsd: 7820000,
-        volume24hUsd: 2100000,
-        currentPriceSol: 0.00000782,
-        creatorAddress: 'jimothy_dev',
-        ageText: '3h',
-        imageUrl: 'https://images.unsplash.com/photo-1590425712287-c37340263300?w=500',
-        description: "The Internet Isn't Done With Jimothy Yet.",
-        category: 'movers',
-        bondingCurvePercent: 92
-      },
-      {
-        name: 'ちいかわ',
-        symbol: 'Chiikawa',
-        marketCapUsd: 1510000,
-        volume24hUsd: 480000,
-        currentPriceSol: 0.00000151,
-        creatorAddress: 'anime_cult',
-        ageText: '5h',
-        imageUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500',
-        description: 'The Little World of Chiikawa viral anime mascot.',
-        category: 'movers',
-        bondingCurvePercent: 88
-      },
-      {
-        name: 'Tung Tung Tung Sahur',
-        symbol: 'TripleT',
-        marketCapUsd: 10700000,
-        volume24hUsd: 3100000,
-        currentPriceSol: 0.0000107,
-        creatorAddress: 'sahur_lead',
-        ageText: '12h',
-        imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500',
-        description: 'Tung Tung Tung Sahur Passes $25M Market Cap.',
-        category: 'mayhem',
-        bondingCurvePercent: 95
-      },
-      {
-        name: 'Cession Sovereign Engine',
-        symbol: 'CESS',
-        marketCapUsd: 58240,
-        volume24hUsd: 18400,
-        currentPriceSol: 0.000000058,
-        creatorAddress: '0x88f4b23a',
-        ageText: '10m',
-        imageUrl: 'images/cession-logo.png',
-        description: 'The flagship fair launch token on Cession with anti-rug proof of skin.',
-        category: 'new',
-        bondingCurvePercent: 84
-      }
-    ];
+    this.defaultTokens = [];
 
     this.init();
   }
 
   init() {
-    this.tokens = [...this.defaultTokens];
+    this.tokens = [];
     this.bundles = [];
     this.topBundles = [];
     this.worstBundles = [];
@@ -168,12 +37,14 @@ class CessionLaunchpadManager {
     const path = window.location.pathname;
     const hash = window.location.hash;
     if (path.startsWith('/exchange') || hash === '#exchange' || path.startsWith('/swap') || path.startsWith('/trade')) {
-      const btn = document.getElementById('railNavExchange');
+      window.location.href = '/exchange';
+    } else if (path.startsWith('/explore') || hash === '#explore') {
+      const btn = document.getElementById('railNavExplore');
       if (btn) {
         document.querySelectorAll('.rail-icon-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
       }
-      this.switchPage('exchange');
+      this.switchPage('explore');
     } else if (path.startsWith('/bundles') || hash === '#bundles' || path.startsWith('/collections')) {
       const btn = document.getElementById('railNavBundles');
       if (btn) {
@@ -186,14 +57,12 @@ class CessionLaunchpadManager {
 
   bindSidebarRail() {
     const navItems = [
-      { id: 'railNavHome', view: 'board', url: '/' },
-      { id: 'railNavExplore', view: 'board', url: '/' },
+      { id: 'railNavHome', view: 'home', url: '/' },
+      { id: 'railNavExplore', view: 'explore', url: '/explore' },
       { id: 'railNavExchange', view: 'exchange', url: '/exchange' },
       { id: 'railNavProfile', view: 'profile', url: '/profile' },
-      { id: 'railNavChat', view: 'board', toast: 'Community chat & trollbox active' },
       { id: 'railNavLeaderboard', view: 'leaderboard', url: '/leaderboard' },
       { id: 'railNavBundles', view: 'bundles', url: '/bundles' },
-      { id: 'railNavStaking', view: 'staking', url: '/staking' },
       { id: 'railNavTransparency', view: 'transparency', url: '/transparency' },
       { id: 'railNavTerms', view: 'terms', url: '/terms' },
     ];
@@ -202,6 +71,10 @@ class CessionLaunchpadManager {
       const btn = document.getElementById(item.id);
       if (btn) {
         btn.addEventListener('click', () => {
+          if (item.view === 'exchange') {
+            window.location.href = '/exchange';
+            return;
+          }
           document.querySelectorAll('.rail-icon-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           if (item.view) this.switchPage(item.view);
@@ -378,6 +251,22 @@ class CessionLaunchpadManager {
   renderGridTokens(tokens) {
     if (!this.exploreGrid) return;
 
+    if (!tokens || tokens.length === 0) {
+      this.exploreGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; padding: 48px 24px; text-align: center; background: var(--bg-card); border: 1px dashed var(--border-card); border-radius: var(--radius-md);">
+          <div style="font-size: 32px; margin-bottom: 12px;">🪙</div>
+          <h3 style="font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 8px;">No Tokens Launched Yet</h3>
+          <p style="font-size: 13px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 20px auto;">
+            Only real tokens launched on Cession will appear here. Be the first creator to launch a coin on the sovereign bonding curve!
+          </p>
+          <button class="btn-signin-mint" style="padding: 10px 24px; font-weight: 700;" onclick="window.launchpadManager.openDeployModal()">
+            + Create First Token (0.1 SOL)
+          </button>
+        </div>
+      `;
+      return;
+    }
+
     this.exploreGrid.innerHTML = tokens.map(t => {
       const mcapStr = t.marketCapUsd >= 1000000
         ? `$${(t.marketCapUsd / 1000000).toFixed(2)}M MC`
@@ -411,6 +300,17 @@ class CessionLaunchpadManager {
 
   renderTableTokens(tokens = this.tokens) {
     if (!this.exploreTableBody) return;
+
+    if (!tokens || tokens.length === 0) {
+      this.exploreTableBody.innerHTML = `
+        <tr>
+          <td colspan="8" style="text-align: center; padding: 36px; color: var(--text-secondary);">
+            No tokens launched yet. Be the first creator to launch a coin!
+          </td>
+        </tr>
+      `;
+      return;
+    }
 
     this.exploreTableBody.innerHTML = tokens.map(t => `
       <tr>
@@ -895,39 +795,56 @@ class CessionLaunchpadManager {
   }
 
   switchPage(viewName) {
+    if (viewName === 'exchange') {
+      window.location.href = '/exchange';
+      return;
+    }
+
     const views = {
-      board: document.getElementById('viewBoard'),
-      exchange: document.getElementById('viewExchange'),
+      home: document.getElementById('viewHome'),
+      explore: document.getElementById('viewExplore'),
+      board: document.getElementById('viewExplore'),
       bundles: document.getElementById('viewBundles'),
-      staking: document.getElementById('viewStaking'),
       transparency: document.getElementById('viewTransparency'),
       leaderboard: document.getElementById('viewLeaderboard'),
       profile: document.getElementById('viewProfile'),
       terms: document.getElementById('viewTerms')
     };
 
+    const targetKey = (viewName === 'board' || viewName === 'explore') ? 'explore' : viewName;
+
     Object.keys(views).forEach(k => {
       if (views[k]) {
-        if (k === viewName) views[k].classList.add('active');
-        else views[k].classList.remove('active');
+        if (k === targetKey) {
+          views[k].classList.add('active');
+          views[k].style.display = 'block';
+        } else {
+          views[k].classList.remove('active');
+          views[k].style.display = 'none';
+        }
       }
     });
 
-    if (viewName === 'exchange') {
-      if (window.exchangeManager) {
-        window.exchangeManager.fetchTickers();
-        window.exchangeManager.fetchCandles(window.exchangeManager.activePair, window.exchangeManager.activeTimeframe);
-        window.exchangeManager.updateWalletDisplay();
-        setTimeout(() => window.exchangeManager.renderCandleChart(), 100);
+    // Control search bar visibility: ONLY visible in explore view
+    const searchWrapper = document.getElementById('navbarSearchWrapper');
+    if (searchWrapper) {
+      if (targetKey === 'explore') {
+        searchWrapper.style.display = 'flex';
+      } else {
+        searchWrapper.style.display = 'none';
       }
-    } else if (viewName === 'bundles') {
+    }
+
+    if (targetKey === 'bundles') {
       this.fetchBundles();
-    } else if (viewName === 'transparency') {
+    } else if (targetKey === 'transparency') {
       this.refreshTransparency();
+    } else if (targetKey === 'explore') {
+      this.filterAndRenderTokens();
     }
 
     if (window.history && window.history.pushState) {
-      const path = viewName === 'board' ? '/' : `/${viewName}`;
+      const path = targetKey === 'home' ? '/' : `/${targetKey}`;
       window.history.pushState({}, '', path);
     }
 
@@ -960,8 +877,24 @@ class CessionLaunchpadManager {
       return;
     }
 
+    // Strict positive wallet balance check
+    const currentBalance = (window.walletEngine && window.walletEngine.balances) 
+      ? (window.walletEngine.balances[token.toLowerCase()] || 0) 
+      : 0;
+
+    if (currentBalance < amount || currentBalance <= 0) {
+      this.toast(`⚠️ Insufficient balance! You have ${currentBalance.toFixed(2)} $${token}. Deposit or acquire tokens to stake.`, 'error');
+      return;
+    }
+
     const days = this.currentStakeDays || 90;
     const apy = days === 30 ? '14.0%' : days === 90 ? '22.5%' : '36.0%';
+
+    // Deduct balance
+    if (window.walletEngine && window.walletEngine.balances) {
+      window.walletEngine.balances[token.toLowerCase()] -= amount;
+      window.walletEngine.renderState();
+    }
 
     const list = document.getElementById('activeStakesList');
     if (list) {
@@ -994,15 +927,13 @@ class CessionLaunchpadManager {
         const solAddrEl = document.getElementById('solTreasuryDisplay');
         const evmAddrEl = document.getElementById('evmTreasuryDisplay');
 
-        if (solEl) solEl.textContent = `${(t.companyTreasuryBalances?.solanaTreasurySol || 48.60).toFixed(2)} SOL`;
-        if (evmEl) evmEl.textContent = `${(t.companyTreasuryBalances?.baseTreasuryEth || 14.28).toFixed(2)} ETH`;
+        if (solEl) solEl.textContent = `${(t.companyTreasuryBalances?.solanaTreasurySol || 0.00).toFixed(2)} SOL`;
+        if (evmEl) evmEl.textContent = `${(t.companyTreasuryBalances?.baseTreasuryEth || 0.00).toFixed(2)} ETH`;
         if (solAddrEl && t.treasurySolAddress) solAddrEl.textContent = t.treasurySolAddress;
-        if (evmAddrEl && t.treasuryEvmAddress) evmAddrEl.textContent = t.treasuryEvmAddress;
-
         this.toast('✓ On-chain transparency metrics refreshed', 'success');
       }
     } catch (e) {
-      console.warn('Transparency fetch:', e);
+      console.warn('Transparency fetch error:', e);
     }
   }
 
@@ -1156,6 +1087,14 @@ class CessionLaunchpadManager {
       return;
     }
 
+    // Strict balance check for mint fee + initial buy
+    const solBalance = (window.walletEngine && window.walletEngine.balances) ? (window.walletEngine.balances.sol || 0) : 0;
+    const requiredSol = 0.1 + initialBuy;
+    if (solBalance < requiredSol) {
+      this.toast(`⚠️ Insufficient SOL balance! Minting requires ${requiredSol.toFixed(2)} SOL (0.1 fee + initial buy). Your balance: ${solBalance.toFixed(2)} SOL.`, 'error');
+      return;
+    }
+
     const creator = (window.walletEngine && window.walletEngine.activeAddress)
       ? window.walletEngine.activeAddress
       : '0x' + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
@@ -1188,7 +1127,7 @@ class CessionLaunchpadManager {
 
       // Deduct mint fee + initial buy from connected wallet
       if (window.walletEngine && window.walletEngine.balances) {
-        window.walletEngine.balances.sol = Math.max(0, (window.walletEngine.balances.sol || 6.2) - (0.1 + initialBuy));
+        window.walletEngine.balances.sol = Math.max(0, (window.walletEngine.balances.sol || 0) - (0.1 + initialBuy));
         window.walletEngine.renderState();
       }
 

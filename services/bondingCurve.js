@@ -1003,263 +1003,7 @@ class BondingCurveEngine {
   }
 
   initSampleTokens() {
-    const sampleTokens = [
-      {
-        name: "Cession Sovereign Network",
-        symbol: "CESS",
-        chain: "Base",
-        tokenType: "sprint",
-        isPrivate: false,
-        description: "The native zero-knowledge governance & fee-redistribution token powering cession.fun launchpad.",
-        imageUrl: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=200",
-        creator: "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
-        devLockedPercent: 100,
-        devTokensLocked: 50000000,
-        createdAt: Date.now() - 86400000,
-        virtualSolReserves: 28.5,
-        virtualTokenReserves: 720000000,
-        realSolRaised: 7.8,
-        tokensSold: 280000000,
-        currentPriceSol: 0.000000045,
-        currentPriceUsd: 0.00000675,
-        openPrice24hUsd: 0.00000375,
-        marketCapUsd: 58240,
-        targetCapUsd: 25000,
-        volume24hUsd: 148500,
-        high24hUsd: 0.00000720,
-        low24hUsd: 0.00000360,
-        isGraduated: false,
-        curveProgressPercent: 96,
-        totalBurnedTokens: 4200000,
-        holdersCount: 382,
-        avgHoldDays: 12,
-        timeLockedPercent: 25,
-        antiDumpEnabled: false,
-        stakingApy: 14.0,
-        holders: [
-          { address: "0x777A...6b3D (Dev)", balance: 50000000, percentage: 5.0, isDev: true, locked: true },
-          { address: "0x9182...4421 (Whale)", balance: 42000000, percentage: 4.2, isDev: false, locked: false },
-          { address: "0x1209...8812 (Diamond)", balance: 28000000, percentage: 2.8, isDev: false, locked: false }
-        ],
-        safetyAudit: {
-          score: 98,
-          grade: "A+",
-          mevProtected: true,
-          devVestingLocked: true,
-          top10HoldersPercent: 18.2,
-          warnings: []
-        },
-        recentTrades: [
-          { id: "tx_1", type: "BUY", amountSol: 1.5, amountTokens: 42857142, usdVal: "225.00", user: "0x88f...1a2", time: "2m ago", mevShielded: true },
-          { id: "tx_2", type: "BUY", amountSol: 0.8, amountTokens: 22857142, usdVal: "120.00", user: "0x19c...99e", time: "5m ago", mevShielded: true }
-        ]
-      },
-      {
-        name: "Baldwin Sovereign Family Stack",
-        symbol: "FAMSTACK",
-        chain: "Base",
-        tokenType: "stack",
-        isPrivate: false,
-        description: "Grassroots generational micro-endowment for friends & family. 86% time-locked in Staking Vault with 1% max daily sell anti-dump protection.",
-        imageUrl: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200",
-        creator: "0x091A4B8290CC189108a798129034",
-        devLockedPercent: 100,
-        devTokensLocked: 50000000,
-        createdAt: Date.now() - (86400000 * 14),
-        virtualSolReserves: 28.0,
-        virtualTokenReserves: 750000000,
-        realSolRaised: 18.5,
-        tokensSold: 250000000,
-        currentPriceSol: 0.000000045,
-        currentPriceUsd: 0.00000675,
-        openPrice24hUsd: 0.00000550,
-        marketCapUsd: 22500,
-        targetCapUsd: 25000,
-        volume24hUsd: 64200,
-        high24hUsd: 0.00000700,
-        low24hUsd: 0.00000540,
-        isGraduated: false,
-        curveProgressPercent: 90,
-        totalBurnedTokens: 8900000,
-        holdersCount: 88,
-        avgHoldDays: 142,
-        timeLockedPercent: 86,
-        antiDumpEnabled: true,
-        stakingApy: 28.5,
-        stakingPool: {
-          totalStakedTokens: 645000000,
-          stakers: [
-            { id: "stk_1", user: "0x091A...9034", amount: 200000000, durationDays: 365, apy: 36.0 }
-          ]
-        },
-        holders: [
-          { address: "0x091A...9034 (Family Trust Lead)", balance: 200000000, percentage: 20.0, isDev: true, locked: true },
-          { address: "0x4491...1812 (Circle Member)", balance: 80000000, percentage: 8.0, isDev: false, locked: true }
-        ],
-        safetyAudit: {
-          score: 99,
-          grade: "A+",
-          mevProtected: true,
-          devVestingLocked: true,
-          top10HoldersPercent: 28.0,
-          warnings: []
-        },
-        recentTrades: [
-          { id: "tx_fam1", type: "BUY", amountSol: 1.0, amountTokens: 25000000, usdVal: "150.00", user: "0x449...812", time: "18m ago", mevShielded: true }
-        ]
-      },
-      {
-        name: "Genesis Alpha Founders Circle",
-        symbol: "TEAMONE",
-        chain: "Base",
-        tokenType: "stack",
-        isPrivate: true,
-        inviteCode: "fam_trust_2026",
-        description: "Private invite-only startup & co-worker sovereign stack. Password protected with automatic fee compounding.",
-        imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200",
-        creator: "0x98bA...2214",
-        devLockedPercent: 100,
-        devTokensLocked: 40000000,
-        createdAt: Date.now() - (86400000 * 7),
-        virtualSolReserves: 21.0,
-        virtualTokenReserves: 840000000,
-        realSolRaised: 11.0,
-        tokensSold: 160000000,
-        currentPriceSol: 0.000000028,
-        currentPriceUsd: 0.00000420,
-        openPrice24hUsd: 0.00000350,
-        marketCapUsd: 14000,
-        targetCapUsd: 25000,
-        volume24hUsd: 38500,
-        high24hUsd: 0.00000440,
-        low24hUsd: 0.00000340,
-        isGraduated: false,
-        curveProgressPercent: 55,
-        totalBurnedTokens: 3100000,
-        holdersCount: 24,
-        avgHoldDays: 95,
-        timeLockedPercent: 92,
-        antiDumpEnabled: true,
-        stakingApy: 32.0,
-        stakingPool: {
-          totalStakedTokens: 720000000,
-          stakers: []
-        },
-        holders: [
-          { address: "0x98bA...2214 (Founder)", balance: 150000000, percentage: 15.0, isDev: true, locked: true }
-        ],
-        safetyAudit: {
-          score: 98,
-          grade: "A+",
-          mevProtected: true,
-          devVestingLocked: true,
-          top10HoldersPercent: 35.0,
-          warnings: []
-        },
-        recentTrades: []
-      },
-      {
-        name: "Quantum Pepe",
-        symbol: "QPEPE",
-        chain: "Solana",
-        tokenType: "sprint",
-        isPrivate: false,
-        description: "Superconducting green frog riding on high-frequency Solana bonding curves with 100% dev locked.",
-        imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200",
-        creator: "SoLDev99xFaCe8721990172Bca9012377a0",
-        devLockedPercent: 100,
-        devTokensLocked: 30000000,
-        createdAt: Date.now() - 43200000,
-        virtualSolReserves: 18.2,
-        virtualTokenReserves: 910000000,
-        realSolRaised: 9.6,
-        tokensSold: 90000000,
-        currentPriceSol: 0.000000022,
-        currentPriceUsd: 0.00000330,
-        openPrice24hUsd: 0.00000250,
-        marketCapUsd: 12000,
-        targetCapUsd: 25000,
-        volume24hUsd: 92400,
-        high24hUsd: 0.00000350,
-        low24hUsd: 0.00000240,
-        isGraduated: false,
-        curveProgressPercent: 48,
-        totalBurnedTokens: 2100000,
-        holdersCount: 219,
-        avgHoldDays: 3,
-        timeLockedPercent: 10,
-        antiDumpEnabled: false,
-        stakingApy: 12.0,
-        holders: [
-          { address: "SoLDev...7a0 (Dev)", balance: 30000000, percentage: 3.0, isDev: true, locked: true },
-          { address: "9xKq...110p", balance: 19000000, percentage: 1.9, isDev: false, locked: false }
-        ],
-        safetyAudit: {
-          score: 95,
-          grade: "A",
-          mevProtected: true,
-          devVestingLocked: true,
-          top10HoldersPercent: 12.0,
-          warnings: []
-        },
-        recentTrades: [
-          { id: "tx_3", type: "BUY", amountSol: 2.0, amountTokens: 60606060, usdVal: "300.00", user: "4hJ...99a", time: "1m ago", mevShielded: true }
-        ]
-      },
-      {
-        name: "Based Doge",
-        symbol: "BDOGE",
-        chain: "Base",
-        tokenType: "sprint",
-        isPrivate: false,
-        description: "The friendliest sovereign Shiba on Base L2. Zero tax, zero rug, 100% fair.",
-        imageUrl: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=200",
-        creator: "0xBaseDev7718910019230912",
-        devLockedPercent: 80,
-        devTokensLocked: 20000000,
-        createdAt: Date.now() - 14400000,
-        virtualSolReserves: 12.0,
-        virtualTokenReserves: 980000000,
-        realSolRaised: 6.4,
-        tokensSold: 20000000,
-        currentPriceSol: 0.000000015,
-        currentPriceUsd: 0.00000225,
-        openPrice24hUsd: 0.00000200,
-        marketCapUsd: 8000,
-        targetCapUsd: 25000,
-        volume24hUsd: 41200,
-        high24hUsd: 0.00000240,
-        low24hUsd: 0.00000190,
-        isGraduated: false,
-        curveProgressPercent: 32,
-        totalBurnedTokens: 850000,
-        holdersCount: 144,
-        avgHoldDays: 2,
-        timeLockedPercent: 5,
-        antiDumpEnabled: false,
-        stakingApy: 10.0,
-        holders: [
-          { address: "0xBase...0912 (Dev)", balance: 20000000, percentage: 2.0, isDev: true, locked: true }
-        ],
-        safetyAudit: {
-          score: 92,
-          grade: "A",
-          mevProtected: true,
-          devVestingLocked: true,
-          top10HoldersPercent: 14.5,
-          warnings: []
-        },
-        recentTrades: []
-      }
-    ];
-
-    sampleTokens.forEach(t => {
-      this.tokens.set(t.symbol, t);
-      this.chatMessages.set(t.symbol, [
-        { user: "AlphaHunter", text: "Dev locked 100% supply, this is going to Raydium/Uniswap tonight 🚀", time: "10m ago", badge: "WHALE" },
-        { user: "SovereignBull", text: "Clean bonding curve, MEV shield and staking vault active!", time: "4m ago", badge: "DIAMOND" }
-      ]);
-    });
+    // Zero initial tokens. Tokens are minted organically by platform creators.
   }
 
   initSampleTraders() {
@@ -1268,7 +1012,7 @@ class BondingCurveEngine {
         rank: 1,
         address: "0x88f2B9104A41B6554D597A8D8e2b9F4190b21a2",
         shortAddress: "0x88f...1a2",
-        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AlphaKing",
+        avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=AlphaKing",
         dailyPnlPercent: 184.5,
         dailyProfitUsd: 14250.00,
         totalVolumeUsd: 68400.00,
@@ -1280,7 +1024,7 @@ class BondingCurveEngine {
         rank: 2,
         address: "0x19c30A90B1293c8477a10293Fa8b1190412899e",
         shortAddress: "0x19c...99e",
-        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=CryptoKnight",
+        avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=CryptoKnight",
         dailyPnlPercent: 142.0,
         dailyProfitUsd: 9820.50,
         totalVolumeUsd: 41200.00,
@@ -1292,7 +1036,7 @@ class BondingCurveEngine {
         rank: 3,
         address: "SoLMaster771092Bca01928371900192809123Fa",
         shortAddress: "SoLM...3Fa",
-        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=SolKing",
+        avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=SolKing",
         dailyPnlPercent: 98.4,
         dailyProfitUsd: 6450.00,
         totalVolumeUsd: 32000.00,
@@ -1304,7 +1048,7 @@ class BondingCurveEngine {
         rank: 4,
         address: "0x44b912aBc091823901928170291902837491029",
         shortAddress: "0x44b...029",
-        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=BaseBull",
+        avatar: "https://api.dicebear.com/7.x/identicon/svg?seed=BaseBull",
         dailyPnlPercent: 64.2,
         dailyProfitUsd: 3820.00,
         totalVolumeUsd: 19500.00,

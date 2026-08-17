@@ -25,6 +25,14 @@ router.use('/exchange', exchangeRoutes);
 
 
 // Health & System Info
+router.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  });
+});
+
 router.get('/status', (req, res) => {
   res.json({
     status: 'ONLINE',

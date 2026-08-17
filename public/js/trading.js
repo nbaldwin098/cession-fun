@@ -143,8 +143,19 @@ class PumpTradingManager {
       return;
     }
 
-    const trader = window.walletEngine && window.walletEngine.activeAddress
-      ? window.walletEngine.activeAddress
+    const we = window.walletEngine;
+    if (this.side === 'buy') {
+      const availableSol = (we && we.balances && we.balances.sol !== undefined) ? we.balances.sol : 0.00;
+      if (availableSol <= 0 || availableSol < amount) {
+        if (window.launchpadManager) {
+          window.launchpadManager.toast(`❌ Insufficient SOL balance (${availableSol.toFixed(2)} SOL). Connect wallet or deposit SOL to trade.`, 'error');
+        }
+        return;
+      }
+    }
+
+    const trader = we && we.activeAddress
+      ? we.activeAddress
       : '0x' + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
 
     const endpoint = this.side === 'buy' 

@@ -30,17 +30,34 @@ app.use(express.static(path.join(__dirname, 'public'), {
 // API Routes
 app.use('/api', apiRoutes);
 
-// Explicit Clean URL Page Routes (No .html needed)
+// Multi-Host & Path Dispatcher for Calabi Exchange & Cession Launchpad
+const calabiRoutes = ['/exchange', '/trade', '/calabi', '/earn', '/markets', '/pro', '/spot', '/swap-pro'];
+
+app.use((req, res, next) => {
+  // If host is calabi.us or subdomain, or if path is a calabi route
+  const host = (req.hostname || '').toLowerCase();
+  const isCalabiHost = host.includes('calabi');
+  const isCalabiPath = calabiRoutes.some(r => req.path === r || req.path.startsWith(r + '/'));
+
+  if (req.path.startsWith('/api') || req.path.startsWith('/ws') || req.path === '/health' || req.path.includes('.')) {
+    return next();
+  }
+
+  if (isCalabiHost || isCalabiPath) {
+    return res.sendFile(path.join(__dirname, 'public', 'calabi.html'));
+  }
+
+  return res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Explicit Clean URL Page Routes for Cession
 const cleanRoutes = [
   '/',
   '/launchpad',
   '/board',
-  '/exchange',
-  '/swap',
-  '/trade',
+  '/explore',
   '/bundles',
   '/bundles/:id',
-  '/staking',
   '/transparency',
   '/treasury',
   '/leaderboard',
@@ -58,8 +75,22 @@ cleanRoutes.forEach(route => {
   });
 });
 
-// Fallback to index.html for all other SPA routes
+// Direct /health check endpoint for Render.com health probes
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    uptime: process.uptime(),
+    service: 'cession.fun & calabi.us',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Fallback for all other routes
 app.get('*', (req, res) => {
+  const host = (req.hostname || '').toLowerCase();
+  if (host.includes('calabi')) {
+    return res.sendFile(path.join(__dirname, 'public', 'calabi.html'));
+  }
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -88,11 +119,13 @@ wss.on('connection', (ws) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+const HOST = '0.0.0.0';
+
+server.listen(PORT, HOST, () => {
   console.log(`=======================================================`);
   console.log(`🚀 CESSION.FUN SOVEREIGN EXCHANGE & FAIR LAUNCHPAD ONLINE`);
-  console.log(`🌐 Clean Gateway (No .html): http://localhost:${PORT}`);
-  console.log(`⚡ WebSocket Stream: ws://localhost:${PORT}/ws`);
+  console.log(`🌐 Clean Gateway (No .html): http://${HOST}:${PORT}`);
+  console.log(`⚡ WebSocket Stream: ws://${HOST}:${PORT}/ws`);
   console.log(`💼 Proof-of-Skin Anti-Rug Engine & Transparent Reserves Ready`);
   console.log(`=======================================================`);
 });

@@ -55,9 +55,10 @@ class CessionWalletEngine {
     this.vaultData = null;
     this.userProfile = null;
     this.balances = {
-      eth: 1.45,
-      sol: 6.20,
-      cess: 250000.00
+      eth: 0.00,
+      sol: 0.00,
+      cess: 0.00,
+      usdc: 0.00
     };
 
     this.init();
@@ -818,6 +819,31 @@ class CessionWalletEngine {
     if (window.showToast) window.showToast('Logged out successfully.', 'info');
   }
 
+  async fetchOnChainBalance(address) {
+    if (!address) return;
+    try {
+      if (!address.startsWith('0x') && address.length >= 32 && address.length <= 44) {
+        const res = await fetch('https://api.mainnet-beta.solana.com', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getBalance',
+            params: [address]
+          })
+        });
+        const data = await res.json();
+        if (data.result && typeof data.result.value === 'number') {
+          this.balances.sol = data.result.value / 1e9;
+          this.renderState();
+        }
+      }
+    } catch (e) {
+      console.warn('On-chain balance query fallback to local:', e.message);
+    }
+  }
+
   renderState() {
     const btnConnect = document.getElementById('btnConnectWallet');
     const pill = document.getElementById('walletConnectedPill');
@@ -833,7 +859,7 @@ class CessionWalletEngine {
         : this.activeAddress;
 
       if (navAddr) navAddr.textContent = shortAddr;
-      if (navBal) navBal.textContent = `${(this.balances.sol || 6.2).toFixed(2)} SOL`;
+      if (navBal) navBal.textContent = `${(this.balances.sol || 0.0).toFixed(2)} SOL`;
     } else {
       if (btnConnect) btnConnect.style.display = 'inline-flex';
       if (pill) pill.style.display = 'none';
