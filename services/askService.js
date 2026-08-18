@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const DATA = path.join(__dirname, '..', 'data');
+
 function readJson(name, fallback) {
   try { return JSON.parse(fs.readFileSync(path.join(DATA, name), 'utf8')); }
   catch { return fallback; }
@@ -12,7 +13,7 @@ function writeJson(name, value) {
 function liveFeed() {
   try {
     const bondingCurve = require('./bondingCurve');
-    return (bondingCurve.getPulseFeed('all', 50) || []).filter((c) => {
+    return (bondingCurve.getPulseFeed('all', 80) || []).filter((c) => {
       const mint = String(c.mintAddress || c.mint || '');
       const sym = String(c.symbol || '').toUpperCase();
       return mint.length >= 32 && !/TEST|DEMO|TDOGE|QPEPE|BDOGE|GRAD/.test(sym);
@@ -27,48 +28,84 @@ function siteContext(address) {
     try { statement = require('./bondingCurve').getMonthlyStatement(address); } catch { statement = null; }
   }
   return {
-    feed: feed.map((c) => ({ symbol: c.symbol, name: c.name, change24h: c.change24h, volume24hUsd: c.volume24hUsd, priceUsd: c.priceUsd, mint: c.mintAddress || c.mint })),
+    liveCoins: feed.map((c) => ({
+      symbol: c.symbol,
+      name: c.name,
+      change24h: c.change24h || 0,
+      volume24hUsd: c.volume24hUsd || 0,
+      priceUsd: c.priceUsd || 0,
+      uniqueTraders: c.uniqueTraders || 0,
+      mint: c.mintAddress || c.mint
+    })),
+    createFeeSol: 0.05,
+    tradeFeePercent: 0.5,
+    programLive: false,
     bots,
     statement,
     address: address || null
   };
 }
-function localAnswer(message, ctx) {
-  const q = String(message || '').toLowerCase();
-  if (/bot/.test(q)) return 'I can save a DCA, limit, or take-profit rule. It will not place trades until the program is live.';
-  if (/pnl|p\/l|profit|statement|hold/.test(q)) {
-    if (!ctx.address) return 'Connect a wallet. I only report indexed Cession trades.';
-    const n = (ctx.statement && (ctx.statement.count || (ctx.statement.transactions || []).length)) || 0;
-    return n ? ('This wallet has ' + n + ' indexed Cession trades.') : 'No statements to display.';
+
+const SYSTEM = [
+  'You are Cession Ask, the same kind of assistant as Grok: direct, useful, a little dry, never corporate.',
+  'Answer everyday questions fully: math, news-level knowledge, how-tos, jokes, explanations.',
+  'When the user asks about Cession, coins, wallets, fees, or P/L, use the live Cession snapshot. Do not invent coins, balances, or fills.',
+  'If the board is empty, say so once, then still answer the rest of the question.',
+  'Not investment advice. Keep replies in the user\'s language.'
+].join(' ');
+
+async function callXai(messages) {
+  const key = process.env.XAI_API_KEY || process.env.GROK_API_KEY;
+  if (!key) return { ok: false, error: 'no_key' };
+  const models = (process.env.XAI_MODEL ? [process.env.XAI_MODEL] : []).concat([
+    'grok-4-fast',
+    'grok-4.6',
+    'grok-4-1-fast',
+    'grok-3-mini',
+    'grok-2-latest'
+  ]);
+  let last = 'no model';
+  for (const model of models) {
+    try {
+      const res = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+        body: JSON.stringify({ model, temperature: 0.7, messages })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        last = (data.error && (data.error.message || data.error)) || ('HTTP ' + res.status);
+        continue;
+      }
+      const text = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+      if (text) return { ok: true, text, model };
+      last = 'empty';
+    } catch (e) {
+      last = e.message;
+    }
   }
-  if (!ctx.feed.length && /coin|cession|token|chart/.test(q)) return 'No live coins yet. Create is 0.05 SOL.';
-  if (ctx.feed.length && /coin|best|worst|trending/.test(q)) return 'Live coins: ' + ctx.feed.map((c) => c.symbol).join(', ') + '.';
-  return 'I can help with Cession and everyday questions. Ask anything.';
+  return { ok: false, error: String(last) };
 }
+
 async function modelAnswer(message, ctx) {
-  const key = process.env.XAI_API_KEY || process.env.GROK_API_KEY || process.env.OPENAI_API_KEY;
-  if (!key) return localAnswer(message, ctx);
-  const xai = !!(process.env.XAI_API_KEY || process.env.GROK_API_KEY);
-  const url = xai ? 'https://api.x.ai/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
-  const model = xai ? 'grok-4-fast' : 'gpt-4o-mini';
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
-      body: JSON.stringify({
-        model,
-        temperature: 0.5,
-        messages: [
-          { role: 'system', content: 'You are Cession Ask. Answer everyday questions normally and helpfully. When the topic is Cession, coins, wallets, or P/L, use only the provided live site data. Never invent balances, fills, or coins. Not investment advice. Be concise.' },
-          { role: 'user', content: 'Question: ' + message + '\n\nLive Cession data: ' + JSON.stringify(ctx) }
-        ]
-      })
-    });
-    if (!res.ok) return localAnswer(message, ctx);
-    const data = await res.json();
-    return (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || localAnswer(message, ctx);
-  } catch { return localAnswer(message, ctx); }
+  const snapshot = {
+    liveCoinCount: (ctx.liveCoins || []).length,
+    liveCoins: ctx.liveCoins || [],
+    createFeeSol: ctx.createFeeSol,
+    tradeFeePercent: ctx.tradeFeePercent,
+    programLive: ctx.programLive,
+    wallet: ctx.address || null,
+    statement: ctx.statement || null,
+    bots: ctx.bots || []
+  };
+  const result = await callXai([
+    { role: 'system', content: SYSTEM },
+    { role: 'user', content: 'Live Cession snapshot:\n' + JSON.stringify(snapshot) + '\n\nUser:\n' + message }
+  ]);
+  if (result.ok) return result.text;
+  return 'I could not reach Grok just now (' + result.error + '). Cession board: ' + snapshot.liveCoinCount + ' live coins. Create is 0.05 SOL.';
 }
+
 function bannerQuestion() {
   const feed = liveFeed();
   if (!feed.length) return 'Why are there no live coins yet?';
@@ -102,4 +139,5 @@ function addFollow(follower, creator) {
   }
   return store.follows.filter((f) => f.follower === follower);
 }
+
 module.exports = { siteContext, modelAnswer, bannerQuestion, saveBot, addFollow, follows, liveFeed };
