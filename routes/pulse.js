@@ -1,6 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const pulse = require('../services/pulseSignals');
+const bondingCurve = require('../services/bondingCurve');
+
+router.get('/', (req, res) => {
+  const { lane = 'all', limit = 20 } = req.query;
+  const feed = pulse.attach(bondingCurve.getPulseFeed(lane, parseInt(limit) || 20));
+  res.json({ success: true, count: feed.length, lane, feed });
+});
 
 router.post('/event', (req, res) => {
   const symbol = String(req.body.symbol || '').toUpperCase();
