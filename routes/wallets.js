@@ -12,6 +12,28 @@ router.get('/screen/:address', (req, res) => {
   }
 });
 
+router.get('/:address/pnl', (req, res) => {
+  try {
+    const bondingCurve = require('../services/bondingCurve');
+    const range = String(req.query.range || '7d');
+    const days = range === '1m' ? 30 : range === '6m' ? 180 : range === '1y' ? 365 : range === 'all' ? 365 : 7;
+    const txs = bondingCurve.getWalletTransactions(req.params.address) || [];
+    const points = [];
+    let value = 0;
+    for (let i = days; i >= 0; i--) {
+      const t = Date.now() - i * 86400000;
+      txs.forEach((tx) => {
+        const when = Date.parse(tx.time || tx.createdAt || 0);
+        if (when && when <= t && when > t - 86400000) value += Number(tx.pnl || tx.sol || 0);
+      });
+      points.push({ t, v: Number(value.toFixed(4)) });
+    }
+    res.json({ success: true, range, total: value, points });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.get('/:address/trades', (req, res) => {
   try {
     const bondingCurve = require('../services/bondingCurve');
@@ -66,8 +88,7 @@ router.post('/follow', (req, res) => {
   try {
     const { follower, creator } = req.body;
     if (!follower || !creator) return res.status(400).json({ success: false, error: 'follower and creator required' });
-    const list = ask.addFollow(follower, creator);
-    res.json({ success: true, follows: list });
+    res.json({ success: true, follows: ask.addFollow(follower, creator) });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
