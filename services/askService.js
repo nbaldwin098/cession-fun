@@ -54,7 +54,7 @@ const SYSTEM = [
   'Not investment advice.'
 ].join(' ');
 
-const MODELS = ['grok-3', 'grok-3-mini', 'grok-4', 'grok-4-0709', 'grok-4.5', 'grok-4.6'];
+const MODELS = ['grok-4.3', 'grok-4.2', 'grok-4.20', 'grok-4-3', 'grok-4-2'];
 
 async function callXai(messages) {
   const key = process.env.XAI_API_KEY || process.env.GROK_API_KEY;
@@ -95,7 +95,7 @@ async function modelAnswer(message, ctx) {
     { role: 'user', content: 'Live Cession snapshot:\n' + JSON.stringify(snapshot) + '\n\nUser:\n' + message }
   ]);
   if (result.ok) return result.text;
-  return 'Grok is not answering yet. On Render set XAI_API_KEY from console.x.ai (not a grok.com password) and optional XAI_MODEL=grok-3. Detail: ' + result.error;
+  return 'Grok is not answering yet. Set XAI_MODEL on Render to the exact name from the console (grok-4.3 or grok-4.2). Detail: ' + result.error;
 }
 
 function bannerQuestion() {
