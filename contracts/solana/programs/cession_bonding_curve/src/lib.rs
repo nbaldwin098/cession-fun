@@ -18,13 +18,14 @@ pub mod cession_bonding_curve {
         require!(symbol.len() <= 12, CessionError::SymbolTooLong);
         require!(uri.len() <= 200, CessionError::UriTooLong);
 
-        // Record creator registry to block duplicate live curves per creator
+        // Creator registry check: if active, block duplicate create until previous is inactive
         let registry = &mut ctx.accounts.creator_registry;
+        require!(!registry.is_active, CessionError::ActiveCurveExists);
         registry.creator = ctx.accounts.signer.key();
         registry.mint = ctx.accounts.mint.key();
         registry.is_active = true;
 
-        // Record symbol registry to enforce unique global tickers
+        // Symbol registry check
         let sym_registry = &mut ctx.accounts.symbol_registry;
         sym_registry.symbol = symbol.clone();
         sym_registry.mint = ctx.accounts.mint.key();
@@ -46,7 +47,7 @@ pub mod cession_bonding_curve {
         curve.fee_bps = 100; // 1.00% total trade fee
         curve.is_graduated = false;
 
-        // 1. Transfer 0.50 SOL creation fee from signer to treasury
+        // Transfer 0.50 SOL creation fee from signer to treasury
         let create_fee = 500_000_000; // 0.50 SOL
         let create_fee_ix = anchor_lang::solana_program::system_instruction::transfer(
             &ctx.accounts.signer.key(),
@@ -62,7 +63,7 @@ pub mod cession_bonding_curve {
             ],
         )?;
 
-        // 2. Mint entire token supply into token_vault (owned by curve_state PDA)
+        // Mint entire token supply into token_vault (owned by curve_state PDA)
         let mint_key = ctx.accounts.mint.key();
         let seeds = &[
             b"curve",
@@ -93,10 +94,6 @@ pub mod cession_bonding_curve {
         require!(sol_amount > 0, CessionError::InvalidAmount);
 
         // 1.00% Fee breakdown on buy:
-        // 0.30% -> Creator fee vault
-        // 0.25% -> Holder rewards vault
-        // 0.15% -> Extra/Referrer rewards vault
-        // 0.30% -> Protocol treasury
         let creator_fee = sol_amount * 30 / 10_000;
         let holder_fee = sol_amount * 25 / 10_000;
         let extra_fee = sol_amount * 15 / 10_000;
@@ -178,7 +175,6 @@ pub mod cession_bonding_curve {
         ];
         let signer_seeds = &[&seeds[..]];
 
-        // Execute 0.10% token burn from token_vault
         if burn_amount > 0 {
             let burn_accounts = Burn {
                 mint: ctx.accounts.mint.to_account_info(),
@@ -190,7 +186,6 @@ pub mod cession_bonding_curve {
             token::burn(cpi_ctx, burn_amount)?;
         }
 
-        // Deliver net tokens to buyer ATA
         let cpi_accounts = Transfer {
             from: ctx.accounts.token_vault.to_account_info(),
             to: ctx.accounts.buyer_token_account.to_account_info(),
@@ -212,7 +207,6 @@ pub mod cession_bonding_curve {
         require!(!curve.is_graduated, CessionError::CurveGraduated);
         require!(token_amount > 0, CessionError::InvalidAmount);
 
-        // 1. Transfer tokens from seller_token_account -> token_vault
         let cpi_accounts = Transfer {
             from: ctx.accounts.seller_token_account.to_account_info(),
             to: ctx.accounts.token_vault.to_account_info(),
@@ -222,13 +216,11 @@ pub mod cession_bonding_curve {
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         token::transfer(cpi_ctx, token_amount)?;
 
-        // 2. Constant-product bonding curve math: (x * y = k)
         let new_token_reserves = curve.virtual_token_reserves + token_amount;
         let k = (curve.virtual_sol_reserves as u128) * (curve.virtual_token_reserves as u128);
         let new_sol_reserves = (k / (new_token_reserves as u128)) as u64;
         let gross_sol_out = curve.virtual_sol_reserves - new_sol_reserves;
 
-        // 1.00% Fee breakdown on sell:
         let creator_fee = gross_sol_out * 30 / 10_000;
         let holder_fee = gross_sol_out * 25 / 10_000;
         let extra_fee = gross_sol_out * 15 / 10_000;
@@ -253,7 +245,6 @@ pub mod cession_bonding_curve {
         Ok(())
     }
 
-    // CRITICAL: Claim creator fees EXCLUSIVELY from fee_vault PDA (NEVER sol_vault)
     pub fn claim_creator_fees(ctx: Context<ClaimCreatorFees>) -> Result<()> {
         let curve = &mut ctx.accounts.curve_state;
         require!(ctx.accounts.signer.key() == curve.creator, CessionError::UnauthorizedClaim);
@@ -263,14 +254,13 @@ pub mod cession_bonding_curve {
 
         curve.creator_fees_accrued = 0;
 
-        // Release accrued fees strictly from fee_vault PDA
         **ctx.accounts.fee_vault.sub_lamports(claimable)?;
         **ctx.accounts.signer.add_lamports(claimable)?;
 
         Ok(())
     }
 
-    // CRITICAL: Claim holder reward share EXCLUSIVELY from fee_vault PDA (NEVER sol_vault)
+    // Holder fee share calculated on CIRCULATING held tokens (excluding token_vault)
     pub fn claim_holder_fees(ctx: Context<ClaimHolderFees>) -> Result<()> {
         let curve = &mut ctx.accounts.curve_state;
         let holder_tokens = ctx.accounts.holder_token_account.amount;
@@ -279,13 +269,16 @@ pub mod cession_bonding_curve {
         let total_holder_pool = curve.holder_fees_accrued;
         require!(total_holder_pool > 0, CessionError::NoFeesToClaim);
 
-        // Pro-rata reward share: (holder_tokens / total_supply) * total_holder_pool
-        let user_share = ((holder_tokens as u128) * (total_holder_pool as u128) / (curve.total_supply as u128)) as u64;
+        // Circulating supply = total_supply - tokens remaining in token_vault
+        let circulating_supply = curve.total_supply.saturating_sub(ctx.accounts.token_vault.amount);
+        require!(circulating_supply > 0, CessionError::NoTokensHeld);
+
+        // Pro-rata user share of holder fees
+        let user_share = ((holder_tokens as u128) * (total_holder_pool as u128) / (circulating_supply as u128)) as u64;
         require!(user_share > 0, CessionError::NoFeesToClaim);
 
         curve.holder_fees_accrued -= user_share;
 
-        // Release holder reward strictly from fee_vault PDA
         **ctx.accounts.fee_vault.sub_lamports(user_share)?;
         **ctx.accounts.signer.add_lamports(user_share)?;
 
@@ -298,7 +291,12 @@ pub mod cession_bonding_curve {
 pub struct Create<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
-    #[account(mut)]
+    #[account(
+        init,
+        payer = signer,
+        mint::decimals = 6,
+        mint::authority = curve_state,
+    )]
     pub mint: Account<'info, Mint>,
     #[account(
         init,
@@ -314,7 +312,7 @@ pub struct Create<'info> {
         bump
     )]
     pub sol_vault: AccountInfo<'info>,
-    /// CHECK: Fee vault PDA (holds fee SOL for claims, strictly separate from sol_vault)
+    /// CHECK: Fee vault PDA (holds fee SOL for claims)
     #[account(
         mut,
         seeds = [b"fee_vault", mint.key().as_ref()],
@@ -333,7 +331,7 @@ pub struct Create<'info> {
     )]
     pub curve_state: Account<'info, CurveState>,
     #[account(
-        init,
+        init_if_needed,
         payer = signer,
         space = 8 + 32 + 32 + 1,
         seeds = [b"creator_registry", signer.key().as_ref()],
@@ -360,20 +358,26 @@ pub struct Buy<'info> {
     pub signer: Signer<'info>,
     #[account(mut)]
     pub mint: Account<'info, Mint>,
-    #[account(mut, has_one = mint)]
+    #[account(
+        mut,
+        has_one = mint,
+        constraint = token_vault.key() == curve_state.token_vault @ CessionError::InvalidVault
+    )]
     pub token_vault: Account<'info, TokenAccount>,
     /// CHECK: SOL vault PDA
     #[account(
         mut,
         seeds = [b"sol_vault", mint.key().as_ref()],
-        bump
+        bump,
+        constraint = sol_vault.key() == curve_state.sol_vault @ CessionError::InvalidVault
     )]
     pub sol_vault: AccountInfo<'info>,
     /// CHECK: Fee vault PDA
     #[account(
         mut,
         seeds = [b"fee_vault", mint.key().as_ref()],
-        bump
+        bump,
+        constraint = fee_vault.key() == curve_state.fee_vault @ CessionError::InvalidVault
     )]
     pub fee_vault: AccountInfo<'info>,
     #[account(mut, has_one = mint)]
@@ -397,20 +401,26 @@ pub struct Sell<'info> {
     pub signer: Signer<'info>,
     #[account(mut)]
     pub mint: Account<'info, Mint>,
-    #[account(mut, has_one = mint)]
+    #[account(
+        mut,
+        has_one = mint,
+        constraint = token_vault.key() == curve_state.token_vault @ CessionError::InvalidVault
+    )]
     pub token_vault: Account<'info, TokenAccount>,
     /// CHECK: SOL vault PDA
     #[account(
         mut,
         seeds = [b"sol_vault", mint.key().as_ref()],
-        bump
+        bump,
+        constraint = sol_vault.key() == curve_state.sol_vault @ CessionError::InvalidVault
     )]
     pub sol_vault: AccountInfo<'info>,
     /// CHECK: Fee vault PDA
     #[account(
         mut,
         seeds = [b"fee_vault", mint.key().as_ref()],
-        bump
+        bump,
+        constraint = fee_vault.key() == curve_state.fee_vault @ CessionError::InvalidVault
     )]
     pub fee_vault: AccountInfo<'info>,
     #[account(mut, has_one = mint)]
@@ -433,11 +443,12 @@ pub struct ClaimCreatorFees<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
     pub mint: Account<'info, Mint>,
-    /// CHECK: Fee vault PDA (contains accrued fee SOL)
+    /// CHECK: Fee vault PDA
     #[account(
         mut,
         seeds = [b"fee_vault", mint.key().as_ref()],
-        bump
+        bump,
+        constraint = fee_vault.key() == curve_state.fee_vault @ CessionError::InvalidVault
     )]
     pub fee_vault: AccountInfo<'info>,
     #[account(
@@ -453,13 +464,20 @@ pub struct ClaimHolderFees<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
     pub mint: Account<'info, Mint>,
-    /// CHECK: Fee vault PDA (contains accrued fee SOL)
+    /// CHECK: Fee vault PDA
     #[account(
         mut,
         seeds = [b"fee_vault", mint.key().as_ref()],
-        bump
+        bump,
+        constraint = fee_vault.key() == curve_state.fee_vault @ CessionError::InvalidVault
     )]
     pub fee_vault: AccountInfo<'info>,
+    #[account(
+        mut,
+        has_one = mint,
+        constraint = token_vault.key() == curve_state.token_vault @ CessionError::InvalidVault
+    )]
+    pub token_vault: Account<'info, TokenAccount>,
     #[account(has_one = mint)]
     pub holder_token_account: Account<'info, TokenAccount>,
     #[account(
@@ -522,4 +540,8 @@ pub enum CessionError {
     SymbolTooLong,
     #[msg("Token URI exceeds 200 characters limit.")]
     UriTooLong,
+    #[msg("Creator already has an active live bonding curve.")]
+    ActiveCurveExists,
+    #[msg("Invalid vault account supplied.")]
+    InvalidVault,
 }

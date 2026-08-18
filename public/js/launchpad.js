@@ -669,17 +669,17 @@ class CessionLaunchpadManager {
     if (!this.activeBundle) return;
 
     if (!window.walletEngine || !window.walletEngine.isAuthenticated || !window.walletEngine.activeAddress) {
-      this.toast('Please connect your crypto wallet or sign in to buy bundles.', 'info');
+      this.toast('Please connect your crypto wallet to buy bundles.', 'info');
       if (window.walletEngine) window.walletEngine.openWalletModal();
       return;
     }
 
     const solInput = document.getElementById('buyBundleSolAmount');
-    const solAmount = parseFloat(solInput ? solInput.value : '1.0') || 1.0;
+    const totalSol = parseFloat(solInput ? solInput.value : '1.0') || 1.0;
 
     const solBalance = (window.walletEngine && window.walletEngine.balances) ? (window.walletEngine.balances.sol || 0) : 0;
-    if (solBalance < solAmount) {
-      this.toast(`Insufficient SOL balance! Bundle requires ${solAmount.toFixed(2)} SOL. Your balance: ${solBalance.toFixed(2)} SOL.`, 'error');
+    if (solBalance < totalSol) {
+      this.toast(`Insufficient SOL balance! Bundle requires ${totalSol.toFixed(2)} SOL. Your balance: ${solBalance.toFixed(2)} SOL.`, 'error');
       if (window.walletEngine) window.walletEngine.openDepositModal();
       return;
     }
@@ -687,36 +687,116 @@ class CessionLaunchpadManager {
     const btn = document.getElementById('btnConfirmBuyBundle');
     if (btn) {
       btn.disabled = true;
-      btn.textContent = 'Executing Atomic Trades...';
+      btn.textContent = 'Approve Atomic Bundle Trade in Wallet...';
     }
 
     try {
+      const tokens = this.activeBundle.tokens || [];
+      if (tokens.length === 0) {
+        throw new Error('No active tokens in this bundle.');
+      }
+
+      const solPerToken = totalSol / tokens.length;
+      let txHash = '';
+
+      if (window.solana?.isPhantom && window.solanaWeb3 && window.solana.publicKey) {
+        const web3 = window.solanaWeb3;
+        const spl = window.splToken;
+
+        const PROGRAM_ID = new web3.PublicKey('Epxb6TRhGwT1gQFj5xCLM6KtZUz9ajD7jZzkVrp3qBR9');
+        const TOKEN_PROGRAM_ID = spl ? spl.TOKEN_PROGRAM_ID : new web3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+        const ASSOCIATED_TOKEN_PROGRAM_ID = spl ? spl.ASSOCIATED_TOKEN_PROGRAM_ID : new web3.PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
+        const TREASURY_PUBKEY = new web3.PublicKey('8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH');
+
+        const transaction = new web3.Transaction();
+
+        for (const t of tokens) {
+          if (!t.mintAddress) continue;
+          const mintPubkey = new web3.PublicKey(t.mintAddress);
+
+          const [curvePda] = web3.PublicKey.findProgramAddressSync([Buffer.from('curve'), mintPubkey.toBuffer()], PROGRAM_ID);
+          const [solVaultPda] = web3.PublicKey.findProgramAddressSync([Buffer.from('sol_vault'), mintPubkey.toBuffer()], PROGRAM_ID);
+          const [feeVaultPda] = web3.PublicKey.findProgramAddressSync([Buffer.from('fee_vault'), mintPubkey.toBuffer()], PROGRAM_ID);
+          const [tokenVaultAta] = web3.PublicKey.findProgramAddressSync([curvePda.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mintPubkey.toBuffer()], ASSOCIATED_TOKEN_PROGRAM_ID);
+          const [traderAta] = web3.PublicKey.findProgramAddressSync([window.solana.publicKey.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mintPubkey.toBuffer()], ASSOCIATED_TOKEN_PROGRAM_ID);
+
+          if (spl && spl.createAssociatedTokenAccountInstruction) {
+            transaction.add(
+              spl.createAssociatedTokenAccountInstruction(
+                window.solana.publicKey,
+                traderAta,
+                window.solana.publicKey,
+                mintPubkey,
+                TOKEN_PROGRAM_ID,
+                ASSOCIATED_TOKEN_PROGRAM_ID
+              )
+            );
+          }
+
+          const buyDiscriminator = new Uint8Array([102, 6, 61, 18, 1, 218, 235, 234]);
+          const lamports = BigInt(Math.floor(solPerToken * 1000000000));
+          const minTokens = 1n;
+
+          const dataBuffer = new Uint8Array(8 + 8 + 8);
+          dataBuffer.set(buyDiscriminator, 0);
+          new DataView(dataBuffer.buffer).setBigUint64(8, lamports, true);
+          new DataView(dataBuffer.buffer).setBigUint64(16, minTokens, true);
+
+          const buyIx = new web3.TransactionInstruction({
+            programId: PROGRAM_ID,
+            keys: [
+              { pubkey: window.solana.publicKey, isSigner: true, isWritable: true },
+              { pubkey: mintPubkey, isSigner: false, isWritable: true },
+              { pubkey: tokenVaultAta, isSigner: false, isWritable: true },
+              { pubkey: solVaultPda, isSigner: false, isWritable: true },
+              { pubkey: feeVaultPda, isSigner: false, isWritable: true },
+              { pubkey: traderAta, isSigner: false, isWritable: true },
+              { pubkey: TREASURY_PUBKEY, isSigner: false, isWritable: true },
+              { pubkey: curvePda, isSigner: false, isWritable: true },
+              { pubkey: web3.SystemProgram.programId, isSigner: false, isWritable: false },
+              { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }
+            ],
+            data: dataBuffer
+          });
+
+          transaction.add(buyIx);
+        }
+
+        const connection = new web3.Connection('https://api.mainnet-beta.solana.com');
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = window.solana.publicKey;
+
+        const signed = await window.solana.signAndSendTransaction(transaction);
+        txHash = signed.signature;
+
+        if (!txHash) {
+          throw new Error('Transaction cancelled in Phantom wallet.');
+        }
+      }
+
       const res = await fetch(`/api/tokens/bundles/${this.activeBundle.id}/buy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          solAmount,
-          buyerAddress: window.walletEngine.activeAddress
+          solAmount: totalSol,
+          buyerAddress: window.walletEngine.activeAddress,
+          txHash
         })
       });
 
       const data = await res.json();
       if (data.success) {
-        if (window.walletEngine && window.walletEngine.balances) {
-          window.walletEngine.balances.sol = Math.max(0, (window.walletEngine.balances.sol || 0) - solAmount);
-          window.walletEngine.renderState();
-        }
-        this.toast(`Successfully bought ${this.activeBundle.name} basket with ${solAmount} SOL!`, 'success');
+        this.toast(`✓ Atomic Bundle Purchase Confirmed on Solana!`, 'success');
         const modal = document.getElementById('buyBundleModal');
         if (modal) modal.style.display = 'none';
         this.fetchBundles();
       } else {
-        this.toast(data.error || 'Failed to buy bundle', 'error');
+        this.toast(data.error || 'Failed to index bundle trade', 'error');
       }
     } catch (e) {
-      this.toast('Purchased bundle locally across curves!', 'success');
-      const modal = document.getElementById('buyBundleModal');
-      if (modal) modal.style.display = 'none';
+      console.error('Bundle buy error:', e);
+      this.toast('Bundle buy aborted: ' + (e.message || 'Signature rejected'), 'error');
     } finally {
       if (btn) {
         btn.disabled = false;

@@ -1,113 +1,62 @@
 /**
- * Cession.us — Corporate Financial, Cost & Kraken-Grade Public Transparency Service
- * Tracks real-time revenues, cumulative swap volume, operational burn rates,
- * transparent public reserves, token holdings, and buyback & burn metrics.
+ * Cession — Corporate Financial & Transparency Service
+ * Verifiable Multi-Chain Non-Custodial Protocol Treasury Ledger
  */
 
 class TreasuryService {
   constructor() {
-    this.cumulativeVolumeUsd = 4850290.00;
-    this.totalTradesCount = 14280;
-    this.protocolFeeRate = 0.005; // 0.50% total fee
-    this.treasuryShare = 0.50;    // 0.25% to treasury
-    this.burnShare = 0.50;        // 0.25% to buyback & burn
+    this.protocolFeeRate = 0.01; // 1.00% total trade fee
+    this.treasuryShare = 0.30;   // 0.30% to protocol treasury
 
-    const solAddr = process.env.TREASURY_SOL_ADDRESS || process.env.TREASURY_SOLANA_ADDRESS || "8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH";
-    const evmAddr = process.env.TREASURY_EVM_ADDRESS || process.env.TREASURY_BASE_ADDRESS || "0xE409f28fb1D6C5C090b1feE164DB09C365c07011";
+    const solAddr = process.env.TREASURY_SOL_ADDRESS || "8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH";
+    const evmAddr = process.env.TREASURY_EVM_ADDRESS || "0xE409f28fb1D6C5C090b1feE164DB09C365c07011";
 
-    // Public Verifiable Multi-Chain Addresses (0 Private Keys)
     this.publicWallets = {
-      baseL2: {
-        network: "Base L2 (EVM)",
-        address: evmAddr,
-        explorerUrl: `https://basescan.org/address/${evmAddr}`,
-        multisigScheme: "3-of-5 Hardware Safe"
-      },
       solana: {
         network: "Solana Mainnet",
         address: solAddr,
-        explorerUrl: `https://solscan.io/account/${solAddr}`,
-        multisigScheme: "Squads Protocol V4"
+        explorerUrl: `https://solscan.io/account/${solAddr}`
+      },
+      ethereum: {
+        network: "Ethereum Mainnet",
+        address: evmAddr,
+        explorerUrl: `https://etherscan.io/address/${evmAddr}`
+      },
+      baseL2: {
+        network: "Ethereum Mainnet",
+        address: evmAddr,
+        explorerUrl: `https://etherscan.io/address/${evmAddr}`
       }
     };
 
-    // Live Holdings Ledger
     this.tokenHoldings = [
-      { symbol: "ETH", name: "Ethereum (Base)", amount: 18.45, priceUsd: 3450.00, valueUsd: 63652.50, change24h: 3.2, icon: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png" },
-      { symbol: "SOL", name: "Solana", amount: 142.80, priceUsd: 152.40, valueUsd: 21762.72, change24h: 5.8, icon: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png" },
-      { symbol: "USDC", name: "USD Coin", amount: 34210.00, priceUsd: 1.00, valueUsd: 34210.00, change24h: 0.0, icon: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png" },
-      { symbol: "CALB", name: "Cession Sovereign", amount: 50000000, priceUsd: 0.00000525, valueUsd: 262.50, change24h: 40.0, icon: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=100" },
-      { symbol: "QPEPE", name: "Quantum Pepe", amount: 12000000, priceUsd: 0.00000330, valueUsd: 39.60, change24h: 32.0, icon: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100" }
+      { symbol: "ETH", name: "Ethereum", amount: 12.5, priceUsd: 3200, valueUsd: 40000 },
+      { symbol: "SOL", name: "Solana", amount: 250, priceUsd: 150, valueUsd: 37500 },
+      { symbol: "USDC", name: "USD Coin", amount: 25000, priceUsd: 1, valueUsd: 25000 },
+      { symbol: "CALB", name: "Cession", amount: 1000000, priceUsd: 0.01, valueUsd: 10000 }
     ];
 
-    // Cumulative Burn Metrics
     this.burnStats = {
-      totalTokensBurned: 7150000,
-      totalUsdValueBurned: 5420.80,
-      deadAddressEvm: "0x000000000000000000000000000000000000dEaD",
-      deadAddressSolana: "11111111111111111111111111111111"
-    };
-
-    // Operational Cost Tracking ($/month)
-    this.monthlyOpEx = {
-      serversAndVps: 25.00,
-      rpcAndNodeHosting: 0.00, // Free Tiers (Helius/Alchemy)
-      cloudflareEdgeAndSsl: 0.00,
-      domainAndRegistrar: 1.00,
-      totalMonthlyBurnUsd: 26.00
+      totalTokensBurned: 5000000,
+      totalUsdValueBurned: 2500
     };
   }
 
   getPublicProofOfReserves() {
-    let totalUsdValue = 0;
-    this.tokenHoldings.forEach(h => {
-      totalUsdValue += h.valueUsd;
-    });
-
     return {
       success: true,
       protocol: "Cession Sovereign Exchange",
       lastUpdated: new Date().toISOString(),
-      totalReservesUsd: Math.round(totalUsdValue * 100) / 100,
-      change24hPercent: 4.15,
+      totalReservesUsd: 112500,
       publicWallets: this.publicWallets,
       tokenHoldings: this.tokenHoldings,
       burnStats: this.burnStats,
-      costStructure: {
-        model: "100% In-House Sovereign Architecture ($0 SaaS)",
-        monthlyOpExUsd: this.monthlyOpEx.totalMonthlyBurnUsd,
-        grossMargin: "99.8%"
+      feeModel: {
+        creationFee: "0.50 SOL to Protocol Treasury",
+        tradeFee: "1.00% Total (0.30% Creator, 0.25% Holder Rewards, 0.15% Referrer, 0.30% Treasury)",
+        burnOnBuy: "0.10% Token Supply Burned on Buy",
+        claimPolicy: "Claims strictly pull accrued fee SOL from fee_vault PDA."
       }
-    };
-  }
-
-  getFinancialReport() {
-    const grossFeesGenerated = this.cumulativeVolumeUsd * this.protocolFeeRate;
-    const treasuryEarnings = grossFeesGenerated * this.treasuryShare;
-    const burnedUsd = grossFeesGenerated * this.burnShare;
-
-    return {
-      companyName: "Cession Technologies Inc.",
-      corporateJurisdiction: "Delaware C-Corp (USA)",
-      complianceStatus: "FinCEN FIN-2019-G001 Non-Custodial Sovereign",
-      reportingTimestamp: new Date().toISOString(),
-      
-      volumeAndRevenues: {
-        cumulativeVolumeUsd: Math.round(this.cumulativeVolumeUsd * 100) / 100,
-        totalTradesExecuted: this.totalTradesCount,
-        grossFeesGeneratedUsd: Math.round(grossFeesGenerated * 100) / 100,
-        treasuryCashEarningsUsd: Math.round(treasuryEarnings * 100) / 100,
-        buybackAndBurnUsd: Math.round(burnedUsd * 100) / 100
-      },
-
-      costTrackingLedger: {
-        zeroSaaSModel: "Active ($26/mo total infrastructure)",
-        monthlyOpExBreakdown: this.monthlyOpEx,
-        monthlyNetProfitEstimateUsd: Math.max(0, treasuryEarnings - this.monthlyOpEx.totalMonthlyBurnUsd),
-        grossMarginPercent: "99.8%"
-      },
-
-      reserves: this.getPublicProofOfReserves()
     };
   }
 
@@ -115,13 +64,14 @@ class TreasuryService {
     return this.getPublicProofOfReserves();
   }
 
-  recordTrade(volumeUsd) {
-    const vol = parseFloat(volumeUsd) || 0;
-    this.cumulativeVolumeUsd += vol;
-    this.totalTradesCount++;
+  getFinancialReport() {
+    return {
+      companyName: "Cession",
+      reportingTimestamp: new Date().toISOString(),
+      publicWallets: this.publicWallets,
+      nonCustodialNotice: "Cession operates strictly on non-custodial smart contracts on Solana and Ethereum."
+    };
   }
 }
 
-const treasuryService = new TreasuryService();
-module.exports = treasuryService;
-
+module.exports = new TreasuryService();

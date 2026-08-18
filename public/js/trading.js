@@ -1,6 +1,6 @@
 /**
- * Cession.fun — Pump.fun Exact Trade Controller
- * Real Constant Product Swap Math ($k = x \cdot y$), Slippage Modal, & Quick Presets
+ * Cession.fun — Sovereign On-Chain Trading Manager
+ * Strict Phantom / Solana Web3 Anchor instruction builder & MetaMask EVM caller
  */
 
 class PumpTradingManager {
@@ -99,34 +99,35 @@ class PumpTradingManager {
     this.calculateQuote();
   }
 
+  setSlippage(percent) {
+    this.slippagePercent = parseFloat(percent);
+    if (this.slippageVal) this.slippageVal.textContent = `${this.slippagePercent}%`;
+    const modal = document.getElementById('slippageModal');
+    if (modal) modal.style.display = 'none';
+    if (window.launchpadManager) window.launchpadManager.toast(`Slippage set to ${this.slippagePercent}%`, 'info');
+  }
+
   openSlippageModal() {
     const modal = document.getElementById('slippageModal');
     if (modal) modal.style.display = 'flex';
   }
 
-  setSlippage(val) {
-    this.slippagePercent = parseFloat(val);
-    if (this.slippageVal) this.slippageVal.textContent = `${this.slippagePercent.toFixed(1)}%`;
-    const modal = document.getElementById('slippageModal');
-    if (modal) modal.style.display = 'none';
-    if (window.launchpadManager) window.launchpadManager.toast(`Max slippage set to ${this.slippagePercent}%`, 'info');
-  }
-
   calculateQuote() {
     if (!this.outputQuote) return;
-    const val = parseFloat(this.amountInput ? this.amountInput.value : 0) || 0;
-    if (!this.activeToken || val <= 0) {
-      this.outputQuote.textContent = this.side === 'buy' ? 'you receive: 0 tokens' : 'you receive: 0 SOL';
+    const amount = parseFloat(this.amountInput ? this.amountInput.value : 0);
+    if (!amount || amount <= 0 || !this.activeToken) {
+      this.outputQuote.textContent = 'you receive: 0.00';
       return;
     }
 
-    const priceSol = this.activeToken.currentPriceSol || 0.000000025;
+    const solPriceUsd = 150.0;
+    const currentPriceSol = (this.activeToken.currentPriceUsd || 0.00001) / solPriceUsd;
 
     if (this.side === 'buy') {
-      const tokensOut = Math.floor(val / priceSol);
-      this.outputQuote.textContent = `you receive: ~${tokensOut.toLocaleString()} $${this.activeToken.symbol}`;
+      const tokensOut = amount / currentPriceSol;
+      this.outputQuote.textContent = `you receive: ~${Math.floor(tokensOut).toLocaleString()} $${this.activeToken.symbol}`;
     } else {
-      const solOut = (val * priceSol * 0.995).toFixed(4);
+      const solOut = (amount * currentPriceSol).toFixed(4);
       this.outputQuote.textContent = `you receive: ~${solOut} SOL`;
     }
   }
@@ -134,6 +135,11 @@ class PumpTradingManager {
   async executeTrade() {
     if (!this.activeToken) {
       if (window.launchpadManager) window.launchpadManager.toast('No token selected', 'error');
+      return;
+    }
+
+    if (!this.activeToken.mintAddress || this.activeToken.mintAddress === "So11111111111111111111111111111111111111112") {
+      if (window.launchpadManager) window.launchpadManager.toast('This coin does not have an on-chain mint address yet.', 'error');
       return;
     }
 
@@ -145,27 +151,12 @@ class PumpTradingManager {
 
     const we = window.walletEngine;
     if (!we || !we.isAuthenticated || !we.activeAddress) {
-      if (window.launchpadManager) {
-        window.launchpadManager.toast('Please connect your crypto wallet to trade.', 'info');
-      }
+      if (window.launchpadManager) window.launchpadManager.toast('Please connect your crypto wallet to trade on-chain.', 'info');
       if (we) we.openWalletModal();
       return;
     }
 
-    if (this.side === 'buy') {
-      const availableSol = (we.balances && we.balances.sol !== undefined) ? we.balances.sol : 0.00;
-      if (availableSol <= 0 || availableSol < amount) {
-        if (window.launchpadManager) {
-          window.launchpadManager.toast(`Insufficient SOL balance (${availableSol.toFixed(2)} SOL). Please deposit SOL to trade.`, 'error');
-        }
-        if (we) we.openDepositModal();
-        return;
-      }
-    }
-
-    const trader = we.activeAddress;
-    const chain = we.activeChain || 'Solana';
-
+    // Single trader and chain declaration
     const trader = we.activeAddress;
     const chain = we.activeChain || 'Solana';
 
@@ -182,9 +173,9 @@ class PumpTradingManager {
         const ASSOCIATED_TOKEN_PROGRAM_ID = spl ? spl.ASSOCIATED_TOKEN_PROGRAM_ID : new web3.PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
         const TREASURY_PUBKEY = new web3.PublicKey('8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH');
 
-        const mintPubkey = new web3.PublicKey(this.activeToken.mintAddress || 'So11111111111111111111111111111111111111112');
+        const mintPubkey = new web3.PublicKey(this.activeToken.mintAddress);
 
-        // Derive PDAs
+        // Derive PDAs matching Anchor lib.rs exactly
         const [curvePda] = web3.PublicKey.findProgramAddressSync(
           [Buffer.from('curve'), mintPubkey.toBuffer()],
           PROGRAM_ID
@@ -192,6 +183,11 @@ class PumpTradingManager {
 
         const [solVaultPda] = web3.PublicKey.findProgramAddressSync(
           [Buffer.from('sol_vault'), mintPubkey.toBuffer()],
+          PROGRAM_ID
+        );
+
+        const [feeVaultPda] = web3.PublicKey.findProgramAddressSync(
+          [Buffer.from('fee_vault'), mintPubkey.toBuffer()],
           PROGRAM_ID
         );
 
@@ -207,7 +203,7 @@ class PumpTradingManager {
 
         const transaction = new web3.Transaction();
 
-        // Check/Create trader ATA instruction if needed
+        // Add createAssociatedTokenAccountInstruction if user ATA does not exist
         if (spl && spl.createAssociatedTokenAccountInstruction && this.side === 'buy') {
           transaction.add(
             spl.createAssociatedTokenAccountInstruction(
@@ -222,23 +218,27 @@ class PumpTradingManager {
         }
 
         if (this.side === 'buy') {
-          // Instruction: buy (Discriminator: 0x66063d1201daebea)
+          // Anchor buy Discriminator: [102, 6, 61, 18, 1, 218, 235, 234]
           const buyDiscriminator = new Uint8Array([102, 6, 61, 18, 1, 218, 235, 234]);
           const lamports = BigInt(Math.floor(amount * 1000000000));
-          const minTokens = 1n; // 1 token minimum slippage protection
+          const minTokens = 1n; // Minimum token slippage protection
 
           const dataBuffer = new Uint8Array(8 + 8 + 8);
           dataBuffer.set(buyDiscriminator, 0);
           new DataView(dataBuffer.buffer).setBigUint64(8, lamports, true);
           new DataView(dataBuffer.buffer).setBigUint64(16, minTokens, true);
 
+          // EXACT account metas matching lib.rs Buy struct:
+          // 0. signer, 1. mint, 2. token_vault, 3. sol_vault, 4. fee_vault,
+          // 5. buyer_token_account, 6. treasury, 7. curve_state, 8. system_program, 9. token_program
           const buyIx = new web3.TransactionInstruction({
             programId: PROGRAM_ID,
             keys: [
               { pubkey: window.solana.publicKey, isSigner: true, isWritable: true },
-              { pubkey: mintPubkey, isSigner: false, isWritable: false },
+              { pubkey: mintPubkey, isSigner: false, isWritable: true },
               { pubkey: tokenVaultAta, isSigner: false, isWritable: true },
               { pubkey: solVaultPda, isSigner: false, isWritable: true },
+              { pubkey: feeVaultPda, isSigner: false, isWritable: true },
               { pubkey: traderAta, isSigner: false, isWritable: true },
               { pubkey: TREASURY_PUBKEY, isSigner: false, isWritable: true },
               { pubkey: curvePda, isSigner: false, isWritable: true },
@@ -250,23 +250,27 @@ class PumpTradingManager {
 
           transaction.add(buyIx);
         } else {
-          // Instruction: sell (Discriminator: 0x33e683f124403326)
+          // Anchor sell Discriminator: [51, 230, 131, 241, 36, 64, 51, 38]
           const sellDiscriminator = new Uint8Array([51, 230, 131, 241, 36, 64, 51, 38]);
           const tokenUnits = BigInt(Math.floor(amount * 1000000)); // 6 decimals
-          const minSol = 1n; // 1 lamport minimum
+          const minSol = 1n;
 
           const dataBuffer = new Uint8Array(8 + 8 + 8);
           dataBuffer.set(sellDiscriminator, 0);
           new DataView(dataBuffer.buffer).setBigUint64(8, tokenUnits, true);
           new DataView(dataBuffer.buffer).setBigUint64(16, minSol, true);
 
+          // EXACT account metas matching lib.rs Sell struct:
+          // 0. signer, 1. mint, 2. token_vault, 3. sol_vault, 4. fee_vault,
+          // 5. seller_token_account, 6. treasury, 7. curve_state, 8. system_program, 9. token_program
           const sellIx = new web3.TransactionInstruction({
             programId: PROGRAM_ID,
             keys: [
               { pubkey: window.solana.publicKey, isSigner: true, isWritable: true },
-              { pubkey: mintPubkey, isSigner: false, isWritable: false },
+              { pubkey: mintPubkey, isSigner: false, isWritable: true },
               { pubkey: tokenVaultAta, isSigner: false, isWritable: true },
               { pubkey: solVaultPda, isSigner: false, isWritable: true },
+              { pubkey: feeVaultPda, isSigner: false, isWritable: true },
               { pubkey: traderAta, isSigner: false, isWritable: true },
               { pubkey: TREASURY_PUBKEY, isSigner: false, isWritable: true },
               { pubkey: curvePda, isSigner: false, isWritable: true },
@@ -294,14 +298,18 @@ class PumpTradingManager {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
 
+        const curveAddress = window.CESSION_EVM_CURVE_ADDRESS || process.env.CESSION_EVM_CURVE_ADDRESS;
+        if (!curveAddress) {
+          if (window.launchpadManager) window.launchpadManager.toast('Ethereum bonding curve deployment pending.', 'info');
+          return;
+        }
+
         const curveAbi = [
           "function buyTokens(address tokenAddress) external payable",
           "function sellTokens(address tokenAddress, uint256 tokenAmount) external"
         ];
-        const curveAddress = "0x7120B5B943800000000000000000000000000001";
         const contract = new ethers.Contract(curveAddress, curveAbi, signer);
-
-        const tokenAddress = this.activeToken.mintAddress || "0x7120B5B943800000000000000000000000000002";
+        const tokenAddress = this.activeToken.mintAddress;
 
         if (this.side === 'buy') {
           const weiVal = ethers.parseEther(amount.toString());
@@ -318,7 +326,12 @@ class PumpTradingManager {
         throw new Error('Connected crypto wallet required to trade on-chain.');
       }
 
-      if (this.btnPlaceTrade) this.btnPlaceTrade.textContent = 'Confirming on-chain trade...';
+      // STRICT: Indexer POST is ONLY executed if txHash is present from wallet confirmation
+      if (!txHash) {
+        throw new Error('On-chain signature missing.');
+      }
+
+      if (this.btnPlaceTrade) this.btnPlaceTrade.textContent = 'Indexing transaction on-chain...';
 
       const endpoint = this.side === 'buy'
         ? `/api/tokens/${this.activeToken.symbol}/buy`
@@ -345,17 +358,17 @@ class PumpTradingManager {
 
         if (window.launchpadManager) {
           window.launchpadManager.toast(
-            `✓ On-Chain ${this.side.toUpperCase()} Confirmed! <a href="${explorerUrl}" target="_blank" style="color:#00f2fe; text-decoration:underline;">View Transaction on Explorer ↗</a>`,
+            `✓ On-Chain ${this.side.toUpperCase()} Confirmed! <a href="${explorerUrl}" target="_blank" style="color:#00f2fe; text-decoration:underline;">View Transaction ↗</a>`,
             'success'
           );
-          await window.launchpadManager.fetchTokens(false);
+          await window.launchpadManager.fetchBackendTokens(false);
           window.launchpadManager.openTokenDetail(this.activeToken.symbol);
         }
         if (this.amountInput) this.amountInput.value = '';
         this.calculateQuote();
       } else {
         if (window.launchpadManager) {
-          window.launchpadManager.toast(data.error || 'Trade failed to record', 'error');
+          window.launchpadManager.toast(data.error || 'Transaction failed on indexer', 'error');
         }
       }
     } catch (e) {
