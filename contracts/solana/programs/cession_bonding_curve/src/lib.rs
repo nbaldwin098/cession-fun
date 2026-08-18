@@ -184,6 +184,30 @@ pub mod cession_bonding_curve {
 
         Ok(())
     }
+
+    pub fn claim(
+        ctx: Context<Claim>,
+        amount: u64,
+    ) -> Result<()> {
+        let curve = &mut ctx.accounts.curve_state;
+        require!(
+            ctx.accounts.signer.key() == curve.creator || ctx.accounts.signer.key() == ctx.accounts.treasury.key(),
+            CessionError::UnauthorizedClaim
+        );
+
+        let sol_balance = ctx.accounts.sol_vault.lamports();
+        let rent = Rent::get()?;
+        let min_rent = rent.minimum_balance(0);
+        let claimable = if sol_balance > min_rent { sol_balance - min_rent } else { 0 };
+        
+        let to_transfer = if amount > 0 && amount <= claimable { amount } else { claimable };
+        require!(to_transfer > 0, CessionError::InvalidAmount);
+
+        **ctx.accounts.sol_vault.sub_lamports(to_transfer)?;
+        **ctx.accounts.recipient.add_lamports(to_transfer)?;
+
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -279,6 +303,32 @@ pub struct Sell<'info> {
     pub token_program: Program<'info, Token>,
 }
 
+#[derive(Accounts)]
+pub struct Claim<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    pub mint: Account<'info, Mint>,
+    /// CHECK: SOL vault PDA
+    #[account(
+        mut,
+        seeds = [b"sol_vault", mint.key().as_ref()],
+        bump
+    )]
+    pub sol_vault: AccountInfo<'info>,
+    /// CHECK: Recipient account for claimed SOL
+    #[account(mut)]
+    pub recipient: AccountInfo<'info>,
+    /// CHECK: Protocol Treasury account
+    pub treasury: AccountInfo<'info>,
+    #[account(
+        mut,
+        seeds = [b"curve", mint.key().as_ref()],
+        bump
+    )]
+    pub curve_state: Account<'info, CurveState>,
+    pub system_program: Program<'info, System>,
+}
+
 #[account]
 pub struct CurveState {
     pub creator: Pubkey,
@@ -303,4 +353,6 @@ pub enum CessionError {
     CurveGraduated,
     #[msg("Slippage tolerance exceeded.")]
     SlippageExceeded,
+    #[msg("Unauthorized to claim fees from this bonding curve.")]
+    UnauthorizedClaim,
 }
