@@ -556,50 +556,26 @@
           </div>
 
           <!-- Official Company Treasury Crypto Wallets -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin: 24px 0;">
-            
-            <!-- Solana Treasury Wallet -->
+          <div style="max-width: 600px; margin: 24px 0;">
             <div class="transparency-card" style="border: 1px solid rgba(134, 239, 172, 0.3);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <strong style="font-size: 15px; color: var(--text-primary);">Solana Company Treasury</strong>
+                  <strong style="font-size: 15px; color: var(--text-primary);">Solana Protocol Treasury</strong>
                 </div>
-                <span style="font-size: 11px; background: rgba(134, 239, 172, 0.15); color: var(--pump-mint); font-weight: 700; padding: 3px 8px; border-radius: 12px;">0.1 SOL MINT FEE AGGREGATOR</span>
+                <span style="font-size: 11px; background: rgba(134, 239, 172, 0.15); color: var(--pump-mint); font-weight: 700; padding: 3px 8px; border-radius: 12px;">0.05 SOL MINT FEE RECEIVER</span>
               </div>
               
-              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Official Fee Receiver & AMM LP Reserve Address:</div>
+              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Official Fee Collection & AMM Reserve Address:</div>
               <div class="wallet-address-box" style="margin-bottom: 12px;">
                 <span id="solTreasuryDisplay">8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH</span>
                 <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="navigator.clipboard.writeText('8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH'); window.launchpadManager.toast('Solana Treasury copied', 'success');">copy</button>
               </div>
 
               <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 13px; border-top: 1px solid var(--border-card); padding-top: 12px;">
-                <span>Live Treasury Balance: <strong id="solTreasuryBal" style="color: var(--pump-mint); font-size: 15px;">48.60 SOL</strong></span>
+                <span>Verified On-Chain Protocol Treasury</span>
                 <a href="https://solscan.io/account/8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH" target="_blank" rel="noopener noreferrer" style="color: var(--pump-mint); font-size: 12px; text-decoration: underline;">Verify on Solscan</a>
               </div>
             </div>
-
-            <!-- Base / EVM Treasury Wallet -->
-            <div class="transparency-card" style="border: 1px solid rgba(192, 132, 252, 0.3);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <strong style="font-size: 15px; color: var(--text-primary);">Base L2 Protocol Treasury</strong>
-                </div>
-                <span style="font-size: 11px; background: rgba(192, 132, 252, 0.15); color: var(--accent-purple); font-weight: 700; padding: 3px 8px; border-radius: 12px;">EVM LP & DUAL-CHAIN VAULT</span>
-              </div>
-              
-              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Multi-Sig Contract & Uniswap v3 Pool Custody:</div>
-              <div class="wallet-address-box" style="margin-bottom: 12px;">
-                <span id="evmTreasuryDisplay">0x777A6b3D91028374829108a798129034Cession99</span>
-                <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="navigator.clipboard.writeText('0x777A6b3D91028374829108a798129034Cession99'); window.launchpadManager.toast('Base Treasury copied', 'success');">copy</button>
-              </div>
-
-              <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 13px; border-top: 1px solid var(--border-card); padding-top: 12px;">
-                <span>Live Treasury Balance: <strong id="evmTreasuryBal" style="color: var(--accent-purple); font-size: 15px;">14.28 ETH</strong></span>
-                <a href="https://basescan.org" target="_blank" rel="noopener noreferrer" style="color: var(--accent-purple); font-size: 12px; text-decoration: underline;">Verify on BaseScan</a>
-              </div>
-            </div>
-
           </div>
 
           <!-- Protocol Fee Breakdown & Flow Architecture -->
@@ -608,23 +584,23 @@
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
               <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 14px; border-left: 3px solid var(--pump-mint);">
-                <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">0.1 SOL Mint Fee</div>
+                <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">0.05 SOL Creation Fee</div>
                 <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4;">
-                  Every newly created coin pays exactly 0.1 SOL at creation. 100% of this fee is immediately settled and credited to the company treasury wallet.
+                  Every newly created coin pays exactly 0.05 SOL at launch. Settled on-chain to protocol reserves.
                 </div>
               </div>
 
               <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 14px; border-left: 3px solid var(--accent-purple);">
                 <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">1.0% AMM Trading Swap Fee</div>
                 <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4;">
-                  Every buy and sell trade on the bonding curve incurs a 1.0% swap fee. Automatically split between protocol growth and liquidity stability.
+                  Every buy and sell trade on the bonding curve incurs a 1.0% swap fee.
                 </div>
               </div>
 
               <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 14px; border-left: 3px solid var(--accent-orange);">
-                <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">Automatic DEX Graduation ($69,420 Cap)</div>
+                <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">Automatic DEX Graduation ($25,000 Cap)</div>
                 <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4;">
-                  Upon reaching 100% bonding curve fill, accumulated SOL reserves are migrated to Raydium / Uniswap with LP tokens burned permanently.
+                  Upon reaching 100% bonding curve fill, accumulated SOL reserves migrate to Raydium LP.
                 </div>
               </div>
             </div>
@@ -649,101 +625,12 @@
       </main>
 
       <!-- =========================================================
-           SITE FOOTER
+           CLEAN DARK SINGLE-LINE PROTOCOL FOOTER
       ========================================================= -->
-      <footer class="site-footer-pump">
-        <div class="footer-top-grid">
-          
-          <!-- Column 1: Brand & Mission -->
-          <div class="footer-brand-col">
-            <div class="footer-logo-row">
-              <span class="footer-brand-name">cession.fun</span>
-            </div>
-            <p class="footer-brand-tagline">
-              The sovereign fair launch bonding curve and token liquidity network on Solana & Base.
-            </p>
-            <div class="footer-social-row">
-              <a href="https://x.com" target="_blank" rel="noopener" class="footer-social-link">Twitter</a>
-              <a href="https://telegram.org" target="_blank" rel="noopener" class="footer-social-link">Telegram</a>
-              <a href="https://github.com/nbaldwin098/cession-fun" target="_blank" rel="noopener" class="footer-social-link">GitHub</a>
-              <a href="https://discord.com" target="_blank" rel="noopener" class="footer-social-link">Discord</a>
-            </div>
-          </div>
-
-          <!-- Column 2: Markets & Trade -->
-          <div>
-            <div class="footer-col-title">Fair Launch</div>
-            <ul class="footer-links-list">
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchPage('explore')">Explore All Coins</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.openDeployModal()">Launch a Coin (0.1 SOL)</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchPage('bundles')">Bundles & Baskets</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchPage('leaderboard')">Top Traders & Volume</button></li>
-            </ul>
-          </div>
-
-          <!-- Column 3: Ecosystem & Yield -->
-          <div>
-            <div class="footer-col-title">Ecosystem</div>
-            <ul class="footer-links-list">
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('leaderboard')">Leaderboard & Hall of Fame</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('profile')">Profile & Portfolio</button></li>
-              <li class="footer-link-item"><button onclick="window.walletEngine.openAuthModal()">Connect Wallet</button></li>
-            </ul>
-          </div>
-
-          <!-- Column 4: Transparency & Trust -->
-          <div>
-            <div class="footer-col-title">Transparency</div>
-            <ul class="footer-links-list">
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('transparency')">Protocol Transparency</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('transparency')">Company Treasury Wallets</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('transparency')">0.1 SOL Fee Breakdown</button></li>
-              <li class="footer-link-item"><a href="https://solscan.io" target="_blank" rel="noopener">Solscan Explorer</a></li>
-              <li class="footer-link-item"><a href="https://basescan.org" target="_blank" rel="noopener">BaseScan Explorer</a></li>
-            </ul>
-          </div>
-
-          <!-- Column 5: Legal & Security -->
-          <div>
-            <div class="footer-col-title">Legal & Security</div>
-            <ul class="footer-links-list">
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('terms')">Terms of Service</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('terms')">Risk Disclosures</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.switchView('terms')">Privacy Policy</button></li>
-              <li class="footer-link-item"><button onclick="window.launchpadManager.toast('Bug bounty active via GitHub', 'info')">Bug Bounty</button></li>
-            </ul>
-          </div>
-
-        </div>
-
-        <!-- Bottom Status Bar -->
-        <div class="footer-bottom-bar">
-          <div>
-            &copy; 2026 Cession Protocol Inc. All rights reserved. Non-custodial sovereign software.
-          </div>
-          <div class="footer-node-status">
-            <span>Solana Mainnet & Base L2 Nodes Live • Block Height #289,142,098</span>
-          </div>
-        </div>
+      <footer style="margin-top: 40px; padding: 24px 16px; border-top: 1px solid #1e293b; text-align: center; font-size: 11px; color: #64748b; line-height: 1.6; background: #050711;">
+        <div>CESSION • Solana Fair Launch Bonding Curve Protocol</div>
+        <div>Create Fee: <strong>0.05 SOL</strong> • We do not hold keys. Not live until the program is deployed.</div>
       </footer>
-
-    </div>
-  </div>
-
-  <!-- =========================================================
-       "WE VALUE YOUR PRIVACY" COOKIE BANNER
-  ========================================================= -->
-  <div class="privacy-cookie-banner" id="privacyCookieBanner">
-    <div class="cookie-title">We value your privacy</div>
-    <div class="cookie-desc">
-      This site uses cookies to improve your browsing experience, analyze site traffic, and show personalized content.
-    </div>
-    <div class="cookie-btns-row">
-      <button class="cookie-link-btn" onclick="document.getElementById('privacyCookieBanner').style.display='none'">Reject all</button>
-      <button class="cookie-link-btn" onclick="document.getElementById('privacyCookieBanner').style.display='none'">Customize</button>
-      <button class="btn-accept-cookie" onclick="document.getElementById('privacyCookieBanner').style.display='none'">Accept all</button>
-    </div>
-  </div>
 
   <!-- =========================================================
        TOKEN DETAIL VIEW MODAL
@@ -1388,6 +1275,254 @@
 
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
+
+  <!-- =========================================================
+       BATCH 1: SCREEN 1 - WAITING FOR SIGNATURE (PHANTOM)
+  ========================================================= -->
+  <div class="modal-overlay-generic" id="waitingForSignatureModal" style="display: none;">
+    <div style="background: #0d0f17; border: 1px solid #1e293b; border-radius: 24px; padding: 28px 20px; width: 100%; max-width: 380px; text-align: center; color: #ffffff; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
+      
+      <!-- Top Ghost Header -->
+      <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 24px;">
+        <svg width="44" height="44" viewBox="0 0 128 128" fill="none" style="filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.4)); margin-bottom: 8px;">
+          <path d="M110.5 44.5C103.8 21.8 84.4 7.2 61.2 7.2 30.6 7.2 5.8 32 5.8 62.6c0 14.5 5.6 27.8 14.8 37.7 5.6 6 12 11.2 12 19 0 1.2 1 2.2 2.2 2.2h6.8c1.2 0 2.2-1 2.2-2.2v-11.8c0-14.8-12-26.8-26.8-26.8-1.2 0-2.2-1-2.2-2.2V62.6c0-21 17-38 38-38 18.2 0 33.6 12.8 37 30.2 0.2 1.2 1.2 2 2.4 2h18.2c1.2 0 2.2-1 2.1-2.3z" fill="#AB47BC"/>
+          <circle cx="48" cy="48" r="6" fill="#FFF"/>
+          <circle cx="72" cy="48" r="6" fill="#FFF"/>
+        </svg>
+        <h2 style="font-size: 22px; font-weight: 800; margin: 0 0 4px 0; color: #ffffff;">iPhone Cession</h2>
+        <div style="font-size: 13px; color: #94a3b8; font-weight: 500;">waiting for signature</div>
+      </div>
+
+      <!-- Dark Inner Card -->
+      <div style="background: #141824; border: 1px solid #1e293b; border-radius: 18px; padding: 20px 16px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; text-align: left;">
+          <div style="width: 36px; height: 36px; background: #000000; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <svg width="22" height="22" viewBox="0 0 128 128" fill="none">
+              <path d="M110.5 44.5C103.8 21.8 84.4 7.2 61.2 7.2 30.6 7.2 5.8 32 5.8 62.6c0 14.5 5.6 27.8 14.8 37.7 5.6 6 12 11.2 12 19 0 1.2 1 2.2 2.2 2.2h6.8c1.2 0 2.2-1 2.2-2.2v-11.8c0-14.8-12-26.8-26.8-26.8-1.2 0-2.2-1-2.2-2.2V62.6c0-21 17-38 38-38 18.2 0 33.6 12.8 37 30.2 0.2 1.2 1.2 2 2.4 2h18.2c1.2 0 2.2-1 2.1-2.3z" fill="#FFF"/>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size: 14px; font-weight: 700; color: #ffffff;">Phantom</div>
+            <div style="font-size: 12px; color: #94a3b8;">Approve transaction</div>
+          </div>
+        </div>
+
+        <!-- Central Circle Icon -->
+        <div style="display: flex; justify-content: center; margin-bottom: 14px;">
+          <div style="width: 64px; height: 64px; border-radius: 50%; background: #090b11; border: 1.5px solid #2e384d; display: flex; align-items: center; justify-content: center;">
+            <svg width="24" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+            </svg>
+          </div>
+        </div>
+
+        <div style="font-size: 16px; font-weight: 700; color: #ffffff; margin-bottom: 4px;">iPhone Cession</div>
+        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">Waiting for signature...</div>
+        
+        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>No fake hash</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button style="width: 100%; padding: 14px; background: #ffffff; color: #000000; border: none; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer;" onclick="window.walletEngine.simulatePhantomApprove()">
+          Approve in Phantom
+        </button>
+        <button style="width: 100%; padding: 14px; background: #1c2230; color: #ffffff; border: none; border-radius: 14px; font-weight: 700; font-size: 15px; cursor: pointer;" onclick="document.getElementById('waitingForSignatureModal').style.display='none'">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       BATCH 1: SCREEN 2 - WALLET DISCONNECT VIEW
+  ========================================================= -->
+  <div class="modal-overlay-generic" id="walletDisconnectModal" style="display: none;">
+    <div style="background: #090b11; border: 1px solid #1e293b; border-radius: 24px; padding: 24px 20px; width: 100%; max-width: 380px; text-align: center; color: #ffffff; box-shadow: 0 20px 40px rgba(0,0,0,0.9);">
+      
+      <!-- Top Header Row -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+        <button style="background: none; border: none; color: #ffffff; font-size: 20px; cursor: pointer;" onclick="document.getElementById('walletDisconnectModal').style.display='none'">←</button>
+        <div style="font-size: 18px; font-weight: 800; color: #ffffff;">Wallet</div>
+        <div style="width: 20px;"></div>
+      </div>
+
+      <!-- Central Diamond Icon -->
+      <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+        <div style="width: 96px; height: 96px; border-radius: 50%; background: #0d0f17; border: 1.5px solid #232b3e; display: flex; align-items: center; justify-content: center;">
+          <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%); transform: rotate(45deg); border-radius: 8px; box-shadow: 0 0 20px rgba(168,85,247,0.4);"></div>
+        </div>
+      </div>
+
+      <h2 style="font-size: 28px; font-weight: 900; color: #ffffff; margin: 0 0 8px 0;">Disconnect</h2>
+      <p style="font-size: 14px; color: #94a3b8; margin: 0 0 28px 0; line-height: 1.4;">
+        Disconnect your wallet to sign out<br>and remove access.
+      </p>
+
+      <!-- Card Container -->
+      <div style="background: #121622; border: 1px solid #1e293b; border-radius: 18px; overflow: hidden; margin-bottom: 24px; text-align: left;">
+        <!-- Row 1: Address -->
+        <div style="padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%); transform: rotate(45deg); border-radius: 4px;"></div>
+            <span style="font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: #ffffff;" id="disconnectAddrModalDisplay">Aa...zZ7x</span>
+          </div>
+          <button style="background: none; border: none; color: #94a3b8; cursor: pointer;" onclick="navigator.clipboard.writeText(window.walletEngine.state.address || 'Aa...zZ7x'); window.launchpadManager.toast('Address copied', 'success');">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+
+        <!-- Row 2: Disconnect Button -->
+        <button style="width: 100%; padding: 16px 20px; background: none; border: none; display: flex; align-items: center; justify-content: center; gap: 10px; color: #ef4444; font-size: 15px; font-weight: 700; cursor: pointer;" onclick="document.getElementById('walletDisconnectModal').style.display='none'; window.walletEngine.disconnect();">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+          Disconnect
+        </button>
+      </div>
+
+      <!-- Status Shield -->
+      <div style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #94a3b8;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 11 12 14 22 4"/></svg>
+        <span>Short address protected</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       BATCH 1: SCREEN 3 - WALLET REJECTED MODAL
+  ========================================================= -->
+  <div class="modal-overlay-generic" id="walletRejectedModal" style="display: none;">
+    <div style="background: #090b11; border: 1px solid #1e293b; border-radius: 24px; padding: 28px 20px; width: 100%; max-width: 380px; color: #ffffff; text-align: left; box-shadow: 0 20px 40px rgba(0,0,0,0.9);">
+      
+      <!-- Phone Header -->
+      <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 28px; text-align: center;">
+        <div style="width: 48px; height: 64px; border: 2px solid #ffffff; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/></svg>
+        </div>
+        <h2 style="font-size: 22px; font-weight: 800; margin: 0; color: #ffffff;">Clean iPhone Cession</h2>
+      </div>
+
+      <!-- 3 Status Rows -->
+      <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 32px;">
+        
+        <!-- Row 1: Title Wallet Rejected -->
+        <div style="display: flex; gap: 16px; align-items: flex-start;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); border: 1.5px solid #ef4444; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="color: #ef4444; font-size: 16px; font-weight: 800;">✕</span>
+          </div>
+          <div>
+            <div style="font-size: 16px; font-weight: 800; color: #ffffff; margin-bottom: 2px;">Title Wallet rejected</div>
+            <div style="font-size: 13px; color: #94a3b8; line-height: 1.4;">The transaction was declined<br>by the wallet.</div>
+          </div>
+        </div>
+
+        <!-- Row 2: User declined in Phantom -->
+        <div style="display: flex; gap: 16px; align-items: flex-start;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: #ab47bc; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="20" height="20" viewBox="0 0 128 128" fill="none">
+              <path d="M110.5 44.5C103.8 21.8 84.4 7.2 61.2 7.2 30.6 7.2 5.8 32 5.8 62.6c0 14.5 5.6 27.8 14.8 37.7 5.6 6 12 11.2 12 19 0 1.2 1 2.2 2.2 2.2h6.8c1.2 0 2.2-1 2.2-2.2v-11.8c0-14.8-12-26.8-26.8-26.8-1.2 0-2.2-1-2.2-2.2V62.6c0-21 17-38 38-38 18.2 0 33.6 12.8 37 30.2 0.2 1.2 1.2 2 2.4 2h18.2c1.2 0 2.2-1 2.1-2.3z" fill="#FFF"/>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size: 16px; font-weight: 800; color: #ffffff; margin-bottom: 2px;">User declined in Phantom</div>
+            <div style="font-size: 13px; color: #94a3b8; line-height: 1.4;">The request was rejected in<br>your Phantom wallet.</div>
+          </div>
+        </div>
+
+        <!-- Row 3: Nothing was sent -->
+        <div style="display: flex; gap: 16px; align-items: flex-start;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: #1c2333; border: 1.5px solid #334155; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="color: #94a3b8; font-size: 16px; font-weight: 800;">i</span>
+          </div>
+          <div>
+            <div style="font-size: 16px; font-weight: 800; color: #ffffff; margin-bottom: 2px;">Nothing was sent</div>
+            <div style="font-size: 13px; color: #94a3b8; line-height: 1.4;">No tokens, NFTs, or data were<br>transferred.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Try Again Button -->
+      <button style="width: 100%; padding: 14px; background: #1a202c; color: #ffffff; border: 1px solid #2d3748; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer;" onclick="document.getElementById('walletRejectedModal').style.display='none'; window.walletEngine.connectPhantom();">
+        Try again
+      </button>
+
+    </div>
+  </div>
+
+  <!-- =========================================================
+       BATCH 1: SCREEN 4 - YOU HAVE NOT LAUNCHED MODAL
+  ========================================================= -->
+  <div class="modal-overlay-generic" id="youHaveNotLaunchedModal" style="display: none;">
+    <div style="background: #090b11; border: 1px solid #1e293b; border-radius: 24px; padding: 28px 20px; width: 100%; max-width: 380px; text-align: center; color: #ffffff; box-shadow: 0 20px 40px rgba(0,0,0,0.9);">
+      
+      <h2 style="font-size: 24px; font-weight: 900; color: #ffffff; margin: 0 0 40px 0;">iPhone Cession<br>Created</h2>
+
+      <!-- Empty Slashed Circle Icon -->
+      <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+        <div style="width: 48px; height: 48px; border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative;">
+          <div style="width: 32px; height: 2px; background: #ffffff; transform: rotate(-45deg);"></div>
+        </div>
+      </div>
+
+      <h3 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 0 0 6px 0;">You have not launched.</h3>
+      <p style="font-size: 14px; color: #94a3b8; margin: 0 0 32px 0;">Be the first to add a coin.</p>
+
+      <!-- Gradient Pill Button -->
+      <button style="width: 100%; padding: 16px; background: linear-gradient(90deg, #9333ea 0%, #06b6d4 100%); color: #ffffff; border: none; border-radius: 28px; font-weight: 800; font-size: 16px; cursor: pointer; box-shadow: 0 8px 24px rgba(147, 51, 234, 0.4);" onclick="document.getElementById('youHaveNotLaunchedModal').style.display='none'; window.launchpadManager.openDeployModal();">
+        Launch 0.05 SOL
+      </button>
+
+    </div>
+  </div>
+
+  <!-- =========================================================
+       BATCH 1: SCREEN 5 - ONE LIVE COIN PER WALLET BLOCKED
+  ========================================================= -->
+  <div class="modal-overlay-generic" id="oneLiveCoinBlockedModal" style="display: none;">
+    <div style="background: #090b11; border: 1px solid #1e293b; border-radius: 24px; padding: 28px 20px; width: 100%; max-width: 380px; text-align: center; color: #ffffff; box-shadow: 0 20px 40px rgba(0,0,0,0.9);">
+      
+      <!-- Lock Header -->
+      <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 24px;">
+        <div style="width: 64px; height: 72px; background: #151924; border: 1px solid #283245; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+          <svg width="24" height="28" viewBox="0 0 24 28" fill="none">
+            <rect x="2" y="10" width="20" height="16" rx="4" fill="#000000" stroke="#ffffff" stroke-width="2"/>
+            <path d="M6 10V6a6 6 0 0 1 12 0v4" stroke="#ffffff" stroke-width="2"/>
+          </svg>
+        </div>
+        <h2 style="font-size: 24px; font-weight: 900; color: #ffffff; margin: 0 0 4px 0;">iPhone Cession blocked</h2>
+        <div style="font-size: 14px; color: #94a3b8;">second coin.</div>
+      </div>
+
+      <!-- Inner Black Card -->
+      <div style="background: #10131d; border: 1px solid #1e293b; border-radius: 20px; padding: 32px 20px; margin-bottom: 20px;">
+        
+        <!-- C Circle with Red X Badge -->
+        <div style="display: flex; justify-content: center; margin-bottom: 20px; position: relative;">
+          <div style="position: relative; display: inline-block;">
+            <div style="width: 72px; height: 72px; border-radius: 50%; background: radial-gradient(circle, #2d3748 0%, #000000 100%); border: 2.5px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; color: #ffffff;">
+              C
+            </div>
+            <!-- Red X Badge -->
+            <div style="position: absolute; bottom: -2px; right: -2px; width: 26px; height: 26px; border-radius: 50%; background: #ef4444; border: 2px solid #10131d; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 14px;">
+              ✕
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size: 18px; font-weight: 800; color: #ffffff; margin: 0 0 6px 0;">One live coin per wallet</h3>
+        <p style="font-size: 13px; color: #94a3b8; margin: 0;">You already have a live coin.</p>
+      </div>
+
+      <!-- Close Button -->
+      <button style="width: 100%; padding: 14px; background: #1c2230; color: #ffffff; border: 1px solid #2d3748; border-radius: 14px; font-weight: 700; font-size: 15px; cursor: pointer;" onclick="document.getElementById('oneLiveCoinBlockedModal').style.display='none'">
+        Close
+      </button>
+
+    </div>
+  </div>
 
   <!-- =========================================================
        TIKTOK-STYLE BOTTOM NAVIGATION SHELL (5 SLOTS)

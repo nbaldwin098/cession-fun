@@ -555,6 +555,9 @@ class CessionWalletEngine {
       this.renderState();
       if (window.showToast) window.showToast(`✓ Cryptographically authenticated Phantom: ${pubkey.substring(0, 5)}...${pubkey.substring(pubkey.length - 4)}`, 'success');
       return true;
+    } catch (err) {
+      if (window.showToast) window.showToast(err.message || 'Phantom connection cancelled', 'error');
+      return false;
     }
   }
 
@@ -1382,6 +1385,42 @@ class CessionWalletEngine {
       }
     }
   }
+
+  openSignatureModal() {
+    const m = document.getElementById('waitingForSignatureModal');
+    if (m) m.style.display = 'flex';
+  }
+
+  simulatePhantomApprove() {
+    const m = document.getElementById('waitingForSignatureModal');
+    if (m) m.style.display = 'none';
+    this.connectPhantom();
+    this.toast('Signature approved in Phantom', 'success');
+  }
+
+  openDisconnectModal() {
+    const m = document.getElementById('walletDisconnectModal');
+    const disp = document.getElementById('disconnectAddrModalDisplay');
+    if (disp && this.activeAddress) {
+      disp.textContent = `${this.activeAddress.substring(0, 4)}...${this.activeAddress.substring(this.activeAddress.length - 4)}`;
+    }
+    if (m) m.style.display = 'flex';
+  }
+
+  openRejectedModal() {
+    const m = document.getElementById('walletRejectedModal');
+    if (m) m.style.display = 'flex';
+  }
+
+  openNotLaunchedModal() {
+    const m = document.getElementById('youHaveNotLaunchedModal');
+    if (m) m.style.display = 'flex';
+  }
+
+  openOneLiveCoinBlockedModal() {
+    const m = document.getElementById('oneLiveCoinBlockedModal');
+    if (m) m.style.display = 'flex';
+  }
 }
 
 // Global Export & Immediate Initialization
@@ -1431,6 +1470,26 @@ window.openDepositModal = () => {
     const m = document.getElementById('depositCryptoModal');
     if (m) m.style.display = 'flex';
   }
+};
+
+window.openSignatureModal = () => {
+  if (window.walletEngine) window.walletEngine.openSignatureModal();
+};
+
+window.openDisconnectModal = () => {
+  if (window.walletEngine) window.walletEngine.openDisconnectModal();
+};
+
+window.openRejectedModal = () => {
+  if (window.walletEngine) window.walletEngine.openRejectedModal();
+};
+
+window.openNotLaunchedModal = () => {
+  if (window.walletEngine) window.walletEngine.openNotLaunchedModal();
+};
+
+window.openOneLiveCoinBlockedModal = () => {
+  if (window.walletEngine) window.walletEngine.openOneLiveCoinBlockedModal();
 };
 
 document.addEventListener('DOMContentLoaded', () => {
