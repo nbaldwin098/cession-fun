@@ -1,24 +1,25 @@
 /**
- * FOREVER FEE LOCK
- * Protocol never above 0.20%. Trader never above 1.00%.
+ * FEE PATH
+ * Now: curve steal.
+ * After curve: keep winners at 0.40%.
+ * Later: Cession pool at 0.20% to beat PumpSwap 0.25%.
  */
-function tier(marketCapUsd) {
+function tier(marketCapUsd, stage) {
   const m = Number(marketCapUsd) || 0;
+  if (stage === 'pool') {
+    return { name: 'pool', live: false, totalBps: 20, creatorBps: 0, holderBps: 0, protocolBps: 20, referralBps: 0 };
+  }
   if (m < 500000) {
-    return { name: 'early', totalBps: 100, creatorBps: 50, holderBps: 20, protocolBps: 20, referralBps: 10 };
+    return { name: 'curve', live: true, totalBps: 100, creatorBps: 50, holderBps: 20, protocolBps: 20, referralBps: 10 };
   }
-  if (m < 1000000) {
-    return { name: 'made', totalBps: 85, creatorBps: 35, holderBps: 20, protocolBps: 20, referralBps: 10 };
-  }
-  return { name: 'scale', totalBps: 70, creatorBps: 25, holderBps: 20, protocolBps: 20, referralBps: 5 };
+  return { name: 'stay', live: true, totalBps: 40, creatorBps: 10, holderBps: 10, protocolBps: 20, referralBps: 0 };
 }
 
 module.exports = {
   createLamports: 0,
-  locked: true,
-  forever: true,
   protocolCapBps: 20,
   maxTraderBps: 100,
+  laterPoolBps: 20,
   tier,
-  graduation: { stayOnCession: true, bundleEligible: true }
+  graduation: { stayOnCession: true, bundleEligible: true, laterPool: true }
 };
