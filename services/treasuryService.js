@@ -12,18 +12,21 @@ class TreasuryService {
     this.treasuryShare = 0.50;    // 0.25% to treasury
     this.burnShare = 0.50;        // 0.25% to buyback & burn
 
+    const solAddr = process.env.TREASURY_SOL_ADDRESS || process.env.TREASURY_SOLANA_ADDRESS || "8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH";
+    const evmAddr = process.env.TREASURY_EVM_ADDRESS || process.env.TREASURY_BASE_ADDRESS || "0x777A6b3D91028374829108a798129034Cession99";
+
     // Public Verifiable Multi-Chain Addresses (0 Private Keys)
     this.publicWallets = {
       baseL2: {
         network: "Base L2 (EVM)",
-        address: "0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
-        explorerUrl: "https://basescan.org/address/0x777A3F98A86e2417C218B14a6Eb339c08B7A6b3D",
+        address: evmAddr,
+        explorerUrl: `https://basescan.org/address/${evmAddr}`,
         multisigScheme: "3-of-5 Hardware Safe"
       },
       solana: {
         network: "Solana Mainnet",
-        address: "9xCessionTreasuryFeeReservesSovereignVaultSol1",
-        explorerUrl: "https://solscan.io/account/9xCessionTreasuryFeeReservesSovereignVaultSol1",
+        address: solAddr,
+        explorerUrl: `https://solscan.io/account/${solAddr}`,
         multisigScheme: "Squads Protocol V4"
       }
     };
