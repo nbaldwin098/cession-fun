@@ -925,13 +925,13 @@
         </button>
 
         <!-- Divider -->
-        <div style="text-align: center; margin: 6px 0; color: var(--text-secondary); font-size: 11px; position: relative;">
-          <span style="background: var(--bg-card); padding: 0 8px; position: relative; z-index: 1;">OR NO EXTENSION REQUIRED</span>
+        <div style="text-align: center; margin: 10px 0 6px 0; color: var(--text-secondary); font-size: 11px; position: relative;">
+          <span style="background: var(--bg-card); padding: 0 8px; position: relative; z-index: 1;">OR CREATE NEW WALLET</span>
         </div>
 
         <!-- 1-Click Instant Vault Generation -->
-        <button class="btn-signin-mint" style="padding: 12px; font-size: 13px; text-align: center; justify-content: center; width: 100%;" onclick="window.walletEngine.generateNewVault(true)">
-          Instant Sovereign Vault
+        <button class="btn-signin-mint" style="padding: 12px; font-size: 13px; text-align: center; justify-content: center; width: 100%; font-weight: 800;" onclick="window.walletEngine.openCreateWalletModal()">
+          ✨ Create Sovereign Vault Wallet
         </button>
 
         <!-- Import Existing Key Accordion Toggle -->
@@ -1095,8 +1095,28 @@
         <button class="btn-close-modal" id="btnCloseCreateVaultModal" onclick="document.getElementById('createVaultModal').style.display='none'">&times;</button>
       </div>
 
+      <!-- STEP 0: PRE-GENERATION INTRO STEP -->
+      <div id="vaultStepIntro" style="display: block; text-align: center; padding: 10px 0;">
+        <div style="background: rgba(134, 239, 172, 0.08); border: 1px solid rgba(134, 239, 172, 0.3); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px; text-align: left;">
+          <div style="font-weight: 800; font-size: 15px; color: var(--pump-mint); margin-bottom: 6px;">
+            🛡️ Non-Custodial In-Browser Sovereign Vault
+          </div>
+          <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+            Your wallet is derived from 128-bit hardware CSPRNG entropy inside your browser. No seed phrase or private key is ever sent to or stored on any server.
+          </div>
+        </div>
+
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 18px;">
+          Click below when you are ready to generate your unique 12-word recovery phrase.
+        </div>
+
+        <button class="btn-signin-mint" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 800;" onclick="window.walletEngine.generateNewVault()">
+          Generate My 12-Word Secret Phrase →
+        </button>
+      </div>
+
       <!-- STEP 1: SHOW 12-WORD SEED PHRASE -->
-      <div id="vaultStepDisplay">
+      <div id="vaultStepDisplay" style="display: none;">
         <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 14px;">
           Your sovereign vault is 100% non-custodial and generated securely in your browser. Write down or copy these 12 secret backup words in order:
         </div>

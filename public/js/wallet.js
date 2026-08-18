@@ -763,13 +763,20 @@ class CessionWalletEngine {
   }
 
   /**
-   * Open Dedicated 1-Click Sovereign HD Wallet Creation Modal
+   * Open Dedicated 1-Click Sovereign HD Wallet Creation Modal (Resets to Step 0)
    */
   openCreateWalletModal() {
     try {
       this.closeAuthModal();
       this.closeWalletModal();
-      this.regenerateNewVaultMnemonic();
+      
+      const intro = document.getElementById('vaultStepIntro');
+      const disp = document.getElementById('vaultStepDisplay');
+      const ver = document.getElementById('vaultStepVerify');
+      if (intro) intro.style.display = 'block';
+      if (disp) disp.style.display = 'none';
+      if (ver) ver.style.display = 'none';
+
       const modal = document.getElementById('createVaultModal');
       if (modal) {
         modal.style.display = 'flex';
@@ -779,6 +786,19 @@ class CessionWalletEngine {
       const modal = document.getElementById('createVaultModal');
       if (modal) modal.style.display = 'flex';
     }
+  }
+
+  /**
+   * Generate 12-word seed phrase when user clicks "Generate My 12-Word Secret Phrase" button
+   */
+  generateNewVault() {
+    this.regenerateNewVaultMnemonic();
+    const intro = document.getElementById('vaultStepIntro');
+    const disp = document.getElementById('vaultStepDisplay');
+    const ver = document.getElementById('vaultStepVerify');
+    if (intro) intro.style.display = 'none';
+    if (disp) disp.style.display = 'block';
+    if (ver) ver.style.display = 'none';
   }
 
   /**
@@ -948,7 +968,10 @@ class CessionWalletEngine {
     if (modal) modal.style.display = 'none';
 
     this.renderState();
-    if (window.showToast) window.showToast('🎉 Sovereign Vault Verified & Unlocked! 100% Non-Custodial Multi-Chain Wallet active.', 'success');
+    if (window.launchpadManager && typeof window.launchpadManager.switchPage === 'function') {
+      window.launchpadManager.switchPage('profile');
+    }
+    if (window.showToast) window.showToast('🎉 Sovereign Vault Verified & Unlocked! Navigated to your Portfolio Dashboard.', 'success');
   }
 
   /**
