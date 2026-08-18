@@ -5,7 +5,7 @@
     line.href = href;
     document.head.appendChild(line);
   });
-  ['js/cession-user-lock.js', 'js/cession-perps-gate.js', 'js/cession-header-perps.js'].forEach(function (src) {
+  ['js/cession-user-lock.js', 'js/cession-perps-gate.js', 'js/cession-header-perps.js', 'js/cession-fees.js'].forEach(function (src) {
     var s = document.createElement('script');
     s.src = src;
     document.head.appendChild(s);
@@ -132,7 +132,10 @@
     const oldTrade = ui.openTrade;
     ui.openTrade = function (side) {
       if (oldTrade) oldTrade(side);
-      if (fee) fee.style.display = side === 'buy' ? 'block' : 'none';
+      if (fee) {
+        fee.style.display = side === 'buy' ? 'block' : 'none';
+        fee.textContent = 'Trade 1.00%. Creator 0.50%.';
+      }
     };
     paintForYou();
   });
