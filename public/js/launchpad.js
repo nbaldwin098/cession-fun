@@ -269,9 +269,9 @@ class CessionLaunchpadManager {
       const emptyHtml = `
         <div style="grid-column: 1 / -1; padding: 48px 24px; text-align: center; background: var(--bg-card); border: 1px dashed var(--border-card); border-radius: var(--radius-md);">
           <div style="font-size: 32px; margin-bottom: 12px;">🪙</div>
-          <h3 style="font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 8px;">No Tokens in Selected Lane</h3>
+          <h3 style="font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 8px;">No live coins yet.</h3>
           <p style="font-size: 13px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 20px auto;">
-            Only active coins matching Cession Pulse criteria appear here.
+            Only active on-chain coins appear here.
           </p>
           <button class="btn-signin-mint" style="padding: 10px 24px; font-weight: 700;" onclick="window.launchpadManager.openDeployModal()">
             + Launch Coin (0.05 SOL)

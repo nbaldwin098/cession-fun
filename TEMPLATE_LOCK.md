@@ -1,73 +1,42 @@
-# 🔒 IMMUTABLE TEMPLATE LOCK MANIFEST — PUMP.FUN 2026 REPLICA
+# 🔓 CESSION.FUN MOBILE-FIRST LAYOUT SPECIFICATION
 
-**Status:** `LOCKED & FROZEN`  
-**Lock Date:** August 17, 2026  
-**Git Tag:** `v1.0.0-pumpfun-locked-template`  
-**Backup Directory:** `templates/pump_fun_2026_locked/`
-
----
-
-## 1. Locked Layout & Component Tree
-This layout is the frozen standard for all frontend views:
-
-1. **Top Notice Banner**:
-   - `Trade faster. Pump is better on mobile. ›` with `✕` dismiss button.
-2. **Left Vertical Sidebar Rail (`.sidebar-rail`)**:
-   - Fixed 58px width dark rail (`#090c13`).
-   - Angled mint pill SVG logo at top.
-   - 9 vertical icon buttons: `Home`, `Explore` (active), `Profile`, `Chat`, `Leaderboard`, `Livestreams`, `Support`, `Swap`, `Tokens`.
-   - Bottom pinned `[ + ]` mint green create coin button.
-3. **Top Navbar (`.top-navbar`)**:
-   - `‹` and `›` navigation chevrons.
-   - Search bar (`🔍 Search for coins and users...`) with `⌘ K` keyboard badge & trash button.
-   - `+ Create` button.
-   - `Sign in` mint button / connected wallet pill (`balance` + `address`).
-4. **"Trending now" Carousel (`.trending-section`)**:
-   - Section header with `‹` and `›` carousel navigation controls.
-   - 4-column responsive grid with market cap badges, title, ticker, and excerpt.
-5. **"Explore coins" Section (`.explore-section`)**:
-   - Category filter pills: `✨ Movers`, `🔥 Mayhem`, `🌱 New`, `💖 Charities`, `📹 Live`, `🔥 Market cap`, `🤖 Agents`, `⏳ Oldest`, `⚡ Last trade`.
-   - Right controls: `⚙ Filter`, `⊞ Grid` & `☷ Table` switcher, `⚙` Settings gear.
-6. **Main Coin Cards Grid (`.explore-coins-grid`)**:
-   - Square image box with embedded green SVG sparkline graph overlay.
-   - Title, ticker, market cap, creator badge, and 2-line excerpt description.
-7. **Table View (`.explore-table-container`)**:
-   - Full tabular view when `☷ Table` is selected.
-8. **"We value your privacy" Cookie Banner (`.privacy-cookie-banner`)**:
-   - Bottom-right floating card with `Reject all`, `Customize`, and `Accept all` buttons.
-9. **Token Detail View Modal (`#tokenDetailModal`)**:
-   - TradingView candlestick chart with timeframe selector.
-   - Bonding curve progress bar ($69,420 graduation target).
-   - `thread` (with meme upload), `trades`, `holders` tabs.
-   - Buy/Sell trade execution card with slippage selector.
+**Status:** `UNLOCKED & UPDATED — CESSION 2026 MOBILE SPEC`  
+**Updated Date:** August 18, 2026  
+**Active Architecture:** Cession 2026 Mobile-First Single-Page Application (5-Slot Bottom Bar)
 
 ---
 
-## 2. Frozen Color & Token Palette
-```css
-:root {
-  --bg-app: #0c0f17;
-  --bg-sidebar: #090c13;
-  --bg-card: #131824;
-  --bg-card-hover: #1a2232;
-  --bg-input: #121824;
-  --bg-pill: #1a2233;
-  --bg-pill-hover: #222d42;
-  --pump-mint: #86efac;
-  --pump-mint-hover: #4ade80;
-  --pump-mint-dark: #14532d;
-  --accent-red: #f87171;
-  --font-sans: 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-}
-```
+## 1. Active Cession Mobile-First Layout Spec
+
+The application uses a 100% dark void theme (`#050711`), steel-violet active accents (`#5B6CFF`), top clean header, and a fixed 5-slot bottom navigation bar stuck to the bottom of the screen above all content:
+
+1. **Top Header Bar**:
+   - Brand title: `CESSION`
+   - Search bar: `🔍 Search coins` (active on Pulse view)
+   - `Connect Wallet` button / connected pill
+
+2. **Fixed 5-Slot Bottom Navigation Bar (`#bottomNav`)**:
+   - Always visible, fixed to the bottom of the viewport (`position: fixed; bottom: 0; z-index: 9999;`).
+   - High enough z-index and main content padding (`padding-bottom: 96px`) so no content is covered.
+   - **Slot 1: For You (`🔥`)** — Main shop feed (empty state shows "No live coins yet.", zero mock tickers).
+   - **Slot 2: Pulse (`📈`)** — Coin search, ranking, and category lanes.
+   - **Slot 3: Wallet (`👛`)** — Raised circle in center (`#5B6CFF`). Logged out: full-screen connect card ("Connect Phantom" & "Connect MetaMask", short line "We do not hold keys. All transactions are signed directly by your wallet."). Logged in: shows connected wallet icon (Phantom/MetaMask) and truncated address. Center button shows the same connected wallet icon.
+   - **Slot 4: Create (`➕`)** — Two panels: Launch coin (0.05 SOL) & Stake (official Cession coins and SOL only, lock status "Not live yet").
+   - **Slot 5: You (`👤`)** — Profile, settings, monthly statements, holdings.
+
+3. **Footer**:
+   - Single clean dark protocol line at bottom of page flow (`#050711` background):
+     `CESSION • Solana Fair Launch Bonding Curve Protocol • Create Fee: 0.05 SOL • We do not hold keys. Not live until the program is deployed.`
+   - NO white blocks, NO Base/BaseScan claims, NO fake 48.60 SOL treasury theater.
+
+4. **Removed Chrome**:
+   - Cookie privacy popup card completely deleted.
+   - Old white footer block completely deleted.
+   - Left sidebar rail deleted.
+   - Back / Forward chevrons deleted.
+   - "Protocol is live" banner deleted.
 
 ---
 
-## 3. Restoration Runbook
-If any accidental modifications occur, run:
-```powershell
-Copy-Item templates/pump_fun_2026_locked/index.html public/index.html -Force
-Copy-Item templates/pump_fun_2026_locked/style.css public/css/style.css -Force
-Copy-Item templates/pump_fun_2026_locked/*.js public/js/ -Force
-```
+## 2. Deprecation Notice
+The previous `templates/pump_fun_2026_locked/` template is **DEPRECATED & UNLOCKED**. Do NOT copy or restore files from `templates/pump_fun_2026_locked/` over `public/`.
