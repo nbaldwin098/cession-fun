@@ -20,7 +20,7 @@ router.get('/banner', (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const message = String(req.body.message || '').slice(0, 500);
+    const message = String(req.body.message || '').slice(0, 2000);
     const address = req.body.address || null;
     if (!message) return res.status(400).json({ success: false, error: 'Message required' });
     const ctx = ask.siteContext(address);
@@ -32,29 +32,24 @@ router.post('/', async (req, res) => {
 });
 
 router.get('/bots', (req, res) => {
-  const ctx = ask.siteContext(req.query.address);
-  res.json({ success: true, bots: ctx.bots });
+  res.json({ success: true, bots: ask.siteContext(req.query.address).bots });
 });
 
 router.post('/bots', (req, res) => {
-  const bot = ask.saveBot(req.body.address, {
-    symbol: req.body.symbol,
-    buySol: req.body.buySol,
-    slippage: req.body.slippage,
-    type: req.body.type || 'dca',
-    interval: req.body.interval || '1h'
-  });
+  const bot = ask.saveBot(req.body.address, req.body);
   res.json({ success: true, bot, notice: 'Rule saved. It will not place trades until the program is live.' });
 });
 
 router.get('/chat', (req, res) => {
-  const store = readChat();
-  res.json({ success: true, messages: (store.messages || []).slice(-100) });
+  const after = Number(req.query.after || 0);
+  const all = readChat().messages || [];
+  res.json({ success: true, messages: all.filter((m) => !after || Date.parse(m.at) > after).slice(-100) });
 });
 
 router.post('/chat', (req, res) => {
-  const text = String(req.body.text || '').trim().slice(0, 280);
-  if (!text) return res.status(400).json({ success: false, error: 'Message required' });
+  const text = String(req.body.text || '').trim().slice(0, 500);
+  const media = String(req.body.media || '').trim().slice(0, 500);
+  if (!text && !media) return res.status(400).json({ success: false, error: 'Message required' });
   const store = readChat();
   const msg = {
     id: 'm' + Date.now(),
@@ -62,9 +57,10 @@ router.post('/chat', (req, res) => {
     username: String(req.body.username || 'anon').slice(0, 24),
     pnl: req.body.pnl || '0',
     text,
+    media: media || null,
     at: new Date().toISOString()
   };
-  store.messages = (store.messages || []).concat(msg).slice(-200);
+  store.messages = (store.messages || []).concat(msg).slice(-500);
   writeChat(store);
   res.json({ success: true, message: msg });
 });
@@ -75,7 +71,7 @@ router.get('/rewards/:address', (req, res) => {
     address: req.params.address,
     status: 'Not live yet',
     accruedSol: 0,
-    rule: 'Holder share is 0.25 percent of trade fees, paid after real protocol volume. No fake SOL.'
+    rule: 'Holder share is 0.25 percent of trade fees, paid after real protocol volume.'
   });
 });
 

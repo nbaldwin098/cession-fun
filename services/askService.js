@@ -26,7 +26,12 @@ function siteContext(address) {
   if (address) {
     try { statement = require('./bondingCurve').getMonthlyStatement(address); } catch { statement = null; }
   }
-  return { feed, bots, statement, address: address || null };
+  return {
+    feed: feed.map((c) => ({ symbol: c.symbol, name: c.name, change24h: c.change24h, volume24hUsd: c.volume24hUsd, priceUsd: c.priceUsd, mint: c.mintAddress || c.mint })),
+    bots,
+    statement,
+    address: address || null
+  };
 }
 function localAnswer(message, ctx) {
   const q = String(message || '').toLowerCase();
@@ -36,8 +41,9 @@ function localAnswer(message, ctx) {
     const n = (ctx.statement && (ctx.statement.count || (ctx.statement.transactions || []).length)) || 0;
     return n ? ('This wallet has ' + n + ' indexed Cession trades.') : 'No statements to display.';
   }
-  if (!ctx.feed.length) return 'No live coins yet. Create is 0.05 SOL.';
-  return 'There are ' + ctx.feed.length + ' live coins.';
+  if (!ctx.feed.length && /coin|cession|token|chart/.test(q)) return 'No live coins yet. Create is 0.05 SOL.';
+  if (ctx.feed.length && /coin|best|worst|trending/.test(q)) return 'Live coins: ' + ctx.feed.map((c) => c.symbol).join(', ') + '.';
+  return 'I can help with Cession and everyday questions. Ask anything.';
 }
 async function modelAnswer(message, ctx) {
   const key = process.env.XAI_API_KEY || process.env.GROK_API_KEY || process.env.OPENAI_API_KEY;
@@ -50,10 +56,11 @@ async function modelAnswer(message, ctx) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
       body: JSON.stringify({
-        model, temperature: 0.2,
+        model,
+        temperature: 0.5,
         messages: [
-          { role: 'system', content: 'You are Cession Ask. Use only provided site data. No fake balances. Not investment advice.' },
-          { role: 'user', content: JSON.stringify({ question: message, site: ctx }) }
+          { role: 'system', content: 'You are Cession Ask. Answer everyday questions normally and helpfully. When the topic is Cession, coins, wallets, or P/L, use only the provided live site data. Never invent balances, fills, or coins. Not investment advice. Be concise.' },
+          { role: 'user', content: 'Question: ' + message + '\n\nLive Cession data: ' + JSON.stringify(ctx) }
         ]
       })
     });
