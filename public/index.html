@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cession | Sovereign Fair Launch Protocol & Bonding Curves</title>
+  <title>For You | Cession</title>
   
   <!-- Meta & SEO Tags -->
-  <meta name="description" content="Cession prevents rugs by making sure that all created tokens are safe. Each coin on Cession is a 100% fair-launch with no presale and continuous mathematical bonding curves.">
-  <meta property="og:title" content="Cession | Sovereign Fair Launch Protocol">
-  <meta property="og:description" content="Trade faster. Fair bonding curves and non-custodial decentralized trading on Solana and Base.">
+  <meta name="description" content="For You — Cession Sovereign Fair Launch Protocol & Pulse Discovery Engine.">
+  <meta property="og:title" content="For You | Cession Sovereign Fair Launch">
+  <meta property="og:description" content="Trade faster. Fair bonding curves and non-custodial decentralized trading on Solana.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://cession.fun">
   <meta property="og:image" content="images/cession-logo.png">
@@ -43,29 +43,34 @@
 
       <!-- Text-Only Navigation Stack -->
       <div class="rail-icons-stack">
-        <!-- 1. Home -->
-        <button class="rail-icon-btn active" id="railNavHome" title="Home">
-          HOME
+        <!-- 1. For You -->
+        <button class="rail-icon-btn active" id="railNavHome" title="For You Page">
+          FOR YOU
         </button>
 
-        <!-- 2. Explore Coins -->
-        <button class="rail-icon-btn" id="railNavExplore" title="Explore Coins">
-          EXPLORE
+        <!-- 2. Shop / Explore Coins -->
+        <button class="rail-icon-btn" id="railNavExplore" title="Open Shop">
+          SHOP
         </button>
 
-        <!-- 3. Profile -->
-        <button class="rail-icon-btn" id="railNavProfile" title="Profile and Portfolio">
-          PROFILE
+        <!-- 3. You / Profile -->
+        <button class="rail-icon-btn" id="railNavProfile" title="Your Portfolio & Unclaimed SOL">
+          YOU
         </button>
 
-        <!-- 5. Leaderboard -->
-        <button class="rail-icon-btn" id="railNavLeaderboard" title="Leaderboard">
+        <!-- 4. Leaderboard -->
+        <button class="rail-icon-btn" id="railNavLeaderboard" title="Ranks">
           RANKS
         </button>
 
-        <!-- 6. Bundles -->
+        <!-- 5. Bundles -->
         <button class="rail-icon-btn" id="railNavBundles" title="Token Bundles">
           BUNDLES
+        </button>
+
+        <!-- 6. Rewards -->
+        <button class="rail-icon-btn" id="railNavRewards" title="Daily Rewards">
+          REWARDS
         </button>
       </div>
 
@@ -134,83 +139,58 @@
       </header>
 
       <!-- =========================================================
-           VIEW: HOME (HERO & PROTOCOL ARCHITECTURE)
+           VIEW: FOR YOU (HOME PAGE — CESSION PULSE RANKED FEED)
       ========================================================= -->
       <main class="page-view active" id="viewHome">
         <section class="explore-section">
-          <!-- Hero Banner -->
-          <div style="background: linear-gradient(135deg, #ffffff, #eff6ff); border: 1px solid #bfdbfe; box-shadow: var(--shadow-sm); border: 1px solid var(--border-card); border-radius: var(--radius-lg); padding: 48px 36px; text-align: center; margin-bottom: 28px; position: relative; overflow: hidden;">
-            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(30, 80, 255, 0.08); border: 1px solid rgba(30, 80, 255, 0.25); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--pump-mint); margin-bottom: 18px;">
-              <span>100% Fair Launch Bonding Curve</span>
-              <span>•</span>
-              <span>Zero Pre-mine</span>
-            </div>
-            
-            <h1 style="font-size: 38px; font-weight: 900; color: var(--text-primary); line-height: 1.2; max-width: 760px; margin: 0 auto 16px auto; letter-spacing: -0.02em;">
-              The Sovereign Fair Launch Protocol & Liquidity Network
-            </h1>
-            
-            <p style="font-size: 15px; color: var(--text-secondary); max-width: 620px; margin: 0 auto 28px auto; line-height: 1.6;">
-              Instant continuous bonding curves with zero insider allocation. Every coin starts fair with transparent on-chain reserves and automated DEX migration when filled.
-            </p>
-
-            <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
-              <button class="btn-signin-mint" style="padding: 12px 28px; font-size: 14px; font-weight: 800;" onclick="window.launchpadManager.openDeployModal()">
-                Launch Coin (0.1 SOL)
-              </button>
-              <button class="cat-pill-btn" style="padding: 12px 24px; font-size: 14px; font-weight: 700;" onclick="window.launchpadManager.switchPage('explore')">
-                Explore Coins & Bundles
-              </button>
-            </div>
-          </div>
-
-          <!-- 3-Step "How It Works" Section -->
-          <div style="margin-bottom: 32px;">
-            <div class="section-header-row" style="margin-bottom: 16px;">
-              <h2 class="section-title">How Cession Works</h2>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
-              <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px;">
-                <div style="font-weight: 800; font-size: 13px; color: var(--pump-mint); text-transform: uppercase; margin-bottom: 6px;">STEP 1</div>
-                <h3 style="font-size: 17px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">1. Instant Fair Mint</h3>
-                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-                  Pay 0.1 SOL mint fee to deploy your token. 100% of the token supply is immediately deposited into the public bonding curve. No dev allocations, no presales, no VC dumps.
-                </p>
-              </div>
-
-              <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px;">
-                <div style="font-weight: 800; font-size: 13px; color: var(--pump-mint); text-transform: uppercase; margin-bottom: 6px;">STEP 2</div>
-                <h3 style="font-size: 17px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">2. Bonding Curve Trading</h3>
-                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-                  Buy tokens directly on the mathematical bonding curve. Continuous pricing with mathematical price discovery on every purchase.
-                </p>
-              </div>
-
-              <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px;">
-                <div style="font-weight: 800; font-size: 13px; color: var(--pump-mint); text-transform: uppercase; margin-bottom: 6px;">STEP 3</div>
-                <h3 style="font-size: 17px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">3. Automated DEX Graduation</h3>
-                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-                  When a coin hits 100% curve completion ($69,420 market cap), accumulated SOL reserves are migrated to Raydium / Uniswap DEX and LP tokens are permanently burned.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Protocol Trust & Verified Multi-Sig Metrics -->
-          <div style="background: var(--bg-card); border: 1px solid rgba(134, 239, 172, 0.2); border-radius: var(--radius-md); padding: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+          <!-- Page Title & Header -->
+          <div class="section-header-row" style="margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
             <div>
-              <div style="font-weight: 800; color: var(--text-primary); font-size: 16px;">
-                Solana Squads Multi-Sig Treasury
-              </div>
-              <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; font-family: var(--font-mono);">
-                8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH
+              <h1 class="section-title" style="font-size: 28px; font-weight: 900;">For You</h1>
+              <div style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">
+                Cession Pulse ranked shop feed — time-decayed volume, unique traders, & holder persistence.
               </div>
             </div>
-            <div style="display: flex; gap: 10px;">
-              <button class="cat-pill-btn" onclick="window.launchpadManager.switchPage('transparency')">View Proof of Reserves</button>
-              <a href="https://solscan.io/account/8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH" target="_blank" rel="noopener noreferrer" class="cat-pill-btn" style="text-decoration: none;">Solscan</a>
+
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="btn-signin-mint" style="padding: 10px 20px; font-size: 13px; font-weight: 800;" onclick="window.launchpadManager.openDeployModal()">
+                + Launch Coin (0.05 SOL)
+              </button>
             </div>
+          </div>
+
+          <!-- Today's 5 Dynamic Top Slice Bundle Banner -->
+          <div id="todaysFiveBanner" style="background: linear-gradient(135deg, rgba(30, 80, 255, 0.08), rgba(134, 239, 172, 0.08)); border: 1px solid rgba(30, 80, 255, 0.25); border-radius: var(--radius-md); padding: 18px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-weight: 900; font-size: 16px; color: var(--text-primary);">🔥 Today's 5</span>
+                <span style="font-size: 11px; font-weight: 800; color: var(--pump-mint); background: rgba(134, 239, 172, 0.15); padding: 2px 8px; border-radius: 10px;">TOP PULSE SLICE</span>
+              </div>
+              <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;" id="todaysFiveDesc">
+                Splits your SOL evenly across the top 5 live Cession coins. Automatically refreshed.
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="btn-signin-mint" style="padding: 8px 18px; font-size: 12px; font-weight: 800;" onclick="window.launchpadManager.buyTodaysFive()">
+                1-Click Buy Today's 5
+              </button>
+            </div>
+          </div>
+
+          <!-- Lane Filter Pills (Rising, New, Active, Selling off) -->
+          <div class="explore-controls-bar" style="margin-bottom: 20px;">
+            <div class="category-pills-row" id="pulseLanePillsRow">
+              <button class="cat-pill-btn active" data-pulse-lane="all">All</button>
+              <button class="cat-pill-btn" data-pulse-lane="rising">Rising</button>
+              <button class="cat-pill-btn" data-pulse-lane="new">New</button>
+              <button class="cat-pill-btn" data-pulse-lane="active">Active</button>
+              <button class="cat-pill-btn" data-pulse-lane="selling">Selling off</button>
+            </div>
+          </div>
+
+          <!-- Main For You Pulse Grid -->
+          <div class="explore-coins-grid" id="forYouCoinsGrid">
+            <!-- Populated dynamically by launchpad.js -->
           </div>
         </section>
       </main>
@@ -417,13 +397,14 @@
       </main>
 
       <!-- =========================================================
-           VIEW: PROFILE & PORTFOLIO
+           VIEW: YOU (PROFILE, HOLDINGS, CLAIMS, REFERRALS & CSV EXPORT)
       ========================================================= -->
       <main class="page-view" id="viewProfile">
         <section class="explore-section">
+          <!-- User Overview Card -->
           <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
             <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--bg-input); border: 2px solid var(--border-card); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; color: var(--pump-mint);">
-              USER
+              YOU
             </div>
             <div style="flex: 1;">
               <div style="font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
@@ -435,20 +416,42 @@
               </div>
               <div style="display: flex; gap: 24px; margin-top: 14px; font-family: var(--font-mono); font-size: 13px; flex-wrap: wrap;">
                 <div>SOL Balance: <strong id="profileSolBalance" style="color: var(--pump-mint); font-size: 16px;">0.00 SOL</strong></div>
-                <div>$CESS Balance: <strong id="profileCessBalance" style="color: var(--pump-mint); font-size: 16px;">0 $CESS</strong></div>
                 <div>Portfolio Value: <strong id="profilePortfolioValue" style="color: var(--text-primary); font-size: 16px;">$0.00</strong></div>
               </div>
 
-              <!-- Profile Sovereign Wallet Action Row -->
-              <div style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; border-top: 1px solid var(--border-card); padding-top: 14px;">
-                <button class="cat-pill-btn" style="color: var(--text-primary); background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); font-weight: 700;" onclick="window.walletEngine.openCreateWalletModal()">Create Sovereign Vault</button>
-                <button class="btn-signin-mint" style="padding: 6px 14px; font-size: 12px; font-weight: 700;" onclick="window.walletEngine.openDepositModal()">Deposit Crypto</button>
-                <button class="cat-pill-btn" style="color: var(--pump-mint); border: 1px solid rgba(134, 239, 172, 0.4);" onclick="window.walletEngine.depositFunds('SOL', 1.0)">Faucet (+1.0 SOL)</button>
-                <button class="cat-pill-btn" style="color: var(--text-secondary);" onclick="window.walletEngine.exportSecretPhrase()">Export Backup Phrase</button>
+              <!-- Unclaimed Protocol SOL Fees (strictly from fee_vault) -->
+              <div style="background: rgba(134, 239, 172, 0.05); border: 1px solid rgba(134, 239, 172, 0.2); border-radius: var(--radius-sm); padding: 14px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                  <div style="font-weight: 800; font-size: 13px; color: var(--pump-mint);">Unclaimed Protocol Fees (from Fee Vault)</div>
+                  <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+                    Creator: <strong id="unclaimedCreatorSol" style="color: #fff;">0.00 SOL</strong> • Holder Rewards: <strong id="unclaimedHolderSol" style="color: #fff;">0.00 SOL</strong>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn-signin-mint" style="padding: 6px 14px; font-size: 12px;" onclick="window.launchpadManager.claimCreatorFees()">Claim Creator Fees</button>
+                  <button class="cat-pill-btn" style="padding: 6px 14px; font-size: 12px;" onclick="window.launchpadManager.claimHolderFees()">Claim Holder Fees</button>
+                </div>
+              </div>
+
+              <!-- Referral Link Card -->
+              <div style="background: var(--bg-input); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 14px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                  <div style="font-weight: 800; font-size: 13px; color: var(--text-primary);">Your Referral Link (/r/CODE)</div>
+                  <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;" id="refLinkDisplay">Connect wallet to generate referral code</div>
+                </div>
+                <button class="cat-pill-btn" style="padding: 6px 14px; font-size: 12px;" onclick="window.launchpadManager.copyReferralLink()">Copy Referral Link</button>
+              </div>
+
+              <!-- CSV Export Button -->
+              <div style="margin-top: 14px; display: flex; justify-content: flex-end;">
+                <button class="cat-pill-btn" style="padding: 6px 16px; font-size: 12px; font-weight: 700; color: var(--text-primary);" onclick="window.launchpadManager.exportTradesCsv()">
+                  📥 Download Trades CSV
+                </button>
               </div>
             </div>
           </div>
 
+          <!-- Section Tabs (Coins Held, Coins Created, Trade History) -->
           <div class="category-pills-row" style="margin-bottom: 16px;">
             <button class="cat-pill-btn active" id="tabProfileHeld">Coins Held</button>
             <button class="cat-pill-btn" id="tabProfileCreated">Coins Created</button>
@@ -470,6 +473,45 @@
                 <!-- Rendered dynamically -->
               </tbody>
             </table>
+          </div>
+        </section>
+      </main>
+
+      <!-- =========================================================
+           VIEW: REWARDS PAGE
+      ========================================================= -->
+      <main class="page-view" id="viewRewards">
+        <section class="explore-section">
+          <div class="section-header-row" style="margin-bottom: 20px;">
+            <div>
+              <h1 class="section-title" style="font-size: 26px; font-weight: 900;">Rewards</h1>
+              <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                Daily trade activity distributions paid strictly from protocol fee income.
+              </div>
+            </div>
+          </div>
+
+          <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 24px; max-width: 680px;">
+            <div style="display: flex; items-center; gap: 8px; margin-bottom: 12px;">
+              <span style="font-weight: 800; font-size: 16px; color: var(--pump-mint);">Daily SOL Reward Program</span>
+            </div>
+            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+              Active traders who exceed the daily volume threshold earn a 0.001 SOL reward claim per wallet per day, funded directly by collected protocol swap fees.
+            </p>
+
+            <div style="background: rgba(30, 80, 255, 0.06); border: 1px dashed rgba(30, 80, 255, 0.3); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px;">
+              <div style="font-weight: 800; font-size: 12px; color: var(--pump-mint); text-transform: uppercase;">Protocol Fee Status</div>
+              <div style="font-size: 14px; font-weight: 700; color: #fff; margin-top: 4px;">
+                Unlocks after first real volume — paid when protocol fees allow.
+              </div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                No fake JSON SOL. Reward distributions begin as accumulated protocol swap fees reach funding thresholds.
+              </div>
+            </div>
+
+            <button class="btn-signin-mint" style="padding: 10px 24px; font-weight: 700; width: 100%; opacity: 0.8;" onclick="window.launchpadManager.toast('Rewards unlock as protocol swap fee volume accumulates', 'info')">
+              Check Reward Eligibility
+            </button>
           </div>
         </section>
       </main>
@@ -834,7 +876,7 @@
         </div>
 
         <div style="background-color: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center;">
-          <span>Mint Fee: <strong style="color: var(--text-primary);">0.1 SOL</strong></span>
+          <span>Mint Fee: <strong style="color: var(--text-primary);">0.05 SOL</strong></span>
           <span style="color: var(--pump-mint); font-weight: 700;">Fair Launch AMM</span>
         </div>
 
@@ -844,7 +886,7 @@
         </div>
 
         <button type="submit" class="btn-signin-mint" style="width: 100%; margin-top: 10px; padding: 12px;">
-          Launch on Bonding Curve (0.1 SOL)
+          Launch on Bonding Curve (0.05 SOL)
         </button>
       </form>
     </div>

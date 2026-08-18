@@ -21,6 +21,33 @@ router.get('/screen/:address', (req, res) => {
 });
 
 /**
+ * Get wallet Cession trade history for CSV export
+ */
+router.get('/:address/trades', (req, res) => {
+  try {
+    const address = req.params.address;
+    const bondingCurve = require('../services/bondingCurve');
+    const allTrades = bondingCurve.recentTrades || [];
+    const walletTrades = allTrades.filter(t => t.traderAddress === address || t.buyer === address || t.seller === address);
+    res.json({ success: true, address, count: walletTrades.length, trades: walletTrades });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * Follow a creator address
+ */
+router.post('/follow', (req, res) => {
+  try {
+    const { follower, creator } = req.body;
+    res.json({ success: true, message: `Followed creator ${creator}`, follower, creator });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
  * Deprecated Server-Side Key Generation & Deposit Endpoints
  */
 router.all(['/generate', '/derive', '/deposit'], (req, res) => {

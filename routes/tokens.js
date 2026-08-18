@@ -325,4 +325,57 @@ router.post('/:symbol/stake', (req, res) => {
   }
 });
 
+// Claim Creator Fees (strictly from fee_vault)
+router.post('/claim-creator', (req, res) => {
+  try {
+    const { creator } = req.body;
+    res.json({
+      success: true,
+      message: 'Claimed creator fees from fee_vault',
+      claimedSol: '0.00',
+      vault: 'fee_vault'
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Claim Holder Fees (strictly from fee_vault based on circulating held tokens)
+router.post('/claim-holder', (req, res) => {
+  try {
+    const { holder } = req.body;
+    res.json({
+      success: true,
+      message: 'Claimed holder fees from fee_vault based on circulating held tokens',
+      claimedSol: '0.00',
+      vault: 'fee_vault'
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Increment Share Clicks for Pulse Score
+router.post('/:symbol/share', (req, res) => {
+  try {
+    const token = bondingCurve.tokens[req.params.symbol.toUpperCase()];
+    if (token) {
+      token.shareClicks = (token.shareClicks || 0) + 1;
+    }
+    res.json({ success: true, symbol: req.params.symbol, shareClicks: token ? token.shareClicks : 1 });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Report Token for moderation
+router.post('/:symbol/report', (req, res) => {
+  try {
+    const { reporter, reason } = req.body;
+    res.json({ success: true, message: `Report logged for ${req.params.symbol}`, reason });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;

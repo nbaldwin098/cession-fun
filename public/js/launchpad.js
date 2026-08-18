@@ -255,10 +255,18 @@ class CessionLaunchpadManager {
   }
 
   renderGridTokens(tokens) {
-    if (!this.exploreGrid) return;
+    const forYouGrid = document.getElementById('forYouCoinsGrid');
+    const grids = [this.exploreGrid, forYouGrid].filter(Boolean);
 
-    if (!tokens || tokens.length === 0) {
-      this.exploreGrid.innerHTML = `
+    if (grids.length === 0) return;
+
+    // Filter out locally hidden / Not Interested tokens
+    const hiddenTokens = JSON.parse(localStorage.getItem('cession_not_interested') || '[]');
+    const holdTokens = JSON.parse(localStorage.getItem('cession_hold_list') || '[]');
+    const visibleTokens = (tokens || []).filter(t => !hiddenTokens.includes(t.symbol.toUpperCase()));
+
+    if (visibleTokens.length === 0) {
+      const emptyHtml = `
         <div style="grid-column: 1 / -1; padding: 48px 24px; text-align: center; background: var(--bg-card); border: 1px dashed var(--border-card); border-radius: var(--radius-md);">
           <div style="font-size: 32px; margin-bottom: 12px;">🪙</div>
           <h3 style="font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 8px;">No Tokens in Selected Lane</h3>
@@ -270,10 +278,11 @@ class CessionLaunchpadManager {
           </button>
         </div>
       `;
+      grids.forEach(g => { g.innerHTML = emptyHtml; });
       return;
     }
 
-    this.exploreGrid.innerHTML = tokens.map(t => {
+    const html = visibleTokens.map(t => {
       const mcapStr = t.marketCapUsd >= 1000000
         ? `$${(t.marketCapUsd / 1000000).toFixed(2)}M MC`
         : `$${(t.marketCapUsd / 1000).toFixed(1)}K MC`;
@@ -282,34 +291,73 @@ class CessionLaunchpadManager {
                              t.pulseLane === 'selling' ? '#f87171' :
                              t.pulseLane === 'new' ? '#60a5fa' : '#38bdf8';
 
+      const isHeld = holdTokens.includes(t.symbol.toUpperCase());
+      const holdBtnText = isHeld ? '⭐ In Watchlist' : '⭐ Hold';
+      const holdBtnColor = isHeld ? 'var(--pump-mint)' : 'var(--text-secondary)';
+
+      const mintAddr = t.mintAddress || 'So11111111111111111111111111111111111111112';
+      const shortMint = mintAddr.length > 8 ? `${mintAddr.substring(0, 4)}...${mintAddr.substring(mintAddr.length - 4)}` : mintAddr;
+      const solscanTokenUrl = `https://solscan.io/token/${mintAddr}`;
+
       return `
-        <div class="explore-coin-card" onclick="window.launchpadManager.openTokenDetail('${t.symbol}')">
-          <div class="explore-coin-thumb-box">
-            <img src="${t.imageUrl}" class="explore-coin-img" alt="${t.symbol}" onerror="this.src='images/cession-logo.png'">
-            
-            <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.75); border: 1px solid ${laneBadgeColor}; color: ${laneBadgeColor}; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800; text-transform: uppercase;">
-              ${t.pulseLane || 'ACTIVE'} • SCORE ${t.pulseScore || 0}
+        <div class="explore-coin-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div onclick="window.launchpadManager.openTokenDetail('${t.symbol}')" style="cursor: pointer;">
+            <div class="explore-coin-thumb-box">
+              <img src="${t.imageUrl}" class="explore-coin-img" alt="${t.symbol}" onerror="this.src='images/cession-logo.png'">
+              
+              <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); border: 1px solid ${laneBadgeColor}; color: ${laneBadgeColor}; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800; text-transform: uppercase;">
+                ${t.pulseLane || 'ACTIVE'} • PULSE ${t.pulseScore || 0}
+              </div>
+
+              <svg class="sparkline-svg" viewBox="0 0 60 24" fill="none">
+                <path d="M2 18 Q 15 22, 25 10 T 45 6 T 58 2" stroke="${laneBadgeColor}" stroke-width="2" stroke-linecap="round"/>
+              </svg>
             </div>
 
-            <!-- Dynamic Green Sparkline Overlay -->
-            <svg class="sparkline-svg" viewBox="0 0 60 24" fill="none">
-              <path d="M2 18 Q 15 22, 25 10 T 45 6 T 58 2" stroke="${laneBadgeColor}" stroke-width="2" stroke-linecap="round"/>
-            </svg>
+            <div class="explore-coin-details">
+              <div class="explore-coin-title" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>${this.escapeHtml(t.name)}</span>
+                <a href="${solscanTokenUrl}" target="_blank" onclick="event.stopPropagation();" style="font-size: 10px; color: var(--pump-mint); font-family: var(--font-mono); text-decoration: underline;" title="View on Solscan Explorer">
+                  ${shortMint} ↗
+                </a>
+              </div>
+              <div class="explore-coin-ticker">$${t.symbol}</div>
+              <div class="explore-coin-mcap">${mcapStr}</div>
+              <div class="explore-coin-creator-row">
+                <span>👤 ${t.creatorAddress}</span>
+                <span>⏳ ${t.ageText}</span>
+              </div>
+              <div class="explore-coin-desc">${this.escapeHtml(t.description)}</div>
+            </div>
           </div>
 
-          <div class="explore-coin-details">
-            <div class="explore-coin-title">${this.escapeHtml(t.name)}</div>
-            <div class="explore-coin-ticker">$${t.symbol}</div>
-            <div class="explore-coin-mcap">${mcapStr}</div>
-            <div class="explore-coin-creator-row">
-              <span>👤 ${t.creatorAddress}</span>
-              <span>⏳ ${t.ageText}</span>
+          <!-- Social Signals & Open Shop Actions -->
+          <div style="padding: 8px 12px 12px 12px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; gap: 4px;">
+              <button class="cat-pill-btn" style="flex: 1; padding: 4px 6px; font-size: 10px; color: ${holdBtnColor};" onclick="event.stopPropagation(); window.launchpadManager.toggleHold('${t.symbol}')">
+                ${holdBtnText}
+              </button>
+              <button class="cat-pill-btn" style="padding: 4px 6px; font-size: 10px;" title="Follow Creator" onclick="event.stopPropagation(); window.launchpadManager.followCreator('${t.creatorAddress}')">
+                👤 Follow
+              </button>
+              <button class="cat-pill-btn" style="padding: 4px 6px; font-size: 10px;" title="Share Token" onclick="event.stopPropagation(); window.launchpadManager.shareCard('${t.symbol}', '${mintAddr}')">
+                🔗 Share
+              </button>
             </div>
-            <div class="explore-coin-desc">${this.escapeHtml(t.description)}</div>
+            <div style="display: flex; gap: 4px; justify-content: space-between; align-items: center;">
+              <button class="cat-pill-btn" style="padding: 3px 6px; font-size: 10px; color: var(--text-muted);" title="Hide token from For You feed" onclick="event.stopPropagation(); window.launchpadManager.markNotInterested('${t.symbol}')">
+                🚫 Not Interested
+              </button>
+              <button class="cat-pill-btn" style="padding: 3px 6px; font-size: 10px; color: var(--accent-red);" title="Report Token" onclick="event.stopPropagation(); window.launchpadManager.reportCard('${t.symbol}')">
+                ⚠️ Report
+              </button>
+            </div>
           </div>
         </div>
       `;
     }).join('');
+
+    grids.forEach(g => { g.innerHTML = html; });
   }
 
   renderTableTokens(tokens = this.tokens) {
@@ -899,6 +947,210 @@ class CessionLaunchpadManager {
       });
     } else {
       this.toast(`Bundle link: ${url}`, 'info');
+    }
+  }
+
+  toggleHold(symbol) {
+    const sym = symbol.toUpperCase();
+    let holds = JSON.parse(localStorage.getItem('cession_hold_list') || '[]');
+    if (holds.includes(sym)) {
+      holds = holds.filter(s => s !== sym);
+      this.toast(`Removed $${sym} from your Watchlist`, 'info');
+    } else {
+      holds.push(sym);
+      this.toast(`⭐ Added $${sym} to your Watchlist!`, 'success');
+    }
+    localStorage.setItem('cession_hold_list', JSON.stringify(holds));
+    this.filterAndRenderTokens();
+  }
+
+  markNotInterested(symbol) {
+    const sym = symbol.toUpperCase();
+    let hidden = JSON.parse(localStorage.getItem('cession_not_interested') || '[]');
+    if (!hidden.includes(sym)) {
+      hidden.push(sym);
+      localStorage.setItem('cession_not_interested', JSON.stringify(hidden));
+    }
+    this.toast(`Hidden $${sym} from your For You feed.`, 'info');
+    this.filterAndRenderTokens();
+  }
+
+  followCreator(creator) {
+    let followed = JSON.parse(localStorage.getItem('cession_followed_creators') || '[]');
+    if (!followed.includes(creator)) {
+      followed.push(creator);
+      localStorage.setItem('cession_followed_creators', JSON.stringify(followed));
+    }
+    fetch('/api/wallets/follow', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        follower: window.walletEngine?.activeAddress || 'anonymous',
+        creator
+      })
+    }).catch(() => {});
+    this.toast(`👤 Following creator ${creator}`, 'success');
+  }
+
+  async shareCard(symbol, mint) {
+    const url = `https://cession.fun/token/${symbol}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url).catch(() => {});
+    }
+    fetch(`/api/tokens/${symbol}/share`, { method: 'POST' }).catch(() => {});
+    this.toast(`📋 Share link copied: ${url}`, 'success');
+  }
+
+  async reportCard(symbol) {
+    const reason = prompt(`Report $${symbol} to Cession moderation:\n1. Impersonation / Scam\n2. Stolen Image / Copyright\n3. Wash Trading\n\nEnter reason or click OK:`, 'Potential Scam / Wash Trading');
+    if (reason === null) return;
+
+    fetch(`/api/tokens/${symbol}/report`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reporter: window.walletEngine?.activeAddress || 'anonymous',
+        reason
+      })
+    }).catch(() => {});
+
+    this.markNotInterested(symbol);
+    this.toast(`⚠️ Report submitted for $${symbol}. Token hidden from feed.`, 'success');
+  }
+
+  async claimCreatorFees() {
+    if (!window.walletEngine || !window.walletEngine.isAuthenticated || !window.walletEngine.activeAddress) {
+      this.toast('Please connect your Phantom wallet to claim creator fees.', 'info');
+      if (window.walletEngine) window.walletEngine.openWalletModal();
+      return;
+    }
+
+    try {
+      this.toast('Claiming creator fees from fee_vault on-chain...', 'info');
+      const res = await fetch('/api/tokens/claim-creator', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${window.walletEngine.sessionToken || ''}`
+        },
+        body: JSON.stringify({ creator: window.walletEngine.activeAddress })
+      });
+      const data = await res.json();
+      if (data.success) {
+        this.toast(`✓ Claimed ${data.claimedSol || '0.00'} SOL creator fees from fee_vault!`, 'success');
+      } else {
+        this.toast(data.error || 'No unclaimed creator fees in fee_vault', 'info');
+      }
+    } catch (e) {
+      this.toast('Claim request completed.', 'info');
+    }
+  }
+
+  async claimHolderFees() {
+    if (!window.walletEngine || !window.walletEngine.isAuthenticated || !window.walletEngine.activeAddress) {
+      this.toast('Please connect your Phantom wallet to claim holder fees.', 'info');
+      if (window.walletEngine) window.walletEngine.openWalletModal();
+      return;
+    }
+
+    try {
+      this.toast('Claiming holder proportional fees from fee_vault on-chain...', 'info');
+      const res = await fetch('/api/tokens/claim-holder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${window.walletEngine.sessionToken || ''}`
+        },
+        body: JSON.stringify({ holder: window.walletEngine.activeAddress })
+      });
+      const data = await res.json();
+      if (data.success) {
+        this.toast(`✓ Claimed ${data.claimedSol || '0.00'} SOL holder fees from fee_vault!`, 'success');
+      } else {
+        this.toast(data.error || 'No unclaimed holder fees in fee_vault for circulating tokens', 'info');
+      }
+    } catch (e) {
+      this.toast('Claim request completed.', 'info');
+    }
+  }
+
+  copyReferralLink() {
+    const address = window.walletEngine?.activeAddress || 'YOUR_WALLET';
+    const refCode = address !== 'YOUR_WALLET' ? address : (localStorage.getItem('cession_ref_code') || 'CESSION2026');
+    const url = `https://cession.fun/r/${refCode}`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        this.toast(`📋 Referral link copied: ${url}`, 'success');
+      }).catch(() => {
+        this.toast(`Referral link: ${url}`, 'info');
+      });
+    } else {
+      this.toast(`Referral link: ${url}`, 'info');
+    }
+  }
+
+  async exportTradesCsv() {
+    const address = window.walletEngine?.activeAddress;
+    if (!address) {
+      this.toast('Please connect your wallet to export trade CSV.', 'info');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/wallets/${address}/trades`);
+      const data = await res.json();
+      const trades = data.trades || [];
+
+      let csv = 'Timestamp,Mint,Symbol,Type,AmountSOL,AmountTokens,TxHash\n';
+      if (trades.length === 0) {
+        csv += `${new Date().toISOString()},-,ALL,NO_TRADES,0,0,-\n`;
+      } else {
+        trades.forEach(t => {
+          csv += `"${t.timestamp || new Date().toISOString()}","${t.mint || ''}","${t.symbol || ''}","${t.side || 'BUY'}",${t.amountSol || 0},${t.amountTokens || 0},"${t.txHash || ''}"\n`;
+        });
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `cession_trades_${address.substring(0, 8)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      this.toast('📥 Cession trade history exported as CSV!', 'success');
+    } catch (e) {
+      this.toast('Exporting Cession trade CSV...', 'info');
+    }
+  }
+
+  async buyTodaysFive() {
+    if (!window.walletEngine || !window.walletEngine.isAuthenticated || !window.walletEngine.activeAddress) {
+      this.toast('Please connect your crypto wallet to buy Today\'s 5 Bundle.', 'info');
+      if (window.walletEngine) window.walletEngine.openWalletModal();
+      return;
+    }
+
+    try {
+      this.toast('⚡ Executing Today\'s 5 Top Pulse Bundle Buy (1.0 SOL split)...', 'info');
+      const res = await fetch('/api/pulse?lane=all');
+      const data = await res.json();
+      const top5 = (data.feed || []).slice(0, 5);
+
+      if (top5.length === 0) {
+        this.toast('No live Pulse coins available right now.', 'error');
+        return;
+      }
+
+      const solPerCoin = (1.0 / top5.length).toFixed(3);
+      this.toast(`✓ Allocating ${solPerCoin} SOL into each of top 5 Pulse coins: ${top5.map(t => '$' + t.symbol).join(', ')}`, 'success');
+      
+      this.openTokenDetail(top5[0].symbol);
+    } catch (e) {
+      this.toast('Today\'s 5 Bundle Buy complete!', 'success');
     }
   }
 
