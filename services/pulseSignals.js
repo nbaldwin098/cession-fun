@@ -14,18 +14,10 @@ function coin(store, symbol) {
   const s = String(symbol || '').toUpperCase();
   if (!store.coins[s]) {
     store.coins[s] = {
-      impressions: 0,
-      views: 0,
-      skips: 0,
-      dwellMs: 0,
-      uniqueViewers: {},
-      uniqueTraders: {},
-      trades: 0,
-      holds: 0,
-      follows: 0,
-      shares: 0,
-      bounces: 0,
-      returns: 0
+      impressions: 0, views: 0, skips: 0, dwellMs: 0,
+      uniqueViewers: {}, uniqueTraders: {},
+      trades: 0, holds: 0, follows: 0, shares: 0, bounces: 0, returns: 0,
+      videoWatchMs: 0, videoCompletes: 0, videoReplays: 0, videoSkips: 0
     };
   }
   return store.coins[s];
@@ -39,22 +31,31 @@ function record(event) {
   const row = coin(store, event.symbol);
   const who = viewerKey(event);
   const type = String(event.type || '');
+  const ms = Number(event.ms || 0);
   if (type === 'impression') {
     row.impressions += 1;
-    if (Number(event.ms || 0) >= 1000) {
-      row.views += 1;
-      row.uniqueViewers[who] = (row.uniqueViewers[who] || 0) + 1;
-    } else {
-      row.skips += 1;
-    }
+    if (ms >= 1000) { row.views += 1; row.uniqueViewers[who] = (row.uniqueViewers[who] || 0) + 1; }
+    else row.skips += 1;
   } else if (type === 'skip' || type === 'scroll_past') {
     row.skips += 1;
+  } else if (type === 'video_skip') {
+    row.videoSkips += 1; row.skips += 1; row.impressions += 1;
+  } else if (type === 'video_watch') {
+    row.videoWatchMs += Math.min(600000, Math.max(0, ms));
+    row.dwellMs += Math.min(600000, Math.max(0, ms));
+    row.views += 1;
+    row.uniqueViewers[who] = (row.uniqueViewers[who] || 0) + 1;
+    row.impressions += 1;
+  } else if (type === 'video_complete') {
+    row.videoCompletes += 1;
+  } else if (type === 'video_replay') {
+    row.videoReplays += 1;
   } else if (type === 'open') {
     row.views += 1;
     row.uniqueViewers[who] = (row.uniqueViewers[who] || 0) + 1;
     if (row.uniqueViewers[who] > 1) row.returns += 1;
   } else if (type === 'dwell') {
-    row.dwellMs += Math.min(600000, Math.max(0, Number(event.ms || 0)));
+    row.dwellMs += Math.min(600000, Math.max(0, ms));
     row.uniqueViewers[who] = (row.uniqueViewers[who] || 0) + 1;
   } else if (type === 'bounce') {
     row.bounces += 1;
@@ -77,12 +78,10 @@ function summarize(row) {
   const uniqueTraders = Object.keys(row.uniqueTraders || {}).length;
   const views = row.views || 0;
   const skips = row.skips || 0;
-  const impressions = Math.max(1, (row.impressions || 0) + skips);
+  const impressions = Math.max(1, (row.impressions || 0) + (row.videoSkips || 0));
   const skipRate = skips / impressions;
-  const completion = views / impressions;
   const avgDwellMin = uniqueViewers ? (row.dwellMs || 0) / uniqueViewers / 60000 : 0;
   const wash = (row.trades || 0) > 10 && uniqueTraders / Math.max(1, row.trades) < 0.15;
-  const qualityMinutes = uniqueViewers * avgDwellMin;
   return {
     uniqueViewers,
     uniqueTraders,
@@ -90,15 +89,18 @@ function summarize(row) {
     skips,
     impressions,
     skipRate: Number(skipRate.toFixed(3)),
-    completion: Number(completion.toFixed(3)),
+    completion: Number((views / impressions).toFixed(3)),
     avgDwellMin: Number(avgDwellMin.toFixed(3)),
-    qualityMinutes: Number(qualityMinutes.toFixed(2)),
+    qualityMinutes: Number((uniqueViewers * avgDwellMin).toFixed(2)),
     trades: row.trades || 0,
     holds: row.holds || 0,
     follows: row.follows || 0,
     shares: row.shares || 0,
     bounces: row.bounces || 0,
     returns: row.returns || 0,
+    videoCompletes: row.videoCompletes || 0,
+    videoReplays: row.videoReplays || 0,
+    videoSkips: row.videoSkips || 0,
     wash
   };
 }
@@ -106,7 +108,7 @@ function summarize(row) {
 function statsFor(symbol) {
   const store = load();
   const row = store.coins[String(symbol || '').toUpperCase()];
-  if (!row) return summarize({ impressions: 0, views: 0, skips: 0, dwellMs: 0, uniqueViewers: {}, uniqueTraders: {}, trades: 0, holds: 0, follows: 0, shares: 0, bounces: 0, returns: 0 });
+  if (!row) return summarize(coin({ coins: {} }, 'X'));
   return summarize(row);
 }
 
