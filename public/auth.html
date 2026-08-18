@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Return to Cession</title>
+  <style>body{font-family:Inter,sans-serif;background:#0a0b0d;color:#fff;padding:32px;text-align:center}button{margin:8px;padding:12px 18px;border-radius:12px;border:0;font-weight:700}</style>
+</head>
+<body>
+  <h1>Connect</h1>
+  <p id="status">Approve in this wallet, then return to Safari.</p>
+  <button type="button" id="go">Connect now</button>
+  <script>
+    const q = new URLSearchParams(location.search);
+    const ticket = q.get('ticket');
+    const provider = q.get('provider') || 'phantom';
+    async function done(address) {
+      await fetch('/api/auth/ticket/' + ticket + '/complete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address }) });
+      document.getElementById('status').textContent = 'Connected. Switch back to Safari. This tab can close.';
+    }
+    document.getElementById('go').onclick = async function () {
+      try {
+        if (provider === 'metamask' && window.ethereum) {
+          const acc = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          if (acc && acc[0]) return done(acc[0]);
+        }
+        if (window.solana) {
+          const res = await window.solana.connect();
+          const addr = res.publicKey ? res.publicKey.toString() : '';
+          if (addr) return done(addr);
+        }
+        document.getElementById('status').textContent = 'Open this page inside Phantom or MetaMask.';
+      } catch (e) {
+        document.getElementById('status').textContent = e.message || 'Rejected';
+      }
+    };
+    document.getElementById('go').click();
+  </script>
+</body>
+</html>
