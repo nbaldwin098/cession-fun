@@ -188,10 +188,10 @@ class CessionLaunchpadManager {
 
   async fetchBackendTokens() {
     try {
-      const res = await fetch('/api/tokens');
+      const res = await fetch('/api/pulse?lane=all');
       const data = await res.json();
-      if (data.tokens && data.tokens.length > 0) {
-        const backendTokens = data.tokens.map(t => ({
+      if (data.feed && data.feed.length > 0) {
+        this.tokens = data.feed.map(t => ({
           name: t.name,
           symbol: t.symbol,
           marketCapUsd: t.marketCapUsd || 10000,
@@ -199,27 +199,40 @@ class CessionLaunchpadManager {
           currentPriceSol: t.currentPriceSol || 0.000000010,
           currentPriceUsd: t.currentPriceUsd || (t.currentPriceSol ? t.currentPriceSol * 150 : 0.0000015),
           creatorAddress: t.creator ? (t.creator.length > 8 ? `${t.creator.substring(0, 4)}...${t.creator.substring(t.creator.length - 4)}` : t.creator) : (t.creatorAddress || '0x000...000'),
-          ageText: 'just now',
+          ageText: t.isTestStage ? 'Test Phase' : 'Active',
           imageUrl: t.imageUrl || 'images/cession-logo.png',
           description: t.description || 'Sovereign fair launch on Cession bonding curve.',
-          category: t.category || 'new',
-          bondingCurvePercent: t.bondingCurveProgressPercent || t.curveProgressPercent || t.bondingCurvePercent || 5
+          category: t.pulseLane || 'active',
+          pulseScore: t.pulseScore || 0,
+          pulseLane: t.pulseLane || 'active',
+          solscanUrl: t.solscanUrl,
+          scoreComponents: t.scoreComponents,
+          bondingCurvePercent: t.bondingCurveProgressPercent || t.curveProgressPercent || 5
         }));
-
-        const existingSymbols = new Set(this.defaultTokens.map(t => t.symbol));
-        backendTokens.forEach(bt => {
-          if (!existingSymbols.has(bt.symbol)) {
-            const idx = this.tokens.findIndex(x => x.symbol === bt.symbol);
-            if (idx >= 0) {
-              this.tokens[idx] = { ...this.tokens[idx], ...bt };
-            } else {
-              this.tokens.unshift(bt);
-            }
-          }
-        });
+      } else {
+        const fallbackRes = await fetch('/api/tokens');
+        const fallbackData = await fallbackRes.json();
+        if (fallbackData.tokens) {
+          this.tokens = fallbackData.tokens.map(t => ({
+            name: t.name,
+            symbol: t.symbol,
+            marketCapUsd: t.marketCapUsd || 10000,
+            volume24hUsd: t.volume24hUsd || 1500,
+            currentPriceSol: t.currentPriceSol || 0.000000010,
+            currentPriceUsd: t.currentPriceUsd || 0.0000015,
+            creatorAddress: t.creator ? `${t.creator.substring(0,4)}...` : '0x000...000',
+            ageText: 'Active',
+            imageUrl: t.imageUrl || 'images/cession-logo.png',
+            description: t.description || 'Sovereign fair launch on Cession bonding curve.',
+            category: 'active',
+            pulseScore: 50,
+            pulseLane: 'active',
+            bondingCurvePercent: t.bondingCurveProgressPercent || 5
+          }));
+        }
       }
     } catch (e) {
-      console.warn('Backend token fetch:', e);
+      console.warn('Backend pulse token fetch error:', e);
     }
   }
 
@@ -231,8 +244,8 @@ class CessionLaunchpadManager {
       return matchesSearch;
     });
 
-    if (this.activeCategory !== 'movers') {
-      const catFiltered = filtered.filter(t => t.category === this.activeCategory);
+    if (this.activeCategory && this.activeCategory !== 'all' && this.activeCategory !== 'movers') {
+      const catFiltered = filtered.filter(t => (t.pulseLane || t.category).toLowerCase() === this.activeCategory.toLowerCase());
       if (catFiltered.length > 0) filtered = catFiltered;
     }
 
@@ -248,12 +261,12 @@ class CessionLaunchpadManager {
       this.exploreGrid.innerHTML = `
         <div style="grid-column: 1 / -1; padding: 48px 24px; text-align: center; background: var(--bg-card); border: 1px dashed var(--border-card); border-radius: var(--radius-md);">
           <div style="font-size: 32px; margin-bottom: 12px;">🪙</div>
-          <h3 style="font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 8px;">No Tokens Launched Yet</h3>
+          <h3 style="font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 8px;">No Tokens in Selected Lane</h3>
           <p style="font-size: 13px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 20px auto;">
-            Only real tokens launched on Cession will appear here. Be the first creator to launch a coin on the sovereign bonding curve!
+            Only active coins matching Cession Pulse criteria appear here.
           </p>
           <button class="btn-signin-mint" style="padding: 10px 24px; font-weight: 700;" onclick="window.launchpadManager.openDeployModal()">
-            + Create First Token (0.1 SOL)
+            + Launch Coin (0.05 SOL)
           </button>
         </div>
       `;
@@ -265,14 +278,22 @@ class CessionLaunchpadManager {
         ? `$${(t.marketCapUsd / 1000000).toFixed(2)}M MC`
         : `$${(t.marketCapUsd / 1000).toFixed(1)}K MC`;
 
+      const laneBadgeColor = t.pulseLane === 'rising' ? '#86efac' :
+                             t.pulseLane === 'selling' ? '#f87171' :
+                             t.pulseLane === 'new' ? '#60a5fa' : '#38bdf8';
+
       return `
         <div class="explore-coin-card" onclick="window.launchpadManager.openTokenDetail('${t.symbol}')">
           <div class="explore-coin-thumb-box">
             <img src="${t.imageUrl}" class="explore-coin-img" alt="${t.symbol}" onerror="this.src='images/cession-logo.png'">
             
+            <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.75); border: 1px solid ${laneBadgeColor}; color: ${laneBadgeColor}; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800; text-transform: uppercase;">
+              ${t.pulseLane || 'ACTIVE'} • SCORE ${t.pulseScore || 0}
+            </div>
+
             <!-- Dynamic Green Sparkline Overlay -->
             <svg class="sparkline-svg" viewBox="0 0 60 24" fill="none">
-              <path d="M2 18 Q 15 22, 25 10 T 45 6 T 58 2" stroke="#86efac" stroke-width="2" stroke-linecap="round"/>
+              <path d="M2 18 Q 15 22, 25 10 T 45 6 T 58 2" stroke="${laneBadgeColor}" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </div>
 

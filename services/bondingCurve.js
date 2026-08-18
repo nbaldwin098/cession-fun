@@ -455,30 +455,151 @@ class BondingCurveEngine {
   }
 
   /**
-   * "Today's 5" Dynamic Bundle Rules & Rotation
-   * 1. Must have a real mintAddress
-   * 2. Must not be graduated
-   * 3. Must have had a trade in last 48h
-   * 4. Creator holds < 50% supply (not a farm)
+   * Cession Pulse Ranking & Discovery Algorithm
+   * Time-decayed activity scoring: 80% exploit (ranked) / 20% explore (test)
    */
-  getTodaysFiveBundle() {
+  computePulseMetrics(token) {
+    const now = Date.now();
+    const ageMinutes = Math.max(1, (now - (token.createdAt || now)) / 60000);
+    const isTestStage = ageMinutes <= 60; // First 30-60 minutes test cohort
+
+    const recentTrades = token.recentTrades || [];
+    const trades15m = recentTrades.filter(t => (now - (t.timestamp || now)) <= 15 * 60000);
+    const trades1h = recentTrades.filter(t => (now - (t.timestamp || now)) <= 60 * 60000);
+    const trades6h = recentTrades.filter(t => (now - (t.timestamp || now)) <= 360 * 60000);
+
+    const uniqueTraders1h = new Set(trades1h.map(t => t.user)).size || 1;
+    const vol15m = trades15m.reduce((acc, t) => acc + (parseFloat(t.usdVal) || 0), 0);
+    const vol1h = trades1h.reduce((acc, t) => acc + (parseFloat(t.usdVal) || 0), 0);
+    const vol6h = trades6h.reduce((acc, t) => acc + (parseFloat(t.usdVal) || 0), 0);
+
+    const velocityScore = Math.min(100, (vol15m * 2) + (vol1h / (vol6h + 10) * 50) + (trades15m.length * 5));
+    const pageTimeScore = Math.min(100, (token.pageViews || 10) * 0.5 + (token.chartOpens || 5) * 1.5);
+    const returnVisits = Math.min(100, (token.returnVisits || 3) * 2.0);
+    const shareClicks = Math.min(100, (token.shareClicks || 2) * 3.0);
+
+    const creatorHoldingsPct = token.creatorHoldingsPct || 10;
+    const holderPersistenceScore = Math.max(0, 100 - creatorHoldingsPct);
+
+    let washTradingPenalty = 0;
+    if (trades1h.length > 5 && uniqueTraders1h === 1) {
+      washTradingPenalty = 40;
+    }
+
+    let creatorDumpPenalty = 0;
+    const sells1h = trades1h.filter(t => t.type === 'SELL');
+    if (sells1h.length > 0 && creatorHoldingsPct < 5) {
+      creatorDumpPenalty = 35;
+    }
+
+    const cardSkips = token.skipsCount || 0;
+    const skipPenalty = Math.min(30, cardSkips * 0.5);
+
+    const hoursInactive = Math.max(0, (now - (token.lastBumpTime || token.createdAt || now)) / 3600000);
+    const decayFactor = Math.exp(-0.05 * hoursInactive);
+
+    const rawScore = (
+      (35 * Math.min(100, uniqueTraders1h * 10)) +
+      (25 * velocityScore) +
+      (15 * pageTimeScore) +
+      (10 * returnVisits) +
+      (10 * shareClicks) +
+      (5 * holderPersistenceScore)
+    ) / 100;
+
+    const netScore = Math.max(0, Math.round((rawScore - washTradingPenalty - creatorDumpPenalty - skipPenalty) * decayFactor));
+
+    let lane = 'active';
+    if (sells1h.length >= 3 || creatorDumpPenalty > 0) {
+      lane = 'selling';
+    } else if (isTestStage) {
+      lane = 'new';
+    } else if (velocityScore > 30 || token.curveProgressPercent > 30) {
+      lane = 'rising';
+    }
+
+    return {
+      score: netScore,
+      lane,
+      isTestStage,
+      scoreComponents: {
+        uniqueTraders: uniqueTraders1h,
+        tradeVelocity: Math.round(velocityScore),
+        pageEngagement: Math.round(pageTimeScore),
+        returnVisits: Math.round(returnVisits),
+        shareClicks: Math.round(shareClicks),
+        holderPersistence: Math.round(holderPersistenceScore),
+        penalties: {
+          washTrading: washTradingPenalty,
+          creatorDump: creatorDumpPenalty,
+          cardSkips: skipPenalty
+        },
+        decayFactor: Number(decayFactor.toFixed(2))
+      }
+    };
+  }
+
+  getPulseFeed(requestedLane = 'all', limit = 20) {
     const now = Date.now();
     const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
 
-    const eligible = Array.from(this.tokens.values()).filter(t => {
-      if (!t.mintAddress || t.mintAddress === "So11111111111111111111111111111111111111112") return false;
-      if (t.isGraduated) return false;
-      
-      const lastTradeTime = t.lastTradeAt || t.createdAt || 0;
+    // Filter eligible active coins (not inactive > 48h)
+    const candidates = Array.from(this.tokens.values()).filter(t => {
+      const lastTradeTime = t.lastTradeAt || t.lastBumpTime || t.createdAt || 0;
       if (now - lastTradeTime > FORTY_EIGHT_HOURS_MS) return false;
-
-      const creatorHoldingsPct = t.creatorHoldingsPct || 0;
-      if (creatorHoldingsPct >= 50) return false;
-
       return true;
+    }).map(t => {
+      const enriched = this._enrichTokenMetrics(t);
+      const pulse = this.computePulseMetrics(enriched);
+      return {
+        ...enriched,
+        pulseScore: pulse.score,
+        pulseLane: pulse.lane,
+        isTestStage: pulse.isTestStage,
+        scoreComponents: pulse.scoreComponents,
+        solscanUrl: t.mintAddress ? `https://solscan.io/token/${t.mintAddress}` : null
+      };
     });
 
-    eligible.sort((a, b) => (b.lastTradeAt || 0) - (a.lastTradeAt || 0));
+    candidates.sort((a, b) => b.pulseScore - a.pulseScore);
+
+    if (requestedLane && requestedLane !== 'all') {
+      const filtered = candidates.filter(c => c.pulseLane.toLowerCase() === requestedLane.toLowerCase());
+      return filtered.slice(0, limit);
+    }
+
+    // Exploit vs Explore mix: 80% proven / 20% test stage
+    const rankedProven = candidates.filter(c => !c.isTestStage);
+    const testCohort = candidates.filter(c => c.isTestStage);
+
+    const targetProvenCount = Math.floor(limit * 0.8);
+    const targetTestCount = limit - targetProvenCount;
+
+    const provenSlice = rankedProven.slice(0, targetProvenCount);
+    const testSlice = testCohort.slice(0, targetTestCount);
+
+    const combinedFeed = [...provenSlice, ...testSlice];
+    combinedFeed.sort((a, b) => b.pulseScore - a.pulseScore);
+
+    return combinedFeed.slice(0, limit);
+  }
+
+  /**
+   * "Today's 5" Dynamic Bundle Rules & Rotation
+   * Top 5 Pulse coins passing non-whale and active trade filters
+   */
+  getTodaysFiveBundle() {
+    const now = Date.now();
+    const pulseCoins = this.getPulseFeed('all', 15);
+
+    const eligible = pulseCoins.filter(t => {
+      if (!t.mintAddress || t.mintAddress === "So11111111111111111111111111111111111111112") return false;
+      if (t.isGraduated) return false;
+      if (t.pulseLane === 'selling') return false; // Exclude dump-only coins from bundle
+      const creatorHoldingsPct = t.creatorHoldingsPct || 0;
+      if (creatorHoldingsPct >= 50) return false;
+      return true;
+    });
 
     const topMembers = eligible.slice(0, 5);
     const count = topMembers.length;
@@ -488,7 +609,7 @@ class BondingCurveEngine {
       id: "bundle_todays_5",
       name: "Today's 5",
       symbol: "TOP5",
-      description: "Splits your SOL evenly across live Cession coins. Rotates automatically as coins graduate or go inactive.",
+      description: "Top 5 ranked Cession Pulse coins. Equal SOL weight allocation, automated interval rotation.",
       updatedAt: now,
       eligibleCount: eligible.length,
       tokens: topMembers.map(t => ({
@@ -497,7 +618,8 @@ class BondingCurveEngine {
         mintAddress: t.mintAddress,
         weight: weightPerToken,
         creator: t.creator,
-        priceUsd: t.priceUsd || t.currentPriceUsd
+        priceUsd: t.priceUsd || t.currentPriceUsd,
+        pulseScore: t.pulseScore
       }))
     };
   }

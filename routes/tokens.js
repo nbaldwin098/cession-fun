@@ -7,6 +7,13 @@ const express = require('express');
 const router = express.Router();
 const bondingCurve = require('../services/bondingCurve');
 
+// Cession Pulse Ranked Feed Endpoint (For You Page)
+router.get('/pulse', (req, res) => {
+  const { lane = 'all', limit = 20 } = req.query;
+  const feed = bondingCurve.getPulseFeed(lane, parseInt(limit) || 20);
+  res.json({ success: true, count: feed.length, lane, feed });
+});
+
 // Global Trade Ticker Stream (for Top Marquee)
 router.get('/global-trades', (req, res) => {
   const { limit = 25 } = req.query;

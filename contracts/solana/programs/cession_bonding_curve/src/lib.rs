@@ -47,8 +47,8 @@ pub mod cession_bonding_curve {
         curve.fee_bps = 100; // 1.00% total trade fee
         curve.is_graduated = false;
 
-        // Transfer 0.50 SOL creation fee from signer to treasury
-        let create_fee = 500_000_000; // 0.50 SOL
+        // Transfer 0.05 SOL creation fee from signer to treasury
+        let create_fee = 50_000_000; // 0.05 SOL
         let create_fee_ix = anchor_lang::solana_program::system_instruction::transfer(
             &ctx.accounts.signer.key(),
             &ctx.accounts.treasury.key(),
