@@ -12,6 +12,26 @@
     m.style.display = 'none';
     m.classList.remove('open');
   }
+  function addX(box, fn) {
+    if (!box || box.querySelector('.cx-x')) return;
+    const x = document.createElement('button');
+    x.className = 'cx-x';
+    x.type = 'button';
+    x.setAttribute('aria-label', 'Close');
+    x.textContent = '\u00d7';
+    x.onclick = fn;
+    box.insertBefore(x, box.firstChild);
+  }
+  function centerSheet(id) {
+    const m = document.getElementById(id);
+    if (!m) return;
+    m.classList.add('cx-center-sheet');
+    const box = m.querySelector('.modal-box-pump');
+    addX(box, function () {
+      m.style.display = 'none';
+      m.classList.remove('open');
+    });
+  }
   function ready() {
     if (!window.CessionUI) return setTimeout(ready, 40);
     const ui = window.CessionUI;
@@ -19,28 +39,65 @@
     link.rel = 'stylesheet';
     link.href = 'css/nav-extra.css';
     document.head.appendChild(link);
+    const hdr = document.querySelector('.cx-search-btn');
+    if (hdr) hdr.style.display = 'none';
+    if (!document.getElementById('floatSearch')) {
+      const b = document.createElement('button');
+      b.id = 'floatSearch';
+      b.className = 'cx-float-search';
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Search');
+      b.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0c0c0c" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
+      b.onclick = function () { ui.openSearch(); };
+      document.body.appendChild(b);
+    }
+    centerSheet('settingsModal');
+    centerSheet('statementModal');
     ui.openSearch = function () {
       const m = document.getElementById('searchModal');
       if (!m) return;
       const box = m.querySelector('.modal-box-pump');
-      if (box && !box.querySelector('.cx-x')) {
-        const x = document.createElement('button');
-        x.className = 'cx-x';
-        x.type = 'button';
-        x.setAttribute('aria-label', 'Close');
-        x.textContent = '×';
-        x.onclick = closeSearch;
-        box.insertBefore(x, box.firstChild);
+      addX(box, closeSearch);
+      if (box && !document.getElementById('searchHits')) {
+        const hits = document.createElement('div');
+        hits.id = 'searchHits';
+        hits.className = 'cx-feed';
+        box.appendChild(hits);
       }
       m.style.display = 'flex';
       m.classList.add('open');
       m.onclick = function (e) { if (e.target === m) closeSearch(); };
+      const q = document.getElementById('searchInput');
+      if (q) q.focus();
     };
     ui.searchLane = function (lane) {
       if (ui.setExploreLane) ui.setExploreLane(lane);
-      ui.go('explore');
-      closeSearch();
+      fillHits(lane);
     };
+    async function fillHits(lane) {
+      const box = document.getElementById('searchHits');
+      if (!box) return;
+      try {
+        const r = await fetch('/api/pulse?lane=' + encodeURIComponent(lane || 'best') + '&limit=20');
+        const d = await r.json();
+        const list = (d.feed || []).filter(function (c) {
+          return String(c.mintAddress || c.mint || '').length >= 32;
+        });
+        box.innerHTML = list.length
+          ? list.map(function (c) {
+            return '<div class="cx-card-coin"><div class="cx-media-empty"></div><div class="meta"><div class="name">' + (c.name || c.symbol) + '</div><div class="tick">' + c.symbol + '</div></div></div>';
+          }).join('')
+          : '<div class="cx-empty"><p class="cx-muted">No live coins yet.</p></div>';
+      } catch (e) {
+        box.innerHTML = '<div class="cx-empty"><p class="cx-muted">No live coins yet.</p></div>';
+      }
+    }
+    const inp = document.getElementById('searchInput');
+    if (inp) {
+      inp.addEventListener('input', function () {
+        fillHits('best');
+      });
+    }
     const prev = ui.go;
     ui.go = function (name) {
       if (name === 'mint') {
@@ -62,7 +119,7 @@
         const t = d.king || d.token;
         if (king) {
           king.innerHTML = t && t.symbol
-            ? '<strong>King of the hill</strong><p>' + (t.name || t.symbol) + ' · ' + t.symbol + '</p>'
+            ? '<strong>King of the hill</strong><p>' + (t.name || t.symbol) + ' \u00b7 ' + t.symbol + '</p>'
             : '<strong>King of the hill</strong><p class="cx-muted">No live coin yet.</p>';
         }
       } catch (e) {
