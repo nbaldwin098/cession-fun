@@ -9,6 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const DATA_FILE = path.join(__dirname, '..', 'data', 'bonding_state.json');
+const TX_FILE = path.join(__dirname, '..', 'data', 'transactions.json');
 
 class BondingCurveEngine {
   constructor() {
@@ -21,7 +22,200 @@ class BondingCurveEngine {
     this.treasuryEvmAddress = process.env.TREASURY_EVM_ADDRESS || "0xE409f28fb1D6C5C090b1feE164DB09C365c07011";
     this.totalMintFeesCollectedSol = 48.6;
     this.totalTradingFeesCollectedSol = 24.3;
+    this.ensureTxFileExists();
     this.loadStateFromDisk();
+  }
+
+  ensureTxFileExists() {
+    try {
+      const dataDir = path.dirname(TX_FILE);
+      if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+      if (!fs.existsSync(TX_FILE)) fs.writeFileSync(TX_FILE, '[]', 'utf8');
+    } catch (e) {
+      console.warn('Error creating transactions file:', e.message);
+    }
+  }
+
+  recordTransaction(txData) {
+    if (!txData || !txData.txHash || typeof txData.txHash !== 'string' || txData.txHash.trim().length < 32) {
+      console.warn('Transaction record rejected: Missing or invalid txHash.');
+      return null;
+    }
+
+    this.ensureTxFileExists();
+    let transactions = [];
+    try {
+      const raw = fs.readFileSync(TX_FILE, 'utf8');
+      transactions = JSON.parse(raw);
+    } catch (e) {
+      transactions = [];
+    }
+
+    // Deduplicate by txHash
+    const cleanHash = txData.txHash.trim();
+    const existing = transactions.find(t => t.txHash === cleanHash);
+    if (existing) {
+      return existing;
+    }
+
+    const record = {
+      timestamp: txData.timestamp || Date.now(),
+      wallet: txData.wallet || txData.traderAddress || txData.buyerAddress || txData.sellerAddress || 'UnknownWallet',
+      mint: txData.mint || txData.symbol || 'CESS',
+      symbol: (txData.symbol || 'CESS').toUpperCase(),
+      side: txData.side || txData.type || 'BUY',
+      tokenAmount: parseFloat(txData.tokenAmount || txData.amountTokens || 0),
+      solAmount: parseFloat(txData.solAmount || txData.amountSol || 0),
+      feeSol: parseFloat(txData.feeSol || 0),
+      txHash: cleanHash,
+      solscanUrl: `https://solscan.io/tx/${cleanHash}`,
+      refCode: txData.refCode || null
+    };
+
+    transactions.push(record);
+    try {
+      fs.writeFileSync(TX_FILE, JSON.stringify(transactions, null, 2), 'utf8');
+    } catch (e) {
+      console.error('Error persisting transaction to disk:', e.message);
+    }
+
+    return record;
+  }
+
+  getWalletTransactions(walletAddress) {
+    this.ensureTxFileExists();
+    if (!walletAddress) return [];
+    const cleanAddr = walletAddress.toLowerCase();
+    try {
+      const raw = fs.readFileSync(TX_FILE, 'utf8');
+      const transactions = JSON.parse(raw);
+      return transactions.filter(t => t.wallet && t.wallet.toLowerCase() === cleanAddr)
+        .sort((a, b) => b.timestamp - a.timestamp);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  getMonthlyStatement(walletAddress, monthStr) {
+    if (!walletAddress) throw new Error('Wallet address is required for statement.');
+    
+    let targetMonth = monthStr;
+    if (!targetMonth || !/^\d{4}-\d{2}$/.test(targetMonth)) {
+      const now = new Date();
+      const yyyy = now.getUTCFullYear();
+      const mm = String(now.getUTCMonth() + 1).padStart(2, '0');
+      targetMonth = `${yyyy}-${mm}`;
+    }
+
+    const [year, month] = targetMonth.split('-').map(Number);
+    const startMs = Date.UTC(year, month - 1, 1, 0, 0, 0, 0);
+    const endMs = Date.UTC(year, month, 0, 23, 59, 59, 999);
+
+    const allWalletTxs = this.getWalletTransactions(walletAddress);
+    const priorTxs = allWalletTxs.filter(t => t.timestamp < startMs);
+    const monthTxs = allWalletTxs.filter(t => t.timestamp >= startMs && t.timestamp <= endMs);
+
+    const tokenHoldingsMap = new Map();
+    priorTxs.forEach(t => {
+      const sym = t.symbol.toUpperCase();
+      if (!tokenHoldingsMap.has(sym)) {
+        tokenHoldingsMap.set(sym, { amount: 0, costBasisSolTotal: 0 });
+      }
+      const entry = tokenHoldingsMap.get(sym);
+      if (t.side === 'BUY' || t.side === 'CREATE' || t.side === 'BUNDLE_BUY') {
+        entry.amount += t.tokenAmount;
+        entry.costBasisSolTotal += t.solAmount;
+      } else if (t.side === 'SELL') {
+        entry.amount = Math.max(0, entry.amount - t.tokenAmount);
+      }
+    });
+
+    let buysCount = 0;
+    let sellsCount = 0;
+    let claimsCount = 0;
+    let monthVolumeSol = 0;
+    let monthFeesPaidSol = 0;
+    let realizedPnlSol = 0;
+
+    monthTxs.forEach(t => {
+      const sym = t.symbol.toUpperCase();
+      if (!tokenHoldingsMap.has(sym)) {
+        tokenHoldingsMap.set(sym, { amount: 0, costBasisSolTotal: 0 });
+      }
+      const entry = tokenHoldingsMap.get(sym);
+      monthFeesPaidSol += (t.feeSol || 0);
+
+      if (t.side === 'BUY' || t.side === 'CREATE' || t.side === 'BUNDLE_BUY') {
+        buysCount++;
+        monthVolumeSol += t.solAmount;
+        entry.amount += t.tokenAmount;
+        entry.costBasisSolTotal += t.solAmount;
+      } else if (t.side === 'SELL') {
+        sellsCount++;
+        monthVolumeSol += t.solAmount;
+        const avgCostPerToken = entry.amount > 0 ? (entry.costBasisSolTotal / entry.amount) : 0;
+        const costBasisOfSell = t.tokenAmount * avgCostPerToken;
+        const pnl = t.solAmount - costBasisOfSell;
+        realizedPnlSol += pnl;
+        entry.amount = Math.max(0, entry.amount - t.tokenAmount);
+        entry.costBasisSolTotal = Math.max(0, entry.costBasisSolTotal - costBasisOfSell);
+      } else if (t.side.startsWith('CLAIM')) {
+        claimsCount++;
+      }
+    });
+
+    const closingHoldings = [];
+    let unrealizedPnlSol = 0;
+
+    tokenHoldingsMap.forEach((entry, sym) => {
+      if (entry.amount > 0) {
+        const token = this.tokens.get(sym);
+        const currentPriceSol = token ? (token.currentPriceSol || 0.00000001) : 0.00000001;
+        const currentValueSol = entry.amount * currentPriceSol;
+        const unrealized = currentValueSol - entry.costBasisSolTotal;
+        unrealizedPnlSol += unrealized;
+
+        closingHoldings.push({
+          symbol: sym,
+          mintAddress: token ? token.mintAddress : null,
+          amount: entry.amount,
+          costBasisSolTotal: Number(entry.costBasisSolTotal.toFixed(6)),
+          currentPriceSol: Number(currentPriceSol.toFixed(9)),
+          currentValueSol: Number(currentValueSol.toFixed(6)),
+          currentValueUsd: (currentValueSol * 150).toFixed(2),
+          unrealizedPnlSol: Number(unrealized.toFixed(6)),
+          unrealizedPnlUsd: (unrealized * 150).toFixed(2)
+        });
+      }
+    });
+
+    return {
+      success: true,
+      protocol: "Cession Sovereign Exchange",
+      wallet: walletAddress,
+      month: targetMonth,
+      period: {
+        start: new Date(startMs).toISOString(),
+        end: new Date(endMs).toISOString()
+      },
+      summary: {
+        totalTransactions: monthTxs.length,
+        buysCount,
+        sellsCount,
+        claimsCount,
+        totalVolumeSol: Number(monthVolumeSol.toFixed(4)),
+        totalVolumeUsd: (monthVolumeSol * 150).toFixed(2),
+        realizedPnlSol: Number(realizedPnlSol.toFixed(6)),
+        realizedPnlUsd: (realizedPnlSol * 150).toFixed(2),
+        unrealizedPnlSol: Number(unrealizedPnlSol.toFixed(6)),
+        unrealizedPnlUsd: (unrealizedPnlSol * 150).toFixed(2),
+        totalFeesPaidSol: Number(monthFeesPaidSol.toFixed(6)),
+        totalFeesPaidUsd: (monthFeesPaidSol * 150).toFixed(2)
+      },
+      closingHoldings,
+      transactions: monthTxs,
+      disclaimer: "Cession indexes your Cession trades on-chain. We do not hold keys. This is mark-to-market from Cession prices, not an official account statement or tax, brokerage, or investment advice."
+    };
   }
 
   getTransparencyData() {
@@ -586,22 +780,26 @@ class BondingCurveEngine {
 
   /**
    * "Today's 5" Dynamic Bundle Rules & Rotation
-   * Top 5 Pulse coins passing non-whale and active trade filters
+   * Top 5 Pulse coins passing house coin and active trade filters
    */
   getTodaysFiveBundle() {
     const now = Date.now();
-    const pulseCoins = this.getPulseFeed('all', 15);
+    const pulseCoins = this.getPulseFeed('all', 50);
 
-    const eligible = pulseCoins.filter(t => {
+    // Bundles = Cession official house coins ONLY
+    const houseCoins = pulseCoins.filter(t => {
       if (!t.mintAddress || t.mintAddress === "So11111111111111111111111111111111111111112") return false;
       if (t.isGraduated) return false;
       if (t.pulseLane === 'selling') return false; // Exclude dump-only coins from bundle
-      const creatorHoldingsPct = t.creatorHoldingsPct || 0;
-      if (creatorHoldingsPct >= 50) return false;
-      return true;
+      
+      const isHouse = t.isOfficialHouseCoin || 
+                      t.creator === this.treasurySolAddress || 
+                      (t.creator && t.creator.startsWith("8cdp")) ||
+                      t.symbol === "CESS" || t.symbol === "MEME" || t.symbol === "SOLA" || t.symbol === "SOV" || t.symbol === "PEPE";
+      return isHouse;
     });
 
-    const topMembers = eligible.slice(0, 5);
+    const topMembers = houseCoins.slice(0, 5);
     const count = topMembers.length;
     const weightPerToken = count > 0 ? Number((100 / count).toFixed(1)) : 0;
 
@@ -609,9 +807,11 @@ class BondingCurveEngine {
       id: "bundle_todays_5",
       name: "Today's 5",
       symbol: "TOP5",
-      description: "Top 5 ranked Cession Pulse coins. Equal SOL weight allocation, automated interval rotation.",
+      label: "Cession bundle — official coins",
+      description: "Top official house coins created by the Cession protocol treasury. Equal SOL weight allocation, automated interval rotation.",
+      disclaimer: "24h change is price movement, not a promised rate.",
       updatedAt: now,
-      eligibleCount: eligible.length,
+      eligibleCount: houseCoins.length,
       tokens: topMembers.map(t => ({
         symbol: t.symbol,
         name: t.name,
@@ -619,6 +819,7 @@ class BondingCurveEngine {
         weight: weightPerToken,
         creator: t.creator,
         priceUsd: t.priceUsd || t.currentPriceUsd,
+        change24hPercent: t.change24hPercent || 0,
         pulseScore: t.pulseScore
       }))
     };
@@ -649,12 +850,15 @@ class BondingCurveEngine {
         return item;
       });
 
-      const roi24h = col.roi24h !== undefined ? col.roi24h : Number(calculatedRoi.toFixed(1));
+      const change24hPercent = col.change24hPercent !== undefined ? col.change24hPercent : Number(calculatedRoi.toFixed(1));
 
       return {
         ...col,
+        label: "Cession bundle — official coins",
         category: col.category || 'memes',
-        roi24h,
+        change24hPercent,
+        performance24h: `${change24hPercent >= 0 ? '+' : ''}${change24hPercent}% 24h`,
+        disclaimer: "24h change is price movement, not a promised rate.",
         tokens: enrichedTokens,
         aggregateMcapUsd: Math.round(aggregateMcap) || 58000,
         aggregateVolumeUsd: Math.round(aggregateVolume) || (col.totalVolumeUsd || 15000)
@@ -952,7 +1156,7 @@ class BondingCurveEngine {
     return this._enrichTokenMetrics(this.tokens.get(cleanSym) || newToken);
   }
 
-  buyTokens(symbol, solAmount, buyerAddress) {
+  buyTokens(symbol, solAmount, buyerAddress, txHash = null, refCode = null) {
     const sym = symbol.toUpperCase();
     if (!this.tokens.has(sym)) {
       try {
@@ -1033,11 +1237,27 @@ class BondingCurveEngine {
     token.recentTrades.unshift(trade);
     if (token.recentTrades.length > 25) token.recentTrades.pop();
 
+    // Persist to Transaction Ledger if txHash present
+    if (txHash && typeof txHash === 'string' && txHash.trim().length >= 32) {
+      this.recordTransaction({
+        timestamp: Date.now(),
+        wallet: buyerAddress,
+        mint: token.mintAddress || sym,
+        symbol: sym,
+        side: 'BUY',
+        tokenAmount: tokensOut,
+        solAmount: solIn,
+        feeSol: feeTotal,
+        txHash: txHash.trim(),
+        refCode: refCode || null
+      });
+    }
+
     this.saveStateToDisk();
     return { token: this._enrichTokenMetrics(token), tokensOut, trade };
   }
 
-  sellTokens(symbol, tokenAmount, sellerAddress) {
+  sellTokens(symbol, tokenAmount, sellerAddress, txHash = null, refCode = null) {
     const sym = symbol.toUpperCase();
     if (!this.tokens.has(sym)) {
       try {
@@ -1098,6 +1318,22 @@ class BondingCurveEngine {
     };
     token.recentTrades.unshift(trade);
     if (token.recentTrades.length > 25) token.recentTrades.pop();
+
+    // Persist to Transaction Ledger if txHash present
+    if (txHash && typeof txHash === 'string' && txHash.trim().length >= 32) {
+      this.recordTransaction({
+        timestamp: Date.now(),
+        wallet: sellerAddress,
+        mint: token.mintAddress || sym,
+        symbol: sym,
+        side: 'SELL',
+        tokenAmount: tokensIn,
+        solAmount: netSolOut,
+        feeSol: feeTotal,
+        txHash: txHash.trim(),
+        refCode: refCode || null
+      });
+    }
 
     this.saveStateToDisk();
     return { token: this._enrichTokenMetrics(token), solOut: netSolOut, trade };

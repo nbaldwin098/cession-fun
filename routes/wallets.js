@@ -27,9 +27,38 @@ router.get('/:address/trades', (req, res) => {
   try {
     const address = req.params.address;
     const bondingCurve = require('../services/bondingCurve');
-    const allTrades = bondingCurve.recentTrades || [];
-    const walletTrades = allTrades.filter(t => t.traderAddress === address || t.buyer === address || t.seller === address);
+    const walletTrades = bondingCurve.getWalletTransactions(address);
     res.json({ success: true, address, count: walletTrades.length, trades: walletTrades });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * Get durable on-chain transaction ledger for a wallet
+ */
+router.get('/:address/transactions', (req, res) => {
+  try {
+    const address = req.params.address;
+    const bondingCurve = require('../services/bondingCurve');
+    const txs = bondingCurve.getWalletTransactions(address);
+    res.json({ success: true, address, count: txs.length, transactions: txs });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * Get monthly account statement for a wallet
+ * GET /api/wallets/:address/statement?month=YYYY-MM
+ */
+router.get('/:address/statement', (req, res) => {
+  try {
+    const address = req.params.address;
+    const month = req.query.month;
+    const bondingCurve = require('../services/bondingCurve');
+    const statement = bondingCurve.getMonthlyStatement(address, month);
+    res.json(statement);
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

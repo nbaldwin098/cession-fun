@@ -1735,6 +1735,154 @@ class CessionLaunchpadManager {
     }, 3500);
   }
 
+  openSettingsModal() {
+    const modal = document.getElementById('settingsModal');
+    if (!modal) return;
+    
+    const activeAddr = window.walletEngine?.activeAddress || 'Not Connected';
+    const settingsWalletEl = document.getElementById('settingsWalletAddress');
+    if (settingsWalletEl) settingsWalletEl.textContent = activeAddr;
+
+    const refCode = activeAddr !== 'Not Connected' ? `r_${activeAddr.substring(0, 6)}` : 'Connect wallet to generate referral code';
+    const settingsRefEl = document.getElementById('settingsRefCodeDisplay');
+    if (settingsRefEl) settingsRefEl.textContent = activeAddr !== 'Not Connected' ? `${window.location.origin}/?ref=${refCode}` : refCode;
+
+    const monthPicker = document.getElementById('settingsStatementMonth');
+    if (monthPicker && !monthPicker.value) {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      monthPicker.value = `${yyyy}-${mm}`;
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  async downloadMonthlyStatement() {
+    const activeAddr = window.walletEngine?.activeAddress;
+    if (!activeAddr) {
+      this.toast('Please connect your Web3 wallet to download a statement.', 'error');
+      return;
+    }
+
+    const monthPicker = document.getElementById('settingsStatementMonth');
+    const monthVal = monthPicker ? monthPicker.value : '';
+
+    try {
+      const res = await fetch(`/api/wallets/${activeAddr}/statement?month=${monthVal}`);
+      const data = await res.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to generate monthly statement');
+      }
+
+      const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cession Monthly Statement - ${data.month}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #0b0f19; color: #f3f4f6; margin: 0; padding: 30px; line-height: 1.5; }
+    .header { border-bottom: 2px solid #1e293b; padding-bottom: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; }
+    .title { font-size: 24px; font-weight: 800; color: #22c55e; margin: 0; }
+    .sub { font-size: 13px; color: #94a3b8; margin-top: 4px; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+    .card { background: #1e293b; border-radius: 8px; padding: 14px; }
+    .card-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
+    .card-val { font-size: 18px; font-weight: 800; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px; }
+    th { text-align: left; border-bottom: 1px solid #334155; padding: 10px; color: #94a3b8; text-transform: uppercase; font-size: 11px; }
+    td { padding: 10px; border-bottom: 1px solid #1e293b; }
+    .disclaimer { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 14px; font-size: 12px; color: #f87171; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="title">CESSION.FUN MONTHLY ACCOUNT STATEMENT</div>
+      <div class="sub">Protocol: Cession Sovereign Exchange • Calendar Month: ${data.month}</div>
+    </div>
+    <div style="text-align: right;">
+      <div style="font-size: 12px; font-family: monospace; color: #22c55e;">Wallet: ${data.wallet}</div>
+      <div style="font-size: 11px; color: #94a3b8;">Generated: ${new Date().toISOString()}</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><div class="card-label">Volume (SOL)</div><div class="card-val" style="color:#38bdf8;">${data.summary.totalVolumeSol} SOL</div></div>
+    <div class="card"><div class="card-label">Realized P/L (SOL)</div><div class="card-val" style="color:${data.summary.realizedPnlSol >= 0 ? '#22c55e' : '#f87171'};">${data.summary.realizedPnlSol >= 0 ? '+' : ''}${data.summary.realizedPnlSol} SOL</div></div>
+    <div class="card"><div class="card-label">Unrealized P/L (SOL)</div><div class="card-val" style="color:${data.summary.unrealizedPnlSol >= 0 ? '#22c55e' : '#f87171'};">${data.summary.unrealizedPnlSol >= 0 ? '+' : ''}${data.summary.unrealizedPnlSol} SOL</div></div>
+    <div class="card"><div class="card-label">Total Fees Paid</div><div class="card-val" style="color:#eab308;">${data.summary.totalFeesPaidSol} SOL</div></div>
+  </div>
+
+  <h3 style="font-size: 16px; margin-bottom: 10px;">Closing Token Holdings Snapshot</h3>
+  <table>
+    <thead>
+      <tr><th>Symbol</th><th>Amount</th><th>Cost Basis (SOL)</th><th>Current Price (SOL)</th><th>Mark-to-Market Value (SOL)</th><th>Unrealized P/L (SOL)</th></tr>
+    </thead>
+    <tbody>
+      ${data.closingHoldings.length === 0 ? '<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No open token positions indexed this month.</td></tr>' : 
+        data.closingHoldings.map(h => `
+          <tr>
+            <td><strong>$${h.symbol}</strong></td>
+            <td>${h.amount.toLocaleString()}</td>
+            <td>${h.costBasisSolTotal} SOL</td>
+            <td>${h.currentPriceSol} SOL</td>
+            <td>${h.currentValueSol} SOL</td>
+            <td style="color:${h.unrealizedPnlSol >= 0 ? '#22c55e' : '#f87171'};">${h.unrealizedPnlSol >= 0 ? '+' : ''}${h.unrealizedPnlSol} SOL</td>
+          </tr>
+        `).join('')
+      }
+    </tbody>
+  </table>
+
+  <h3 style="font-size: 16px; margin-bottom: 10px;">Transactions Ledger (${data.transactions.length} Records)</h3>
+  <table>
+    <thead>
+      <tr><th>Time</th><th>Type</th><th>Symbol</th><th>Tokens</th><th>SOL Amount</th><th>Tx Signature / Solscan</th></tr>
+    </thead>
+    <tbody>
+      ${data.transactions.length === 0 ? '<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No transactions indexed during this calendar month.</td></tr>' : 
+        data.transactions.map(t => `
+          <tr>
+            <td>${new Date(t.timestamp).toLocaleString()}</td>
+            <td><strong style="color:${t.side === 'BUY' ? '#22c55e' : '#f87171'};">${t.side}</strong></td>
+            <td>$${t.symbol}</td>
+            <td>${t.tokenAmount.toLocaleString()}</td>
+            <td>${t.solAmount} SOL</td>
+            <td><a href="${t.solscanUrl}" target="_blank" style="color:#38bdf8; font-family:monospace;">${t.txHash.substring(0, 16)}...</a></td>
+          </tr>
+        `).join('')
+      }
+    </tbody>
+  </table>
+
+  <div class="disclaimer">
+    <strong>⚖️ NON-CUSTODIAL & ACCOUNTING DISCLAIMER:</strong><br>
+    ${data.disclaimer}
+  </div>
+</body>
+</html>
+      `;
+
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Cession_Statement_${activeAddr.substring(0, 6)}_${data.month}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      this.toast(`✓ Monthly statement for ${data.month} downloaded!`, 'success');
+    } catch (e) {
+      console.error('Statement error:', e);
+      this.toast('Failed to download statement: ' + e.message, 'error');
+    }
+  }
+
   escapeHtml(str) {
     if (!str) return '';
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

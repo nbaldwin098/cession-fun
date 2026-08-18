@@ -476,9 +476,14 @@
               YOU
             </div>
             <div style="flex: 1;">
-              <div style="font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                <span id="profileAddressFull">Not Connected</span>
-                <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="if(document.getElementById('profileAddressFull').textContent !== 'Not Connected'){navigator.clipboard.writeText(document.getElementById('profileAddressFull').textContent); window.launchpadManager.toast('Address copied', 'success');} else { window.walletEngine.openAuthModal(); }">copy</button>
+              <div style="font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span id="profileAddressFull">Not Connected</span>
+                  <button class="cat-pill-btn" style="padding: 2px 8px; font-size: 11px;" onclick="if(document.getElementById('profileAddressFull').textContent !== 'Not Connected'){navigator.clipboard.writeText(document.getElementById('profileAddressFull').textContent); window.launchpadManager.toast('Address copied', 'success');} else { window.walletEngine.openAuthModal(); }">copy</button>
+                </div>
+                <button class="cat-pill-btn" style="padding: 6px 14px; font-size: 12px; font-weight: 700; color: var(--pump-mint); border: 1px solid var(--pump-mint);" onclick="window.launchpadManager.openSettingsModal()">
+                  ⚙️ Settings
+                </button>
               </div>
               <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">
                 Status: <span id="profileVaultStatus" style="color: var(--text-muted); font-weight: 700;">Disconnected (Connect Wallet)</span>
@@ -1304,6 +1309,77 @@
 
       <button class="btn-signin-mint" style="width: 100%; padding: 10px;" onclick="document.getElementById('backupSeedModal').style.display='none'">
         Close
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       SETTINGS & MONTHLY STATEMENT MODAL
+  ========================================================= -->
+  <div class="modal-overlay-generic" id="settingsModal" style="display: none;">
+    <div class="modal-box-pump" style="max-width: 520px; width: 92%;">
+      <div class="modal-header-row" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-card); padding-bottom: 12px; margin-bottom: 16px;">
+        <span class="modal-title-text" style="font-weight: 800; font-size: 18px; color: var(--text-primary);">⚙️ Account Settings & Statement</span>
+        <button class="btn-close-modal" onclick="document.getElementById('settingsModal').style.display='none'" style="background: none; border: none; font-size: 22px; color: var(--text-secondary); cursor: pointer;">&times;</button>
+      </div>
+
+      <!-- Connected Wallet (Read-Only) -->
+      <div style="background: var(--bg-input); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
+        <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-weight: 700;">Connected Web3 Wallet (Read-Only)</div>
+        <div style="font-family: var(--font-mono); font-size: 13px; color: var(--pump-mint); font-weight: 700; word-break: break-all;" id="settingsWalletAddress">
+          Not Connected
+        </div>
+      </div>
+
+      <!-- Referral Link & Code -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
+        <div style="font-size: 12px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">Referral Program (/r/CODE)</div>
+        <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;" id="settingsRefCodeDisplay">
+          Connect wallet to generate referral code
+        </div>
+        <button class="cat-pill-btn" style="padding: 4px 12px; font-size: 11px;" onclick="window.launchpadManager.copyReferralLink()">
+          Copy Referral Link
+        </button>
+      </div>
+
+      <!-- Exports: Trades CSV & Monthly Statement -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px;">
+        <div style="font-size: 13px; font-weight: 800; color: var(--pump-mint); margin-bottom: 8px;">Statements & Trade Reports</div>
+        
+        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
+          <label style="font-size: 12px; color: var(--text-secondary);">Select Month:</label>
+          <input type="month" id="settingsStatementMonth" style="background: var(--bg-input); border: 1px solid var(--border-card); color: #fff; padding: 6px 10px; border-radius: var(--radius-sm); font-size: 12px;">
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn-signin-mint" style="padding: 8px 14px; font-size: 12px; font-weight: 700;" onclick="window.launchpadManager.downloadMonthlyStatement()">
+            📄 Download Monthly Statement
+          </button>
+          <button class="cat-pill-btn" style="padding: 8px 14px; font-size: 12px; font-weight: 700; color: var(--text-primary);" onclick="window.launchpadManager.exportTradesCsv()">
+            📥 Export Trades CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Preferences: Hold / Not Interested / Follows -->
+      <div style="background: var(--bg-input); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
+        <div style="font-size: 12px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">Feed Preferences & Follows</div>
+        <div style="font-size: 11px; color: var(--text-secondary); display: flex; gap: 16px; flex-wrap: wrap;">
+          <div>Holding: <strong id="settingsHoldCount" style="color: #fff;">0</strong> coins</div>
+          <div>Not Interested / Hidden: <strong id="settingsHiddenCount" style="color: #fff;">0</strong> coins</div>
+          <div>Followed Creators: <strong id="settingsFollowsCount" style="color: #fff;">0</strong></div>
+        </div>
+      </div>
+
+      <!-- Honest Non-Custodial Disclaimer -->
+      <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 16px;">
+        <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+          ⚖️ <strong>Honest Disclaimer:</strong> Cession indexes your Cession trades on-chain. We do not hold keys or funds. P/L is calculated mark-to-market from Cession curve prices. This is not an official tax, brokerage, or investment advice statement.
+        </div>
+      </div>
+
+      <button class="cat-pill-btn" style="width: 100%; justify-content: center; padding: 10px; font-weight: 700; color: var(--text-primary);" onclick="document.getElementById('settingsModal').style.display='none'">
+        Close Settings
       </button>
     </div>
   </div>
