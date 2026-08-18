@@ -6,6 +6,12 @@
       el.style.display = on ? 'block' : 'none';
     });
   }
+  function closeSearch() {
+    const m = document.getElementById('searchModal');
+    if (!m) return;
+    m.style.display = 'none';
+    m.classList.remove('open');
+  }
   function ready() {
     if (!window.CessionUI) return setTimeout(ready, 40);
     const ui = window.CessionUI;
@@ -15,13 +21,25 @@
     document.head.appendChild(link);
     ui.openSearch = function () {
       const m = document.getElementById('searchModal');
-      if (m) { m.style.display = 'flex'; m.classList.add('open'); }
+      if (!m) return;
+      const box = m.querySelector('.modal-box-pump');
+      if (box && !box.querySelector('.cx-x')) {
+        const x = document.createElement('button');
+        x.className = 'cx-x';
+        x.type = 'button';
+        x.setAttribute('aria-label', 'Close');
+        x.textContent = '×';
+        x.onclick = closeSearch;
+        box.insertBefore(x, box.firstChild);
+      }
+      m.style.display = 'flex';
+      m.classList.add('open');
+      m.onclick = function (e) { if (e.target === m) closeSearch(); };
     };
     ui.searchLane = function (lane) {
       if (ui.setExploreLane) ui.setExploreLane(lane);
       ui.go('explore');
-      const m = document.getElementById('searchModal');
-      if (m) { m.style.display = 'none'; m.classList.remove('open'); }
+      closeSearch();
     };
     const prev = ui.go;
     ui.go = function (name) {
