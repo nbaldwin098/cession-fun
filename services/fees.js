@@ -1,8 +1,6 @@
 /**
- * FEE PATH
- * Now: curve steal.
- * After curve: keep winners at 0.40%.
- * Later: Cession pool at 0.20% to beat PumpSwap 0.25%.
+ * FEE PATH — no fixed referral cut.
+ * Referrals paid as bonus / discount from protocol, not a line on the trade.
  */
 function tier(marketCapUsd, stage) {
   const m = Number(marketCapUsd) || 0;
@@ -10,7 +8,7 @@ function tier(marketCapUsd, stage) {
     return { name: 'pool', live: false, totalBps: 20, creatorBps: 0, holderBps: 0, protocolBps: 20, referralBps: 0 };
   }
   if (m < 500000) {
-    return { name: 'curve', live: true, totalBps: 100, creatorBps: 50, holderBps: 20, protocolBps: 20, referralBps: 10 };
+    return { name: 'curve', live: true, totalBps: 100, creatorBps: 55, holderBps: 25, protocolBps: 20, referralBps: 0 };
   }
   return { name: 'stay', live: true, totalBps: 40, creatorBps: 10, holderBps: 10, protocolBps: 20, referralBps: 0 };
 }
@@ -20,6 +18,7 @@ module.exports = {
   protocolCapBps: 20,
   maxTraderBps: 100,
   laterPoolBps: 20,
+  referral: 'bonus_or_discount_only',
   tier,
   graduation: { stayOnCession: true, bundleEligible: true, laterPool: true }
 };
