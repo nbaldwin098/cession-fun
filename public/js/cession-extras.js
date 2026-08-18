@@ -7,10 +7,14 @@
     const img = c.imageUrl || c.image || '';
     const chg = Number(c.change24h || 0);
     const p = JSON.stringify({ symbol: c.symbol, name: c.name || c.symbol, mint: c.mintAddress || c.mint || '', creator: c.creator || '' });
-    return '<button class="cx-card-coin" type="button" onclick=\'CessionUI.openCoin(' + p + ')\'>' + (img ? '<img src="' + img + '" alt="">' : '') + '<div class="meta"><div class="name">' + (c.name || c.symbol) + '</div><div class="tick">' + c.symbol + (chg ? (' ' + (chg > 0 ? '+' : '') + chg.toFixed(1) + '%') : '') + '</div></div></button>';
+    return '<button class="cx-card-coin" type="button" data-symbol="' + c.symbol + '" onclick=\'CessionUI.openCoin(' + p + ')\'>' +
+      (img ? '<img src="' + img + '" alt="">' : '') +
+      '<div class="meta"><div class="name">' + (c.name || c.symbol) + '</div><div class="tick">' + c.symbol +
+      (chg ? (' ' + (chg > 0 ? '+' : '') + chg.toFixed(1) + '%') : '') +
+      '</div></div></button>';
   }
   function empty(t, s) { return '<div class="cx-empty"><h2>' + t + '</h2><p class="cx-muted">' + s + '</p></div>'; }
-  function ad() { return '<div class="cx-ad">Hold and follow shape For You. Skip buries a coin.</div>'; }
+  function ad() { return '<div class="cx-ad">50 real viewers who stay beat 500 wash trades.</div>'; }
   async function live() {
     try {
       const r = await fetch('/api/pulse?lane=all&limit=80');
@@ -26,13 +30,13 @@
     if (!grid) return;
     const f = CessionRank.follows();
     const coins = CessionRank.rankFollowing(await live());
-    const head = '<div class="cx-ad">Following ' + f.users.length + ' wallets, ' + f.coins.length + ' coins. Ranked, not chronological.</div>';
+    const head = '<div class="cx-ad">Following ' + f.users.length + ' wallets and ' + f.coins.length + ' coins. Ranked by stay time, not follow count.</div>';
     if (!f.users.length && !f.coins.length) {
-      grid.innerHTML = head + empty('Following', 'Follow a coin or a wallet. The feed will mix both.');
+      grid.innerHTML = head + empty('Following', 'Follow a coin or a wallet.');
       return;
     }
     if (!coins.length) {
-      grid.innerHTML = head + empty('No live followed coins', 'Followed wallets have not launched live coins yet.');
+      grid.innerHTML = head + empty('No live followed coins', 'Followed wallets have no live coins yet.');
       return;
     }
     const parts = [head];
@@ -56,8 +60,15 @@
       if (lane === 'following') paintFollowing();
       else paintForYou();
     };
+    const prevGo = ui.go;
+    ui.go = function (name) {
+      if (window.CessionTrack) CessionTrack.leave();
+      if (prevGo) prevGo(name);
+      if (name === 'home') paintForYou();
+    };
     const prevOpen = ui.openCoin;
     ui.openCoin = function (coin) {
+      if (window.CessionTrack) CessionTrack.open(coin.symbol);
       if (prevOpen) prevOpen(coin);
       const meta = document.getElementById('coinMeta');
       if (!meta) return;
@@ -68,8 +79,13 @@
         meta.parentNode.insertBefore(bar, meta.nextSibling);
       }
       bar.innerHTML = '<button class="cx-ghost" type="button" id="followCoinBtn">Follow coin</button><button class="cx-ghost" type="button" id="followUserBtn">Follow wallet</button>';
-      document.getElementById('followCoinBtn').onclick = function () { CessionRank.followCoin(coin.symbol); alert('Following ' + coin.symbol); };
-      document.getElementById('followUserBtn').onclick = function () { CessionRank.followUser(String(coin.creator || '').toLowerCase()); alert('Following wallet'); };
+      document.getElementById('followCoinBtn').onclick = function () {
+        CessionRank.followCoin(coin.symbol);
+        if (window.CessionTrack) CessionTrack.emit('follow', coin.symbol, 0);
+      };
+      document.getElementById('followUserBtn').onclick = function () {
+        CessionRank.followUser(String(coin.creator || '').toLowerCase());
+      };
     };
     ui.copyReferral = function () {
       const addr = localStorage.getItem('cession_address') || 'cession';
@@ -83,5 +99,6 @@
       if (oldTrade) oldTrade(side);
       if (fee) fee.style.display = side === 'buy' ? 'block' : 'none';
     };
+    paintForYou();
   });
 })();
