@@ -13,16 +13,46 @@ const TICKETS_FILE = path.join(__dirname, '..', 'data', 'tickets.json');
 const usersByAddress = new Map();
 const activeSessions = new Map();
 
+function keysFor(address) {
+  const raw = String(address || '').trim();
+  const out = [];
+  if (raw) out.push(raw);
+  if (raw.startsWith('0x')) out.push(raw.toLowerCase());
+  return out;
+}
+function findUser(address) {
+  for (const k of keysFor(address)) {
+    if (usersByAddress.has(k)) return usersByAddress.get(k);
+    const low = k.toLowerCase();
+    for (const [ak, u] of usersByAddress) {
+      if (ak.toLowerCase() === low) return u;
+    }
+  }
+  return null;
+}
+function putUser(user) {
+  keysFor(user.address || user.cleanAddress).forEach((k) => usersByAddress.set(k, user));
+}
 function loadUsersFromDisk() {
   try {
     if (fs.existsSync(USERS_FILE)) {
       const parsed = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
-      if (Array.isArray(parsed)) parsed.forEach((u) => { if (u.address) usersByAddress.set(u.address.toLowerCase(), u); });
+      if (Array.isArray(parsed)) parsed.forEach((u) => { if (u.address) putUser(u); });
     }
   } catch (e) {}
 }
 function saveUsersToDisk() {
-  try { fs.writeFileSync(USERS_FILE, JSON.stringify(Array.from(usersByAddress.values()), null, 2)); } catch (e) {}
+  try {
+    const uniq = [];
+    const seen = new Set();
+    for (const u of usersByAddress.values()) {
+      const id = (u.address || '').toLowerCase();
+      if (seen.has(id)) continue;
+      seen.add(id);
+      uniq.push(u);
+    }
+    fs.writeFileSync(USERS_FILE, JSON.stringify(uniq, null, 2));
+  } catch (e) {}
 }
 function readTickets() {
   try { return JSON.parse(fs.readFileSync(TICKETS_FILE, 'utf8')); } catch { return { tickets: {} }; }
@@ -33,10 +63,29 @@ function writeTickets(store) {
 }
 function usernameTaken(name, exceptAddr) {
   const want = String(name || '').trim().toLowerCase();
+  const except = String(exceptAddr || '').toLowerCase();
   for (const u of usersByAddress.values()) {
-    if (u.usernameLocked && String(u.username || '').toLowerCase() === want && u.cleanAddress !== exceptAddr) return true;
+    if (u.usernameLocked && String(u.username || '').toLowerCase() === want && String(u.address || '').toLowerCase() !== except) return true;
   }
   return false;
+}
+function ensureUser(address) {
+  let user = findUser(address);
+  if (user) return user;
+  const raw = String(address || '').trim();
+  user = {
+    id: 'usr_' + crypto.randomBytes(6).toString('hex'),
+    address: raw,
+    cleanAddress: raw.startsWith('0x') ? raw.toLowerCase() : raw,
+    username: null,
+    usernameLocked: false,
+    avatar: '',
+    createdAt: Date.now(),
+    lastLogin: Date.now()
+  };
+  putUser(user);
+  saveUsersToDisk();
+  return user;
 }
 loadUsersFromDisk();
 
@@ -63,12 +112,8 @@ router.post('/wallet-login', (req, res) => {
     const sol = chain.toLowerCase() === 'solana' || /phantom|solflare/i.test(walletType);
     const ok = sol ? verifySolanaSignature(address, message, signature) : verifyEthereumSignature(address, message, signature);
     if (!ok) return res.status(401).json({ success: false, error: 'Invalid wallet signature.' });
-    const cleanAddr = address.toLowerCase();
-    let user = usersByAddress.get(cleanAddr);
-    if (!user) {
-      user = { id: 'usr_' + crypto.randomBytes(6).toString('hex'), address, cleanAddress: cleanAddr, chain, walletType, username: null, usernameLocked: false, avatar: '', createdAt: Date.now(), lastLogin: Date.now() };
-      usersByAddress.set(cleanAddr, user);
-    } else user.lastLogin = Date.now();
+    const user = ensureUser(address);
+    user.lastLogin = Date.now();
     saveUsersToDisk();
     const token = 'sess_' + crypto.randomBytes(24).toString('hex');
     activeSessions.set(token, user);
@@ -97,37 +142,32 @@ router.post('/ticket/:id/complete', (req, res) => {
   if (!row) return res.status(404).json({ success: false, error: 'Unknown ticket' });
   const address = String(req.body.address || '').trim();
   if (address.length < 20) return res.status(400).json({ success: false, error: 'Address required' });
-  const cleanAddr = address.toLowerCase();
-  let user = usersByAddress.get(cleanAddr);
-  if (!user) {
-    user = { id: 'usr_' + crypto.randomBytes(6).toString('hex'), address, cleanAddress: cleanAddr, username: null, usernameLocked: false, avatar: '', createdAt: Date.now(), lastLogin: Date.now() };
-    usersByAddress.set(cleanAddr, user);
-    saveUsersToDisk();
-  }
+  const user = ensureUser(address);
   row.status = 'complete';
-  row.address = address;
+  row.address = user.address;
   row.user = { address: user.address, username: user.username, usernameLocked: !!user.usernameLocked, avatar: user.avatar || '', needsUsername: !user.usernameLocked };
   writeTickets(store);
   res.json({ success: true, user: row.user });
 });
 
 router.post('/username', (req, res) => {
-  const address = String(req.body.address || '').toLowerCase();
+  const address = String(req.body.address || '').trim();
   const username = String(req.body.username || '').trim().replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20);
   if (!address || username.length < 3) return res.status(400).json({ success: false, error: 'Username must be 3-20 letters or numbers.' });
-  const user = usersByAddress.get(address);
-  if (!user) return res.status(404).json({ success: false, error: 'Connect first.' });
-  if (user.usernameLocked) return res.status(409).json({ success: false, error: 'Username is permanent.' });
+  const user = ensureUser(address);
+  if (user.usernameLocked) {
+    return res.json({ success: true, username: user.username, already: true });
+  }
   if (usernameTaken(username, address)) return res.status(409).json({ success: false, error: 'Username taken.' });
   user.username = username;
   user.usernameLocked = true;
+  putUser(user);
   saveUsersToDisk();
   res.json({ success: true, username });
 });
 
 router.post('/avatar', (req, res) => {
-  const address = String(req.body.address || '').toLowerCase();
-  const user = usersByAddress.get(address);
+  const user = findUser(req.body.address);
   if (!user) return res.status(404).json({ success: false, error: 'Connect first.' });
   user.avatar = String(req.body.avatar || '').slice(0, 400000);
   saveUsersToDisk();
@@ -135,16 +175,15 @@ router.post('/avatar', (req, res) => {
 });
 
 router.get('/profile/:address', (req, res) => {
-  const user = usersByAddress.get(String(req.params.address).toLowerCase());
-  if (!user) return res.json({ success: true, exists: false });
+  const user = findUser(req.params.address);
+  if (!user) return res.json({ success: true, exists: false, usernameLocked: false });
   res.json({ success: true, exists: true, username: user.username, usernameLocked: !!user.usernameLocked, avatar: user.avatar || '' });
 });
 
 router.get('/session', (req, res) => {
   const token = (req.headers.authorization || '').replace('Bearer ', '') || req.query.token;
   if (!token || !activeSessions.has(token)) return res.status(401).json({ success: false, authenticated: false });
-  const user = activeSessions.get(token);
-  res.json({ success: true, authenticated: true, user });
+  res.json({ success: true, authenticated: true, user: activeSessions.get(token) });
 });
 
 router.post('/logout', (req, res) => {
