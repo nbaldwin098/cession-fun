@@ -6,14 +6,11 @@
   <title>For You | Cession</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" type="image/png" href="images/cession-logo.png">
-  <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
   <header class="cx-top">
     <button class="cx-wordmark" type="button" onclick="CessionUI.go('home')">CESSION</button>
-    <div class="cx-top-right">
-      <button class="cx-connect" id="btnConnectWallet" type="button">Connect</button>
-    </div>
+    <button class="cx-connect" id="btnConnectWallet" type="button">Connect</button>
   </header>
   <div class="cx-app">
     <main class="page-view active" id="viewHome">
@@ -34,7 +31,7 @@
       <div id="walletScreenDisconnected">
         <div class="cx-card">
           <h2>Connect a wallet</h2>
-          <p>Connect once per visit. You still sign each on-chain buy or sell. We do not hold keys.</p>
+          <p>Connect once per visit. We do not hold keys.</p>
           <button class="cx-door phantom" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button>
           <button class="cx-door metamask" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button>
           <p class="cx-muted" id="walletExtHint"></p>
@@ -42,11 +39,9 @@
       </div>
       <div id="walletScreenConnected" style="display:none;">
         <div class="cx-card">
-          <div class="cx-muted" id="walletConnectedTypeLabel">Connected</div>
           <div class="cx-mono" id="walletScreenAddress">-</div>
           <div class="cx-balance" id="walletScreenSolBal">0.00 SOL</div>
           <button class="cx-ghost" type="button" onclick="CessionUI.openSettings()">Settings</button>
-          <button class="cx-ghost" type="button" onclick="window.walletEngine && window.walletEngine.disconnect()">Disconnect</button>
         </div>
       </div>
     </main>
@@ -55,12 +50,13 @@
       <input class="cx-search" id="tokenSearchInput" type="search" placeholder="Search live coins">
       <button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create a coin (0.05 SOL)</button>
       <div class="cx-card" style="margin-top:16px;">
+        <p class="cx-muted">Create 0.05 SOL. Trade 0.50 percent. Creator fees escrow until the curve is live. We do not charge 2 percent to copy Bags.</p>
+        <button class="cx-ghost" type="button" disabled>Verified Launch - not live</button>
         <button class="cx-ghost" type="button" disabled>Perpetuals - not live</button>
         <button class="cx-ghost" type="button" disabled>Predictions - not live</button>
         <button class="cx-ghost" type="button" disabled>Rewards - not live</button>
         <button class="cx-ghost" type="button" disabled>Market data - not live</button>
         <button class="cx-launch" type="button" style="width:100%;margin-top:16px;" onclick="CessionUI.openStake()">Stake SOL with Phantom</button>
-        <p class="cx-muted">SOL only. Staked in Phantom. We do not hold your stake.</p>
       </div>
     </main>
     <main class="page-view" id="viewProfile">
@@ -84,10 +80,9 @@
     </main>
     <main class="page-view" id="viewCoin">
       <button class="cx-ghost" type="button" onclick="CessionUI.go('home')">Back</button>
-      <img id="coinImage" class="cx-coin-hero" alt="">
       <h1 class="cx-title" id="coinTitle">Coin</h1>
       <p class="cx-muted" id="coinMeta">No live mint yet.</p>
-      <div id="tradingviewChart" class="cx-chart"></div>
+      <p class="cx-muted">Deployer score shows after real trades. New launchers start with no score.</p>
       <div class="cx-trade-row">
         <button class="cx-launch" type="button" onclick="CessionUI.openTrade('buy')">Buy</button>
         <button class="cx-ghost" type="button" onclick="CessionUI.openTrade('sell')">Sell</button>
@@ -97,19 +92,18 @@
   <nav class="bottom-nav-bar" id="bottomNav">
     <button class="bottom-nav-slot active" id="bnavForYou" type="button" onclick="CessionUI.go('home')"><span class="bnav-icon">&#128293;</span><span class="bnav-label">For You</span></button>
     <button class="bottom-nav-slot" id="bnavPulse" type="button" onclick="CessionUI.go('pulse')"><span class="bnav-icon">&#128200;</span><span class="bnav-label">Pulse</span></button>
-    <button class="bottom-nav-slot bnav-center-wallet" id="bnavWallet" type="button" onclick="CessionUI.go('wallet')"><span class="bnav-wallet-circle"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></span><span class="bnav-label">Wallet</span></button>
+    <button class="bottom-nav-slot bnav-center-wallet" id="bnavWallet" type="button" onclick="CessionUI.go('wallet')"><span class="bnav-wallet-circle">&#128176;</span><span class="bnav-label">Wallet</span></button>
     <button class="bottom-nav-slot" id="bnavExplore" type="button" onclick="CessionUI.go('explore')"><span class="bnav-icon">&#127760;</span><span class="bnav-label">Explore</span></button>
     <button class="bottom-nav-slot" id="bnavYou" type="button" onclick="CessionUI.go('you')"><span class="bnav-icon">&#128100;</span><span class="bnav-label">You</span></button>
   </nav>
-  <div class="modal-overlay-generic" id="deployModal"><div class="modal-box-pump"><div class="modal-header-row"><strong>Launch coin</strong><button class="btn-close-modal" type="button" onclick="CessionUI.close('deployModal')">x</button></div><form id="deployCoinForm"><label class="form-label-pump">Name</label><input class="form-input-pump" id="deployName" required><label class="form-label-pump">Ticker</label><input class="form-input-pump" id="deploySymbol" required><button class="cx-launch" type="submit" style="width:100%;margin-top:16px;">Launch (0.05 SOL)</button></form></div></div>
-  <div class="modal-overlay-generic" id="walletModal"><div class="modal-box-pump"><div class="modal-header-row"><strong>Connect</strong><button class="btn-close-modal" type="button" onclick="CessionUI.close('walletModal')">x</button></div><button class="cx-door phantom" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button><button class="cx-door metamask" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button><p class="cx-muted" id="walletExtHintModal"></p></div></div>
-  <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump"><div class="modal-header-row"><strong>Settings</strong><button class="btn-close-modal" type="button" onclick="CessionUI.close('settingsModal')">x</button></div><div class="cx-mono" id="settingsWalletAddress">Not connected</div><input class="form-input-pump" id="presetBuySol" type="number" step="0.01"><input class="form-input-pump" id="presetSlippage" type="number"><button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save presets</button><button class="cx-ghost" type="button" onclick="CessionUI.openStatement()">Open statement</button><button class="cx-ghost" type="button" onclick="CessionUI.downloadCsv()">Download trades CSV</button></div></div>
-  <div class="modal-overlay-generic" id="statementModal"><div class="modal-box-pump"><div class="modal-header-row"><strong>Statement</strong><button class="btn-close-modal" type="button" onclick="CessionUI.close('statementModal')">x</button></div><div id="statementBody" class="cx-muted">No statements to display.</div><button class="cx-ghost" id="statementDownloadBtn" type="button" style="display:none;" onclick="CessionUI.downloadCsv()">Download statement</button></div></div>
-  <div class="modal-overlay-generic" id="stakeModal"><div class="modal-box-pump"><div class="modal-header-row"><strong>Stake SOL</strong><button class="btn-close-modal" type="button" onclick="CessionUI.close('stakeModal')">x</button></div><p class="cx-muted">Stake SOL in Phantom. About 6 to 8 percent network yield. Not a promised return.</p><button class="cx-launch" type="button" style="width:100%;" onclick="CessionUI.openPhantomStake()">Open Phantom stake</button></div></div>
-  <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump"><div class="modal-header-row"><strong id="tradeTitle">Buy</strong><button class="btn-close-modal" type="button" onclick="CessionUI.close('tradeModal')">x</button></div><p class="cx-muted" id="tradeCoinLabel"></p><input class="form-input-pump" id="tradeAmount" type="number" step="0.01"><button class="cx-launch" type="button" style="width:100%;margin-top:16px;" onclick="CessionUI.confirmTrade()">Confirm</button></div></div>
+  <div class="modal-overlay-generic" id="deployModal"><div class="modal-box-pump"><div class="modal-header-row"><strong>Launch coin</strong><button class="btn-close-modal" type="button" onclick="CessionUI.close('deployModal')">x</button></div><p class="cx-muted">0.05 SOL. Program not live yet.</p><form id="deployCoinForm"><input class="form-input-pump" id="deployName" placeholder="Name" required><input class="form-input-pump" id="deploySymbol" placeholder="Ticker" required><button class="cx-launch" type="submit" style="width:100%;margin-top:16px;">Launch (0.05 SOL)</button></form></div></div>
+  <div class="modal-overlay-generic" id="walletModal"><div class="modal-box-pump"><button class="cx-door phantom" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button><button class="cx-door metamask" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button><p class="cx-muted" id="walletExtHintModal"></p></div></div>
+  <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump"><div class="cx-mono" id="settingsWalletAddress">Not connected</div><button class="cx-ghost" type="button" onclick="CessionUI.openStatement()">Statement</button><button class="cx-ghost" type="button" onclick="CessionUI.downloadCsv()">Download CSV</button></div></div>
+  <div class="modal-overlay-generic" id="statementModal"><div class="modal-box-pump"><div id="statementBody" class="cx-muted">No statements to display.</div><button class="cx-ghost" id="statementDownloadBtn" type="button" style="display:none;" onclick="CessionUI.downloadCsv()">Download statement</button></div></div>
+  <div class="modal-overlay-generic" id="stakeModal"><div class="modal-box-pump"><p class="cx-muted">Stake in Phantom. About 6 to 8 percent. Not a promised return.</p><button class="cx-launch" type="button" style="width:100%;" onclick="CessionUI.openPhantomStake()">Open Phantom stake</button></div></div>
+  <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump"><strong id="tradeTitle">Buy</strong><p class="cx-muted" id="tradeCoinLabel"></p><input class="form-input-pump" id="tradeAmount" type="number"><button class="cx-launch" type="button" onclick="CessionUI.confirmTrade()">Confirm</button></div></div>
   <script src="js/cession-shell.js"></script>
   <script src="js/wallet.js"></script>
   <script src="js/charts.js"></script>
   <script src="js/trading.js"></script>
-</body>
-</html>
+</body></html>
