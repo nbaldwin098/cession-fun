@@ -1,17 +1,12 @@
-/*
-  CessionRank v2
-  Bounded X in [0, 100]. Cheap views/clicks stay ~4 pts.
-  Dynamic decay. Wallet quality. Human dwell only.
-  2-hop funding clusters and on-chain Q_w wait for program deploy.
-*/
+/* CessionRank v2.1 — spark reset, not launch-age death */
 (function (root) {
-  function hours(c) {
-    const t = Date.parse(c.createdAt || c.created || 0);
-    return t ? Math.max(0, (Date.now() - t) / 36e5) : 24;
+  function hoursSince(ts, fallbackHours) {
+    const t = Date.parse(ts || 0);
+    if (!t) return fallbackHours || 24;
+    return Math.max(0, (Date.now() - t) / 36e5);
   }
-  function minutesSince(ts) {
-    if (!ts) return 999;
-    return Math.max(0, (Date.now() - Date.parse(ts)) / 60000);
+  function hours(c) {
+    return hoursSince(c.createdAt || c.created, 24);
   }
   function follows() {
     try { return JSON.parse(localStorage.getItem('cession_follows') || '{"users":[],"coins":[]}'); }
@@ -40,7 +35,7 @@
       qualityMinutes: 0, humanMinutes: 0, holds: 0, follows: 0, shares: 0,
       returns: 0, bounces: 0, videoCompletes: 0, videoReplays: 0, videoSkips: 0,
       impressions: 0, trades: 0, repeatBuyers: 0, qualityTraderSum: 0,
-      lastTradeAt: null, wash: false
+      lastTradeAt: null, lastSparkAt: null, sparkRatio15m: 0, isResurrected: false, wash: false
     }, c.pulse || {});
   }
   function sat(n, cap) {
@@ -55,54 +50,63 @@
     return Number(den) > 0 ? Math.min(1, Number(num || 0) / Number(den)) : 0;
   }
   function lambda(p) {
-    const idle = minutesSince(p.lastTradeAt);
-    if (idle >= 15) return 0.5;
-    return 0.15;
+    const idleMin = hoursSince(p.lastTradeAt, 24) * 60;
+    return idleMin >= 15 ? 0.5 : 0.15;
   }
   function prices(c, f) {
     const p = pulse(c);
     const views = Math.max(1, p.views || p.impressions || 1);
     const buyers = Math.max(1, p.uniqueTraders || 1);
-
     const cheap =
       1.5 * Math.min(1, logSat(p.views, 10000)) +
       2.5 * Math.min(1, logSat(p.views * 0.15, 1000));
-
     const time =
       12 * sat(p.humanMinutes || p.qualityMinutes, 40) +
       10 * rate(p.videoCompletes, views) +
       5 * Math.min(1, rate(p.videoReplays, views));
-
     const people =
       8 * sat(p.uniqueViewers, 60) +
       18 * sat(p.qualityTraderSum || p.uniqueTraders, 25);
-
     const commit =
       12 * sat(p.holds, 20) +
       6 * rate(p.follows + (isFollowed(c, f) ? 3 : 0), views) +
       10 * rate(p.shares, views) +
       15 * rate(p.repeatBuyers, buyers);
-
     const washHit = p.wash || ((p.trades || 0) > 10 && (p.uniqueTraders || 0) / Math.max(1, p.trades) < 0.15);
     const penalty =
       18 * Number(p.skipRate || 0) +
       8 * rate(p.videoSkips, views) +
       8 * rate(p.bounces, Math.max(1, p.uniqueViewers)) +
       (washHit ? 50 : 0);
-
-    const decay = Math.exp(-lambda(p) * hours(c));
+    const sigma = Number(p.sparkRatio15m || 0);
+    const ageH = hours(c);
+    const sparkH = hoursSince(p.lastSparkAt || p.lastTradeAt || c.createdAt, ageH);
+    const resurrected = !!p.isResurrected || (sigma > 4 && (p.qualityTraderSum || 0) >= 3 && ageH >= 12);
+    const mr = resurrected ? 1 + Math.min(0.25, 0.04 * Math.max(0, sigma - 3)) : 1;
+    const lam = lambda(p);
+    const decay = Math.exp(-lam * sparkH);
     const base = Math.min(100, cheap + time + people + commit);
-    const x = Math.max(0, Math.min(100, (base - penalty) * decay));
+    const x = Math.max(0, Math.min(100, (base - penalty) * decay * mr));
     return {
-      cheap, time, people, commit, penalty, decay, lambda: lambda(p),
-      wash: washHit, x, cheapShare: base ? cheap / base : 0
+      cheap, time, people, commit, penalty,
+      decay_lambda: lam,
+      hours_since_spark: Number(sparkH.toFixed(3)),
+      spark_ratio_15m: sigma,
+      is_resurrected: resurrected,
+      revival_multiplier: Number(mr.toFixed(3)),
+      base_score: Number(base.toFixed(2)),
+      wash: washHit,
+      cheapShare: base ? cheap / base : 0,
+      x: Number(x.toFixed(2)),
+      final_X: Number(x.toFixed(2))
     };
   }
   function score(c, f) { return prices(c, f).x; }
   function stage(c) {
     const p = pulse(c);
+    const br = prices(c, follows());
+    if (br.is_resurrected && hours(c) >= 12) return 'spark';
     if (hours(c) < 4 && p.uniqueViewers < 30) return 'test';
-    if (p.uniqueTraders >= 8 && (p.humanMinutes || p.qualityMinutes) >= 15) return 'escalate';
     return 'main';
   }
   function diversify(list) {
@@ -120,14 +124,20 @@
     return out;
   }
   function mix(ranked) {
+    const spark = ranked.filter(function (c) { return stage(c) === 'spark'; });
     const test = ranked.filter(function (c) { return stage(c) === 'test'; });
-    const main = ranked.filter(function (c) { return stage(c) !== 'test'; });
+    const main = ranked.filter(function (c) { return stage(c) === 'main'; });
     const out = [];
-    let i = 0, j = 0;
-    while (i < main.length || j < test.length) {
-      if (out.length % 5 === 4 && j < test.length) out.push(test[j++]);
+    let i = 0, j = 0, k = 0;
+    while (i < main.length || j < test.length || k < spark.length) {
+      const n = out.length % 10;
+      if (n === 7 && j < test.length) out.push(test[j++]);
+      else if ((n === 8 || n === 9) && k < spark.length) out.push(spark[k++]);
+      else if (n >= 8 && j < test.length) out.push(test[j++]);
       else if (i < main.length) out.push(main[i++]);
-      else out.push(test[j++]);
+      else if (j < test.length) out.push(test[j++]);
+      else if (k < spark.length) out.push(spark[k++]);
+      else break;
     }
     const seen = {};
     return out.filter(function (c) {
