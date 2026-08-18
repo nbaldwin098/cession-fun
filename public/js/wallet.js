@@ -75,18 +75,44 @@ class CessionWalletEngine {
     const token = localStorage.getItem('cession_session_token');
     const profile = localStorage.getItem('cession_user_profile');
     const vault = localStorage.getItem('cession_vault_data');
+    const savedAddress = localStorage.getItem('cession_active_address');
+    const savedWalletType = localStorage.getItem('cession_wallet_type');
+    const savedChain = localStorage.getItem('cession_active_chain');
+    const savedBalances = localStorage.getItem('cession_balances');
 
-    if (token && profile) {
+    if (savedAddress || token || profile) {
       try {
-        this.sessionToken = token;
-        this.userProfile = JSON.parse(profile);
+        this.sessionToken = token || ('sess_' + Date.now());
+        this.userProfile = profile ? JSON.parse(profile) : {
+          username: savedAddress ? `User_${savedAddress.substring(0, 6)}` : 'SovereignTrader',
+          badge: 'ACTIVE TRADER',
+          addresses: { sol: savedAddress, eth: savedAddress }
+        };
         this.vaultData = vault ? JSON.parse(vault) : null;
-        this.isAuthenticated = true;
-        this.activeWalletType = localStorage.getItem('cession_wallet_type') || 'email';
-        this.activeAddress = this.userProfile.addresses?.eth || this.userProfile.addresses?.sol || this.vaultData?.addresses?.eth || '';
-        this.activeChain = this.activeAddress.startsWith('0x') ? 'Base' : 'Solana';
+        this.activeAddress = savedAddress || this.userProfile?.addresses?.sol || this.userProfile?.addresses?.eth || this.vaultData?.addresses?.sol || '';
+        this.activeWalletType = savedWalletType || 'phantom';
+        this.activeChain = savedChain || (this.activeAddress.startsWith('0x') ? 'Base' : 'Solana');
+        this.isAuthenticated = Boolean(this.activeAddress);
+
+        if (savedBalances) {
+          try {
+            this.balances = { ...this.balances, ...JSON.parse(savedBalances) };
+          } catch (e) {}
+        }
+
+        // Persist back to ensure full key alignment
+        if (this.activeAddress) {
+          localStorage.setItem('cession_session_token', this.sessionToken);
+          localStorage.setItem('cession_user_profile', JSON.stringify(this.userProfile));
+          localStorage.setItem('cession_active_address', this.activeAddress);
+          localStorage.setItem('cession_wallet_type', this.activeWalletType);
+          localStorage.setItem('cession_active_chain', this.activeChain);
+        }
+
+        // Silent Web3 Auto-Reconnect
+        this._autoReconnectWeb3(this.activeWalletType);
       } catch (e) {
-        this.logout();
+        console.warn('Session restoration error:', e);
       }
     } else {
       // Disconnected guest state
@@ -94,6 +120,26 @@ class CessionWalletEngine {
       this.activeAddress = '';
       this.userProfile = null;
       this.vaultData = null;
+    }
+  }
+
+  _autoReconnectWeb3(walletType) {
+    if (walletType === 'phantom' && window.phantom?.solana) {
+      window.phantom.solana.connect({ onlyIfTrusted: true }).then(resp => {
+        if (resp && resp.publicKey) {
+          this.activeAddress = resp.publicKey.toString();
+          this.isAuthenticated = true;
+          this.renderState();
+        }
+      }).catch(() => {});
+    } else if (['metamask', 'coinbase', 'trust'].includes(walletType) && window.ethereum) {
+      window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
+        if (accounts && accounts[0]) {
+          this.activeAddress = accounts[0];
+          this.isAuthenticated = true;
+          this.renderState();
+        }
+      }).catch(() => {});
     }
   }
 
@@ -461,7 +507,9 @@ class CessionWalletEngine {
 
       localStorage.setItem('cession_session_token', this.sessionToken);
       localStorage.setItem('cession_user_profile', JSON.stringify(this.userProfile));
+      localStorage.setItem('cession_active_address', this.activeAddress);
       localStorage.setItem('cession_wallet_type', walletName);
+      localStorage.setItem('cession_active_chain', this.activeChain);
 
       this.closeWalletModal();
       this.closeAuthModal();
@@ -518,7 +566,9 @@ class CessionWalletEngine {
 
       localStorage.setItem('cession_session_token', this.sessionToken);
       localStorage.setItem('cession_user_profile', JSON.stringify(this.userProfile));
+      localStorage.setItem('cession_active_address', this.activeAddress);
       localStorage.setItem('cession_wallet_type', 'phantom');
+      localStorage.setItem('cession_active_chain', 'Solana');
 
       this.closeWalletModal();
       this.closeAuthModal();
@@ -1113,6 +1163,8 @@ class CessionWalletEngine {
     localStorage.removeItem('cession_user_profile');
     localStorage.removeItem('cession_vault_data');
     localStorage.removeItem('cession_wallet_type');
+    localStorage.removeItem('cession_active_address');
+    localStorage.removeItem('cession_active_chain');
     localStorage.removeItem('cession_balances');
     localStorage.removeItem('cession_active_wallet');
     localStorage.removeItem('session_token');
