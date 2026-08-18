@@ -5,70 +5,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>For You | Cession</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" type="image/png" href="images/cession-logo.png">
 </head>
 <body>
   <header class="cx-top">
-    <button class="cx-wordmark" type="button" onclick="CessionUI.go('home')">CESSION</button>
-    <div class="cx-pills" id="topPills">
-      <button class="cx-pill on" type="button" data-lane="foryou">For You</button>
-      <button class="cx-pill" type="button" data-lane="trending">Trending</button>
-      <button class="cx-pill" type="button" data-lane="earn">Earn</button>
-      <button class="cx-pill" type="button" data-lane="rewards">Rewards</button>
-      <button class="cx-pill" type="button" data-lane="perps">Perpetuals</button>
+    <button class="cx-wordmark" type="button" onclick="CessionUI.go('home')">Cession</button>
+    <div class="cx-xhead">
+      <button class="cx-xtab on" id="tabForYou" type="button" onclick="CessionUI.setHomeLane('foryou')">For you</button>
+      <button class="cx-xtab" id="tabFollowing" type="button" onclick="CessionUI.setHomeLane('following')">Following</button>
     </div>
-    <button class="cx-search-btn" type="button" onclick="CessionUI.go('explore')" aria-label="Search">&#128269;</button>
+    <button class="cx-plus" type="button" onclick="CessionUI.openCreate()">+</button>
   </header>
   <div class="cx-app">
     <main class="page-view active" id="viewHome">
-      <button class="cx-ask" id="askBanner" type="button" onclick="CessionUI.go('ai')">Ask · Why is a coin moving</button>
       <div class="cx-feed" id="forYouCoinsGrid"></div>
     </main>
     <main class="page-view" id="viewExplorePulse">
-      <h1 class="cx-title">Pulse</h1>
-      <h2 class="cx-h2">Top 10 best</h2><div class="cx-feed" id="pulseBestGrid"></div>
-      <h2 class="cx-h2">Top 10 worst</h2><div class="cx-feed" id="pulseWorstGrid"></div>
-      <h2 class="cx-h2">Bundles</h2><div class="cx-feed" id="pulseBundleGrid"></div>
+      <h1 class="cx-title">Explore</h1>
+      <div class="cx-words" id="exploreWords">
+        <button class="on" type="button" data-lane="best">Best</button>
+        <button type="button" data-lane="worst">Worst</button>
+        <button type="button" data-lane="bundles">Bundles</button>
+        <button type="button" data-lane="trending">Trending</button>
+        <button type="button" data-lane="new">New</button>
+        <button type="button" data-lane="bots">Bots</button>
+        <button type="button" data-lane="rewards">Rewards</button>
+        <button type="button" data-lane="perps">Perpetuals</button>
+      </div>
+      <div class="cx-feed" id="exploreGrid"></div>
+      <div class="cx-card" id="botsPanel" style="display:none;">
+        <p class="cx-muted">Bots save a rule. They do not trade until the program is live.</p>
+        <input class="form-input-pump" id="botSymbol" placeholder="Ticker">
+        <input class="form-input-pump" id="botBuy" type="number" step="0.01" placeholder="Buy SOL">
+        <button class="cx-launch" type="button" onclick="CessionUI.saveBot()">Save bot</button>
+        <div id="botList" class="cx-muted"></div>
+      </div>
     </main>
     <main class="page-view" id="viewWallet">
       <h1 class="cx-title">Wallet</h1>
-      <div id="walletScreenDisconnected"><div class="cx-card"><h2>Connect a wallet</h2><p class="cx-muted">On phone, stay in Phantom or MetaMask after you connect. Safari cannot see a login made inside the MetaMask app.</p><button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button><button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button><p class="cx-muted" id="walletExtHint"></p></div></div>
-      <div id="walletScreenConnected" style="display:none;"><div class="cx-card"><div class="cx-mono" id="walletScreenAddress">-</div><div id="walletScreenSolBal">0.00 SOL</div><div class="cx-row"><span>Holdings</span><span id="youHoldCount">none</span></div><button class="cx-ghost" type="button" onclick="CessionUI.openSettings()">Settings</button><button class="cx-ghost" type="button" onclick="CessionUI.openStatement()">Statement</button><button class="cx-ghost" type="button" onclick="CessionUI.openStake()">Stake SOL with Phantom</button></div></div>
+      <div id="walletScreenDisconnected" class="cx-card">
+        <p class="cx-muted">On phone, stay in Phantom or MetaMask after you connect. Safari cannot inherit that login.</p>
+        <button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button>
+        <button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button>
+      </div>
+      <div id="walletScreenConnected" class="cx-card" style="display:none;">
+        <div class="cx-mono" id="walletScreenAddress">-</div>
+        <div class="cx-row"><span>Created</span><span id="youCreateCount">none</span></div>
+        <div class="cx-row"><span>Held</span><span id="youHoldCount">none</span></div>
+        <div class="cx-row"><span>Trades</span><span id="youTxCount">none</span></div>
+        <button class="cx-ghost" type="button" onclick="CessionUI.openSettings()">Settings</button>
+        <button class="cx-ghost" type="button" onclick="CessionUI.openStatement()">Statement</button>
+        <button class="cx-ghost" type="button" onclick="CessionUI.openStake()">Stake SOL</button>
+      </div>
     </main>
-    <main class="page-view" id="viewExplore">
-      <h1 class="cx-title">Explore</h1>
-      <input class="cx-search" id="tokenSearchInput" type="search" placeholder="Search live coins">
-      <div class="cx-pills" style="margin-bottom:10px;"><button class="cx-pill on" type="button" onclick="CessionUI.setExploreLane('mix')">Mix</button><button class="cx-pill" type="button" onclick="CessionUI.setExploreLane('trending')">Trending</button><button class="cx-pill" type="button" onclick="CessionUI.setExploreLane('value')">High value</button><button class="cx-pill" type="button" onclick="CessionUI.setExploreLane('new')">New</button><button class="cx-pill" type="button" onclick="CessionUI.setExploreLane('bots')">Bots</button></div>
-      <button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create a coin (0.05 SOL)</button>
-      <div class="cx-feed" id="exploreGrid" style="margin-top:12px;"></div>
-      <div class="cx-card" id="botsPanel" style="display:none;margin-top:12px;"><h2>Trading bots</h2><p class="cx-muted">Not live until the program is on mainnet.</p><button class="cx-ghost" type="button" disabled>Create bot - not live</button></div>
+    <main class="page-view" id="viewRewards">
+      <h1 class="cx-title">Rewards</h1>
+      <div class="cx-card" id="rewardsBody"><p class="cx-muted">Holder share is 0.25 percent of trade fees after real volume. Accrued: 0 SOL. Not live yet.</p></div>
     </main>
     <main class="page-view" id="viewAi">
       <h1 class="cx-title">Ask</h1>
-      <div class="cx-chat"><div class="cx-chat-log" id="aiLog"></div><div class="cx-chat-row"><input class="cx-search" id="aiInput" placeholder="Ask about coins, P/L, or your wallet"><button class="cx-launch" type="button" onclick="CessionUI.sendAi()">Send</button></div></div>
+      <div class="cx-chat"><div class="cx-chat-log" id="aiLog"></div><div class="cx-chat-row"><input class="cx-search" id="aiInput" placeholder="Ask about coins, P/L, or a bot"><button class="cx-launch" type="button" onclick="CessionUI.sendAi()">Send</button></div></div>
     </main>
     <main class="page-view" id="viewCoin">
       <button class="cx-ghost" type="button" onclick="CessionUI.go('home')">Back</button>
       <h1 class="cx-title" id="coinTitle">Coin</h1>
-      <p class="cx-muted" id="coinMeta">No live mint yet.</p>
+      <p class="cx-muted" id="coinMeta"></p>
       <div class="cx-trade-row"><button class="cx-launch" type="button" onclick="CessionUI.openTrade('buy')">Buy</button><button class="cx-ghost" type="button" onclick="CessionUI.openTrade('sell')">Sell</button></div>
     </main>
   </div>
-  <nav class="bottom-nav-bar" id="bottomNav">
-    <button class="bottom-nav-slot active" id="bnavForYou" type="button" onclick="CessionUI.go('home')"><span class="bnav-icon">&#127968;</span><span class="bnav-label">For You</span></button>
-    <button class="bottom-nav-slot" id="bnavPulse" type="button" onclick="CessionUI.go('pulse')"><span class="bnav-icon">&#128200;</span><span class="bnav-label">Pulse</span></button>
-    <button class="bottom-nav-slot bnav-center-wallet" id="bnavWallet" type="button" onclick="CessionUI.go('wallet')"><span class="bnav-wallet-circle">+</span><span class="bnav-label">Wallet</span></button>
-    <button class="bottom-nav-slot" id="bnavExplore" type="button" onclick="CessionUI.go('explore')"><span class="bnav-icon">&#127760;</span><span class="bnav-label">Explore</span></button>
-    <button class="bottom-nav-slot" id="bnavYou" type="button" onclick="CessionUI.go('ai')"><span class="bnav-icon">&#129302;</span><span class="bnav-label">Ask</span></button>
+  <button class="cx-askbar" id="askBanner" type="button" onclick="CessionUI.go('ai')">Ask</button>
+  <nav class="bottom-nav-bar">
+    <button class="bottom-nav-slot active" id="bnavForYou" type="button" onclick="CessionUI.go('home')">For You</button>
+    <button class="bottom-nav-slot" id="bnavPulse" type="button" onclick="CessionUI.go('explore')">Explore</button>
+    <button class="bottom-nav-slot bnav-wallet" id="bnavWallet" type="button" onclick="CessionUI.go('wallet')"><span class="bnav-wallet-circle"></span></button>
+    <button class="bottom-nav-slot" id="bnavExplore" type="button" onclick="CessionUI.go('rewards')">Rewards</button>
+    <button class="bottom-nav-slot" id="bnavYou" type="button" onclick="CessionUI.go('ai')">Ask</button>
   </nav>
-  <div class="modal-overlay-generic" id="deployModal"><div class="modal-box-pump"><form id="deployCoinForm"><input class="form-input-pump" id="deployName" placeholder="Name" required><input class="form-input-pump" id="deploySymbol" placeholder="Ticker" required><button class="cx-launch" type="submit">Launch (0.05 SOL)</button></form></div></div>
-  <div class="modal-overlay-generic" id="walletModal"><div class="modal-box-pump"><button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button><button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button><p class="cx-muted" id="walletExtHintModal"></p></div></div>
-  <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump"><div class="cx-mono" id="settingsWalletAddress">Not connected</div><input class="form-input-pump" id="presetBuySol" type="number" step="0.01" placeholder="Default buy SOL"><input class="form-input-pump" id="presetSlippage" type="number" step="0.1" placeholder="Slippage %"><button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save presets</button><button class="cx-ghost" type="button" onclick="CessionUI.toggleTheme()">Light / dark</button><button class="cx-ghost" type="button" onclick="CessionUI.openStatement()">Statement</button><button class="cx-ghost" type="button" onclick="CessionUI.downloadCsv()">Download CSV</button></div></div>
-  <div class="modal-overlay-generic" id="statementModal"><div class="modal-box-pump"><div id="statementBody" class="cx-muted">No statements to display.</div><button class="cx-ghost" id="statementDownloadBtn" type="button" style="display:none;" onclick="CessionUI.downloadCsv()">Download statement</button></div></div>
-  <div class="modal-overlay-generic" id="stakeModal"><div class="modal-box-pump"><p class="cx-muted">Stake in Phantom. About 6 to 8 percent.</p><button class="cx-launch" type="button" onclick="CessionUI.openPhantomStake()">Open Phantom stake</button></div></div>
-  <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump"><strong id="tradeTitle">Buy</strong><p class="cx-muted" id="tradeCoinLabel"></p><input class="form-input-pump" id="tradeAmount" type="number" step="0.01" placeholder="Amount SOL"><input class="form-input-pump" id="tradeSlippage" type="number" step="0.1" placeholder="Slippage %"><button class="cx-launch" type="button" onclick="CessionUI.confirmTrade()">Confirm</button><button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save as preset</button></div></div>
+  <div class="modal-overlay-generic" id="deployModal"><div class="modal-box-pump"><form id="deployCoinForm"><input class="form-input-pump" id="deployName" placeholder="Name" required><input class="form-input-pump" id="deploySymbol" placeholder="Ticker" required><button class="cx-launch" type="submit">Launch 0.05 SOL</button></form></div></div>
+  <div class="modal-overlay-generic" id="walletModal"><div class="modal-box-pump"><button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button><button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button></div></div>
+  <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump"><div class="cx-mono" id="settingsWalletAddress"></div><input class="form-input-pump" id="presetBuySol" type="number" step="0.01" placeholder="Default buy SOL"><input class="form-input-pump" id="presetSlippage" type="number" step="0.1" placeholder="Slippage"><button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save presets</button><button class="cx-ghost" type="button" onclick="CessionUI.toggleTheme()">Light / dark</button><button class="cx-ghost" type="button" onclick="CessionUI.downloadCsv()">Download CSV</button></div></div>
+  <div class="modal-overlay-generic" id="statementModal"><div class="modal-box-pump"><div id="statementBody" class="cx-muted">No statements to display.</div><button class="cx-ghost" id="statementDownloadBtn" type="button" style="display:none;" onclick="CessionUI.downloadCsv()">Download</button></div></div>
+  <div class="modal-overlay-generic" id="stakeModal"><div class="modal-box-pump"><p class="cx-muted">Stake in Phantom. About 6 to 8 percent. Not a promised return.</p><button class="cx-launch" type="button" onclick="CessionUI.openPhantomStake()">Open Phantom</button></div></div>
+  <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump"><strong id="tradeTitle">Buy</strong><p id="tradeCoinLabel" class="cx-muted"></p><input class="form-input-pump" id="tradeAmount" type="number" step="0.01"><input class="form-input-pump" id="tradeSlippage" type="number" step="0.1"><button class="cx-launch" type="button" onclick="CessionUI.confirmTrade()">Confirm</button><button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save as preset</button></div></div>
   <script src="js/cession-shell.js"></script>
   <script src="js/wallet.js"></script>
-  <script src="js/charts.js"></script>
   <script src="js/trading.js"></script>
 </body></html>
