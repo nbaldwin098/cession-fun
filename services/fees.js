@@ -18,9 +18,31 @@ function tier(marketCapUsd) {
   return { name: 'mega', totalBps: 50, creatorBps: 5, holderBps: 10, protocolBps: 30, referralBps: 5 };
 }
 
+function sellSurchargeBps(holdMinutes) {
+  const h = Number(holdMinutes);
+  if (!Number.isFinite(h) || h < 15) return 50;
+  if (h < 240) return 25;
+  return 0;
+}
+
+function quote(side, marketCapUsd, holdMinutes) {
+  const t = tier(marketCapUsd);
+  const extra = side === 'sell' ? sellSurchargeBps(holdMinutes) : 0;
+  return {
+    ...t,
+    side,
+    holdMinutes: holdMinutes || 0,
+    dumpTaxBps: extra,
+    traderPaysBps: t.totalBps + extra,
+    protocolBps: t.protocolBps + extra
+  };
+}
+
 module.exports = {
   createLamports: 0,
-  locked: 'create stays free; creator ladder is the published scale; protocol may only go down for a promo',
+  locked: 'create free; creator ladder never cut; dump tax is extra protocol only',
   tier,
+  sellSurchargeBps,
+  quote,
   graduation: { stayOnCession: true, bundleEligible: true }
 };
