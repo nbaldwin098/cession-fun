@@ -22,9 +22,17 @@
     alert(msg);
   }
 
+  function engine() {
+    return window.walletEngine || null;
+  }
+
   function address() {
-    const w = window.walletEngine;
-    return (w && (w.state?.address || w.address || w.publicKey)) || localStorage.getItem('cession_address') || '';
+    const w = engine();
+    return (
+      (w && (w.activeAddress || w.state?.address || w.address || w.publicKey)) ||
+      localStorage.getItem('cession_address') ||
+      ''
+    );
   }
 
   function emptyHtml(title, sub) {
@@ -42,6 +50,7 @@
     const tab = document.getElementById(tabs[key]);
     if (tab) tab.classList.add('active');
     if (key === 'home' || key === 'pulse' || key === 'explore') loadPulse();
+    if (key === 'you' || key === 'profile' || key === 'wallet') syncFromBackend();
     window.scrollTo(0, 0);
   }
 
@@ -84,23 +93,82 @@
   function openCoin(coin) {
     show('coin');
     document.getElementById('coinTitle').textContent = coin.name || coin.symbol || 'Coin';
-    document.getElementById('coinMeta').textContent = coin.mint ? coin.mint : 'No live mint yet.';
+    document.getElementById('coinMeta').textContent = coin.mint || 'No live mint yet.';
     const empty = document.getElementById('chartEmpty');
-    const el = document.getElementById('cessionChart');
-    el.innerHTML = '';
-    if (!coin.mint || !window.LightweightCharts) {
+    if (!coin.symbol) {
       empty.style.display = 'block';
       return;
     }
     empty.style.display = 'none';
-    const chart = LightweightCharts.createChart(el, {
-      width: el.clientWidth,
-      height: 220,
-      layout: { background: { color: '#0b0e16' }, textColor: '#94a3b8' },
-      grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } }
-    });
-    const series = chart.addAreaSeries({ lineColor: '#5B6CFF', topColor: 'rgba(91,108,255,0.3)', bottomColor: 'rgba(91,108,255,0.0)' });
-    series.setData([]);
+    if (window.chartController && typeof window.chartController.loadSymbol === 'function') {
+      window.chartController.loadSymbol(coin.symbol);
+      return;
+    }
+    if (window.chartController && typeof window.chartController.fetchCandles === 'function') {
+      window.chartController.fetchCandles(coin.symbol);
+      return;
+    }
+    fetch(`/api/market/candles/${encodeURIComponent(coin.symbol)}?tf=15m`)
+      .then((r) => r.json())
+      .then((data) => {
+        const el = document.getElementById('tradingviewChart');
+        if (!el || !window.LightweightCharts) {
+          empty.style.display = 'block';
+          return;
+        }
+        el.innerHTML = '';
+        const chart = LightweightCharts.createChart(el, {
+          width: el.clientWidth,
+          height: 220,
+          layout: { background: { color: '#0b0e16' }, textColor: '#94a3b8' },
+          grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } }
+        });
+        const series = chart.addCandlestickSeries();
+        const candles = (data.candles || []).map((c) => ({
+          time: c.time,
+          open: c.open,
+          high: c.high,
+          low: c.low,
+          close: c.close
+        }));
+        if (!candles.length) {
+          empty.style.display = 'block';
+          empty.textContent = 'No candles yet for this mint.';
+          return;
+        }
+        series.setData(candles);
+      })
+      .catch(() => {
+        empty.style.display = 'block';
+        empty.textContent = 'No candles yet for this mint.';
+      });
+  }
+
+  async function syncFromBackend() {
+    const addr = address();
+    const settingsAddr = document.getElementById('settingsWalletAddress');
+    const profileAddr = document.getElementById('profileAddressFull');
+    if (settingsAddr) settingsAddr.textContent = addr || 'Not connected';
+    if (profileAddr && addr) profileAddr.textContent = addr;
+    if (!addr) return;
+    localStorage.setItem('cession_address', addr);
+    try {
+      const [stRes, txRes] = await Promise.all([
+        fetch(`/api/wallets/${encodeURIComponent(addr)}/statement`),
+        fetch(`/api/wallets/${encodeURIComponent(addr)}/transactions`)
+      ]);
+      const statement = await stRes.json();
+      const txs = await txRes.json();
+      const list = txs.transactions || txs.trades || [];
+      const holds = statement.holdings || statement.positions || [];
+      const created = list.filter((t) => (t.type || '') === 'create');
+      const holdEl = document.getElementById('youHoldCount');
+      const createEl = document.getElementById('youCreateCount');
+      if (holdEl) holdEl.textContent = holds.length ? String(holds.length) : (list.length ? String(list.length) : 'none');
+      if (createEl) createEl.textContent = created.length ? String(created.length) : 'none';
+    } catch (e) {
+      /* ledger empty is valid */
+    }
   }
 
   async function openStatement() {
@@ -116,7 +184,8 @@
     try {
       const res = await fetch(`/api/wallets/${encodeURIComponent(addr)}/statement?month=${encodeURIComponent(month)}`);
       const data = await res.json();
-      body.innerHTML = `<div>Month: ${data.month || month}</div><div>Transactions: ${data.count || (data.transactions || []).length || 0}</div><div>Holdings: none unless a real trade exists.</div><p>${data.disclaimer || 'We index trades. We do not hold keys. Not tax advice.'}</p>`;
+      const txs = data.transactions || data.trades || [];
+      body.innerHTML = `<div>Wallet: ${addr}</div><div>Month: ${data.month || month}</div><div>Transactions: ${data.count || txs.length || 0}</div><div>Holdings: ${(data.holdings || []).length || 0}</div><p>${data.disclaimer || 'We index trades. We do not hold keys. Not tax advice.'}</p>`;
     } catch (e) {
       body.textContent = 'No statement yet. No trades indexed.';
     }
@@ -139,7 +208,7 @@
   }
 
   function openSettings() {
-    document.getElementById('settingsWalletAddress').textContent = address() || 'Not connected';
+    syncFromBackend();
     const month = document.getElementById('settingsStatementMonth');
     if (month && !month.value) month.value = new Date().toISOString().slice(0, 7);
     const link = document.getElementById('settingsSolscan');
@@ -149,14 +218,29 @@
   }
 
   function connectPhantom() {
-    if (window.walletEngine?.connectPhantom) return window.walletEngine.connectPhantom();
+    if (engine()?.connectPhantom) return engine().connectPhantom();
     toast('Phantom is not available in this browser.');
   }
   function connectMetaMask() {
-    const w = window.walletEngine;
+    const w = engine();
     if (w?.connectMetaMask) return w.connectMetaMask();
     if (w?.connectEVM) return w.connectEVM('metamask');
     toast('MetaMask is not available in this browser.');
+  }
+
+  function hookWallet() {
+    const w = engine();
+    if (!w || w._cessionHooked) return;
+    w._cessionHooked = true;
+    const original = w.renderState?.bind(w);
+    if (original) {
+      w.renderState = function () {
+        original();
+        const addr = w.activeAddress;
+        if (addr) localStorage.setItem('cession_address', addr);
+        syncFromBackend();
+      };
+    }
   }
 
   window.CessionUI = {
@@ -169,10 +253,12 @@
     connectPhantom,
     connectMetaMask,
     close,
-    loadPulse
+    loadPulse,
+    syncFromBackend
   };
 
   document.addEventListener('DOMContentLoaded', () => {
+    hookWallet();
     document.getElementById('btnConnectWallet')?.addEventListener('click', () => open('walletModal'));
     document.getElementById('tokenSearchInput')?.addEventListener('input', loadPulse);
     document.getElementById('deployCoinForm')?.addEventListener('submit', (e) => {
@@ -180,5 +266,6 @@
       toast('Create is not live until the program is deployed.');
     });
     show('home');
+    setTimeout(hookWallet, 500);
   });
 })();
