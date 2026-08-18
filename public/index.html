@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>For You | Cession</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/media.css">
   <link rel="icon" type="image/svg+xml" href="brand/cession-c-white.svg">
 </head>
 <body>
@@ -100,22 +101,22 @@
       <p class="cx-muted">Not live until the program is deployed. Nothing here is a return.</p>
       <div class="cx-card">
         <div class="cx-row"><span>Creator</span><span>0 SOL</span></div>
-        <p class="cx-muted">Share of fees on coins you launch. Pump pays creators 0.30% of a 1.25% trade. We split a smaller 0.25% buy fee so traders keep more.</p>
+        <p class="cx-muted">Share of fees on coins you launch.</p>
         <button class="cx-ghost" type="button" disabled>Claim creator</button>
       </div>
       <div class="cx-card">
         <div class="cx-row"><span>Holder</span><span>0 SOL</span></div>
-        <p class="cx-muted">Paid to wallets that still hold after a trade. Pump cashback coins dump all creator fees on traders. We pay holders who do not dump in the same window.</p>
+        <p class="cx-muted">Paid to wallets that still hold after a trade.</p>
         <button class="cx-ghost" type="button" disabled>Claim holder</button>
       </div>
       <div class="cx-card">
         <div class="cx-row"><span>Trader</span><span>0 SOL</span></div>
-        <p class="cx-muted">Small rebate on your own buys after volume. Claim only after deploy.</p>
+        <p class="cx-muted">Small rebate on your own buys after volume.</p>
         <button class="cx-ghost" type="button" disabled>Claim trader</button>
       </div>
       <div class="cx-card">
         <div class="cx-row"><span>Referral</span><span>0 SOL</span></div>
-        <p class="cx-muted">Share your link. You earn when they trade. They keep their own holder share.</p>
+        <p class="cx-muted">Share your link. You earn when they trade.</p>
         <button class="cx-ghost" type="button" onclick="CessionUI.copyReferral()">Copy link</button>
         <button class="cx-ghost" type="button" disabled>Claim referral</button>
       </div>
@@ -145,7 +146,7 @@
     <button class="bottom-nav-slot" id="bnavExplore" type="button" onclick="CessionUI.go('rewards')">Rewards</button>
     <button class="bottom-nav-slot" id="bnavYou" type="button" onclick="CessionUI.go('ai')">Ask</button>
   </nav>
-  <div class="modal-overlay-generic" id="deployModal"><div class="modal-box-pump"><form id="deployCoinForm"><input class="form-input-pump" id="deployName" placeholder="Name" required><input class="form-input-pump" id="deploySymbol" placeholder="Ticker" required><button class="cx-launch" type="submit">Launch 0.05 SOL</button></form></div></div>
+  <div class="modal-overlay-generic" id="deployModal"><div class="modal-box-pump"><form id="deployCoinForm"><input class="form-input-pump" id="deployName" placeholder="Name" required><input class="form-input-pump" id="deploySymbol" placeholder="Ticker" required><input class="form-input-pump" id="deployMedia" type="url" placeholder="Image or video URL"><p class="cx-muted">Paste a .png .jpg .mp4 .webm or a YouTube link. We detect the type and show it.</p><button class="cx-launch" type="submit">Launch 0.05 SOL</button></form></div></div>
   <div class="modal-overlay-generic" id="usernameModal"><div class="modal-box-pump"><p class="cx-muted">Pick a username. It cannot be changed.</p><input class="form-input-pump" id="newUsername" placeholder="username"><button class="cx-launch" type="button" onclick="CessionUI.lockUsername()">Save forever</button></div></div>
   <div class="modal-overlay-generic" id="walletModal"><div class="modal-box-pump"><button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button><button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button></div></div>
   <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump"><input class="form-input-pump" id="presetBuySol" type="number" step="0.01" placeholder="Default buy SOL"><input class="form-input-pump" id="presetSlippage" type="number" step="0.1" placeholder="Slippage"><button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save presets</button><button class="cx-ghost" type="button" onclick="CessionUI.downloadCsv()">Download CSV</button></div></div>
@@ -153,6 +154,7 @@
   <div class="modal-overlay-generic" id="stakeModal"><div class="modal-box-pump"><p class="cx-muted">Stake in Phantom. About 6 to 8 percent.</p><button class="cx-launch" type="button" onclick="CessionUI.openPhantomStake()">Open Phantom</button></div></div>
   <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump"><strong id="tradeTitle">Buy</strong><p id="tradeCoinLabel" class="cx-muted"></p><p id="tradeFeeLine" class="cx-muted" style="display:none;">Trade fee 0.25%</p><input class="form-input-pump" id="tradeAmount" type="number"><input class="form-input-pump" id="tradeSlippage" type="number"><button class="cx-launch" type="button" onclick="CessionUI.confirmTrade()">Confirm</button></div></div>
   <script src="js/cession-shell.js"></script>
+  <script src="js/cession-media.js"></script>
   <script src="js/cession-rank.js"></script>
   <script src="js/cession-track.js"></script>
   <script src="js/cession-extras.js"></script>
