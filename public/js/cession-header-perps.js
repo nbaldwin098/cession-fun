@@ -13,10 +13,14 @@
       if (ai) header.insertBefore(b, ai);
       else header.appendChild(b);
     }
-    const hide = document.createElement('style');
-    hide.textContent = '#usernameModal{display:none !important} body.has-user #usernameModal{display:none !important}';
-    document.head.appendChild(hide);
-    if (localStorage.getItem('cession_username')) document.body.classList.add('has-user');
+    if (localStorage.getItem('cession_username') || localStorage.getItem('cession_username:' + (localStorage.getItem('cession_address') || ''))) {
+      document.body.classList.add('has-user');
+      const hide = document.createElement('style');
+      hide.textContent = 'body.has-user #usernameModal{display:none !important}';
+      document.head.appendChild(hide);
+    }
+    var s = document.createElement('script');
+    s.src = 'js/cession-header-perps.js';
   }
   ready();
 })();
