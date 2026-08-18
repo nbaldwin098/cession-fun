@@ -4,3 +4,25 @@
 .bottom-nav-slot.active{color:#fff;opacity:1}
 .bnav-plus-circle{width:44px;height:44px;border-radius:50%;background:#fff;color:#111;display:flex;align-items:center;justify-content:center}
 .bnav-wallet-circle{display:none}
+
+#searchModal{align-items:center;justify-content:center;background:rgba(12,12,12,.35)}
+#searchModal .modal-box-pump{
+  width:min(340px,calc(100% - 40px));
+  border-radius:20px;
+  padding:18px 16px 16px;
+  position:relative;
+  box-shadow:0 16px 40px rgba(0,0,0,.18);
+}
+#searchModal .cx-x{
+  position:absolute;top:10px;right:10px;width:32px;height:32px;border:0;background:none;font-size:22px;line-height:1;color:#111
+}
+#searchModal .cx-words{flex-wrap:wrap;justify-content:center;padding:8px 0 0}
+#searchModal .form-input-pump{display:none}
+
+.cx-media-empty,
+.cx-card-coin img,
+.cx-media{
+  background:
+    radial-gradient(circle at 30% 20%, #e8e8e2 0%, #d4d4cc 42%, #c8c8c0 100%);
+}
+.cx-card-coin{background:#fff}
