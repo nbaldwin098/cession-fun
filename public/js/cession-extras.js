@@ -1,20 +1,22 @@
 (function () {
   function ready(fn) {
-    if (!window.CessionUI || !window.CessionRank) return setTimeout(function () { ready(fn); }, 40);
+    if (!window.CessionUI || !window.CessionRank || !window.CessionMedia) return setTimeout(function () { ready(fn); }, 40);
     fn();
   }
+  function mediaUrl(c) { return c.mediaUrl || c.videoUrl || c.imageUrl || c.image || ''; }
   function card(c) {
-    const img = c.imageUrl || c.image || '';
+    const url = mediaUrl(c);
     const chg = Number(c.change24h || 0);
-    const p = JSON.stringify({ symbol: c.symbol, name: c.name || c.symbol, mint: c.mintAddress || c.mint || '', creator: c.creator || '' });
+    const payload = { symbol: c.symbol, name: c.name || c.symbol, mint: c.mintAddress || c.mint || '', creator: c.creator || '', mediaUrl: url };
+    const p = JSON.stringify(payload);
     return '<button class="cx-card-coin" type="button" data-symbol="' + c.symbol + '" onclick=\'CessionUI.openCoin(' + p + ')\'>' +
-      (img ? '<img src="' + img + '" alt="">' : '') +
+      CessionMedia.cardHtml(url, c.symbol) +
       '<div class="meta"><div class="name">' + (c.name || c.symbol) + '</div><div class="tick">' + c.symbol +
       (chg ? (' ' + (chg > 0 ? '+' : '') + chg.toFixed(1) + '%') : '') +
       '</div></div></button>';
   }
   function empty(t, s) { return '<div class="cx-empty"><h2>' + t + '</h2><p class="cx-muted">' + s + '</p></div>'; }
-  function ad() { return '<div class="cx-ad">50 real viewers who stay beat 500 wash trades.</div>'; }
+  function ad() { return '<div class="cx-ad">Video completion ranks higher than wash volume.</div>'; }
   async function live() {
     try {
       const r = await fetch('/api/pulse?lane=all&limit=80');
@@ -30,7 +32,7 @@
     if (!grid) return;
     const f = CessionRank.follows();
     const coins = CessionRank.rankFollowing(await live());
-    const head = '<div class="cx-ad">Following ' + f.users.length + ' wallets and ' + f.coins.length + ' coins. Ranked by stay time, not follow count.</div>';
+    const head = '<div class="cx-ad">Following ' + f.users.length + ' wallets and ' + f.coins.length + ' coins.</div>';
     if (!f.users.length && !f.coins.length) {
       grid.innerHTML = head + empty('Following', 'Follow a coin or a wallet.');
       return;
@@ -70,6 +72,14 @@
     ui.openCoin = function (coin) {
       if (window.CessionTrack) CessionTrack.open(coin.symbol);
       if (prevOpen) prevOpen(coin);
+      const title = document.getElementById('coinTitle');
+      let stage = document.getElementById('coinMedia');
+      if (title && !stage) {
+        stage = document.createElement('div');
+        stage.id = 'coinMedia';
+        title.parentNode.insertBefore(stage, title.nextSibling);
+      }
+      if (stage) stage.innerHTML = CessionMedia.pageHtml(coin.mediaUrl || '', coin.symbol);
       const meta = document.getElementById('coinMeta');
       if (!meta) return;
       let bar = document.getElementById('followBar');
@@ -99,6 +109,14 @@
       if (oldTrade) oldTrade(side);
       if (fee) fee.style.display = side === 'buy' ? 'block' : 'none';
     };
+    const form = document.getElementById('deployCoinForm');
+    if (form && !form.dataset.media) {
+      form.dataset.media = '1';
+      form.addEventListener('submit', function () {
+        const media = (document.getElementById('deployMedia') || {}).value || '';
+        localStorage.setItem('cession_last_media', media);
+      });
+    }
     paintForYou();
   });
 })();
