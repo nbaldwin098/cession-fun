@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-const stripeRoutes = require('./stripe');
 const tokenRoutes = require('./tokens');
 const walletRoutes = require('./wallets');
 const marketRoutes = require('./market');
@@ -11,11 +10,11 @@ const authRoutes = require('./auth');
 const askRoutes = require('./ask');
 const pulseRoutes = require('./pulse');
 const support = require('./support');
+const accessRoutes = require('./access');
 const pulseSignals = require('../services/pulseSignals');
 const bondingCurve = require('../services/bondingCurve');
 
 router.use('/auth', authRoutes);
-router.use('/stripe', stripeRoutes);
 router.use('/tokens', tokenRoutes);
 router.use('/wallets', walletRoutes);
 router.use('/market', marketRoutes);
@@ -24,6 +23,7 @@ router.use('/treasury', treasuryRoutes);
 router.use('/ask', askRoutes);
 router.use('/pulse', pulseRoutes);
 router.use('/support', support.router);
+router.use('/access', accessRoutes);
 
 router.get('/desk/overview', support.deskAuth, (req, res) => {
   support.audit({ action: 'overview' });
