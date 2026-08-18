@@ -5,10 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>For You | Cession</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/svg+xml" href="brand/cession-c-mark.svg">
 </head>
 <body>
   <header class="cx-top">
-    <button class="cx-wordmark" type="button" onclick="CessionUI.go('home')">Cession</button>
+    <button class="cx-brand" id="brandMark" type="button" aria-label="Cession" onclick="CessionUI.toggleBrand()">
+      <span class="cx-brand-clip"><img src="brand/cession-wordmark.svg" alt="Cession"></span>
+    </button>
     <div class="cx-xhead">
       <button class="cx-xtab on" id="tabForYou" type="button" onclick="CessionUI.setHomeLane('foryou')">For you</button>
       <button class="cx-xtab" id="tabFollowing" type="button" onclick="CessionUI.setHomeLane('following')">Following</button>
@@ -56,6 +59,13 @@
         <button class="cx-ghost" type="button" onclick="CessionUI.openStatement()">Statement</button>
         <button class="cx-ghost" type="button" onclick="CessionUI.openStake()">Stake SOL</button>
       </div>
+      <footer class="cx-you-footer">
+        <a href="#about">About</a>
+        <a href="#terms">Terms</a>
+        <a href="#risk">Risk</a>
+        <a href="#transparency">Transparency</a>
+        <a href="#support">Support</a>
+      </footer>
     </main>
     <main class="page-view" id="viewRewards">
       <h1 class="cx-title">Rewards</h1>
@@ -76,7 +86,7 @@
   <nav class="bottom-nav-bar">
     <button class="bottom-nav-slot active" id="bnavForYou" type="button" onclick="CessionUI.go('home')">For You</button>
     <button class="bottom-nav-slot" id="bnavPulse" type="button" onclick="CessionUI.go('explore')">Explore</button>
-    <button class="bottom-nav-slot bnav-wallet" id="bnavWallet" type="button" onclick="CessionUI.go('wallet')"><span class="bnav-wallet-circle"></span></button>
+    <button class="bottom-nav-slot bnav-wallet" id="bnavWallet" type="button" onclick="CessionUI.go('wallet')"><span class="bnav-wallet-circle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></span></button>
     <button class="bottom-nav-slot" id="bnavExplore" type="button" onclick="CessionUI.go('rewards')">Rewards</button>
     <button class="bottom-nav-slot" id="bnavYou" type="button" onclick="CessionUI.go('ai')">Ask</button>
   </nav>
