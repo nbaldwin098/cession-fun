@@ -30,6 +30,7 @@
           entered = Date.now();
           if (video) {
             video.muted = true;
+            video.loop = true;
             video.play().catch(function () {});
           }
         } else if (entered) {
@@ -46,7 +47,12 @@
     }, { threshold: [0.6] });
     io.observe(el);
     if (video) {
-      video.addEventListener('ended', function () { emit('video_complete', symbol, (video.duration || 0) * 1000); });
+      video.loop = true;
+      video.addEventListener('ended', function () {
+        emit('video_complete', symbol, (video.duration || 0) * 1000);
+        video.currentTime = 0;
+        video.play().catch(function () {});
+      });
       video.addEventListener('play', function () {
         if (!video._plays) video._plays = 0;
         video._plays += 1;
