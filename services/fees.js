@@ -1,6 +1,11 @@
+/**
+ * FEE LOCK — do not lower creator, holder, or referral.
+ * Protocol 0.20% may be reduced for a named promo. Never raise user total above 1.00% without a public change.
+ */
 module.exports = {
+  locked: true,
   createLamports: 0,
-  createNote: 'Create is free. Payer only covers Solana rent for mint and vaults.',
+  createNote: 'Create is free. Payer only covers Solana rent.',
   totalBps: 100,
   split: {
     creatorBps: 50,
@@ -8,22 +13,18 @@ module.exports = {
     protocolBps: 20,
     referralBps: 10
   },
+  floors: {
+    creatorBps: 50,
+    holderBps: 20,
+    referralBps: 10
+  },
   promo: {
-    name: 'Launch promo',
+    allowed: 'protocolBps only',
     protocolOffBps: 10,
     userTotalBps: 90
   },
   graduation: {
     stayOnCession: true,
-    bundleEligible: true,
-    copy: 'When the curve fills, the coin stays on Cession. Those coins can enter official bundles.'
-  },
-  pumpCompare: {
-    pumpCreate: 'Free (network rent only)',
-    pumpCurveTotal: '1.25%',
-    pumpCreatorOnCurve: '0.30%',
-    cessionCreate: 'Free (network rent only)',
-    cessionTotal: '1.00%',
-    cessionCreator: '0.50%'
+    bundleEligible: true
   }
 };
