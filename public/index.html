@@ -20,11 +20,10 @@
     <main class="page-view" id="viewExplorePulse">
       <h1 class="cx-title">Explore</h1>
       <div class="cx-words" id="exploreWords">
-        <button class="on" type="button" data-lane="best">Best</button>
+        <button class="on" type="button" data-lane="new">New</button>
+        <button type="button" data-lane="best">Best</button>
+        <button type="button" data-lane="old">Old</button>
         <button type="button" data-lane="worst">Worst</button>
-        <button type="button" data-lane="bundles">Bundles</button>
-        <button type="button" data-lane="trending">Trending</button>
-        <button type="button" data-lane="new">New</button>
       </div>
       <div class="cx-feed" id="exploreGrid"></div>
     </main>
@@ -96,7 +95,31 @@
         <div id="botList" class="cx-muted"></div>
       </div>
     </main>
-    <main class="page-view" id="viewRewards"><h1 class="cx-title">Rewards</h1><div class="cx-card" id="rewardsBody"></div></main>
+    <main class="page-view" id="viewRewards">
+      <h1 class="cx-title">Rewards</h1>
+      <p class="cx-muted">Not live until the program is deployed. Nothing here is a return.</p>
+      <div class="cx-card">
+        <div class="cx-row"><span>Creator</span><span>0 SOL</span></div>
+        <p class="cx-muted">Share of fees on coins you launch. Pump pays creators 0.30% of a 1.25% trade. We split a smaller 0.25% buy fee so traders keep more.</p>
+        <button class="cx-ghost" type="button" disabled>Claim creator</button>
+      </div>
+      <div class="cx-card">
+        <div class="cx-row"><span>Holder</span><span>0 SOL</span></div>
+        <p class="cx-muted">Paid to wallets that still hold after a trade. Pump cashback coins dump all creator fees on traders. We pay holders who do not dump in the same window.</p>
+        <button class="cx-ghost" type="button" disabled>Claim holder</button>
+      </div>
+      <div class="cx-card">
+        <div class="cx-row"><span>Trader</span><span>0 SOL</span></div>
+        <p class="cx-muted">Small rebate on your own buys after volume. Claim only after deploy.</p>
+        <button class="cx-ghost" type="button" disabled>Claim trader</button>
+      </div>
+      <div class="cx-card">
+        <div class="cx-row"><span>Referral</span><span>0 SOL</span></div>
+        <p class="cx-muted">Share your link. You earn when they trade. They keep their own holder share.</p>
+        <button class="cx-ghost" type="button" onclick="CessionUI.copyReferral()">Copy link</button>
+        <button class="cx-ghost" type="button" disabled>Claim referral</button>
+      </div>
+    </main>
     <main class="page-view" id="viewPerps"><h1 class="cx-title">Perps</h1><div class="cx-card"><p class="cx-muted">Perpetuals are not live.</p></div></main>
     <main class="page-view" id="viewAi">
       <h1 class="cx-title">Ask</h1>
@@ -128,7 +151,7 @@
   <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump"><input class="form-input-pump" id="presetBuySol" type="number" step="0.01" placeholder="Default buy SOL"><input class="form-input-pump" id="presetSlippage" type="number" step="0.1" placeholder="Slippage"><button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save presets</button><button class="cx-ghost" type="button" onclick="CessionUI.downloadCsv()">Download CSV</button></div></div>
   <div class="modal-overlay-generic" id="statementModal"><div class="modal-box-pump"><div id="statementBody" class="cx-muted">No statements to display.</div><button class="cx-ghost" id="statementDownloadBtn" type="button" style="display:none;" onclick="CessionUI.downloadCsv()">Download</button></div></div>
   <div class="modal-overlay-generic" id="stakeModal"><div class="modal-box-pump"><p class="cx-muted">Stake in Phantom. About 6 to 8 percent.</p><button class="cx-launch" type="button" onclick="CessionUI.openPhantomStake()">Open Phantom</button></div></div>
-  <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump"><strong id="tradeTitle">Buy</strong><p id="tradeCoinLabel" class="cx-muted"></p><input class="form-input-pump" id="tradeAmount" type="number"><input class="form-input-pump" id="tradeSlippage" type="number"><button class="cx-launch" type="button" onclick="CessionUI.confirmTrade()">Confirm</button></div></div>
+  <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump"><strong id="tradeTitle">Buy</strong><p id="tradeCoinLabel" class="cx-muted"></p><p id="tradeFeeLine" class="cx-muted" style="display:none;">Trade fee 0.25%</p><input class="form-input-pump" id="tradeAmount" type="number"><input class="form-input-pump" id="tradeSlippage" type="number"><button class="cx-launch" type="button" onclick="CessionUI.confirmTrade()">Confirm</button></div></div>
   <script src="js/cession-shell.js"></script>
   <script src="js/wallet.js"></script>
   <script src="js/trading.js"></script>
