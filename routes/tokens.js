@@ -20,6 +20,12 @@ router.get(['/transparency', '/treasury'], (req, res) => {
   res.json(data);
 });
 
+// Get "Today's 5" Dynamic Bundle
+router.get(['/collections/todays-5', '/bundles/todays-5'], (req, res) => {
+  const bundle = bondingCurve.getTodaysFiveBundle();
+  res.json({ success: true, bundle });
+});
+
 // Get Token Bundles / Curated Baskets (supports ?category=memes|politics|trends|whale|ai)
 router.get(['/collections', '/bundles'], (req, res) => {
   const { category = 'all' } = req.query;

@@ -4,21 +4,50 @@ Cession is a non-custodial, fair-launch coin factory and bonding curve exchange 
 
 ---
 
+## ⚡ How Cession Works
+
+1. **Non-Custodial First**: Users connect Phantom or MetaMask. Cession **never** generates or stores 12-word seed phrases.
+2. **Coin Factory (`create`)**: Creating a coin costs **0.50 SOL**, transferred directly to the protocol treasury during the on-chain Anchor instruction. Each creator is restricted to one active live coin at a time, and ticker symbols must be unique.
+3. **Continuous Bonding Curve (`buy` / `sell`)**: Constant product AMM ($x \times y = k$).
+   - **Trade Fee (1.00% Total in SOL)**:
+     - `0.30%` -> Creator fee (accrued to `fee_vault` PDA)
+     - `0.25%` -> Holder rewards (accrued to `fee_vault` PDA)
+     - `0.15%` -> Referrer / Extra holder rewards
+     - `0.30%` -> Protocol Treasury
+   - **Token Burn**: `0.10%` of tokens out on every buy instruction are permanently burned on-chain.
+4. **Rug-Proof Fee Claims (`claim`)**:
+   - `claim_creator_fees` & `claim_holder_fees` pull accrued fee SOL **exclusively from `fee_vault` PDA**.
+   - The bonding curve liquidity in `sol_vault` PDA **can NEVER be drained by claims**.
+
+---
+
+## 🧺 "Today's 5" Dynamic Bundles
+
+"Today's 5" splits a single SOL purchase evenly across 5 eligible live Cession coins:
+* **Eligibility Rules**:
+  1. Has a real on-chain mint address.
+  2. Bonding curve is active (not graduated).
+  3. Recorded a trade within the last 48 hours.
+  4. Creator holds less than 50% of supply (prevents creator farms).
+* **Automatic Rotation**: As coins graduate, go inactive (no trades in 48h), or creator dumps, they drop out of the roster and the next eligible coin slides in automatically.
+
+---
+
+## ⚠️ Risk Disclosure
+
+> *"Connect the wallet you already have. We list fewer coins. Price moves up on buys and down on sells. A cut of fees is paid in SOL to holders and creators. You can lose everything."*
+
+---
+
 ## 🏗️ Solana Anchor Smart Contract & Deployment Command
 
 * **Program ID**: `Epxb6TRhGwT1gQFj5xCLM6KtZUz9ajD7jZzkVrp3qBR9`
 * **Program Source**: [`contracts/solana/programs/cession_bonding_curve/src/lib.rs`](file:///C:/Users/A6237/.gemini/antigravity/scratch/calabi-exchange/contracts/solana/programs/cession_bonding_curve/src/lib.rs)
-* **Program Keypair**: `contracts/solana/target/deploy/cession_bonding_curve-keypair.json`
 
-### Founder CLI Program Deployment Command
-To build and deploy the Cession program directly to Solana Mainnet:
-
+### Founder CLI Deployment Command (For Founder)
 ```bash
-# 1. Build Anchor Program
 cd contracts/solana
 anchor build
-
-# 2. Deploy Program to Solana Mainnet
 solana program deploy target/deploy/cession_bonding_curve.so \
   --program-id target/deploy/cession_bonding_curve-keypair.json \
   --keypair ~/.config/solana/id.json \
@@ -27,7 +56,7 @@ solana program deploy target/deploy/cession_bonding_curve.so \
 
 ---
 
-## ⚡ Quick Start for Founder (Local Development)
+## ⚡ Quick Start (Local Development)
 
 ```bash
 # 1. Clone & Install Dependencies
@@ -48,37 +77,7 @@ npm run dev
 
 ---
 
-## 🔒 Security & Non-Custodial Directives
-
-1. **Zero Server Seeds**: Cession **never** generates, stores, or requests 12-word seed phrases or private keys. All identity management is handled client-side by user wallets.
-2. **Cryptographic Authentication**: Logging in requires signing a cryptographic message challenge (`nacl.sign` on Solana, SIWE / `personal_sign` on EVM). Unsigned connect requests are strictly rejected.
-3. **Card Purchases Disabled**: Stripe credit card onramping is permanently disabled (`/api/stripe/config` returns `{ enabled: false }`). Users bring their own crypto.
-4. **Persistent Account Storage**: Verified user profiles and bonding curve transactions persist to `data/users.json` and `data/bonding_state.json` so server reboots on Render never erase user records.
-
----
-
-## 📊 Fee Math & Economics
-
-Every coin creation and trade on Cession follows strict transparent fee rules:
-* **Coin Creation Fee**: 0.10 SOL (`CREATE_FEE_LAMPORTS`), paid by the creator during the on-chain `create` instruction and sent to the protocol treasury.
-* **Trade Fee**: 0.50% (50 bps) total fee on every `buy` and `sell` transaction:
-  * **0.25% Protocol Treasury**: Directly transferred to `TREASURY_SOL_ADDRESS` / `TREASURY_EVM_ADDRESS`.
-  * **0.25% Curve Reserve**: Retained in the vault reserves to protect liquidity depth.
-
----
-
-## 🚀 Honest Graduation Policy
-
-* **Target Cap**: $25,000 (~85 SOL).
-* When a curve reaches 85 SOL raised, trading freezes and the UI states:
-  > *"Bonding curve target reached (85 SOL raised). Raydium DEX liquidity pool migration pending."*
-* Cession **never** displays fake "Graduated" badges without a verified live DEX pool.
-
----
-
-## 📋 Founder Production Configuration (Render.com Environment)
-
-In your [Render.com Dashboard](https://dashboard.render.com) -> `cession-fun` -> **Environment**, set:
+## 📋 Render.com Production Configuration
 
 | Variable | Value | Description |
 | :--- | :--- | :--- |
@@ -88,11 +87,3 @@ In your [Render.com Dashboard](https://dashboard.render.com) -> `cession-fun` ->
 | `SOLANA_RPC_URL` | `https://api.mainnet-beta.solana.com` | Solana Mainnet RPC Endpoint |
 | `TREASURY_SOL_ADDRESS` | `8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH` | Solana Protocol Fee Wallet |
 | `TREASURY_EVM_ADDRESS` | `0xE409f28fb1D6C5C090b1feE164DB09C365c07011` | Ethereum Protocol Fee Wallet |
-
----
-
-## 🔍 Verification & Explorer Links
-
-* **Solana Trades**: Verified on [Solscan](https://solscan.io) (`https://solscan.io/tx/${sig}`).
-* **Ethereum Trades**: Verified on [Etherscan](https://etherscan.io) (`https://etherscan.io/tx/${hash}`).
-

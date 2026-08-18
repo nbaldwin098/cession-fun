@@ -455,6 +455,54 @@ class BondingCurveEngine {
   }
 
   /**
+   * "Today's 5" Dynamic Bundle Rules & Rotation
+   * 1. Must have a real mintAddress
+   * 2. Must not be graduated
+   * 3. Must have had a trade in last 48h
+   * 4. Creator holds < 50% supply (not a farm)
+   */
+  getTodaysFiveBundle() {
+    const now = Date.now();
+    const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
+
+    const eligible = Array.from(this.tokens.values()).filter(t => {
+      if (!t.mintAddress || t.mintAddress === "So11111111111111111111111111111111111111112") return false;
+      if (t.isGraduated) return false;
+      
+      const lastTradeTime = t.lastTradeAt || t.createdAt || 0;
+      if (now - lastTradeTime > FORTY_EIGHT_HOURS_MS) return false;
+
+      const creatorHoldingsPct = t.creatorHoldingsPct || 0;
+      if (creatorHoldingsPct >= 50) return false;
+
+      return true;
+    });
+
+    eligible.sort((a, b) => (b.lastTradeAt || 0) - (a.lastTradeAt || 0));
+
+    const topMembers = eligible.slice(0, 5);
+    const count = topMembers.length;
+    const weightPerToken = count > 0 ? Number((100 / count).toFixed(1)) : 0;
+
+    return {
+      id: "bundle_todays_5",
+      name: "Today's 5",
+      symbol: "TOP5",
+      description: "Splits your SOL evenly across live Cession coins. Rotates automatically as coins graduate or go inactive.",
+      updatedAt: now,
+      eligibleCount: eligible.length,
+      tokens: topMembers.map(t => ({
+        symbol: t.symbol,
+        name: t.name,
+        mintAddress: t.mintAddress,
+        weight: weightPerToken,
+        creator: t.creator,
+        priceUsd: t.priceUsd || t.currentPriceUsd
+      }))
+    };
+  }
+
+  /**
    * Token Collections / Baskets Methods
    */
   getAllCollections(category = 'all') {

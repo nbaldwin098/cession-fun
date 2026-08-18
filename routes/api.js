@@ -34,19 +34,26 @@ router.get('/health', (req, res) => {
 router.get('/status', (req, res) => {
   res.json({
     status: 'ONLINE',
-    exchange: 'Cession.us Sovereign Engine',
+    exchange: 'Cession Sovereign Fair Launchpad',
     version: '1.0.0-PRO',
+    programId: process.env.CESSION_PROGRAM_ID || 'Epxb6TRhGwT1gQFj5xCLM6KtZUz9ajD7jZzkVrp3qBR9',
+    chainsSupported: ['Solana Mainnet', 'Ethereum Mainnet'],
+    stripeOnramp: {
+      enabled: false,
+      notice: 'Direct crypto wallet purchases only. Cession is strictly non-custodial.'
+    },
+    treasuryWallets: {
+      solana: process.env.TREASURY_SOL_ADDRESS || '8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH',
+      ethereum: process.env.TREASURY_EVM_ADDRESS || '0xE409f28fb1D6C5C090b1feE164DB09C365c07011'
+    },
+    feeModel: {
+      creationFee: '0.50 SOL to Protocol Treasury',
+      tradeFee: '1.00% Total (0.30% Creator, 0.25% Holder Rewards, 0.15% Referrer, 0.30% Treasury)',
+      burnOnBuy: '0.10% Token Supply Burned on Buy',
+      claimPolicy: 'Claims strictly pull accrued fee SOL from fee_vault PDA. Curve liquidity in sol_vault cannot be drained.'
+    },
     uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-    chainsSupported: ['Ethereum', 'Base L2', 'Solana', 'Bitcoin'],
-    regulatoryModel: 'Non-Custodial Hybrid Gateway (FinCEN FIN-2019-G001 Compliant)',
-    features: [
-      'BIP-39 Sovereign Wallet Minting',
-      'Cession Ignition Fair-Launch Bonding Curve',
-      'Stripe Crypto Onramp & Pro SaaS Subscriptions',
-      'Live Coinbase Public WebSocket Price Feeds',
-      'Automated OFAC SDN Sanctions Screening'
-    ]
+    timestamp: new Date().toISOString()
   });
 });
 
