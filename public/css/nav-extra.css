@@ -1,28 +1,57 @@
-.cx-search-btn{margin-left:auto;background:none;border:0;height:52px;padding:0 4px 10px;display:flex;align-items:center}
-.bottom-nav-bar{background:#111;color:#8a8a8a;border:0;border-radius:22px;box-shadow:none}
-.bottom-nav-slot{color:#8a8a8a}
-.bottom-nav-slot.active{color:#fff;opacity:1}
-.bnav-plus-circle{width:44px;height:44px;border-radius:50%;background:#fff;color:#111;display:flex;align-items:center;justify-content:center}
-.bnav-wallet-circle{display:none}
+.cx-top{padding-right:48px}
+#viewExplorePulse{padding:0 16px}
+#viewExplorePulse .cx-title{padding:0}
 
-#searchModal{align-items:center;justify-content:center;background:rgba(12,12,12,.35)}
+.cx-float-search{
+  position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;z-index:95;
+  width:40px;height:40px;border:0;border-radius:50%;background:transparent;
+  display:flex;align-items:center;justify-content:center;
+}
+.cx-float-search svg{display:block}
+
+#searchModal{
+  align-items:flex-start;justify-content:center;
+  padding:72px 16px 24px;
+  background:rgba(12,12,12,.28);
+}
 #searchModal .modal-box-pump{
-  width:min(340px,calc(100% - 40px));
-  border-radius:20px;
-  padding:18px 16px 16px;
+  width:min(420px,100%);
+  background:transparent;
+  border-radius:0;
+  padding:0;
+  box-shadow:none;
   position:relative;
-  box-shadow:0 16px 40px rgba(0,0,0,.18);
 }
 #searchModal .cx-x{
-  position:absolute;top:10px;right:10px;width:32px;height:32px;border:0;background:none;font-size:22px;line-height:1;color:#111
+  position:absolute;top:-36px;right:0;width:32px;height:32px;border:0;background:none;font-size:26px;color:#111
 }
-#searchModal .cx-words{flex-wrap:wrap;justify-content:center;padding:8px 0 0}
-#searchModal .form-input-pump{display:none}
+#searchModal .form-input-pump{
+  display:block;width:100%;height:44px;border-radius:22px;border:1px solid #e6e6e1;background:#fff;padding:0 16px
+}
+#searchModal .cx-words{justify-content:flex-start;padding:10px 0 12px}
+#searchHits{min-height:120px}
+#searchHits .cx-feed{grid-template-columns:repeat(2,1fr)}
 
-.cx-media-empty,
-.cx-card-coin img,
-.cx-media{
-  background:
-    radial-gradient(circle at 30% 20%, #e8e8e2 0%, #d4d4cc 42%, #c8c8c0 100%);
+.cx-center-sheet{
+  align-items:center !important;
+  justify-content:center !important;
+  background:rgba(12,12,12,.35);
 }
-.cx-card-coin{background:#fff}
+.cx-center-sheet .modal-box-pump{
+  width:min(360px,calc(100% - 40px));
+  border-radius:20px;
+  padding:20px 16px 16px;
+  position:relative;
+}
+.cx-center-sheet .cx-x{
+  position:absolute;top:8px;right:8px;width:32px;height:32px;border:0;background:none;font-size:24px
+}
+
+.bottom-nav-bar{background:#111;color:#8a8a8a;border:0;border-radius:22px}
+.bottom-nav-slot{color:#8a8a8a}
+.bottom-nav-slot.active{color:#fff;opacity:1}
+.bnav-plus-circle{width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+.bnav-wallet-circle{display:none}
+.cx-media-empty,.cx-card-coin img,.cx-media{
+  background:radial-gradient(circle at 30% 20%,#e8e8e2 0%,#d4d4cc 100%);
+}
