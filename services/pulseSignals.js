@@ -4,7 +4,7 @@ const FILE = path.join(__dirname, '..', 'data', 'pulse_signals.json');
 
 function load() {
   try { return JSON.parse(fs.readFileSync(FILE, 'utf8')); }
-  catch { return { coins: {}, viewers: {} }; }
+  catch { return { coins: {} }; }
 }
 function save(store) {
   fs.mkdirSync(path.dirname(FILE), { recursive: true });
@@ -14,16 +14,28 @@ function coin(store, symbol) {
   const s = String(symbol || '').toUpperCase();
   if (!store.coins[s]) {
     store.coins[s] = {
-      impressions: 0, views: 0, skips: 0, dwellMs: 0,
-      uniqueViewers: {}, uniqueTraders: {},
+      impressions: 0, views: 0, skips: 0, dwellMs: 0, humanMs: 0,
+      uniqueViewers: {}, traders: {},
       trades: 0, holds: 0, follows: 0, shares: 0, bounces: 0, returns: 0,
-      videoWatchMs: 0, videoCompletes: 0, videoReplays: 0, videoSkips: 0
+      videoWatchMs: 0, videoCompletes: 0, videoReplays: 0, videoSkips: 0,
+      lastTradeAt: null
     };
   }
   return store.coins[s];
 }
-function viewerKey(req) {
-  return String(req.address || req.viewer || '').slice(0, 64) || 'anon';
+function walletQuality(trader) {
+  const ageH = trader.firstSeen ? (Date.now() - trader.firstSeen) / 36e5 : 0;
+  const trades = trader.trades || 0;
+  let q = 0.15;
+  if (ageH > 1) q = 0.35;
+  if (ageH > 24) q = 0.6;
+  if (ageH > 24 * 14) q = 0.85;
+  if (trades >= 3) q = Math.min(1, q + 0.15);
+  if (trades >= 10) q = 1;
+  return q;
+}
+function viewerKey(event) {
+  return String(event.address || event.viewer || '').slice(0, 64) || 'anon';
 }
 
 function record(event) {
@@ -32,6 +44,8 @@ function record(event) {
   const who = viewerKey(event);
   const type = String(event.type || '');
   const ms = Number(event.ms || 0);
+  const human = !!event.human;
+
   if (type === 'impression') {
     row.impressions += 1;
     if (ms >= 1000) { row.views += 1; row.uniqueViewers[who] = (row.uniqueViewers[who] || 0) + 1; }
@@ -42,12 +56,13 @@ function record(event) {
     row.videoSkips += 1; row.skips += 1; row.impressions += 1;
   } else if (type === 'video_watch') {
     row.videoWatchMs += Math.min(600000, Math.max(0, ms));
+    if (human) row.humanMs += Math.min(600000, Math.max(0, ms));
     row.dwellMs += Math.min(600000, Math.max(0, ms));
     row.views += 1;
     row.uniqueViewers[who] = (row.uniqueViewers[who] || 0) + 1;
     row.impressions += 1;
   } else if (type === 'video_complete') {
-    row.videoCompletes += 1;
+    if (ms >= 3000) row.videoCompletes += 1;
   } else if (type === 'video_replay') {
     row.videoReplays += 1;
   } else if (type === 'open') {
@@ -55,7 +70,9 @@ function record(event) {
     row.uniqueViewers[who] = (row.uniqueViewers[who] || 0) + 1;
     if (row.uniqueViewers[who] > 1) row.returns += 1;
   } else if (type === 'dwell') {
-    row.dwellMs += Math.min(600000, Math.max(0, ms));
+    const add = Math.min(600000, Math.max(0, ms));
+    row.dwellMs += add;
+    if (human) row.humanMs += add;
     row.uniqueViewers[who] = (row.uniqueViewers[who] || 0) + 1;
   } else if (type === 'bounce') {
     row.bounces += 1;
@@ -67,7 +84,9 @@ function record(event) {
     row.shares += 1;
   } else if (type === 'trade') {
     row.trades += 1;
-    row.uniqueTraders[who] = 1;
+    row.lastTradeAt = new Date().toISOString();
+    if (!row.traders[who]) row.traders[who] = { firstSeen: Date.now(), trades: 0 };
+    row.traders[who].trades += 1;
   }
   save(store);
   return summarize(row);
@@ -75,23 +94,31 @@ function record(event) {
 
 function summarize(row) {
   const uniqueViewers = Object.keys(row.uniqueViewers || {}).length;
-  const uniqueTraders = Object.keys(row.uniqueTraders || {}).length;
+  const traders = row.traders || {};
+  const uniqueTraders = Object.keys(traders).length;
+  let qualityTraderSum = 0;
+  let repeatBuyers = 0;
+  Object.keys(traders).forEach((k) => {
+    qualityTraderSum += walletQuality(traders[k]);
+    if ((traders[k].trades || 0) >= 2) repeatBuyers += 1;
+  });
   const views = row.views || 0;
   const skips = row.skips || 0;
-  const impressions = Math.max(1, (row.impressions || 0) + (row.videoSkips || 0));
-  const skipRate = skips / impressions;
-  const avgDwellMin = uniqueViewers ? (row.dwellMs || 0) / uniqueViewers / 60000 : 0;
+  const impressions = Math.max(1, (row.impressions || 0));
   const wash = (row.trades || 0) > 10 && uniqueTraders / Math.max(1, row.trades) < 0.15;
+  const humanMinutes = uniqueViewers ? (row.humanMs || 0) / uniqueViewers / 60000 : 0;
+  const qualityMinutes = uniqueViewers ? (row.dwellMs || 0) / uniqueViewers / 60000 : 0;
   return {
     uniqueViewers,
     uniqueTraders,
+    qualityTraderSum: Number(qualityTraderSum.toFixed(3)),
+    repeatBuyers,
     views,
     skips,
     impressions,
-    skipRate: Number(skipRate.toFixed(3)),
-    completion: Number((views / impressions).toFixed(3)),
-    avgDwellMin: Number(avgDwellMin.toFixed(3)),
-    qualityMinutes: Number((uniqueViewers * avgDwellMin).toFixed(2)),
+    skipRate: Number((skips / impressions).toFixed(3)),
+    qualityMinutes: Number(qualityMinutes.toFixed(3)),
+    humanMinutes: Number(humanMinutes.toFixed(3)),
     trades: row.trades || 0,
     holds: row.holds || 0,
     follows: row.follows || 0,
@@ -101,6 +128,7 @@ function summarize(row) {
     videoCompletes: row.videoCompletes || 0,
     videoReplays: row.videoReplays || 0,
     videoSkips: row.videoSkips || 0,
+    lastTradeAt: row.lastTradeAt,
     wash
   };
 }
@@ -108,7 +136,7 @@ function summarize(row) {
 function statsFor(symbol) {
   const store = load();
   const row = store.coins[String(symbol || '').toUpperCase()];
-  if (!row) return summarize(coin({ coins: {} }, 'X'));
+  if (!row) return summarize(coin({ coins: {} }, 'NONE'));
   return summarize(row);
 }
 
@@ -116,4 +144,4 @@ function attach(feed) {
   return (feed || []).map((c) => Object.assign({}, c, { pulse: statsFor(c.symbol) }));
 }
 
-module.exports = { record, statsFor, attach };
+module.exports = { record, statsFor, attach, walletQuality };
