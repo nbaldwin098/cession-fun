@@ -11,16 +11,10 @@ window.CessionMedia = {
     const m = String(url || '').match(/(?:youtu\.be\/|v=|embed\/)([A-Za-z0-9_-]{6,})/);
     return m ? m[1] : '';
   },
-  thumb: function (url) {
-    const kind = this.kind(url);
-    if (kind === 'youtube') return 'https://img.youtube.com/vi/' + this.youtubeId(url) + '/hqdefault.jpg';
-    if (kind === 'image') return url;
-    return '';
-  },
   cardHtml: function (url, symbol) {
     const kind = this.kind(url);
     if (kind === 'video') {
-      return '<video class="cx-media" data-symbol="' + symbol + '" src="' + url + '" muted playsinline loop preload="metadata"></video>';
+      return '<video class="cx-media" data-symbol="' + symbol + '" src="' + url + '" muted playsinline loop autoplay preload="auto"></video>';
     }
     if (kind === 'youtube') {
       const id = this.youtubeId(url);
@@ -32,11 +26,11 @@ window.CessionMedia = {
   pageHtml: function (url, symbol) {
     const kind = this.kind(url);
     if (kind === 'video') {
-      return '<video class="cx-media-full" data-symbol="' + symbol + '" src="' + url + '" controls playsinline loop></video>';
+      return '<video class="cx-media-full" data-symbol="' + symbol + '" src="' + url + '" controls muted playsinline loop autoplay></video>';
     }
     if (kind === 'youtube') {
       const id = this.youtubeId(url);
-      return '<iframe class="cx-media-full" src="https://www.youtube.com/embed/' + id + '?playsinline=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+      return '<iframe class="cx-media-full" src="https://www.youtube.com/embed/' + id + '?playsinline=1&loop=1&playlist=' + id + '&autoplay=1&mute=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
     }
     if (kind === 'image') return '<img class="cx-media-full" src="' + url + '" alt="">';
     return '';
