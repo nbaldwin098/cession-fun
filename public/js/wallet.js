@@ -836,12 +836,94 @@ class CessionWalletEngine {
   }
 
   /**
-   * Confirm and activate the generated sovereign vault
+   * Transition to Coinbase-style 3-word verification step
+   */
+  startSeedPhraseVerification() {
+    if (!this.tempGeneratedVault || !this.tempGeneratedVault.words) {
+      this.regenerateNewVaultMnemonic();
+    }
+    const words = this.tempGeneratedVault.words;
+
+    // Select 3 unique random indices between 0 and 11
+    const indices = [];
+    while (indices.length < 3) {
+      const r = Math.floor(Math.random() * 12);
+      if (!indices.includes(r)) indices.push(r);
+    }
+    indices.sort((a, b) => a - b);
+    this.verificationTargets = indices;
+
+    const grid = document.getElementById('seedVerificationGrid');
+    if (grid) {
+      grid.innerHTML = indices.map((idx, stepNum) => {
+        const correctWord = words[idx];
+        // Generate 3 decoy words from BIP39_DICTIONARY
+        const decoys = [];
+        while (decoys.length < 3) {
+          const randDecoy = BIP39_DICTIONARY[Math.floor(Math.random() * BIP39_DICTIONARY.length)];
+          if (randDecoy !== correctWord && !decoys.includes(randDecoy)) decoys.push(randDecoy);
+        }
+        const options = [correctWord, ...decoys].sort(() => Math.random() - 0.5);
+
+        return `
+          <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px;">
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-primary); display: block; margin-bottom: 6px;">
+              Verify Word #${idx + 1}:
+            </label>
+            <select class="form-input-pump seed-verify-select" data-index="${idx}" style="width: 100%; cursor: pointer; background: var(--bg-input); color: var(--pump-mint); font-family: var(--font-mono); font-weight: 700;">
+              <option value="" disabled selected>-- Select Word #${idx + 1} --</option>
+              ${options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+            </select>
+          </div>
+        `;
+      }).join('');
+    }
+
+    const stepDisp = document.getElementById('vaultStepDisplay');
+    const stepVer = document.getElementById('vaultStepVerify');
+    if (stepDisp) stepDisp.style.display = 'none';
+    if (stepVer) stepVer.style.display = 'block';
+  }
+
+  /**
+   * Return back to Step 1 (reveal phrase)
+   */
+  backToSeedDisplay() {
+    const stepDisp = document.getElementById('vaultStepDisplay');
+    const stepVer = document.getElementById('vaultStepVerify');
+    if (stepDisp) stepDisp.style.display = 'block';
+    if (stepVer) stepVer.style.display = 'none';
+  }
+
+  /**
+   * Confirm and activate the generated sovereign vault after local 3-word verification
    */
   confirmCreateVault() {
     if (!this.tempGeneratedVault) {
       this.regenerateNewVaultMnemonic();
+      return;
     }
+
+    // Verify 3 selected words
+    const selects = document.querySelectorAll('.seed-verify-select');
+    if (selects && selects.length > 0) {
+      for (const sel of selects) {
+        const targetIdx = parseInt(sel.getAttribute('data-index'), 10);
+        const selectedVal = sel.value;
+        const expectedVal = this.tempGeneratedVault.words[targetIdx];
+
+        if (!selectedVal) {
+          if (window.showToast) window.showToast(`Please select Word #${targetIdx + 1} to verify your backup phrase.`, 'warning');
+          return;
+        }
+
+        if (selectedVal !== expectedVal) {
+          if (window.showToast) window.showToast(`❌ Incorrect choice for Word #${targetIdx + 1}. Please check your saved seed phrase!`, 'error');
+          return;
+        }
+      }
+    }
+
     const vault = this.tempGeneratedVault;
     this.vaultData = vault;
 
@@ -866,7 +948,7 @@ class CessionWalletEngine {
     if (modal) modal.style.display = 'none';
 
     this.renderState();
-    if (window.showToast) window.showToast('✓ Sovereign Multi-Chain Vault Activated! Ready to deposit and trade.', 'success');
+    if (window.showToast) window.showToast('🎉 Sovereign Vault Verified & Unlocked! 100% Non-Custodial Multi-Chain Wallet active.', 'success');
   }
 
   /**

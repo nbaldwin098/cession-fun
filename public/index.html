@@ -1095,36 +1095,59 @@
         <button class="btn-close-modal" id="btnCloseCreateVaultModal" onclick="document.getElementById('createVaultModal').style.display='none'">&times;</button>
       </div>
 
-      <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 14px;">
-        Your sovereign vault is 100% non-custodial and generated securely in your browser. Write down or copy these 12 secret backup words in order:
-      </div>
+      <!-- STEP 1: SHOW 12-WORD SEED PHRASE -->
+      <div id="vaultStepDisplay">
+        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 14px;">
+          Your sovereign vault is 100% non-custodial and generated securely in your browser. Write down or copy these 12 secret backup words in order:
+        </div>
 
-      <!-- 12-Word Seed Phrase Badges Grid -->
-      <div id="seedWordsGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; background: var(--bg-input); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
-        <!-- 12 words populated dynamically -->
-      </div>
+        <!-- 12-Word Seed Phrase Badges Grid -->
+        <div id="seedWordsGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; background: var(--bg-input); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+          <!-- 12 words populated dynamically -->
+        </div>
 
-      <div style="display: flex; gap: 8px; margin-bottom: 14px;">
-        <button class="cat-pill-btn" style="flex: 1; justify-content: center; font-size: 12px; color: var(--pump-mint);" id="btnCopySeedPhrase" onclick="window.walletEngine.copyGeneratedMnemonic()">
-          Copy 12 Words
+        <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+          <button class="cat-pill-btn" style="flex: 1; justify-content: center; font-size: 12px; color: var(--pump-mint);" id="btnCopySeedPhrase" onclick="window.walletEngine.copyGeneratedMnemonic()">
+            Copy 12 Words
+          </button>
+          <button class="cat-pill-btn" style="flex: 1; justify-content: center; font-size: 12px; color: var(--text-secondary);" onclick="window.walletEngine.regenerateNewVaultMnemonic()">
+            Generate New
+          </button>
+        </div>
+
+        <!-- Derived Multi-Chain Addresses Preview -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">Derived Multi-Chain Addresses:</div>
+          <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
+            <div>Solana (Ed25519): <span id="derivedSolAddrPreview" style="color: var(--pump-mint);">...</span></div>
+            <div>Base / EVM (secp256k1): <span id="derivedEthAddrPreview" style="color: #60a5fa;">...</span></div>
+          </div>
+        </div>
+
+        <button class="btn-signin-mint" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 800;" onclick="window.walletEngine.startSeedPhraseVerification()">
+          I Have Saved My 12 Words — Verify & Continue →
         </button>
-        <button class="cat-pill-btn" style="flex: 1; justify-content: center; font-size: 12px; color: var(--text-secondary);" onclick="window.walletEngine.regenerateNewVaultMnemonic()">
-          Generate New
-        </button>
       </div>
 
-      <!-- Derived Multi-Chain Addresses Preview -->
-      <div style="background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px;">
-        <div style="font-size: 11px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">Derived Multi-Chain Addresses:</div>
-        <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
-          <div>Solana (Ed25519): <span id="derivedSolAddrPreview" style="color: var(--pump-mint);">...</span></div>
-          <div>Base / EVM (secp256k1): <span id="derivedEthAddrPreview" style="color: #60a5fa;">...</span></div>
+      <!-- STEP 2: COINBASE-STYLE 3-WORD VERIFICATION STEP -->
+      <div id="vaultStepVerify" style="display: none;">
+        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 14px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); padding: 10px; border-radius: var(--radius-sm);">
+          <strong style="color: #60a5fa;">🔒 Coinbase-Style Backup Verification:</strong> Select the correct word for each indicated index to verify that you saved your 12-word seed phrase. Evaluated 100% locally in your browser.
+        </div>
+
+        <div id="seedVerificationGrid" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+          <!-- 3 random word selectors populated dynamically -->
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button class="cat-pill-btn" style="flex: 1; justify-content: center; font-size: 12px; color: var(--text-secondary);" onclick="window.walletEngine.backToSeedDisplay()">
+            ← Back to Phrase
+          </button>
+          <button class="btn-signin-mint" id="btnConfirmUnlockVault" style="flex: 2; padding: 12px; font-size: 13px; font-weight: 800;" onclick="window.walletEngine.confirmCreateVault()">
+            Confirm Backup & Unlock Vault
+          </button>
         </div>
       </div>
-
-      <button class="btn-signin-mint" id="btnConfirmUnlockVault" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 800;" onclick="window.walletEngine.confirmCreateVault()">
-        Confirm Saved Seed Phrase — Unlock Sovereign Vault
-      </button>
     </div>
   </div>
 
