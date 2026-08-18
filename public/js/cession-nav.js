@@ -26,11 +26,28 @@
     const m = document.getElementById(id);
     if (!m) return;
     m.classList.add('cx-center-sheet');
-    const box = m.querySelector('.modal-box-pump');
-    addX(box, function () {
+    addX(m.querySelector('.modal-box-pump'), function () {
       m.style.display = 'none';
       m.classList.remove('open');
     });
+  }
+  function bindLogo(root) {
+    const brand = root.querySelector('.cx-foot-brand');
+    if (!brand || brand.dataset.bound) return;
+    brand.dataset.bound = '1';
+    brand.addEventListener('click', function () { brand.classList.toggle('open'); });
+    brand.addEventListener('mouseenter', function () { brand.classList.add('open'); });
+    brand.addEventListener('mouseleave', function () { brand.classList.remove('open'); });
+  }
+  function placeFooters() {
+    const src = document.querySelector('#viewWallet .cx-you-footer');
+    if (!src) return;
+    ['viewMint', 'viewRewards'].forEach(function (id) {
+      const page = document.getElementById(id);
+      if (!page || page.querySelector('.cx-you-footer')) return;
+      page.appendChild(src.cloneNode(true));
+    });
+    document.querySelectorAll('.cx-you-footer').forEach(bindLogo);
   }
   function ready() {
     if (!window.CessionUI) return setTimeout(ready, 40);
@@ -47,13 +64,14 @@
       b.className = 'cx-float-search';
       b.type = 'button';
       b.setAttribute('aria-label', 'Search');
-      b.style.cssText = 'background:transparent;background-color:transparent;-webkit-appearance:none;appearance:none;border:0;box-shadow:none;';
+      b.style.cssText = 'background:transparent;border:0;-webkit-appearance:none;';
       b.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0c0c0c" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
       b.onclick = function () { ui.openSearch(); };
       document.body.appendChild(b);
     }
     centerSheet('settingsModal');
     centerSheet('statementModal');
+    placeFooters();
     ui.openSearch = function () {
       const m = document.getElementById('searchModal');
       if (!m) return;
@@ -68,8 +86,6 @@
       m.style.display = 'flex';
       m.classList.add('open');
       m.onclick = function (e) { if (e.target === m) closeSearch(); };
-      const q = document.getElementById('searchInput');
-      if (q) q.focus();
     };
     ui.searchLane = function (lane) {
       if (ui.setExploreLane) ui.setExploreLane(lane);
@@ -92,12 +108,6 @@
       } catch (e) {
         box.innerHTML = '<div class="cx-empty"><p class="cx-muted">No live coins yet.</p></div>';
       }
-    }
-    const inp = document.getElementById('searchInput');
-    if (inp) {
-      inp.addEventListener('input', function () {
-        fillHits('best');
-      });
     }
     const prev = ui.go;
     ui.go = function (name) {
