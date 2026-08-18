@@ -1,5 +1,5 @@
 /**
- * cession.fun — Sovereign Digital Asset Exchange & Fair-Launch Platform
+ * cession.fun — Sovereign Fair-Launch Platform & Liquidity Bonding Curves
  * Main Server Entrypoint (Express + WebSockets)
  * Clean URLs without .html extensions
  */
@@ -29,26 +29,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
 
 // API Routes
 app.use('/api', apiRoutes);
-
-// Multi-Host & Path Dispatcher for Calabi Exchange & Cession Launchpad
-const calabiRoutes = ['/exchange', '/trade', '/calabi', '/earn', '/markets', '/pro', '/spot', '/swap-pro'];
-
-app.use((req, res, next) => {
-  // If host is calabi.us or subdomain, or if path is a calabi route
-  const host = (req.hostname || '').toLowerCase();
-  const isCalabiHost = host.includes('calabi');
-  const isCalabiPath = calabiRoutes.some(r => req.path === r || req.path.startsWith(r + '/'));
-
-  if (req.path.startsWith('/api') || req.path.startsWith('/ws') || req.path === '/health' || req.path.includes('.')) {
-    return next();
-  }
-
-  if (isCalabiHost || isCalabiPath) {
-    return res.sendFile(path.join(__dirname, 'public', 'calabi.html'));
-  }
-
-  return res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
 
 // Explicit Clean URL Page Routes for Cession
 const cleanRoutes = [
@@ -80,17 +60,13 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'healthy',
     uptime: process.uptime(),
-    service: 'cession.fun & calabi.us',
+    service: 'cession.fun Fair Launchpad',
     timestamp: new Date().toISOString()
   });
 });
 
-// Fallback for all other routes
+// Fallback for all other routes -> Cession Launchpad
 app.get('*', (req, res) => {
-  const host = (req.hostname || '').toLowerCase();
-  if (host.includes('calabi')) {
-    return res.sendFile(path.join(__dirname, 'public', 'calabi.html'));
-  }
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -123,9 +99,9 @@ const HOST = '0.0.0.0';
 
 server.listen(PORT, HOST, () => {
   console.log(`=======================================================`);
-  console.log(`🚀 CESSION.FUN SOVEREIGN EXCHANGE & FAIR LAUNCHPAD ONLINE`);
-  console.log(`🌐 Clean Gateway (No .html): http://${HOST}:${PORT}`);
+  console.log(`🚀 CESSION.FUN SOVEREIGN FAIR LAUNCHPAD ONLINE`);
+  console.log(`🌐 Clean Gateway: http://${HOST}:${PORT}`);
   console.log(`⚡ WebSocket Stream: ws://${HOST}:${PORT}/ws`);
-  console.log(`💼 Proof-of-Skin Anti-Rug Engine & Transparent Reserves Ready`);
+  console.log(`💼 100% Fair Launch Bonding Curve & Anti-Rug Engine Ready`);
   console.log(`=======================================================`);
 });

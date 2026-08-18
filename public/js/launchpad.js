@@ -36,9 +36,7 @@ class CessionLaunchpadManager {
     // Check initial URL routing
     const path = window.location.pathname;
     const hash = window.location.hash;
-    if (path.startsWith('/exchange') || hash === '#exchange' || path.startsWith('/swap') || path.startsWith('/trade')) {
-      window.location.href = '/exchange';
-    } else if (path.startsWith('/explore') || hash === '#explore') {
+    if (path.startsWith('/explore') || hash === '#explore' || path.startsWith('/board') || hash === '#board') {
       const btn = document.getElementById('railNavExplore');
       if (btn) {
         document.querySelectorAll('.rail-icon-btn').forEach(b => b.classList.remove('active'));
@@ -59,7 +57,6 @@ class CessionLaunchpadManager {
     const navItems = [
       { id: 'railNavHome', view: 'home', url: '/' },
       { id: 'railNavExplore', view: 'explore', url: '/explore' },
-      { id: 'railNavExchange', view: 'exchange', url: '/exchange' },
       { id: 'railNavProfile', view: 'profile', url: '/profile' },
       { id: 'railNavLeaderboard', view: 'leaderboard', url: '/leaderboard' },
       { id: 'railNavBundles', view: 'bundles', url: '/bundles' },
@@ -71,10 +68,6 @@ class CessionLaunchpadManager {
       const btn = document.getElementById(item.id);
       if (btn) {
         btn.addEventListener('click', () => {
-          if (item.view === 'exchange') {
-            window.location.href = '/exchange';
-            return;
-          }
           document.querySelectorAll('.rail-icon-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           if (item.view) this.switchPage(item.view);
@@ -813,11 +806,6 @@ class CessionLaunchpadManager {
   }
 
   switchPage(viewName) {
-    if (viewName === 'exchange') {
-      window.location.href = '/exchange';
-      return;
-    }
-
     const views = {
       home: document.getElementById('viewHome'),
       explore: document.getElementById('viewExplore'),

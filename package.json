@@ -1,7 +1,7 @@
 {
-  "name": "cession-fun-exchange",
+  "name": "cession-fun-launchpad",
   "version": "1.0.0",
-  "description": "cession.fun — Sovereign Web3 Fair Launchpad, Dual-Chain Bonding Curve Exchange, and Multi-Wallet Engine",
+  "description": "cession.fun — Sovereign Web3 Fair Launchpad, Dual-Chain Bonding Curve Protocol, and Multi-Wallet Engine",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -10,7 +10,6 @@
   },
   "keywords": [
     "cession-fun",
-    "crypto-exchange",
     "bonding-curve",
     "token-launchpad",
     "non-custodial",

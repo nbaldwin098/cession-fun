@@ -1,5 +1,5 @@
 /**
- * Cession & Calabi True Price Oracle & Multi-Exchange Market Data Aggregator
+ * Cession True Price Oracle & Market Data Aggregator
  * 
  * Aggregates live price feeds from:
  * 1. Coinbase Public API & WebSocket
@@ -100,7 +100,7 @@ class TruePriceOracle {
   _httpGet(url) {
     return new Promise((resolve, reject) => {
       const client = url.startsWith('https') ? https : http;
-      const req = client.get(url, { headers: { 'User-Agent': 'CalabiExchange/2.0' }, timeout: 4000 }, (res) => {
+      const req = client.get(url, { headers: { 'User-Agent': 'CessionLaunchpad/2.0' }, timeout: 4000 }, (res) => {
         let data = '';
         res.on('data', chunk => data += chunk);
         res.on('end', () => {
@@ -320,7 +320,7 @@ class TruePriceOracle {
       symbol,
       priceUsd: basePrice,
       confidence: 0.992,
-      sources: ['Binance_L2_Depth', 'CoinGecko_Global_Index', 'Calabi_Bonding_Curve_AMM'],
+      sources: ['Binance_L2_Depth', 'CoinGecko_Global_Index', 'Cession_Bonding_Curve_AMM'],
       lastUpdated: Date.now()
     };
   }

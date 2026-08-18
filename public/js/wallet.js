@@ -1114,7 +1114,7 @@ class CessionWalletEngine {
     localStorage.removeItem('cession_vault_data');
     localStorage.removeItem('cession_wallet_type');
     localStorage.removeItem('cession_balances');
-    localStorage.removeItem('calabi_active_wallet');
+    localStorage.removeItem('cession_active_wallet');
     localStorage.removeItem('session_token');
     sessionStorage.clear();
 
@@ -1166,14 +1166,6 @@ class CessionWalletEngine {
     const profilePortfolioVal = document.getElementById('profilePortfolioValue');
     const profileHoldingsBody = document.getElementById('profileHoldingsBody');
 
-    // Exchange DOM elements
-    const exBadge = document.getElementById('exchangeWalletBadge');
-    const exAddr = document.getElementById('exchangeWalletAddressDisplay');
-    const exSol = document.getElementById('exchangeBalSol');
-    const exEth = document.getElementById('exchangeBalEth');
-    const exUsdc = document.getElementById('exchangeBalUsdc');
-    const exCess = document.getElementById('exchangeBalCess');
-    const swapPayBal = document.getElementById('swapPayBalanceDisplay');
     const depositSol = document.getElementById('depositSolAddr');
     const depositEth = document.getElementById('depositEthAddr');
 
@@ -1200,18 +1192,6 @@ class CessionWalletEngine {
         profilePortfolioVal.textContent = `$${totalUsd.toFixed(2)}`;
       }
 
-      if (exBadge) {
-        exBadge.textContent = 'CONNECTED';
-        exBadge.style.color = 'var(--pump-mint)';
-        exBadge.style.background = 'rgba(134,239,172,0.1)';
-      }
-      if (exAddr) exAddr.textContent = `${shortAddr} (${(this.activeWalletType || 'Sovereign').toUpperCase()})`;
-      if (exSol) exSol.textContent = `${(this.balances.sol || 0.0).toFixed(2)} SOL`;
-      if (exEth) exEth.textContent = `${(this.balances.eth || 0.0).toFixed(2)} ETH`;
-      if (exUsdc) exUsdc.textContent = `$${(this.balances.usdc || 0.0).toFixed(2)}`;
-      if (exCess) exCess.textContent = `${(this.balances.cess || 0).toLocaleString()}`;
-      if (swapPayBal) swapPayBal.textContent = `${(this.balances.sol || 0.0).toFixed(2)} SOL`;
-
       const solAddrFull = this.vaultData?.addresses?.sol || this.userProfile?.addresses?.sol || this.activeAddress;
       const ethAddrFull = this.vaultData?.addresses?.eth || this.userProfile?.addresses?.eth || (this.activeAddress?.startsWith('0x') ? this.activeAddress : '0x' + this.activeAddress.substring(0, 40));
       if (depositSol) depositSol.textContent = solAddrFull;
@@ -1232,24 +1212,6 @@ class CessionWalletEngine {
       if (profileHoldingsBody) {
         profileHoldingsBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 30px;">No wallet connected. Connect your wallet or 1-Click Sovereign Vault to view holdings.</td></tr>`;
       }
-
-      if (exBadge) {
-        exBadge.textContent = 'DISCONNECTED';
-        exBadge.style.color = 'var(--text-muted)';
-        exBadge.style.background = 'rgba(255,255,255,0.05)';
-      }
-      if (exAddr) exAddr.textContent = 'Not Connected';
-      if (exSol) exSol.textContent = '0.00 SOL';
-      if (exEth) exEth.textContent = '0.00 ETH';
-      if (exUsdc) exUsdc.textContent = '$0.00';
-      if (exCess) exCess.textContent = '0';
-      if (swapPayBal) swapPayBal.textContent = '0.00 SOL';
-      if (depositSol) depositSol.textContent = 'Not Connected';
-      if (depositEth) depositEth.textContent = 'Not Connected';
-    }
-
-    if (window.exchangeManager && typeof window.exchangeManager.renderWalletBalances === 'function') {
-      window.exchangeManager.renderWalletBalances();
     }
   }
 }
