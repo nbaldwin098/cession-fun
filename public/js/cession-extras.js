@@ -1,6 +1,8 @@
 (function () {
   function ready(fn) {
-    if (!window.CessionUI || !window.CessionRank || !window.CessionMedia) return setTimeout(function () { ready(fn); }, 40);
+    if (!window.CessionUI || !window.CessionRank || !window.CessionMedia || !window.CessionEngine) {
+      return setTimeout(function () { ready(fn); }, 40);
+    }
     fn();
   }
   function mediaUrl(c) { return c.mediaUrl || c.videoUrl || c.imageUrl || c.image || ''; }
@@ -16,7 +18,7 @@
       '</div></div></button>';
   }
   function empty(t, s) { return '<div class="cx-empty"><h2>' + t + '</h2><p class="cx-muted">' + s + '</p></div>'; }
-  function ad() { return '<div class="cx-ad">Video completion ranks higher than wash volume.</div>'; }
+  function ad() { return '<div class="cx-ad">Your feed is yours. Skip trains it. Buy trains it harder.</div>'; }
   async function live() {
     try {
       const r = await fetch('/api/pulse?lane=all&limit=80');
@@ -26,6 +28,10 @@
         return String(c.mintAddress || c.mint || '').length >= 32 && !/TEST|DEMO|TDOGE|QPEPE|BDOGE/.test(s);
       });
     } catch (e) { return []; }
+  }
+  function rankHome(list) {
+    if (window.CessionEngine) return CessionEngine.assemble(list);
+    return CessionRank.rankForYou(list);
   }
   async function paintFollowing() {
     const grid = document.getElementById('forYouCoinsGrid');
@@ -48,7 +54,7 @@
   async function paintForYou() {
     const grid = document.getElementById('forYouCoinsGrid');
     if (!grid) return;
-    const coins = CessionRank.rankForYou(await live());
+    const coins = rankHome(await live());
     const parts = [ad()];
     if (!coins.length) parts.push(empty('No live coins yet.', 'Be the first to add a coin.'));
     coins.forEach(function (c, i) { if (i && i % 6 === 0) parts.push(ad()); parts.push(card(c)); });
@@ -70,6 +76,7 @@
     };
     const prevOpen = ui.openCoin;
     ui.openCoin = function (coin) {
+      if (window.CessionEngine) CessionEngine.learn(coin, 'dwell');
       if (window.CessionTrack) CessionTrack.open(coin.symbol);
       if (prevOpen) prevOpen(coin);
       const title = document.getElementById('coinTitle');
@@ -91,6 +98,7 @@
       bar.innerHTML = '<button class="cx-ghost" type="button" id="followCoinBtn">Follow coin</button><button class="cx-ghost" type="button" id="followUserBtn">Follow wallet</button>';
       document.getElementById('followCoinBtn').onclick = function () {
         CessionRank.followCoin(coin.symbol);
+        if (window.CessionEngine) CessionEngine.learn(coin, 'follow');
         if (window.CessionTrack) CessionTrack.emit('follow', coin.symbol, 0);
       };
       document.getElementById('followUserBtn').onclick = function () {
