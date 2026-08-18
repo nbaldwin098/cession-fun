@@ -2,6 +2,9 @@
   var lock = document.createElement('script');
   lock.src = 'js/cession-user-lock.js';
   document.head.appendChild(lock);
+  var gate = document.createElement('script');
+  gate.src = 'js/cession-perps-gate.js';
+  document.head.appendChild(gate);
   function ready(fn) {
     if (!window.CessionUI || !window.CessionRank || !window.CessionMedia || !window.CessionEngine) {
       return setTimeout(function () { ready(fn); }, 40);
