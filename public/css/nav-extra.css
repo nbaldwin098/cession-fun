@@ -1,74 +1,57 @@
-.cx-top{padding-right:16px}
-#viewExplorePulse{padding:0 16px}
-#viewExplorePulse .cx-title{padding:0}
+.cx-top{
+  align-items:center;
+  justify-content:flex-start;
+  gap:20px;
+  padding:0 16px;
+}
+.cx-xtab{
+  height:52px;
+  padding:0;
+  display:inline-flex;
+  align-items:center;
+  box-shadow:none;
+}
+.cx-xtab.on{box-shadow:inset 0 -2px 0 #0c0c0c}
+#tabAi{margin:0}
+
+.bottom-nav-bar{
+  background:#111;color:#8a8a8a;border:0;border-radius:22px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.bottom-nav-slot{
+  flex:1 1 20%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#8a8a8a;
+  height:100%;
+}
+.bottom-nav-slot.active{color:#fff;opacity:1}
+.bnav-plus{overflow:visible}
+.bnav-plus-circle{
+  width:44px;height:44px;border-radius:50%;background:#fff;
+  display:flex;align-items:center;justify-content:center;margin:0;
+}
+.bnav-wallet-circle{display:none}
 
 .cx-float-search{
   position:fixed;
   top:calc(env(safe-area-inset-top, 0px) + 58px);
   right:14px;
   z-index:95;
-  width:28px;
-  height:28px;
-  padding:0;
-  margin:0;
-  border:0;
-  border-radius:0;
+  width:28px;height:28px;padding:0;margin:0;border:0;
   background:transparent !important;
-  background-color:transparent !important;
-  -webkit-appearance:none;
-  appearance:none;
-  box-shadow:none;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  -webkit-appearance:none;appearance:none;box-shadow:none;
 }
-.cx-float-search:focus,
-.cx-float-search:active{background:transparent !important;outline:0}
-.cx-float-search svg{display:block;background:none}
+.cx-float-search:focus,.cx-float-search:active{background:transparent !important;outline:0}
 
-#searchModal{
-  align-items:flex-start;justify-content:center;
-  padding:72px 16px 24px;
-  background:rgba(12,12,12,.28);
-}
-#searchModal .modal-box-pump{
-  width:min(420px,100%);
-  background:transparent;
-  border-radius:0;
-  padding:0;
-  box-shadow:none;
-  position:relative;
-}
-#searchModal .cx-x{
-  position:absolute;top:-36px;right:0;width:32px;height:32px;border:0;background:none;font-size:26px;color:#111
-}
-#searchModal .form-input-pump{
-  display:block;width:100%;height:44px;border-radius:22px;border:1px solid #e6e6e1;background:#fff;padding:0 16px
-}
+#viewExplorePulse{padding:0 16px}
+#searchModal{align-items:flex-start;justify-content:center;padding:72px 16px 24px;background:rgba(12,12,12,.28)}
+#searchModal .modal-box-pump{width:min(420px,100%);background:transparent;border-radius:0;padding:0;box-shadow:none;position:relative}
+#searchModal .cx-x{position:absolute;top:-36px;right:0;width:32px;height:32px;border:0;background:none;font-size:26px}
+#searchModal .form-input-pump{display:block;width:100%;height:44px;border-radius:22px;border:1px solid #e6e6e1;background:#fff;padding:0 16px}
 #searchModal .cx-words{justify-content:flex-start;padding:10px 0 12px}
-#searchHits{min-height:120px}
-#searchHits .cx-feed{grid-template-columns:repeat(2,1fr)}
-
-.cx-center-sheet{
-  align-items:center !important;
-  justify-content:center !important;
-  background:rgba(12,12,12,.35);
-}
-.cx-center-sheet .modal-box-pump{
-  width:min(360px,calc(100% - 40px));
-  border-radius:20px;
-  padding:20px 16px 16px;
-  position:relative;
-}
-.cx-center-sheet .cx-x{
-  position:absolute;top:8px;right:8px;width:32px;height:32px;border:0;background:none;font-size:24px
-}
-
-.bottom-nav-bar{background:#111;color:#8a8a8a;border:0;border-radius:22px}
-.bottom-nav-slot{color:#8a8a8a}
-.bottom-nav-slot.active{color:#fff;opacity:1}
-.bnav-plus-circle{width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
-.bnav-wallet-circle{display:none}
-.cx-media-empty,.cx-card-coin img,.cx-media{
-  background:radial-gradient(circle at 30% 20%,#e8e8e2 0%,#d4d4cc 100%);
-}
+.cx-center-sheet{align-items:center !important;justify-content:center !important}
+.cx-center-sheet .modal-box-pump{width:min(360px,calc(100% - 40px));border-radius:20px;padding:20px 16px 16px;position:relative}
+.cx-center-sheet .cx-x{position:absolute;top:8px;right:8px;width:32px;height:32px;border:0;background:none;font-size:24px}
+.cx-media-empty,.cx-card-coin img,.cx-media{background:radial-gradient(circle at 30% 20%,#e8e8e2 0%,#d4d4cc 100%)}
