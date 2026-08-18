@@ -19,6 +19,7 @@
     if (!m) return;
     m.style.display = 'none';
     m.classList.remove('open');
+    m.style.setProperty('display', 'none', 'important');
   }
   function apply() {
     const name = savedName();
@@ -38,10 +39,18 @@
     };
     const prevGo = window.CessionUI.go;
     window.CessionUI.go = function (name) {
+      if (savedName()) closeUserModal();
       if (prevGo) prevGo(name);
       apply();
     };
-    setInterval(apply, 800);
+    const modal = document.getElementById('usernameModal');
+    if (modal && savedName()) {
+      closeUserModal();
+      const obs = new MutationObserver(function () {
+        if (savedName()) closeUserModal();
+      });
+      obs.observe(modal, { attributes: true, attributeFilter: ['style', 'class'] });
+    }
     apply();
   }
   ready();
