@@ -1,22 +1,22 @@
+/**
+ * FOREVER FEE LOCK
+ * Trader never pays more than 1.00%.
+ * Protocol never above 0.20%. Promo may only cut protocol.
+ */
 function tier(marketCapUsd) {
   const m = Number(marketCapUsd) || 0;
-  if (m < 88000) {
-    return { name: 'small', totalBps: 100, creatorBps: 55, holderBps: 20, protocolBps: 20, referralBps: 5 };
+  if (m < 1000000) {
+    return { name: 'standard', totalBps: 100, creatorBps: 50, holderBps: 20, protocolBps: 20, referralBps: 10 };
   }
-  if (m < 300000) {
-    return { name: 'sweet', totalBps: 125, creatorBps: 95, holderBps: 5, protocolBps: 20, referralBps: 5 };
-  }
-  if (m < 20000000) {
-    return { name: 'large', totalBps: 80, creatorBps: 30, holderBps: 20, protocolBps: 20, referralBps: 10 };
-  }
-  return { name: 'huge', totalBps: 50, creatorBps: 15, holderBps: 10, protocolBps: 20, referralBps: 5 };
+  return { name: 'scale', totalBps: 70, creatorBps: 25, holderBps: 20, protocolBps: 20, referralBps: 5 };
 }
 
 module.exports = {
   createLamports: 0,
   locked: true,
+  forever: true,
   protocolCapBps: 20,
-  note: 'Steal-all ladder. Protocol never above 0.20%. Promo may only cut protocol.',
+  maxTraderBps: 100,
   tier,
   graduation: { stayOnCession: true, bundleEligible: true }
 };
