@@ -13,7 +13,7 @@ class TreasuryService {
     this.burnShare = 0.50;        // 0.25% to buyback & burn
 
     const solAddr = process.env.TREASURY_SOL_ADDRESS || process.env.TREASURY_SOLANA_ADDRESS || "8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH";
-    const evmAddr = process.env.TREASURY_EVM_ADDRESS || process.env.TREASURY_BASE_ADDRESS || "0x777A6b3D91028374829108a798129034Cession99";
+    const evmAddr = process.env.TREASURY_EVM_ADDRESS || process.env.TREASURY_BASE_ADDRESS || "0xE409f28fb1D6C5C090b1feE164DB09C365c07011";
 
     // Public Verifiable Multi-Chain Addresses (0 Private Keys)
     this.publicWallets = {
