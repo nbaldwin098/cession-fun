@@ -15,46 +15,46 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* White & Royal Blue Palette */
-  --bg-app: #f8fafc;
-  --bg-sidebar: #ffffff;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f1f5f9;
-  --bg-input: #f8fafc;
-  --bg-pill: #f1f5f9;
-  --bg-pill-hover: #e2e8f0;
-  --bg-modal: #ffffff;
-  --bg-banner: #eff6ff;
+  /* Dark Void Black & Steel-Violet Palette */
+  --bg-app: #050711;
+  --bg-sidebar: #0b0f19;
+  --bg-card: #0e1322;
+  --bg-card-hover: #141b2d;
+  --bg-input: #121829;
+  --bg-pill: #161d30;
+  --bg-pill-hover: #1f2840;
+  --bg-modal: #0b0f19;
+  --bg-banner: #0d1222;
 
-  /* Brand Accents (Royal Blue & Secondary) */
-  --pump-mint: #1e50ff; /* Primary Royal Blue */
-  --pump-mint-hover: #003cd6;
-  --pump-mint-dark: #1e3a8a;
-  --pump-mint-glow: rgba(30, 80, 255, 0.2);
-  --accent-blue: #1e50ff;
-  --accent-light-blue: #3b82f6;
-  --accent-red: #dc2626;
-  --accent-green: #16a34a;
-  --accent-orange: #ea580c;
-  --accent-purple: #7c3aed;
-  --accent-pink: #db2777;
+  /* Brand Accents (Steel-Violet #5B6CFF) */
+  --pump-mint: #5B6CFF; /* Primary Steel-Violet */
+  --pump-mint-hover: #4858e6;
+  --pump-mint-dark: #3a47bf;
+  --pump-mint-glow: rgba(91, 108, 255, 0.25);
+  --accent-blue: #5B6CFF;
+  --accent-light-blue: #7081ff;
+  --accent-red: #ef4444; /* 24h down coral */
+  --accent-green: #22c55e; /* 24h up mint green */
+  --accent-orange: #f97316;
+  --accent-purple: #8b5cf6;
+  --accent-pink: #ec4899;
 
   /* Borders & Dividers */
-  --border-subtle: #e2e8f0;
-  --border-card: #e2e8f0;
-  --border-active: #1e50ff;
+  --border-subtle: #1e293b;
+  --border-card: #1e293b;
+  --border-active: #5B6CFF;
 
   /* Typography */
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --text-mint: #1e50ff;
+  --text-primary: #f3f4f6; /* Ice text */
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-mint: #5B6CFF;
   --text-on-accent: #ffffff;
 
-  /* Shadows for White Theme */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  /* Shadows for Dark Theme */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
 
   /* Fonts */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -1387,15 +1387,15 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
-  background: #ffffff;
-  border-top: 1px solid #e2e8f0;
+  height: 68px;
+  background: #050711;
+  border-top: 1px solid #1e293b;
   display: flex;
   justify-content: space-around;
   align-items: center;
   z-index: 99999;
   padding: 0 8px;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .bottom-nav-slot {
@@ -1416,55 +1416,36 @@ button { background: none; border: none; color: inherit; font-family: inherit; c
 
 .bottom-nav-slot:hover,
 .bottom-nav-slot.active {
-  color: #1e50ff;
+  color: #5B6CFF !important;
 }
 
-.bnav-icon {
-  font-size: 18px;
-  line-height: 1;
-  margin-bottom: 3px;
-}
-
-.bnav-label {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-/* Slot 3: Center Raised Create Button */
-.bnav-center-create {
+/* Slot 3: Center Raised Wallet Circle */
+.bnav-center-wallet {
   position: relative;
-  top: -10px;
+  top: -12px;
 }
 
-.bnav-create-circle {
-  width: 48px;
-  height: 48px;
+.bnav-wallet-circle {
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1e50ff, #3b82f6);
+  background: #5B6CFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 15px rgba(30, 80, 255, 0.4);
+  box-shadow: 0 4px 18px rgba(91, 108, 255, 0.45);
   margin-bottom: 2px;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.bnav-center-create:hover .bnav-create-circle {
+.bnav-center-wallet:hover .bnav-wallet-circle {
   transform: scale(1.08);
-  box-shadow: 0 6px 20px rgba(30, 80, 255, 0.6);
+  box-shadow: 0 6px 24px rgba(91, 108, 255, 0.65);
 }
 
-.bnav-plus {
-  font-size: 28px;
-  font-weight: 900;
-  color: #ffffff;
-  line-height: 1;
-  margin-top: -2px;
-}
-
-/* Add bottom padding to main-viewport so content clears bottom-nav-bar */
 .main-viewport {
-  padding-bottom: 76px !important;
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-bottom: 84px !important;
 }
