@@ -48,7 +48,11 @@ const cleanRoutes = [
   '/coin/:symbol',
   '/token/:symbol',
   '/r/:code',
-  '/rewards'
+  '/rewards',
+  '/wallet',
+  '/you',
+  '/foryou',
+  '/pulse'
 ];
 
 cleanRoutes.forEach(route => {

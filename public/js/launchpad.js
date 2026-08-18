@@ -1163,14 +1163,18 @@ class CessionLaunchpadManager {
       home: document.getElementById('viewHome'),
       explore: document.getElementById('viewExplore'),
       board: document.getElementById('viewExplore'),
+      pulse: document.getElementById('viewExplore'),
+      wallet: document.getElementById('viewWallet'),
+      profile: document.getElementById('viewProfile'),
+      you: document.getElementById('viewProfile'),
       bundles: document.getElementById('viewBundles'),
       transparency: document.getElementById('viewTransparency'),
       leaderboard: document.getElementById('viewLeaderboard'),
-      profile: document.getElementById('viewProfile'),
+      rewards: document.getElementById('viewRewards'),
       terms: document.getElementById('viewTerms')
     };
 
-    const targetKey = (viewName === 'board' || viewName === 'explore') ? 'explore' : viewName;
+    const targetKey = (viewName === 'board' || viewName === 'explore' || viewName === 'pulse') ? 'explore' : (viewName === 'you' ? 'profile' : viewName);
 
     Object.keys(views).forEach(k => {
       if (views[k]) {
@@ -1183,6 +1187,20 @@ class CessionLaunchpadManager {
         }
       }
     });
+
+    // Update 5-slot bottom nav bar active state
+    const bnavSlotMap = {
+      home: 'bnavForYou',
+      explore: 'bnavPulse',
+      wallet: 'bnavWallet',
+      profile: 'bnavYou'
+    };
+    document.querySelectorAll('.bottom-nav-slot').forEach(b => b.classList.remove('active'));
+    const activeBnavId = bnavSlotMap[targetKey];
+    if (activeBnavId) {
+      const activeBtn = document.getElementById(activeBnavId);
+      if (activeBtn) activeBtn.classList.add('active');
+    }
 
     // Control search bar visibility: ONLY visible in explore view
     const searchWrapper = document.getElementById('navbarSearchWrapper');
