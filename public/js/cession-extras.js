@@ -5,12 +5,11 @@
     line.href = href;
     document.head.appendChild(line);
   });
-  var lock = document.createElement('script');
-  lock.src = 'js/cession-user-lock.js';
-  document.head.appendChild(lock);
-  var gate = document.createElement('script');
-  gate.src = 'js/cession-perps-gate.js';
-  document.head.appendChild(gate);
+  ['js/cession-user-lock.js', 'js/cession-perps-gate.js', 'js/cession-header-perps.js'].forEach(function (src) {
+    var s = document.createElement('script');
+    s.src = src;
+    document.head.appendChild(s);
+  });
   function ready(fn) {
     if (!window.CessionUI || !window.CessionRank || !window.CessionMedia || !window.CessionEngine) {
       return setTimeout(function () { ready(fn); }, 40);
