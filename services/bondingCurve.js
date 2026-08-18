@@ -821,12 +821,13 @@ class BondingCurveEngine {
     token.realSolRaised = (token.realSolRaised || 0) + netSolIn;
     token.tokensSold = (token.tokensSold || 0) + tokensOut;
 
-    // Fee Accounting
+    // Fee Accounting & 100% Treasury Accrual
     token.feePool.totalGenerated += feeTotal;
     token.feePool.holderRewardsDistributed += feeYield;
     const burnedTokensFromFee = Math.floor(tokensOut * 0.0025);
     token.totalBurnedTokens = (token.totalBurnedTokens || 0) + burnedTokensFromFee;
     this.totalProtocolBurnedUsd += (feeBurn * 150);
+    this.totalTradingFeesCollectedSol += feeTotal;
 
     // Dynamic Price & Cap
     token.currentPriceSol = token.virtualSolReserves / token.virtualTokenReserves;
@@ -906,6 +907,7 @@ class BondingCurveEngine {
     token.virtualTokenReserves = newTokenReserves;
     token.tokensSold = Math.max(0, token.tokensSold - tokensIn);
     token.realSolRaised = Math.max(0, token.realSolRaised - grossSolOut);
+    this.totalTradingFeesCollectedSol += feeTotal;
 
     const solGraduationTarget = token.targetCapUsd <= 25000 ? 8.0 : 20.0;
     token.currentPriceSol = token.virtualSolReserves / token.virtualTokenReserves;
