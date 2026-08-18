@@ -240,21 +240,12 @@ class CessionWalletEngine {
     }
   }
 
-  openAuthModal(defaultTab = 'email') {
-    const modal = document.getElementById('authModal');
-    if (modal) {
-      modal.classList.add('active');
-      this.switchAuthTab(defaultTab);
-    } else {
-      this.openWalletModal();
-    }
+  openAuthModal(defaultTab = 'web3') {
+    this.openWalletModal();
   }
 
   closeAuthModal() {
-    const modal = document.getElementById('authModal');
-    if (modal) modal.classList.remove('active');
-    const walletModal = document.getElementById('walletModal');
-    if (walletModal) walletModal.style.display = 'none';
+    this.closeWalletModal();
   }
 
   switchAuthTab(tab) {
