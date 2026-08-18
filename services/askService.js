@@ -47,24 +47,20 @@ function siteContext(address) {
 }
 
 const SYSTEM = [
-  'You are Cession Ask, the same kind of assistant as Grok: direct, useful, a little dry, never corporate.',
-  'Answer everyday questions fully: math, news-level knowledge, how-tos, jokes, explanations.',
-  'When the user asks about Cession, coins, wallets, fees, or P/L, use the live Cession snapshot. Do not invent coins, balances, or fills.',
+  'You are Cession Ask. Talk like Grok: direct, useful, a little dry.',
+  'Answer everyday questions fully: math, explanations, how-tos, jokes.',
+  'When the topic is Cession, coins, wallets, fees, or P/L, use the live snapshot only. Do not invent coins or balances.',
   'If the board is empty, say so once, then still answer the rest of the question.',
-  'Not investment advice. Keep replies in the user\'s language.'
+  'Not investment advice.'
 ].join(' ');
+
+const MODELS = ['grok-3', 'grok-3-mini', 'grok-4', 'grok-4-0709', 'grok-4.5', 'grok-4.6'];
 
 async function callXai(messages) {
   const key = process.env.XAI_API_KEY || process.env.GROK_API_KEY;
   if (!key) return { ok: false, error: 'no_key' };
-  const models = (process.env.XAI_MODEL ? [process.env.XAI_MODEL] : []).concat([
-    'grok-4-fast',
-    'grok-4.6',
-    'grok-4-1-fast',
-    'grok-3-mini',
-    'grok-2-latest'
-  ]);
-  let last = 'no model';
+  const models = process.env.XAI_MODEL ? [process.env.XAI_MODEL].concat(MODELS) : MODELS;
+  const errors = [];
   for (const model of models) {
     try {
       const res = await fetch('https://api.x.ai/v1/chat/completions', {
@@ -73,18 +69,14 @@ async function callXai(messages) {
         body: JSON.stringify({ model, temperature: 0.7, messages })
       });
       const data = await res.json();
-      if (!res.ok) {
-        last = (data.error && (data.error.message || data.error)) || ('HTTP ' + res.status);
-        continue;
-      }
       const text = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-      if (text) return { ok: true, text, model };
-      last = 'empty';
+      if (res.ok && text) return { ok: true, text, model };
+      errors.push(model + ': ' + ((data.error && (data.error.message || data.error.code)) || ('HTTP ' + res.status)));
     } catch (e) {
-      last = e.message;
+      errors.push(model + ': ' + e.message);
     }
   }
-  return { ok: false, error: String(last) };
+  return { ok: false, error: errors.join(' | ') };
 }
 
 async function modelAnswer(message, ctx) {
@@ -103,7 +95,7 @@ async function modelAnswer(message, ctx) {
     { role: 'user', content: 'Live Cession snapshot:\n' + JSON.stringify(snapshot) + '\n\nUser:\n' + message }
   ]);
   if (result.ok) return result.text;
-  return 'I could not reach Grok just now (' + result.error + '). Cession board: ' + snapshot.liveCoinCount + ' live coins. Create is 0.05 SOL.';
+  return 'Grok is not answering yet. On Render set XAI_API_KEY from console.x.ai (not a grok.com password) and optional XAI_MODEL=grok-3. Detail: ' + result.error;
 }
 
 function bannerQuestion() {
