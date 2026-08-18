@@ -16,7 +16,8 @@ body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 .cx-card-coin{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;text-align:left;color:inherit;cursor:pointer}
 .cx-card-coin img{width:100%;height:88px;object-fit:cover;display:block;background:#1c1d22}
 .cx-card-coin .meta{padding:8px}.cx-card-coin .name{font-size:12px;font-weight:700}.cx-card-coin .tick{font-size:11px;color:var(--muted)}
-.cx-ad{grid-column:1/-1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13px;color:var(--muted)}
+.cx-ad,.cx-empty{grid-column:1/-1}
+.cx-ad{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13px;color:var(--muted)}
 .cx-empty,.cx-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
 .cx-muted{color:var(--muted);font-size:13px;margin:8px 0}
 .cx-launch{background:#111;color:#fff;border:none;border-radius:999px;height:42px;padding:0 16px;font-weight:700;cursor:pointer}
