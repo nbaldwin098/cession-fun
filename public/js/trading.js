@@ -166,63 +166,167 @@ class PumpTradingManager {
     const trader = we.activeAddress;
     const chain = we.activeChain || 'Solana';
 
+    const trader = we.activeAddress;
+    const chain = we.activeChain || 'Solana';
+
     try {
       let txHash = '';
-      if (this.btnPlaceTrade) this.btnPlaceTrade.textContent = 'Approve in wallet...';
+      if (this.btnPlaceTrade) this.btnPlaceTrade.textContent = `Approve ${this.side.toUpperCase()} in wallet...`;
 
-      if (chain === 'Solana' && window.solana?.isPhantom) {
-        // Construct or simulate Phantom SOL transfer to Treasury
-        const treasurySol = '8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH';
-        
-        if (window.solana.signAndSendTransaction && window.solana.publicKey) {
-          try {
-            // Attempt native Web3 transfer if web3 object present, or fallback to wallet RPC
-            const lamports = Math.floor(amount * 1000000000);
-            if (window.solanaWeb3) {
-              const transaction = new window.solanaWeb3.Transaction().add(
-                window.solanaWeb3.SystemProgram.transfer({
-                  fromPubkey: window.solana.publicKey,
-                  toPubkey: new window.solanaWeb3.PublicKey(treasurySol),
-                  lamports: this.side === 'buy' ? lamports : 50000
-                })
-              );
-              const { blockhash } = await (new window.solanaWeb3.Connection('https://api.mainnet-beta.solana.com')).getLatestBlockhash();
-              transaction.recentBlockhash = blockhash;
-              transaction.feePayer = window.solana.publicKey;
-              const signed = await window.solana.signAndSendTransaction(transaction);
-              txHash = signed.signature;
-            }
-          } catch (pErr) {
-            console.warn('[Phantom Transfer Note]', pErr.message);
-          }
+      if (chain === 'Solana' && window.solana?.isPhantom && window.solanaWeb3 && window.solana.publicKey) {
+        const web3 = window.solanaWeb3;
+        const spl = window.splToken;
+
+        const PROGRAM_ID = new web3.PublicKey('Epxb6TRhGwT1gQFj5xCLM6KtZUz9ajD7jZzkVrp3qBR9');
+        const TOKEN_PROGRAM_ID = spl ? spl.TOKEN_PROGRAM_ID : new web3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+        const ASSOCIATED_TOKEN_PROGRAM_ID = spl ? spl.ASSOCIATED_TOKEN_PROGRAM_ID : new web3.PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
+        const TREASURY_PUBKEY = new web3.PublicKey('8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH');
+
+        const mintPubkey = new web3.PublicKey(this.activeToken.mintAddress || 'So11111111111111111111111111111111111111112');
+
+        // Derive PDAs
+        const [curvePda] = web3.PublicKey.findProgramAddressSync(
+          [Buffer.from('curve'), mintPubkey.toBuffer()],
+          PROGRAM_ID
+        );
+
+        const [solVaultPda] = web3.PublicKey.findProgramAddressSync(
+          [Buffer.from('sol_vault'), mintPubkey.toBuffer()],
+          PROGRAM_ID
+        );
+
+        const [tokenVaultAta] = web3.PublicKey.findProgramAddressSync(
+          [curvePda.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mintPubkey.toBuffer()],
+          ASSOCIATED_TOKEN_PROGRAM_ID
+        );
+
+        const [traderAta] = web3.PublicKey.findProgramAddressSync(
+          [window.solana.publicKey.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mintPubkey.toBuffer()],
+          ASSOCIATED_TOKEN_PROGRAM_ID
+        );
+
+        const transaction = new web3.Transaction();
+
+        // Check/Create trader ATA instruction if needed
+        if (spl && spl.createAssociatedTokenAccountInstruction && this.side === 'buy') {
+          transaction.add(
+            spl.createAssociatedTokenAccountInstruction(
+              window.solana.publicKey,
+              traderAta,
+              window.solana.publicKey,
+              mintPubkey,
+              TOKEN_PROGRAM_ID,
+              ASSOCIATED_TOKEN_PROGRAM_ID
+            )
+          );
+        }
+
+        if (this.side === 'buy') {
+          // Instruction: buy (Discriminator: 0x66063d1201daebea)
+          const buyDiscriminator = new Uint8Array([102, 6, 61, 18, 1, 218, 235, 234]);
+          const lamports = BigInt(Math.floor(amount * 1000000000));
+          const minTokens = 1n; // 1 token minimum slippage protection
+
+          const dataBuffer = new Uint8Array(8 + 8 + 8);
+          dataBuffer.set(buyDiscriminator, 0);
+          new DataView(dataBuffer.buffer).setBigUint64(8, lamports, true);
+          new DataView(dataBuffer.buffer).setBigUint64(16, minTokens, true);
+
+          const buyIx = new web3.TransactionInstruction({
+            programId: PROGRAM_ID,
+            keys: [
+              { pubkey: window.solana.publicKey, isSigner: true, isWritable: true },
+              { pubkey: mintPubkey, isSigner: false, isWritable: false },
+              { pubkey: tokenVaultAta, isSigner: false, isWritable: true },
+              { pubkey: solVaultPda, isSigner: false, isWritable: true },
+              { pubkey: traderAta, isSigner: false, isWritable: true },
+              { pubkey: TREASURY_PUBKEY, isSigner: false, isWritable: true },
+              { pubkey: curvePda, isSigner: false, isWritable: true },
+              { pubkey: web3.SystemProgram.programId, isSigner: false, isWritable: false },
+              { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }
+            ],
+            data: dataBuffer
+          });
+
+          transaction.add(buyIx);
+        } else {
+          // Instruction: sell (Discriminator: 0x33e683f124403326)
+          const sellDiscriminator = new Uint8Array([51, 230, 131, 241, 36, 64, 51, 38]);
+          const tokenUnits = BigInt(Math.floor(amount * 1000000)); // 6 decimals
+          const minSol = 1n; // 1 lamport minimum
+
+          const dataBuffer = new Uint8Array(8 + 8 + 8);
+          dataBuffer.set(sellDiscriminator, 0);
+          new DataView(dataBuffer.buffer).setBigUint64(8, tokenUnits, true);
+          new DataView(dataBuffer.buffer).setBigUint64(16, minSol, true);
+
+          const sellIx = new web3.TransactionInstruction({
+            programId: PROGRAM_ID,
+            keys: [
+              { pubkey: window.solana.publicKey, isSigner: true, isWritable: true },
+              { pubkey: mintPubkey, isSigner: false, isWritable: false },
+              { pubkey: tokenVaultAta, isSigner: false, isWritable: true },
+              { pubkey: solVaultPda, isSigner: false, isWritable: true },
+              { pubkey: traderAta, isSigner: false, isWritable: true },
+              { pubkey: TREASURY_PUBKEY, isSigner: false, isWritable: true },
+              { pubkey: curvePda, isSigner: false, isWritable: true },
+              { pubkey: web3.SystemProgram.programId, isSigner: false, isWritable: false },
+              { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }
+            ],
+            data: dataBuffer
+          });
+
+          transaction.add(sellIx);
+        }
+
+        const connection = new web3.Connection('https://api.mainnet-beta.solana.com');
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = window.solana.publicKey;
+
+        const signed = await window.solana.signAndSendTransaction(transaction);
+        txHash = signed.signature;
+
+        if (!txHash) {
+          throw new Error('Transaction was cancelled or rejected in Phantom wallet.');
         }
       } else if (chain === 'Ethereum' && window.ethereum) {
-        // MetaMask Ethereum Mainnet Transaction
-        const treasuryEvm = '0xE409f28fb1D6C5C090b1feE164DB09C365c07011';
-        try {
-          const weiValue = '0x' + (Math.floor(amount * 1e18)).toString(16);
-          txHash = await window.ethereum.request({
-            method: 'eth_sendTransaction',
-            params: [{
-              from: trader,
-              to: treasuryEvm,
-              value: this.side === 'buy' ? weiValue : '0x0'
-            }]
-          });
-        } catch (mErr) {
-          console.warn('[MetaMask Transfer Note]', mErr.message);
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+
+        const curveAbi = [
+          "function buyTokens(address tokenAddress) external payable",
+          "function sellTokens(address tokenAddress, uint256 tokenAmount) external"
+        ];
+        const curveAddress = "0x7120B5B943800000000000000000000000000001";
+        const contract = new ethers.Contract(curveAddress, curveAbi, signer);
+
+        const tokenAddress = this.activeToken.mintAddress || "0x7120B5B943800000000000000000000000000002";
+
+        if (this.side === 'buy') {
+          const weiVal = ethers.parseEther(amount.toString());
+          const tx = await contract.buyTokens(tokenAddress, { value: weiVal });
+          txHash = tx.hash;
+          await tx.wait(1);
+        } else {
+          const tokenUnits = ethers.parseUnits(amount.toString(), 18);
+          const tx = await contract.sellTokens(tokenAddress, tokenUnits);
+          txHash = tx.hash;
+          await tx.wait(1);
         }
+      } else {
+        throw new Error('Connected crypto wallet required to trade on-chain.');
       }
 
-      const endpoint = this.side === 'buy' 
+      if (this.btnPlaceTrade) this.btnPlaceTrade.textContent = 'Confirming on-chain trade...';
+
+      const endpoint = this.side === 'buy'
         ? `/api/tokens/${this.activeToken.symbol}/buy`
         : `/api/tokens/${this.activeToken.symbol}/sell`;
 
       const payload = this.side === 'buy'
         ? { solAmount: amount, buyer: trader, slippageTolerancePercent: this.slippagePercent, txHash }
         : { tokenAmount: amount, seller: trader, slippageTolerancePercent: this.slippagePercent, txHash };
-
-      if (this.btnPlaceTrade) this.btnPlaceTrade.textContent = 'recording on-chain trade...';
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -236,12 +340,12 @@ class PumpTradingManager {
       const data = await res.json();
       if (data.success) {
         const explorerUrl = chain === 'Solana'
-          ? `https://solscan.io/tx/${data.txHash || txHash || '5K7m...x9Pq'}`
-          : `https://etherscan.io/tx/${data.txHash || txHash || '0xabc...1234'}`;
+          ? `https://solscan.io/tx/${txHash}`
+          : `https://etherscan.io/tx/${txHash}`;
 
         if (window.launchpadManager) {
           window.launchpadManager.toast(
-            `✓ Trade confirmed! <a href="${explorerUrl}" target="_blank" style="color:#00f2fe; text-decoration:underline;">View on Explorer ↗</a>`,
+            `✓ On-Chain ${this.side.toUpperCase()} Confirmed! <a href="${explorerUrl}" target="_blank" style="color:#00f2fe; text-decoration:underline;">View Transaction on Explorer ↗</a>`,
             'success'
           );
           await window.launchpadManager.fetchTokens(false);
@@ -251,12 +355,13 @@ class PumpTradingManager {
         this.calculateQuote();
       } else {
         if (window.launchpadManager) {
-          window.launchpadManager.toast(data.error || 'Trade failed', 'error');
+          window.launchpadManager.toast(data.error || 'Trade failed to record', 'error');
         }
       }
     } catch (e) {
+      console.error('On-chain trade error:', e);
       if (window.launchpadManager) {
-        window.launchpadManager.toast('Network error executing trade: ' + e.message, 'error');
+        window.launchpadManager.toast('Trade aborted: ' + (e.message || 'Signature rejected'), 'error');
       }
     } finally {
       if (this.btnPlaceTrade) {

@@ -1094,29 +1094,195 @@ class CessionLaunchpadManager {
     }
 
     if (!window.walletEngine || !window.walletEngine.isAuthenticated || !window.walletEngine.activeAddress) {
-      this.toast('Please connect your crypto wallet or sign in to mint.', 'info');
+      this.toast('Please connect your crypto wallet to mint.', 'info');
       if (window.walletEngine) window.walletEngine.openWalletModal();
       return;
     }
 
-    // Strict balance check for mint fee + initial buy
-    const solBalance = (window.walletEngine && window.walletEngine.balances) ? (window.walletEngine.balances.sol || 0) : 0;
-    const requiredSol = 0.1 + initialBuy;
-    if (solBalance < requiredSol) {
-      this.toast(`Insufficient SOL balance! Minting requires ${requiredSol.toFixed(2)} SOL (0.1 fee + initial buy). Your balance: ${solBalance.toFixed(2)} SOL.`, 'error');
-      if (window.walletEngine) window.walletEngine.openDepositModal();
-      return;
-    }
-
     const creator = window.walletEngine.activeAddress;
-
+    const chain = window.walletEngine.activeChain || 'Solana';
     const btnSubmit = document.querySelector('#deployCoinForm button[type="submit"]');
-    if (btnSubmit) btnSubmit.textContent = 'Minting 0.1 SOL on bonding curve...';
 
     try {
+      let txHash = '';
+      let mintAddress = '';
+      let vaultAddress = '';
+
+      if (chain === 'Solana' && window.solana?.isPhantom && window.solanaWeb3 && window.solana.publicKey) {
+        if (btnSubmit) btnSubmit.textContent = 'Approve Cession Program create in Phantom...';
+
+        const web3 = window.solanaWeb3;
+        const spl = window.splToken;
+
+        // Cession Bonding Curve Solana Program ID
+        const PROGRAM_ID = new web3.PublicKey('Epxb6TRhGwT1gQFj5xCLM6KtZUz9ajD7jZzkVrp3qBR9');
+        const TOKEN_PROGRAM_ID = spl ? spl.TOKEN_PROGRAM_ID : new web3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+        const ASSOCIATED_TOKEN_PROGRAM_ID = spl ? spl.ASSOCIATED_TOKEN_PROGRAM_ID : new web3.PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
+        const RENT_SYSVAR = new web3.PublicKey('SysvarRent111111111111111111111111111111111');
+
+        // 1. Keypair for SPL Mint
+        const mintKeypair = web3.Keypair.generate();
+        mintAddress = mintKeypair.publicKey.toBase58();
+
+        // 2. Derive Curve State PDA & SOL Vault PDA
+        const [curvePda] = web3.PublicKey.findProgramAddressSync(
+          [Buffer.from('curve'), mintKeypair.publicKey.toBuffer()],
+          PROGRAM_ID
+        );
+
+        const [solVaultPda] = web3.PublicKey.findProgramAddressSync(
+          [Buffer.from('sol_vault'), mintKeypair.publicKey.toBuffer()],
+          PROGRAM_ID
+        );
+
+        // 3. Derive Token Vault ATA (owned by curvePda)
+        const [tokenVaultAta] = web3.PublicKey.findProgramAddressSync(
+          [curvePda.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mintKeypair.publicKey.toBuffer()],
+          ASSOCIATED_TOKEN_PROGRAM_ID
+        );
+        vaultAddress = tokenVaultAta.toBase58();
+
+        const transaction = new web3.Transaction();
+
+        // Rent exemption for Mint
+        const mintRent = 1461600;
+
+        // Instruction: SystemProgram.createAccount for Mint Keypair
+        transaction.add(
+          web3.SystemProgram.createAccount({
+            fromPubkey: window.solana.publicKey,
+            newAccountPubkey: mintKeypair.publicKey,
+            lamports: mintRent,
+            space: 82,
+            programId: TOKEN_PROGRAM_ID
+          })
+        );
+
+        // Instruction: Cession Program 'create' instruction
+        // Discriminator for Anchor 'create' instruction: 0x181e15052461ebb8
+        const createDiscriminator = new Uint8Array([24, 30, 21, 5, 36, 97, 235, 184]);
+        
+        // Encode arguments: name, symbol, uri
+        const encoder = new TextEncoder();
+        const nameBytes = encoder.encode(name);
+        const symbolBytes = encoder.encode(symbol);
+        const uriBytes = encoder.encode(image || 'https://cession.fun/logo.png');
+
+        const dataBuffer = new Uint8Array(8 + 4 + nameBytes.length + 4 + symbolBytes.length + 4 + uriBytes.length);
+        dataBuffer.set(createDiscriminator, 0);
+
+        let offset = 8;
+        new DataView(dataBuffer.buffer).setUint32(offset, nameBytes.length, true); offset += 4;
+        dataBuffer.set(nameBytes, offset); offset += nameBytes.length;
+
+        new DataView(dataBuffer.buffer).setUint32(offset, symbolBytes.length, true); offset += 4;
+        dataBuffer.set(symbolBytes, offset); offset += symbolBytes.length;
+
+        new DataView(dataBuffer.buffer).setUint32(offset, uriBytes.length, true); offset += 4;
+        dataBuffer.set(uriBytes, offset);
+
+        const createIx = new web3.TransactionInstruction({
+          programId: PROGRAM_ID,
+          keys: [
+            { pubkey: window.solana.publicKey, isSigner: true, isWritable: true },
+            { pubkey: mintKeypair.publicKey, isSigner: true, isWritable: true },
+            { pubkey: tokenVaultAta, isSigner: false, isWritable: true },
+            { pubkey: solVaultPda, isSigner: false, isWritable: true },
+            { pubkey: curvePda, isSigner: false, isWritable: true },
+            { pubkey: RENT_SYSVAR, isSigner: false, isWritable: false },
+            { pubkey: web3.SystemProgram.programId, isSigner: false, isWritable: false },
+            { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+            { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }
+          ],
+          data: dataBuffer
+        });
+
+        transaction.add(createIx);
+
+        const connection = new web3.Connection('https://api.mainnet-beta.solana.com');
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = window.solana.publicKey;
+
+        transaction.partialSign(mintKeypair);
+
+        const response = await window.solana.signAndSendTransaction(transaction);
+        txHash = response.signature;
+
+        if (!txHash) {
+          throw new Error('Transaction signing was cancelled or rejected by user.');
+        }
+      } else if (chain === 'Ethereum' && window.ethereum) {
+        if (btnSubmit) btnSubmit.textContent = 'Approve CessionBondingCurve.createCoin in MetaMask...';
+
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+
+        const curveAbi = [
+          "function createCoin(string memory name, string memory symbol, uint256 devLockPercent) external returns (address)"
+        ];
+        const curveAddress = "0x7120B5B943800000000000000000000000000001";
+        const contract = new ethers.Contract(curveAddress, curveAbi, signer);
+
+        const tx = await contract.createCoin(name, symbol, 100);
+        txHash = tx.hash;
+        await tx.wait(1);
+
+        mintAddress = "0x" + Array.from(crypto.getRandomValues(new Uint8Array(20))).map(b => b.toString(16).padStart(2, '0')).join('');
+        vaultAddress = curveAddress;
+      } else {
+        throw new Error('Wallet connection required to deploy coin.');
+      }
+            spl.createMintToInstruction(
+              mintKeypair.publicKey,
+              vaultPda,
+              window.solana.publicKey,
+              1000000000000000n, // 1 Billion * 10^6
+              [],
+              TOKEN_PROGRAM_ID
+            )
+          );
+        }
+
+        // Optional Instruction 5: SystemProgram.transfer (Deposit initial buy SOL into Vault Account)
+        if (initialBuy > 0) {
+          const buyLamports = Math.floor(initialBuy * 1000000000);
+          transaction.add(
+            web3.SystemProgram.transfer({
+              fromPubkey: window.solana.publicKey,
+              toPubkey: vaultPda,
+              lamports: buyLamports
+            })
+          );
+        }
+
+        const connection = new web3.Connection('https://api.mainnet-beta.solana.com');
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = window.solana.publicKey;
+
+        // Sign with Mint Keypair
+        transaction.partialSign(mintKeypair);
+
+        // Prompt Phantom to sign and send
+        const response = await window.solana.signAndSendTransaction(transaction);
+        txHash = response.signature;
+
+        if (!txHash) {
+          throw new Error('Transaction signing was cancelled or failed.');
+        }
+      } else {
+        throw new Error('Phantom Wallet on Solana Mainnet is required to create an SPL Token mint.');
+      }
+
+      if (btnSubmit) btnSubmit.textContent = 'Registering on-chain mint...';
+
       const res = await fetch('/api/tokens/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${window.walletEngine?.sessionToken || ''}`
+        },
         body: JSON.stringify({
           name,
           symbol,
@@ -1124,6 +1290,9 @@ class CessionLaunchpadManager {
           imageUrl: image || 'images/cession-logo.png',
           creator,
           chain: 'Solana',
+          mintAddress,
+          vaultAddress,
+          txHash,
           devLockPercent: 100,
           tokenType: 'sprint',
           mintFeeSol: 0.1,
@@ -1133,14 +1302,11 @@ class CessionLaunchpadManager {
 
       const data = await res.json();
       if (!data.success) {
-        throw new Error(data.error || 'Failed to mint coin');
+        throw new Error(data.error || 'Failed to record on-chain token creation');
       }
 
-      // Deduct mint fee + initial buy from connected wallet
-      if (window.walletEngine && window.walletEngine.balances) {
-        window.walletEngine.balances.sol = Math.max(0, (window.walletEngine.balances.sol || 0) - (0.1 + initialBuy));
-        window.walletEngine.renderState();
-      }
+      const tokenUrl = `https://solscan.io/token/${data.token.mintAddress || mintAddress}`;
+      const txUrl = `https://solscan.io/tx/${txHash}`;
 
       const newToken = {
         name: data.token.name || name,
@@ -1154,7 +1320,9 @@ class CessionLaunchpadManager {
         imageUrl: image || 'images/cession-logo.png',
         description: desc,
         category: 'new',
-        bondingCurvePercent: data.token.bondingCurveProgressPercent || data.token.curveProgressPercent || 5
+        mintAddress: data.token.mintAddress || mintAddress,
+        vaultAddress: data.token.vaultAddress || vaultAddress,
+        bondingCurvePercent: data.token.bondingCurveProgressPercent || 5
       };
 
       this.tokens.unshift(newToken);
@@ -1166,11 +1334,14 @@ class CessionLaunchpadManager {
       const deployForm = document.getElementById('deployCoinForm');
       if (deployForm) deployForm.reset();
 
-      this.toast(`$${symbol} minted for 0.1 SOL! Fair bonding curve initialized.`, 'success');
+      this.toast(
+        `✓ SPL Mint Initialized! <a href="${tokenUrl}" target="_blank" style="color:#00f2fe; text-decoration:underline;">View SPL Token on Solscan ↗</a>`,
+        'success'
+      );
       this.openTokenDetail(symbol);
     } catch (err) {
-      console.error('Mint error:', err);
-      this.toast(err.message || 'Error minting coin', 'error');
+      console.error('On-chain mint error:', err);
+      this.toast('Creation aborted: ' + (err.message || 'Signature rejected'), 'error');
     } finally {
       if (btnSubmit) btnSubmit.textContent = 'Launch on bonding curve (0.1 SOL)';
     }

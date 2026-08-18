@@ -1,5 +1,5 @@
 {
-  "totalProtocolBurnedUsd": 42895.562125000004,
+  "totalProtocolBurnedUsd": 42910.748500000016,
   "tokens": [
     {
       "name": "Cession Protocol",
@@ -19,7 +19,7 @@
       "creator": "0xFounderSovereign",
       "devLockedPercent": 100,
       "devTokensLocked": 50000000,
-      "createdAt": 1787045243809,
+      "createdAt": 1787047665562,
       "mintFeeSol": 0.1,
       "virtualSolReserves": 10.431334999999999,
       "virtualTokenReserves": 968236568,
@@ -61,10 +61,10 @@
       "twitter": null,
       "telegram": null,
       "website": null,
-      "lastBumpTime": 1787045243809,
+      "lastBumpTime": 1787047665562,
       "recentTrades": [
         {
-          "id": "tx_msyglj1o",
+          "id": "tx_msyi1fon",
           "type": "BUY",
           "amountSol": 0.33299999999999996,
           "amountTokens": 31763432,
@@ -93,7 +93,7 @@
       "creator": "0xDevTestAddress",
       "devLockedPercent": 100,
       "devTokensLocked": 50000000,
-      "createdAt": 1787045243811,
+      "createdAt": 1787047665564,
       "mintFeeSol": 0.1,
       "virtualSolReserves": 12.349405065,
       "virtualTokenReserves": 817853162,
@@ -135,10 +135,10 @@
       "twitter": null,
       "telegram": null,
       "website": null,
-      "lastBumpTime": 1787045243811,
+      "lastBumpTime": 1787047665564,
       "recentTrades": [
         {
-          "id": "tx_msyglj1p",
+          "id": "tx_msyi1foo",
           "type": "BUY",
           "amountSol": 0.33299999999999996,
           "amountTokens": 22547995,
@@ -148,7 +148,7 @@
           "mevShielded": true
         },
         {
-          "id": "tx_msyglj1i",
+          "id": "tx_msyi1foe",
           "type": "SELL",
           "amountSol": 0.071570285325,
           "amountTokens": 5000000,
@@ -158,7 +158,7 @@
           "mevShielded": true
         },
         {
-          "id": "tx_msyglj1g",
+          "id": "tx_msyi1fod",
           "type": "BUY",
           "amountSol": 2,
           "amountTokens": 164598843,
@@ -187,7 +187,7 @@
       "creator": "0xDevGrad",
       "devLockedPercent": 100,
       "devTokensLocked": 50000000,
-      "createdAt": 1787045243815,
+      "createdAt": 1787047665567,
       "mintFeeSol": 0.1,
       "virtualSolReserves": 20.381334999999996,
       "virtualTokenReserves": 495551444,
@@ -229,10 +229,10 @@
       "twitter": null,
       "telegram": null,
       "website": null,
-      "lastBumpTime": 1787045243815,
+      "lastBumpTime": 1787047665567,
       "recentTrades": [
         {
-          "id": "tx_msyglj1q",
+          "id": "tx_msyi1fop",
           "type": "BUY",
           "amountSol": 0.33299999999999996,
           "amountTokens": 8189204,
@@ -242,7 +242,7 @@
           "mevShielded": true
         },
         {
-          "id": "tx_msyglj1k",
+          "id": "tx_msyi1fog",
           "type": "BUY",
           "amountSol": 10,
           "amountTokens": 496259352,
@@ -255,8 +255,8 @@
       "graduationData": {
         "dexName": "Raydium CPMM",
         "liquiditySolSeeded": 10.049999999999999,
-        "lpBurnTx": "0xdead6rv46nz3z5q0000dead",
-        "timestamp": 1787045243816
+        "lpBurnTx": "0xdeadzkqfgd91g20000dead",
+        "timestamp": 1787047665568
       }
     },
     {
@@ -277,7 +277,7 @@
       "creator": "0xSniperDev",
       "devLockedPercent": 100,
       "devTokensLocked": 50000000,
-      "createdAt": 1787045243825,
+      "createdAt": 1787047665579,
       "mintFeeSol": 0.1,
       "virtualSolReserves": 10.5975,
       "virtualTokenReserves": 953054965,
@@ -319,10 +319,10 @@
       "twitter": "https://x.com/snipecoin",
       "telegram": "https://t.me/snipecoin",
       "website": "https://snipecoin.fun",
-      "lastBumpTime": 1787045243825,
+      "lastBumpTime": 1787047665579,
       "recentTrades": [
         {
-          "id": "tx_msyglj1t",
+          "id": "tx_msyi1for",
           "type": "BUY",
           "amountSol": 0.5,
           "amountTokens": 46945035,
@@ -346,12 +346,12 @@
         "totalStakedTokens": 750250000,
         "stakers": [
           {
-            "id": "stake_msyglmh0",
+            "id": "stake_msyi1g9a",
             "user": "0xFamMember",
             "amount": 250000,
             "durationDays": 90,
-            "stakedAt": 1787045248260,
-            "unlockTime": 1794821248260,
+            "stakedAt": 1787047666318,
+            "unlockTime": 1794823666318,
             "apy": 22.5
           }
         ]
@@ -361,7 +361,7 @@
       "creator": "0xFamCreator",
       "devLockedPercent": 100,
       "devTokensLocked": 50000000,
-      "createdAt": 1787045248258,
+      "createdAt": 1787047666316,
       "mintFeeSol": 0.1,
       "virtualSolReserves": 10.1,
       "virtualTokenReserves": 1000000000,
@@ -403,20 +403,20 @@
       "twitter": null,
       "telegram": null,
       "website": null,
-      "lastBumpTime": 1787045248258,
+      "lastBumpTime": 1787047666316,
       "recentTrades": []
     }
   ],
   "collections": [
     {
-      "id": "col_msyglj1m",
+      "id": "col_msyi1foj",
       "name": "Solana DeFi Giants",
       "symbol": "SOLAN",
       "description": "Curated basket of top DeFi protocols",
       "category": "memes",
       "creator": "0xCuratorMaster",
       "imageUrl": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=200",
-      "createdAt": 1787045243818,
+      "createdAt": 1787047665571,
       "tokens": [
         {
           "symbol": "CESS",

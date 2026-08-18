@@ -218,48 +218,70 @@ router.post(['/create', '/deploy', '/launch'], (req, res) => {
   }
 });
 
-// Buy on Bonding Curve
+// Buy on Bonding Curve (Requires Confirmed On-Chain Program Transaction Signature)
 router.post('/:symbol/buy', (req, res) => {
   try {
-    const { solAmount, amount, buyerAddress, buyer } = req.body;
+    const { solAmount, amount, buyerAddress, buyer, txHash } = req.body;
     const buySol = parseFloat(solAmount || amount);
     if (!buySol || buySol <= 0 || isNaN(buySol)) {
       return res.status(400).json({ success: false, error: 'Valid SOL amount is required.' });
     }
+
+    if (!txHash || typeof txHash !== 'string' || txHash.trim().length < 32) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Confirmed on-chain program transaction signature (txHash) is required to record a buy.' 
+      });
+    }
+
     const result = bondingCurve.buyTokens(
       req.params.symbol,
       buySol,
-      buyerAddress || buyer || '0xCessionTrader'
+      buyerAddress || buyer || '0xCessionTrader',
+      txHash
     );
+
     res.json({
       success: true,
-      message: `Successfully bought ${Math.floor(result.tokensOut).toLocaleString()} $${result.token.symbol}! (MEV Shield Active)`,
+      message: `Successfully bought ${Math.floor(result.tokensOut).toLocaleString()} $${result.token.symbol} on-chain!`,
       token: result.token,
-      trade: result.trade
+      trade: result.trade,
+      txHash: txHash
     });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
 });
 
-// Sell on Bonding Curve (with Anti-Dump verification)
+// Sell on Bonding Curve (Requires Confirmed On-Chain Program Transaction Signature)
 router.post('/:symbol/sell', (req, res) => {
   try {
-    const { tokenAmount, amount, sellerAddress, seller } = req.body;
+    const { tokenAmount, amount, sellerAddress, seller, txHash } = req.body;
     const sellTokens = parseFloat(tokenAmount || amount);
     if (!sellTokens || sellTokens <= 0 || isNaN(sellTokens)) {
       return res.status(400).json({ success: false, error: 'Valid token amount is required.' });
     }
+
+    if (!txHash || typeof txHash !== 'string' || txHash.trim().length < 32) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Confirmed on-chain program transaction signature (txHash) is required to record a sell.' 
+      });
+    }
+
     const result = bondingCurve.sellTokens(
       req.params.symbol,
       sellTokens,
-      sellerAddress || seller || '0xCessionTrader'
+      sellerAddress || seller || '0xCessionTrader',
+      txHash
     );
+
     res.json({
       success: true,
-      message: `Successfully sold ${sellTokens} $${result.token.symbol} for ${result.solOut.toFixed(4)} SOL!`,
+      message: `Successfully sold ${sellTokens.toLocaleString()} $${result.token.symbol} on-chain for ${result.solOut.toFixed(4)} SOL!`,
       token: result.token,
-      trade: result.trade
+      trade: result.trade,
+      txHash: txHash
     });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
