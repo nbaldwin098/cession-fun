@@ -6,7 +6,6 @@
   let cached=[], activeCoin=null, exploreLane='best', homeLane='foryou', askMode='ai', pnlRange='7d', chatTimer=null;
   function toast(m){alert(m)}
   function isPhone(){return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)}
-  function inWalletBrowser(){return !!(window.solana||(window.ethereum&&window.ethereum.isMetaMask))&&/Phantom|MetaMask/i.test(navigator.userAgent)}
   function address(){const w=window.walletEngine;return (w&&(w.activeAddress||w.address))||localStorage.getItem('cession_address')||''}
   function saveAddr(a){if(a)localStorage.setItem('cession_address',a)}
   function isLive(c){if(!c||!c.symbol)return false;const s=String(c.symbol).toUpperCase();if(BLOCKED.has(s)||/test|demo/i.test(s+(c.name||'')))return false;return String(c.mintAddress||c.mint||'').length>=32}
@@ -28,8 +27,7 @@
     if(key==='wallet')sync();
     if(key==='rewards')loadRewards();
     if(key==='bots')loadBots();
-    if(key==='ai'){bootAi();if(askMode==='chat')startChat()}
-    else stopChat();
+    if(key==='ai'){bootAi();if(askMode==='chat')startChat()} else stopChat();
     window.scrollTo(0,0);
   }
   function open(id){const m=document.getElementById(id);if(!m)return;m.style.display='flex';m.classList.add('open')}
@@ -118,25 +116,30 @@
   function startChat(){loadChat();if(chatTimer)clearInterval(chatTimer);chatTimer=setInterval(loadChat,2500)}
   function stopChat(){if(chatTimer){clearInterval(chatTimer);chatTimer=null}}
   async function sendChat(){const input=document.getElementById('chatInput');const q=(input.value||'').trim();if(!q)return;input.value='';const media=/^https?:\/\/\S+\.(gif|png|webp|jpg|jpeg)(\?.*)?$/i.test(q)?q:'';await fetch('/api/ask/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:media?'':q,media:media||null,address:address(),username:document.getElementById('profileName').textContent,pnl:localStorage.getItem('cession_pnl')||'0'})});loadChat()}
+  async function claimTicket(id){
+    if(!id)return false;
+    try{
+      const s=await fetch('/api/auth/ticket/'+id);const row=await s.json();
+      if(row.status==='complete'&&row.address){saveAddr(row.address);localStorage.removeItem('cession_ticket');sync();show('wallet');return true}
+    }catch(e){}
+    return false;
+  }
+  function pendingTicket(){return localStorage.getItem('cession_ticket')||''}
   async function startTicket(provider){
     const r=await fetch('/api/auth/ticket',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({provider})});
     const d=await r.json();
+    localStorage.setItem('cession_ticket',d.ticket);
     const hint=document.getElementById('connectHint');
-    if(hint)hint.textContent='Approve in '+provider+', then this tab will log you in.';
-    if(isPhone()&&!inWalletBrowser()){
-      if(provider==='phantom') location.href='https://phantom.app/ul/browse/'+encodeURIComponent(d.authUrl)+'?ref='+encodeURIComponent(location.origin);
+    if(hint)hint.innerHTML='Approve in the wallet. Then come back here and tap I approved.';
+    const authUrl=d.authUrl;
+    if(isPhone()){
+      if(provider==='phantom') location.href='https://phantom.app/ul/browse/'+encodeURIComponent(authUrl);
       else location.href='https://metamask.app.link/dapp/'+location.host+'/auth.html?ticket='+d.ticket+'&provider=metamask';
-    } else {
-      window.open(d.authUrl,'_blank');
-    }
-    const t=setInterval(async function(){
-      const s=await fetch('/api/auth/ticket/'+d.ticket);const row=await s.json();
-      if(row.status==='complete'&&row.address){clearInterval(t);saveAddr(row.address);sync();toast('Connected. You can close the wallet browser.')}
-    },1500);
+    } else window.open(authUrl,'_blank');
   }
   function connectPhantom(){if(window.solana){window.solana.connect().then(function(res){if(res.publicKey){saveAddr(res.publicKey.toString());sync()}});return}startTicket('phantom')}
   function connectMetaMask(){if(window.ethereum){window.ethereum.request({method:'eth_requestAccounts'}).then(function(a){if(a&&a[0]){saveAddr(a[0]);sync()}});return}startTicket('metamask')}
-  window.CessionUI={go:show,open:open,close:close,openCreate:function(){open('deployModal')},openSettings:function(){open('settingsModal')},openStatement:openStatement,downloadCsv:downloadCsv,savePresets:savePresets,openCoin:openCoin,openTrade:openTrade,confirmTrade:function(){toast('Sign this trade in your wallet.')},connectPhantom:connectPhantom,connectMetaMask:connectMetaMask,openStake:function(){open('stakeModal')},openPhantomStake:function(){location.href='https://phantom.app/ul/browse/'+encodeURIComponent('https://help.phantom.com')},sendAi:sendAi,sendChat:sendChat,setAskMode:setAskMode,setHomeLane:setHomeLane,saveBot:saveBot,lockUsername:lockUsername};
+  window.CessionUI={go:show,open:open,close:close,openCreate:function(){open('deployModal')},openSettings:function(){open('settingsModal')},openStatement:openStatement,downloadCsv:downloadCsv,savePresets:savePresets,openCoin:openCoin,openTrade:openTrade,confirmTrade:function(){toast('Sign this trade in your wallet.')},connectPhantom:connectPhantom,connectMetaMask:connectMetaMask,claimApproved:function(){claimTicket(pendingTicket()).then(function(ok){if(!ok)toast('Not approved yet. Approve in the wallet, then tap again.')})},openStake:function(){open('stakeModal')},openPhantomStake:function(){location.href='https://phantom.app/ul/browse/'+encodeURIComponent('https://help.phantom.com')},sendAi:sendAi,sendChat:sendChat,setAskMode:setAskMode,setHomeLane:setHomeLane,saveBot:saveBot,lockUsername:lockUsername};
   document.addEventListener('DOMContentLoaded',function(){
     const form=document.getElementById('deployCoinForm');if(form)form.addEventListener('submit',function(e){e.preventDefault();toast('Create is not live until the program is deployed.')});
     const words=document.getElementById('exploreWords');if(words)words.addEventListener('click',function(e){const b=e.target.closest('button');if(b)setExploreLane(b.getAttribute('data-lane'))});
@@ -144,6 +147,16 @@
     const file=document.getElementById('avatarFile');if(file)file.addEventListener('change',function(){const f=file.files&&file.files[0];if(!f)return;const r=new FileReader();r.onload=function(){saveAvatar(r.result)};r.readAsDataURL(f)});
     const brand=document.getElementById('footerBrand');
     if(brand){brand.addEventListener('click',function(){brand.classList.toggle('open')});brand.addEventListener('mouseleave',function(){brand.classList.remove('open')})}
+    const hint=document.getElementById('connectHint');
+    if(hint&&!document.getElementById('claimBtn')){
+      const b=document.createElement('button');b.id='claimBtn';b.className='cx-door';b.type='button';b.textContent='I approved';b.onclick=function(){CessionUI.claimApproved()};hint.parentNode.appendChild(b);
+    }
+    const q=new URLSearchParams(location.search);
+    const ticket=q.get('authTicket')||pendingTicket();
+    if(ticket)claimTicket(ticket);
+    document.addEventListener('visibilitychange',function(){if(!document.hidden)claimTicket(pendingTicket())});
+    window.addEventListener('pageshow',function(){claimTicket(pendingTicket())});
+    window.addEventListener('focus',function(){claimTicket(pendingTicket())});
     const ai=document.getElementById('aiInput');if(ai)ai.addEventListener('keydown',function(e){if(e.key==='Enter')sendAi()});
     const ch=document.getElementById('chatInput');if(ch)ch.addEventListener('keydown',function(e){if(e.key==='Enter')sendChat()});
     show('home');
