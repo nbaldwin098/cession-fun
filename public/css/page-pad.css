@@ -1,0 +1,21 @@
+.cx-app:has(#forYouCoinsGrid){padding:16px}
+#viewHome.page-view.active{padding:0}
+#viewMint,
+#viewRewards,
+#viewWallet,
+#viewExplorePulse,
+#viewAi{
+  padding-left:4px;
+  padding-right:4px;
+}
+#viewMint .cx-title,
+#viewRewards .cx-title,
+#viewExplorePulse .cx-title{
+  padding-left:2px;
+  margin-top:4px;
+}
+#viewHome .cx-empty,
+#viewHome .cx-ad{
+  margin:12px 16px;
+  padding:16px;
+}
