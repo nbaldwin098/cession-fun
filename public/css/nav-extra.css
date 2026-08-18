@@ -1,13 +1,30 @@
-.cx-top{padding-right:48px}
+.cx-top{padding-right:16px}
 #viewExplorePulse{padding:0 16px}
 #viewExplorePulse .cx-title{padding:0}
 
 .cx-float-search{
-  position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;z-index:95;
-  width:40px;height:40px;border:0;border-radius:50%;background:transparent;
-  display:flex;align-items:center;justify-content:center;
+  position:fixed;
+  top:calc(env(safe-area-inset-top, 0px) + 58px);
+  right:14px;
+  z-index:95;
+  width:28px;
+  height:28px;
+  padding:0;
+  margin:0;
+  border:0;
+  border-radius:0;
+  background:transparent !important;
+  background-color:transparent !important;
+  -webkit-appearance:none;
+  appearance:none;
+  box-shadow:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-.cx-float-search svg{display:block}
+.cx-float-search:focus,
+.cx-float-search:active{background:transparent !important;outline:0}
+.cx-float-search svg{display:block;background:none}
 
 #searchModal{
   align-items:flex-start;justify-content:center;
