@@ -1,22 +1,3 @@
-/*
-  Cession rankers — For You and Following.
-
-  TikTok: batch-test new items, weight completion/watch, punish skip,
-  mix exploration, cap one creator in a row.
-  Instagram: skip in first seconds kills distribution; shares > likes.
-  YouTube: satisfaction over raw volume; regret/bounce is a negative.
-
-  Cession map:
-    watch time  -> dwell on the coin page (ms)
-    skip        -> impression < 1s or scroll-past
-    like/save   -> hold
-    follow      -> follow coin or wallet
-    share       -> share
-    satisfaction-> unique viewers * avg dwell minutes
-    wash trades -> many trades, few unique wallets (penalty)
-
-  50 unique viewers on a coin for 10 minutes beats 500 wash trades.
-*/
 (function (root) {
   function hours(c) {
     const t = Date.parse(c.createdAt || c.created || 0);
@@ -45,25 +26,18 @@
   }
   function pulse(c) {
     return c.pulse || {
-      uniqueViewers: Number(c.uniqueTraders || 0),
-      uniqueTraders: Number(c.uniqueTraders || 0),
-      skipRate: 0,
-      completion: 0,
-      avgDwellMin: 0,
-      qualityMinutes: 0,
-      trades: 0,
-      holds: 0,
-      follows: 0,
-      shares: 0,
-      bounces: 0,
-      returns: 0,
-      wash: false
+      uniqueViewers: 0, uniqueTraders: 0, skipRate: 0, avgDwellMin: 0,
+      qualityMinutes: 0, trades: 0, holds: 0, follows: 0, shares: 0,
+      bounces: 0, returns: 0, videoCompletes: 0, videoReplays: 0, videoSkips: 0, wash: false
     };
+  }
+  function hasVideo(c) {
+    const u = String(c.mediaUrl || c.videoUrl || c.imageUrl || '');
+    return /\.(mp4|webm|mov|m4v)(\?|$)/i.test(u) || /youtube|youtu\.be|vimeo/i.test(u);
   }
   function stage(c) {
     const p = pulse(c);
-    const age = hours(c);
-    if (age < 6 && p.uniqueViewers < 40) return 'test';
+    if (hours(c) < 6 && p.uniqueViewers < 40) return 'test';
     if (p.uniqueViewers >= 40 && p.qualityMinutes >= 20) return 'escalate';
     return 'main';
   }
@@ -78,14 +52,17 @@
       5 * p.follows +
       7 * p.shares +
       3 * p.returns +
+      9 * (p.videoCompletes || 0) +
+      6 * (p.videoReplays || 0) +
+      2 * (hasVideo(c) ? 1 : 0) +
       5 * followed;
     const nonAction =
       10 * p.skipRate +
-      4 * (p.bounces || 0) / Math.max(1, p.uniqueViewers) +
+      6 * ((p.videoSkips || 0) / Math.max(1, p.impressions || 1)) +
+      4 * (p.bounces || 0) / Math.max(1, p.uniqueViewers || 1) +
       (p.wash ? 40 : 0);
     const volumeLie = Math.log(1 + Number(c.volume24hUsd || 0)) * 0.15;
-    const freshness = Math.exp(-0.045 * hours(c));
-    return Math.max(0, (action + volumeLie - nonAction) * freshness);
+    return Math.max(0, (action + volumeLie - nonAction) * Math.exp(-0.045 * hours(c)));
   }
   function diversify(list) {
     const out = [];
@@ -120,16 +97,14 @@
   }
   function rankForYou(coins) {
     const f = follows();
-    const ranked = coins.slice().sort(function (a, b) { return score(b, f) - score(a, f); });
-    return diversify(mix(ranked));
+    return diversify(mix(coins.slice().sort(function (a, b) { return score(b, f) - score(a, f); })));
   }
   function rankFollowing(coins) {
     const f = follows();
     let pool = coins.filter(function (c) { return isFollowed(c, f); });
     pool.sort(function (a, b) { return hours(a) - hours(b); });
     if (pool.length > 80) pool = pool.slice(0, 80);
-    const ranked = pool.sort(function (a, b) { return score(b, f) - score(a, f); });
-    return diversify(mix(ranked));
+    return diversify(mix(pool.sort(function (a, b) { return score(b, f) - score(a, f); })));
   }
   root.CessionRank = { rankForYou, rankFollowing, followUser, followCoin, follows, hours, score, stage };
 })(window);
