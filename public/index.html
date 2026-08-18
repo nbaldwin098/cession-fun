@@ -13,6 +13,14 @@
   <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
+  <aside class="cx-desk-rail" aria-label="Desktop nav">
+    <button type="button" onclick="CessionUI.go('home')">For You</button>
+    <button type="button" onclick="CessionUI.go('pulse')">Pulse</button>
+    <button type="button" onclick="CessionUI.go('wallet')">Wallet</button>
+    <button type="button" onclick="CessionUI.go('explore')">Explore</button>
+    <button type="button" onclick="CessionUI.go('you')">You</button>
+  </aside>
+
   <header class="cx-top">
     <button class="cx-wordmark" type="button" onclick="CessionUI.go('home')">CESSION</button>
     <div class="cx-top-right">
@@ -28,13 +36,18 @@
   <div class="cx-app">
     <main class="page-view active" id="viewHome">
       <h1 class="cx-title">For You</h1>
-      <div class="explore-coins-grid" id="forYouCoinsGrid"></div>
+      <div class="cx-feed" id="forYouCoinsGrid"></div>
     </main>
 
-    <main class="page-view" id="viewExplore">
+    <main class="page-view" id="viewExplorePulse">
       <h1 class="cx-title">Pulse</h1>
-      <input class="cx-search" id="tokenSearchInput" type="search" placeholder="Search">
-      <div class="explore-coins-grid" id="exploreCoinsGrid"></div>
+      <input class="cx-search" id="tokenSearchInput" type="search" placeholder="Search live coins">
+      <h2 class="cx-h2">Top 10 best</h2>
+      <div class="cx-feed" id="pulseBestGrid"></div>
+      <h2 class="cx-h2">Top 10 worst</h2>
+      <div class="cx-feed" id="pulseWorstGrid"></div>
+      <h2 class="cx-h2">Bundles</h2>
+      <div class="cx-feed" id="pulseBundleGrid"></div>
     </main>
 
     <main class="page-view" id="viewWallet">
@@ -42,9 +55,10 @@
       <div id="walletScreenDisconnected">
         <div class="cx-card">
           <h2>Connect a wallet</h2>
-          <p>We do not hold keys. You sign every transaction.</p>
+          <p>Connect once per visit. You still sign each on-chain buy or sell in Phantom or MetaMask. We do not hold keys.</p>
           <button class="cx-door phantom" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button>
           <button class="cx-door metamask" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button>
+          <p class="cx-muted" id="walletExtHint"></p>
         </div>
       </div>
       <div id="walletScreenConnected" style="display:none;">
@@ -56,6 +70,20 @@
           <button class="cx-ghost" type="button" onclick="CessionUI.openSettings()">Settings</button>
           <button class="cx-ghost" type="button" onclick="window.walletEngine && window.walletEngine.disconnect()">Disconnect</button>
         </div>
+      </div>
+    </main>
+
+    <main class="page-view" id="viewExplore">
+      <div class="cx-explore-head">
+        <h1 class="cx-title">Explore</h1>
+        <button class="cx-icon-btn" type="button" onclick="CessionUI.open('exploreMenu')" aria-label="Menu">☰</button>
+      </div>
+      <button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create a coin (0.05 SOL)</button>
+      <div class="cx-card" style="margin-top:16px;">
+        <div class="cx-row"><span>Perpetuals</span><span>Coming soon</span></div>
+        <div class="cx-row"><span>Predictions</span><span>Coming soon</span></div>
+        <button class="cx-ghost" type="button" onclick="CessionUI.open('rewardsPanel')">Rewards</button>
+        <button class="cx-ghost" type="button" onclick="CessionUI.go('pulse')">Market data</button>
       </div>
     </main>
 
@@ -74,10 +102,15 @@
 
     <main class="page-view" id="viewCoin">
       <button class="cx-ghost" type="button" onclick="CessionUI.go('home')">Back</button>
+      <img id="coinImage" class="cx-coin-hero" alt="">
       <h1 class="cx-title" id="coinTitle">Coin</h1>
       <p class="cx-muted" id="coinMeta">No live mint yet.</p>
       <div id="tradingviewChart" class="cx-chart"></div>
-      <p class="cx-muted" id="chartEmpty">Chart loads after a real on-chain coin exists. No example tickers.</p>
+      <p class="cx-muted" id="chartEmpty">Chart loads after a real on-chain coin exists.</p>
+      <div class="cx-trade-row">
+        <button class="cx-launch" type="button" onclick="CessionUI.openTrade('buy')">Buy</button>
+        <button class="cx-ghost" type="button" onclick="CessionUI.openTrade('sell')">Sell</button>
+      </div>
     </main>
   </div>
 
@@ -92,8 +125,8 @@
       <span class="bnav-wallet-circle"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></span>
       <span class="bnav-label">Wallet</span>
     </button>
-    <button class="bottom-nav-slot" id="bnavCreate" type="button" onclick="CessionUI.openCreate()">
-      <span class="bnav-icon">＋</span><span class="bnav-label">Create</span>
+    <button class="bottom-nav-slot" id="bnavExplore" type="button" onclick="CessionUI.go('explore')">
+      <span class="bnav-icon">🌐</span><span class="bnav-label">Explore</span>
     </button>
     <button class="bottom-nav-slot" id="bnavYou" type="button" onclick="CessionUI.go('you')">
       <span class="bnav-icon">👤</span><span class="bnav-label">You</span>
@@ -119,9 +152,10 @@
   <div class="modal-overlay-generic" id="walletModal">
     <div class="modal-box-pump">
       <div class="modal-header-row"><strong>Connect</strong><button class="btn-close-modal" type="button" onclick="CessionUI.close('walletModal')">&times;</button></div>
-      <p class="cx-muted">Phantom or MetaMask only. We never ask for a seed.</p>
+      <p class="cx-muted">Phantom or MetaMask only. Connect once per visit. We never ask for a seed.</p>
       <button class="cx-door phantom" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button>
       <button class="cx-door metamask" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button>
+      <p class="cx-muted" id="walletExtHintModal"></p>
     </div>
   </div>
 
@@ -130,6 +164,11 @@
       <div class="modal-header-row"><strong>Settings</strong><button class="btn-close-modal" type="button" onclick="CessionUI.close('settingsModal')">&times;</button></div>
       <p class="cx-muted">We index Cession trades. We do not hold keys. Not tax advice.</p>
       <div class="cx-mono" id="settingsWalletAddress">Not connected</div>
+      <label class="form-label-pump">Default buy (SOL)</label>
+      <input class="form-input-pump" id="presetBuySol" type="number" step="0.01" min="0.001">
+      <label class="form-label-pump">Slippage %</label>
+      <input class="form-input-pump" id="presetSlippage" type="number" step="0.1" min="0.1">
+      <button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save presets</button>
       <label class="form-label-pump">Statement month</label>
       <input class="form-input-pump" id="settingsStatementMonth" type="month">
       <button class="cx-ghost" type="button" onclick="CessionUI.openStatement()">Open statement</button>
@@ -143,6 +182,35 @@
       <div class="modal-header-row"><strong>Statement</strong><button class="btn-close-modal" type="button" onclick="CessionUI.close('statementModal')">&times;</button></div>
       <p class="cx-muted" id="statementDisclaimer">Cession indexes on-chain trades. We do not hold keys.</p>
       <div id="statementBody" class="cx-muted">Connect a wallet to load a month.</div>
+    </div>
+  </div>
+
+  <div class="modal-overlay-generic" id="tradeModal">
+    <div class="modal-box-pump">
+      <div class="modal-header-row"><strong id="tradeTitle">Buy</strong><button class="btn-close-modal" type="button" onclick="CessionUI.close('tradeModal')">&times;</button></div>
+      <p class="cx-muted" id="tradeCoinLabel"></p>
+      <label class="form-label-pump">Amount (SOL)</label>
+      <input class="form-input-pump" id="tradeAmount" type="number" step="0.01">
+      <button class="cx-launch" type="button" style="width:100%;margin-top:16px;" onclick="CessionUI.confirmTrade()">Confirm</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay-generic" id="exploreMenu">
+    <div class="modal-box-pump">
+      <div class="modal-header-row"><strong>Explore</strong><button class="btn-close-modal" type="button" onclick="CessionUI.close('exploreMenu')">&times;</button></div>
+      <button class="cx-ghost" type="button" onclick="CessionUI.close('exploreMenu');CessionUI.openCreate()">Create a coin</button>
+      <div class="cx-row"><span>Perpetuals</span><span>Coming soon</span></div>
+      <div class="cx-row"><span>Predictions</span><span>Coming soon</span></div>
+      <button class="cx-ghost" type="button" onclick="CessionUI.close('exploreMenu');CessionUI.open('rewardsPanel')">Rewards</button>
+      <button class="cx-ghost" type="button" onclick="CessionUI.close('exploreMenu');CessionUI.go('pulse')">Market data</button>
+      <button class="cx-ghost" type="button" onclick="CessionUI.close('exploreMenu');CessionUI.openStatement()">Statement</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay-generic" id="rewardsPanel">
+    <div class="modal-box-pump">
+      <div class="modal-header-row"><strong>Rewards</strong><button class="btn-close-modal" type="button" onclick="CessionUI.close('rewardsPanel')">&times;</button></div>
+      <p class="cx-muted">Daily SOL rewards are not live until protocol fees exist. No fake balances.</p>
     </div>
   </div>
 
