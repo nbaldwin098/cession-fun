@@ -398,33 +398,34 @@ class CessionWalletEngine {
   }
 
   /**
-   * Connect Injected EVM (MetaMask / Coinbase / Trust)
+   * Connect Injected EVM (MetaMask — Ethereum Mainnet Only)
    */
   async connectEVM(walletName = 'metamask') {
     try {
       let provider = window.ethereum;
 
-      if (walletName === 'trust') {
-        provider = window.trustwallet?.ethereum || (window.ethereum?.isTrust ? window.ethereum : null);
-      } else if (walletName === 'coinbase') {
-        provider = window.coinbaseWalletExtension || (window.ethereum?.isCoinbaseWallet ? window.ethereum : null);
-      }
-
       if (!provider) {
-        const installUrls = {
-          metamask: 'https://metamask.io/download/',
-          trust: 'https://trustwallet.com/download',
-          coinbase: 'https://www.coinbase.com/wallet/downloads'
-        };
-        const url = installUrls[walletName] || 'https://metamask.io/download/';
-        if (confirm(`${walletName.toUpperCase()} extension not detected. Would you like to open the download page?`)) {
-          window.open(url, '_blank');
+        if (confirm('MetaMask extension not detected. Open metamask.io to install it?')) {
+          window.open('https://metamask.io/download/', '_blank');
         }
         return false;
       }
 
+      // Enforce Ethereum Mainnet (0x1)
+      try {
+        const chainId = await provider.request({ method: 'eth_chainId' });
+        if (chainId !== '0x1') {
+          await provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x1' }]
+          });
+        }
+      } catch (switchErr) {
+        if (window.showToast) window.showToast('Please switch your MetaMask network to Ethereum Mainnet.', 'warning');
+      }
+
       const accounts = await provider.request({ method: 'eth_requestAccounts' });
-      if (!accounts || accounts.length === 0) throw new Error('No accounts authorized');
+      if (!accounts || accounts.length === 0) throw new Error('No Ethereum accounts authorized');
 
       const addr = accounts[0];
       const screen = this.screenAddressLocally(addr);
@@ -433,37 +434,52 @@ class CessionWalletEngine {
         return false;
       }
 
+      // Sign-In With Ethereum (SIWE) Cryptographic Challenge
+      const nonce = Date.now();
+      const message = `Sign in with Ethereum to Cession.fun\nAddress: ${addr}\nNonce: ${nonce}\nTimestamp: ${new Date().toISOString()}`;
+      
+      const signature = await provider.request({
+        method: 'personal_sign',
+        params: [message, addr]
+      });
+
       const res = await fetch('/api/auth/wallet-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: addr, chain: 'Base', walletType: walletName })
+        body: JSON.stringify({
+          address: addr,
+          chain: 'Ethereum',
+          walletType: walletName,
+          message,
+          signature
+        })
       });
       const data = await res.json();
 
-      this.sessionToken = data.token || 'sess_evm_' + Date.now();
-      this.userProfile = data.user || {
-        username: `${walletName.toUpperCase()}_${addr.substring(2, 6)}`,
-        badge: 'WEB3 NATIVE',
-        addresses: { eth: addr }
-      };
+      if (!data.success) {
+        throw new Error(data.error || 'Signature verification failed');
+      }
+
+      this.sessionToken = data.token;
+      this.userProfile = data.user;
       this.isAuthenticated = true;
       this.activeWalletType = walletName;
       this.activeAddress = addr;
-      this.activeChain = 'Base';
+      this.activeChain = 'Ethereum';
 
       localStorage.setItem('cession_session_token', this.sessionToken);
       localStorage.setItem('cession_user_profile', JSON.stringify(this.userProfile));
       localStorage.setItem('cession_active_address', this.activeAddress);
       localStorage.setItem('cession_wallet_type', walletName);
-      localStorage.setItem('cession_active_chain', this.activeChain);
+      localStorage.setItem('cession_active_chain', 'Ethereum');
 
       this.closeWalletModal();
       this.closeAuthModal();
       this.renderState();
-      if (window.showToast) window.showToast(`✓ Connected ${walletName.toUpperCase()}: ${addr.substring(0, 6)}...${addr.substring(38)}`, 'success');
+      if (window.showToast) window.showToast(`✓ Cryptographically authenticated MetaMask: ${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`, 'success');
       return true;
     } catch (err) {
-      if (window.showToast) window.showToast(err.message || `${walletName.toUpperCase()} connection cancelled`, 'error');
+      if (window.showToast) window.showToast(err.message || 'MetaMask signature cancelled', 'error');
       return false;
     }
   }
@@ -475,10 +491,8 @@ class CessionWalletEngine {
     try {
       const provider = window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null);
       if (!provider) {
-        if (confirm('Phantom Wallet extension not detected. Would you like to open phantom.app to install it?')) {
+        if (confirm('Phantom Wallet extension not detected. Open phantom.app to install it?')) {
           window.open('https://phantom.app/download', '_blank');
-        } else {
-          if (window.showToast) window.showToast('You can also use the 1-Click Sovereign Vault to trade immediately.', 'info');
         }
         return false;
       }
@@ -492,19 +506,39 @@ class CessionWalletEngine {
         return false;
       }
 
+      // Solana Detached Ed25519 Cryptographic Challenge
+      const nonce = Date.now();
+      const message = `Sign in to Cession.fun\nAddress: ${pubkey}\nNonce: ${nonce}`;
+      const messageBytes = new TextEncoder().encode(message);
+
+      let signature = '';
+      if (provider.signMessage) {
+        const sigObj = await provider.signMessage(messageBytes, 'utf8');
+        const sigBytes = sigObj.signature || sigObj;
+        signature = Array.from(sigBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+      } else {
+        throw new Error('Phantom wallet signMessage method unavailable.');
+      }
+
       const res = await fetch('/api/auth/wallet-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: pubkey, chain: 'Solana', walletType: 'phantom' })
+        body: JSON.stringify({
+          address: pubkey,
+          chain: 'Solana',
+          walletType: 'phantom',
+          message,
+          signature
+        })
       });
       const data = await res.json();
 
-      this.sessionToken = data.token || 'sess_sol_' + Date.now();
-      this.userProfile = data.user || {
-        username: `PHANTOM_${pubkey.substring(0, 4)}`,
-        badge: 'SOLANA TRADER',
-        addresses: { sol: pubkey }
-      };
+      if (!data.success) {
+        throw new Error(data.error || 'Solana signature verification failed');
+      }
+
+      this.sessionToken = data.token;
+      this.userProfile = data.user;
       this.isAuthenticated = true;
       this.activeWalletType = 'phantom';
       this.activeAddress = pubkey;
@@ -519,11 +553,8 @@ class CessionWalletEngine {
       this.closeWalletModal();
       this.closeAuthModal();
       this.renderState();
-      if (window.showToast) window.showToast(`✓ Connected Phantom: ${pubkey.substring(0, 5)}...${pubkey.substring(pubkey.length - 4)}`, 'success');
+      if (window.showToast) window.showToast(`✓ Cryptographically authenticated Phantom: ${pubkey.substring(0, 5)}...${pubkey.substring(pubkey.length - 4)}`, 'success');
       return true;
-    } catch (err) {
-      if (window.showToast) window.showToast(err.message || 'Phantom connection cancelled', 'error');
-      return false;
     }
   }
 

@@ -1,199 +1,129 @@
 /**
- * Cession Sovereign Authentication & User Session Router
+ * Cession Sovereign Authentication & Non-Custodial Session Router
  * 
- * Supports:
- * 1. Email & Password registration/login with local sovereign seed generation
- * 2. Google OAuth credential verification & account attachment
- * 3. Web3 Public key session validation
+ * STRICT NON-CUSTODIAL IDENTITY DIRECTIVE:
+ * 1. Your wallet is your door. Cession NEVER creates, stores, or returns seed phrases/mnemonics.
+ * 2. Connect requests MUST be cryptographically signed (tweetnacl on Solana, SIWE/ethers on EVM).
+ * 3. Accounts & sessions persist to disk (data/users.json) so server restarts never erase user profiles.
  */
 
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
-const walletEngine = require('../services/walletEngine');
+const fs = require('fs');
+const path = require('path');
+const nacl = require('tweetnacl');
+const bs58 = require('bs58').default || require('bs58');
+const { ethers } = require('ethers');
 const ofacChecker = require('../services/ofacChecker');
 
-// In-memory persistent user store (persisted in session)
-const usersByEmail = new Map();
+const USERS_FILE = path.join(__dirname, '..', 'data', 'users.json');
+
+// In-memory store backed by data/users.json
 const usersByAddress = new Map();
 const activeSessions = new Map();
 
-function hashPassword(password, salt) {
-  return crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
+function loadUsersFromDisk() {
+  try {
+    if (fs.existsSync(USERS_FILE)) {
+      const raw = fs.readFileSync(USERS_FILE, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        parsed.forEach(u => {
+          if (u.address) usersByAddress.set(u.address.toLowerCase(), u);
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('[Auth] Error loading users.json:', e.message);
+  }
+}
+
+function saveUsersToDisk() {
+  try {
+    const list = Array.from(usersByAddress.values());
+    fs.writeFileSync(USERS_FILE, JSON.stringify(list, null, 2), 'utf8');
+  } catch (e) {
+    console.error('[Auth] Error saving users.json:', e.message);
+  }
+}
+
+// Initial load
+loadUsersFromDisk();
+
+/**
+ * Verify Solana Detached Ed25519 Signature via TweetNaCl
+ */
+function verifySolanaSignature(address, message, signatureHexOrBase58) {
+  try {
+    const messageBytes = new TextEncoder().encode(message);
+    let signatureBytes;
+    
+    // Attempt hex or base58 decode
+    if (/^[0-9a-fA-F]+$/.test(signatureHexOrBase58)) {
+      signatureBytes = Buffer.from(signatureHexOrBase58, 'hex');
+    } else {
+      signatureBytes = bs58.decode(signatureHexOrBase58);
+    }
+    
+    const publicKeyBytes = bs58.decode(address);
+    return nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
+  } catch (err) {
+    console.warn('[Auth] Solana signature verification failed:', err.message);
+    return false;
+  }
 }
 
 /**
- * Register with Email & Password
+ * Verify Ethereum Signature via Ethers.js (SIWE / Personal Sign)
  */
-router.post('/register', (req, res) => {
+function verifyEthereumSignature(address, message, signatureHex) {
   try {
-    const { email, password, username } = req.body;
-    if (!email || !email.includes('@')) {
-      return res.status(400).json({ success: false, error: 'Valid email required.' });
-    }
-    if (!password || password.length < 6) {
-      return res.status(400).json({ success: false, error: 'Password must be at least 6 characters.' });
-    }
-
-    const cleanEmail = email.toLowerCase().trim();
-    if (usersByEmail.has(cleanEmail)) {
-      return res.status(400).json({ success: false, error: 'Account with this email already exists. Please log in.' });
-    }
-
-    // Generate Sovereign Multi-Chain Vault for this user
-    const vault = walletEngine.generateSovereignVault();
-    const salt = crypto.randomBytes(16).toString('hex');
-    const passwordHash = hashPassword(password, salt);
-
-    const user = {
-      id: 'usr_' + crypto.randomBytes(6).toString('hex'),
-      email: cleanEmail,
-      username: username || cleanEmail.split('@')[0],
-      salt,
-      passwordHash,
-      createdAt: Date.now(),
-      authProvider: 'email',
-      addresses: vault.addresses,
-      mnemonic: vault.mnemonic,
-      role: 'TRADER',
-      badge: 'VERIFIED TRADER'
-    };
-
-    usersByEmail.set(cleanEmail, user);
-    usersByAddress.set(vault.addresses.eth.toLowerCase(), user);
-
-    const token = 'sess_' + crypto.randomBytes(24).toString('hex');
-    activeSessions.set(token, user);
-
-    res.json({
-      success: true,
-      message: 'Account created successfully.',
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        addresses: user.addresses,
-        mnemonic: user.mnemonic,
-        badge: user.badge,
-        authProvider: 'email'
-      }
-    });
+    const recoveredAddress = ethers.verifyMessage(message, signatureHex);
+    return recoveredAddress.toLowerCase() === address.toLowerCase();
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.warn('[Auth] Ethereum signature verification failed:', err.message);
+    return false;
   }
-});
+}
 
 /**
- * Login with Email & Password
- */
-router.post('/login', (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ success: false, error: 'Email and password are required.' });
-    }
-
-    const cleanEmail = email.toLowerCase().trim();
-    const user = usersByEmail.get(cleanEmail);
-    if (!user) {
-      return res.status(401).json({ success: false, error: 'No account found with this email. Please sign up.' });
-    }
-
-    const checkHash = hashPassword(password, user.salt);
-    if (checkHash !== user.passwordHash) {
-      return res.status(401).json({ success: false, error: 'Incorrect password.' });
-    }
-
-    const token = 'sess_' + crypto.randomBytes(24).toString('hex');
-    activeSessions.set(token, user);
-
-    res.json({
-      success: true,
-      message: 'Logged in successfully.',
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        addresses: user.addresses,
-        mnemonic: user.mnemonic,
-        badge: user.badge,
-        authProvider: user.authProvider
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-/**
- * Google OAuth / Social Authentication
- */
-router.post('/google', (req, res) => {
-  try {
-    const { email, name, googleId, credential } = req.body;
-    if (!email) {
-      return res.status(400).json({ success: false, error: 'Google email is required.' });
-    }
-
-    const cleanEmail = email.toLowerCase().trim();
-    let user = usersByEmail.get(cleanEmail);
-
-    if (!user) {
-      // Auto-provision sovereign vault for Google user
-      const vault = walletEngine.generateSovereignVault();
-      user = {
-        id: 'usr_g_' + crypto.randomBytes(6).toString('hex'),
-        email: cleanEmail,
-        username: name || cleanEmail.split('@')[0],
-        googleId: googleId || 'g_' + Math.random().toString(36).substring(2, 10),
-        createdAt: Date.now(),
-        authProvider: 'google',
-        addresses: vault.addresses,
-        mnemonic: vault.mnemonic,
-        role: 'TRADER',
-        badge: 'GOOGLE VERIFIED'
-      };
-      usersByEmail.set(cleanEmail, user);
-      usersByAddress.set(vault.addresses.eth.toLowerCase(), user);
-    }
-
-    const token = 'sess_' + crypto.randomBytes(24).toString('hex');
-    activeSessions.set(token, user);
-
-    res.json({
-      success: true,
-      message: 'Google authentication successful.',
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        addresses: user.addresses,
-        mnemonic: user.mnemonic,
-        badge: user.badge,
-        authProvider: 'google'
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-/**
- * Direct Web3 Wallet Session Attachment
+ * Non-Custodial Cryptographically Signed Wallet Login
  */
 router.post('/wallet-login', (req, res) => {
   try {
-    const { address, chain = 'Base', walletType = 'metamask' } = req.body;
+    const { address, chain = 'Solana', walletType = 'phantom', message, signature } = req.body;
+    
     if (!address) {
-      return res.status(400).json({ success: false, error: 'Wallet address required.' });
+      return res.status(400).json({ success: false, error: 'Wallet address is required.' });
     }
 
+    if (!message || !signature) {
+      return res.status(401).json({
+        success: false,
+        error: 'Cryptographic signature required. Please approve the login request in your wallet.'
+      });
+    }
+
+    // OFAC Sanctions Screening
     const screen = ofacChecker.screenAddress(address);
     if (!screen.allowed) {
-      return res.status(403).json({ success: false, error: screen.detail || 'Sanctioned address blocked.' });
+      return res.status(403).json({ success: false, error: screen.detail || 'Sanctioned entity blocked.' });
+    }
+
+    // Verify cryptographic signature
+    let isValidSignature = false;
+    if (chain.toLowerCase() === 'solana' || walletType.toLowerCase() === 'phantom' || walletType.toLowerCase() === 'solflare') {
+      isValidSignature = verifySolanaSignature(address, message, signature);
+    } else {
+      isValidSignature = verifyEthereumSignature(address, message, signature);
+    }
+
+    if (!isValidSignature) {
+      return res.status(401).json({
+        success: false,
+        error: '❌ Invalid wallet signature. Signature verification failed.'
+      });
     }
 
     const cleanAddr = address.toLowerCase();
@@ -201,18 +131,21 @@ router.post('/wallet-login', (req, res) => {
 
     if (!user) {
       user = {
-        id: 'usr_w_' + crypto.randomBytes(6).toString('hex'),
-        username: `${walletType.toUpperCase()}_${address.substring(2, 6)}`,
+        id: 'usr_' + crypto.randomBytes(6).toString('hex'),
+        address,
+        cleanAddress: cleanAddr,
+        chain,
+        walletType,
+        username: `${walletType.toUpperCase()}_${address.substring(0, 4)}...${address.substring(address.length - 4)}`,
         createdAt: Date.now(),
-        authProvider: walletType,
-        addresses: {
-          eth: address.startsWith('0x') ? address : null,
-          sol: !address.startsWith('0x') ? address : null
-        },
-        role: 'TRADER',
-        badge: 'WEB3 NATIVE'
+        lastLogin: Date.now(),
+        badge: chain.toLowerCase() === 'solana' ? 'SOLANA NATIVE' : 'ETHEREUM NATIVE'
       };
       usersByAddress.set(cleanAddr, user);
+      saveUsersToDisk();
+    } else {
+      user.lastLogin = Date.now();
+      saveUsersToDisk();
     }
 
     const token = 'sess_' + crypto.randomBytes(24).toString('hex');
@@ -220,14 +153,15 @@ router.post('/wallet-login', (req, res) => {
 
     res.json({
       success: true,
-      message: `Connected via ${walletType.toUpperCase()}`,
+      message: `✓ Cryptographically authenticated via ${walletType.toUpperCase()}`,
       token,
       user: {
         id: user.id,
+        address: user.address,
+        chain: user.chain,
+        walletType: user.walletType,
         username: user.username,
-        addresses: user.addresses,
-        badge: user.badge,
-        authProvider: walletType
+        badge: user.badge
       }
     });
   } catch (err) {
@@ -236,60 +170,49 @@ router.post('/wallet-login', (req, res) => {
 });
 
 /**
- * Check active session
+ * Check Active Non-Custodial Session
  */
 router.get('/session', (req, res) => {
   const authHeader = req.headers.authorization;
   const token = authHeader ? authHeader.replace('Bearer ', '') : req.query.token;
+  
   if (!token || !activeSessions.has(token)) {
     return res.status(401).json({ success: false, authenticated: false });
   }
+  
   const user = activeSessions.get(token);
   res.json({
     success: true,
     authenticated: true,
     user: {
       id: user.id,
-      email: user.email,
+      address: user.address,
+      chain: user.chain,
+      walletType: user.walletType,
       username: user.username,
-      addresses: user.addresses,
-      mnemonic: user.mnemonic,
-      badge: user.badge,
-      authProvider: user.authProvider
+      badge: user.badge
     }
   });
 });
 
 /**
- * Logout
+ * Logout Session
  */
-/**
- * Sovereign Derivation Helpers
- */
-router.deriveSovereignMnemonic = function(email, password) {
-  const seedHash = crypto.createHash('sha256').update(`${email.toLowerCase().trim()}:${password}`).digest();
-  const wordlist = [
-    'abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 'abstract', 'absurd', 'abuse',
-    'access', 'accident', 'account', 'accuse', 'achieve', 'acid', 'acoustic', 'acquire', 'across', 'act',
-    'action', 'actor', 'actress', 'actual', 'adapt', 'add', 'addict', 'address', 'adjust', 'admit',
-    'adult', 'advance', 'advice', 'aerobic', 'affair', 'afford', 'afraid', 'again', 'age', 'agent',
-    'agree', 'ahead', 'aim', 'air', 'airport', 'aisle', 'alarm', 'album', 'alcohol', 'alert'
-  ];
-  const words = [];
-  for (let i = 0; i < 12; i++) {
-    const idx = (seedHash[i] * 256 + seedHash[(i + 1) % seedHash.length]) % wordlist.length;
-    words.push(wordlist[idx]);
-  }
-  return words.join(' ');
-};
+router.post('/logout', (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader ? authHeader.replace('Bearer ', '') : req.body.token;
+  if (token) activeSessions.delete(token);
+  res.json({ success: true, message: 'Session terminated.' });
+});
 
-router.deriveAddressFromSeed = function(mnemonic, chain = 'Base') {
-  const hash = crypto.createHash('sha256').update(mnemonic).digest('hex');
-  if (chain === 'Solana') {
-    return 'So1' + hash.substring(0, 32);
-  }
-  return '0x' + hash.substring(0, 40);
-};
+/**
+ * Explicitly Disabled Deprecated Custodial Endpoints
+ */
+router.post(['/register', '/login', '/google'], (req, res) => {
+  res.status(410).json({
+    success: false,
+    error: 'Custodial accounts & email logins have been permanently retired. Cession is 100% non-custodial: connect directly using your Phantom or MetaMask wallet.'
+  });
+});
 
 module.exports = router;
-

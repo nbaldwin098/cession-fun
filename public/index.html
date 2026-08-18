@@ -863,92 +863,32 @@
         Connect your preferred non-custodial Web3 wallet to trade on bonding curves, participate in fair launches, and deploy tokens.
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <!-- Phantom (Solana) -->
-        <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between; background: rgba(171, 159, 242, 0.08); border: 1px solid rgba(171, 159, 242, 0.3);" onclick="window.walletEngine.connectPhantom()">
+      <div style="display: flex; flex-direction: column; gap: 8">
+        <!-- 1. Phantom Door (Solana Mainnet) -->
+        <button class="cat-pill-btn" style="padding: 16px; font-size: 14px; justify-content: space-between; background: rgba(171, 71, 188, 0.12); border: 1px solid rgba(171, 71, 188, 0.4); margin-bottom: 12px; border-radius: var(--radius-sm);" onclick="window.walletEngine.connectPhantom()">
           <div style="text-align: left;">
-            <strong style="color: var(--text-primary); display: block;">Phantom Wallet</strong>
-            <span style="font-size: 11px; color: var(--text-secondary);">Solana Mainnet Native</span>
+            <strong style="color: #d8b4fe; font-size: 15px; display: block;">Phantom Wallet (Solana)</strong>
+            <span style="font-size: 12px; color: var(--text-secondary);">Solana Mainnet · Sign challenge to authenticate</span>
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
-            <span id="badgePhantomDetected" style="display: none; font-size: 10px; background: rgba(134, 239, 172, 0.2); color: var(--pump-mint); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
-            <span style="color: var(--pump-mint); font-weight: 700;">Connect</span>
+            <span style="color: var(--pump-mint); font-weight: 800; font-size: 13px;">Connect →</span>
           </div>
         </button>
 
-        <!-- Trust Wallet (Solana & EVM) -->
-        <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between; background: rgba(51, 117, 255, 0.08); border: 1px solid rgba(51, 117, 255, 0.3);" onclick="window.walletEngine.connectTrustWallet()">
+        <!-- 2. MetaMask Door (Ethereum Mainnet) -->
+        <button class="cat-pill-btn" style="padding: 16px; font-size: 14px; justify-content: space-between; background: rgba(246, 133, 27, 0.12); border: 1px solid rgba(246, 133, 27, 0.4); border-radius: var(--radius-sm);" onclick="window.walletEngine.connectEVM('metamask')">
           <div style="text-align: left;">
-            <strong style="color: var(--text-primary); display: block;">Trust Wallet</strong>
-            <span style="font-size: 11px; color: var(--text-secondary);">Solana & Base Multi-Chain</span>
+            <strong style="color: #fdba74; font-size: 15px; display: block;">MetaMask (Ethereum)</strong>
+            <span style="font-size: 12px; color: var(--text-secondary);">Ethereum Mainnet · SIWE Signature Authentication</span>
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
-            <span id="badgeTrustDetected" style="display: none; font-size: 10px; background: rgba(134, 239, 172, 0.2); color: var(--pump-mint); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
-            <span style="color: var(--pump-mint); font-weight: 700;">Connect</span>
+            <span style="color: var(--pump-mint); font-weight: 800; font-size: 13px;">Connect →</span>
           </div>
         </button>
 
-        <!-- MetaMask (Base / EVM) -->
-        <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between; background: rgba(246, 133, 27, 0.08); border: 1px solid rgba(246, 133, 27, 0.3);" onclick="window.walletEngine.connectEVM('metamask')">
-          <div style="text-align: left;">
-            <strong style="color: var(--text-primary); display: block;">MetaMask</strong>
-            <span style="font-size: 11px; color: var(--text-secondary);">Base L2 & Ethereum</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <span id="badgeMetaMaskDetected" style="display: none; font-size: 10px; background: rgba(134, 239, 172, 0.2); color: var(--pump-mint); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
-            <span style="color: var(--pump-mint); font-weight: 700;">Connect</span>
-          </div>
-        </button>
-
-        <!-- Solflare (Solana) -->
-        <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between; background: rgba(254, 185, 30, 0.08); border: 1px solid rgba(254, 185, 30, 0.3);" onclick="window.walletEngine.connectSolflare()">
-          <div style="text-align: left;">
-            <strong style="color: var(--text-primary); display: block;">Solflare</strong>
-            <span style="font-size: 11px; color: var(--text-secondary);">Solana Mainnet</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <span id="badgeSolflareDetected" style="display: none; font-size: 10px; background: rgba(134, 239, 172, 0.2); color: var(--pump-mint); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
-            <span style="color: var(--pump-mint); font-weight: 700;">Connect</span>
-          </div>
-        </button>
-
-        <!-- Coinbase Wallet -->
-        <button class="cat-pill-btn" style="padding: 12px; font-size: 13px; justify-content: space-between; background: rgba(0, 82, 255, 0.08); border: 1px solid rgba(0, 82, 255, 0.3);" onclick="window.walletEngine.connectCoinbase()">
-          <div style="text-align: left;">
-            <strong style="color: var(--text-primary); display: block;">Coinbase Wallet</strong>
-            <span style="font-size: 11px; color: var(--text-secondary);">Base & Solana Smart Wallet</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <span id="badgeCoinbaseDetected" style="display: none; font-size: 10px; background: rgba(134, 239, 172, 0.2); color: var(--pump-mint); padding: 2px 6px; border-radius: 8px; font-weight: 700;">INSTALLED</span>
-            <span style="color: var(--pump-mint); font-weight: 700;">Connect</span>
-          </div>
-        </button>
-
-        <!-- Divider -->
-        <div style="text-align: center; margin: 10px 0 6px 0; color: var(--text-secondary); font-size: 11px; position: relative;">
-          <span style="background: var(--bg-card); padding: 0 8px; position: relative; z-index: 1;">OR CREATE NEW WALLET</span>
-        </div>
-
-        <!-- 1-Click Instant Vault Generation -->
-        <button class="btn-signin-mint" style="padding: 12px; font-size: 13px; text-align: center; justify-content: center; width: 100%; font-weight: 800;" onclick="window.walletEngine.openCreateWalletModal()">
-          ✨ Create Sovereign Vault Wallet
-        </button>
-
-        <!-- Import Existing Key Accordion Toggle -->
-        <div style="margin-top: 6px;">
-          <button class="cat-pill-btn" style="width: 100%; justify-content: center; font-size: 11px; color: var(--text-secondary);" onclick="const b = document.getElementById('importVaultCollapse'); b.style.display = b.style.display === 'none' ? 'block' : 'none';">
-            Have a 12-word seed phrase or private key? Click to import
-          </button>
-          
-          <div id="importVaultCollapse" style="display: none; margin-top: 8px; background: var(--bg-input); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
-            <label style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Paste 12-Word Mnemonic or Hex Private Key:</label>
-            <input type="password" id="importVaultInput" class="form-input-pump" placeholder="e.g. apple banana orange..." style="width: 100%; margin-bottom: 8px; font-family: var(--font-mono); font-size: 12px;">
-            <button class="btn-signin-mint" style="width: 100%; padding: 8px; font-size: 12px;" onclick="window.walletEngine.importExistingVault(document.getElementById('importVaultInput').value)">
-              Import & Unlock Vault
-            </button>
-          </div>
-        </div>
-      </div>
+        <!-- Pure Non-Custodial Disclaimer -->
+        <div style="text-align: center; margin-top: 16px; color: var(--text-secondary); font-size: 11px; line-height: 1.5; background: var(--bg-input); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+          🔒 <strong>100% Non-Custodial Security:</strong> Cession never generates, holds, or asks for your seed phrase or private key. You maintain 100% sovereign control over your funds.
     </div>
   </div>
 

@@ -1,5 +1,7 @@
 /**
- * Cession Multi-Chain Wallet API Routes
+ * Cession Non-Custodial Wallet API Router
+ * Deprecates server-side seed generation and deposit faucets.
+ * Cession is 100% non-custodial: users bring their own Web3 wallets (Phantom/MetaMask).
  */
 
 const express = require('express');
@@ -7,71 +9,25 @@ const router = express.Router();
 const walletEngine = require('../services/walletEngine');
 
 /**
- * Mint / Generate a new Sovereign Multi-Chain HD Wallet
+ * Screen a wallet address for OFAC compliance
  */
-router.post('/generate', (req, res) => {
+router.get('/screen/:address', (req, res) => {
   try {
-    const mnemonic = walletEngine.generateMnemonic();
-    const vault = walletEngine.deriveMultiChainVault(mnemonic);
-    res.json({ success: true, vault });
+    const screen = walletEngine.screenWallet(req.params.address);
+    res.json({ success: true, address: req.params.address, allowed: screen.allowed, detail: screen.detail });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
 /**
- * Derive addresses from an existing mnemonic seed
+ * Deprecated Server-Side Key Generation & Deposit Endpoints
  */
-router.post('/derive', (req, res) => {
-  try {
-    const { mnemonic } = req.body;
-    if (!mnemonic) {
-      return res.status(400).json({ success: false, error: "Mnemonic seed is required." });
-    }
-    const vault = walletEngine.deriveMultiChainVault(mnemonic);
-    res.json({ success: true, vault });
-  } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
-  }
-});
-
-/**
- * Get unified multi-chain portfolio balances
- */
-router.get('/portfolio/:address', (req, res) => {
-  try {
-    const portfolio = walletEngine.getPortfolioBalances(req.params.address);
-    res.json({ success: true, address: req.params.address, portfolio });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-/**
- * Deposit / Faucet test funds to wallet
- */
-router.post('/deposit', (req, res) => {
-  try {
-    const { address, asset, amount } = req.body;
-    if (!address) {
-      return res.status(400).json({ success: false, error: "Wallet address is required." });
-    }
-    const depositAmount = parseFloat(amount) || 1.0;
-    const depositAsset = (asset || 'SOL').toUpperCase();
-
-    const updatedBalances = walletEngine.deposit(address, depositAsset, depositAmount);
-    const portfolio = walletEngine.getPortfolioBalances(address);
-
-    res.json({
-      success: true,
-      message: `Successfully deposited ${depositAmount} ${depositAsset} to ${address}`,
-      address,
-      balances: updatedBalances,
-      portfolio
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
+router.all(['/generate', '/derive', '/deposit'], (req, res) => {
+  res.status(410).json({
+    success: false,
+    error: 'Non-custodial directive: Cession never creates, stores, or funds wallets on the server. Connect directly with your Phantom or MetaMask wallet.'
+  });
 });
 
 module.exports = router;

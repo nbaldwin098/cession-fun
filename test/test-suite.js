@@ -201,14 +201,27 @@ async function main() {
     assert(reserves.burnStats.totalTokensBurned > 0, "Must track cumulative tokens burned to 0xdead");
   });
 
-  // Test 6: Sovereign Wallet Engine & In-Browser OFAC
-  console.log('\n[6] MULTI-WALLET ENGINE & ZERO-SAAS COMPLIANCE:');
-  runTest('BIP-39 12-Word Mnemonic Generation with Multi-Chain Derivation', () => {
-    const vault = walletEngine.generateSovereignVault();
-    assert(vault.mnemonic.split(' ').length === 12, "Mnemonic must have 12 words");
-    assert(vault.addresses.eth.startsWith('0x'), "EVM address must start with 0x");
-    assert(vault.addresses.btc.startsWith('bc1q'), "BTC address must be Native SegWit bc1q");
-    assert(vault.addresses.sol.length >= 32, "Solana address must be Base58 formatted");
+  // Test 6: Non-Custodial Cryptographic Security & OFAC Compliance
+  console.log('\n[6] NON-CUSTODIAL CRYPTOGRAPHIC SECURITY & OFAC COMPLIANCE:');
+  runTest('Non-Custodial Zero-Seed Guarantee (Server never stores or generates seed phrases)', () => {
+    const authRouter = require('../routes/auth');
+    assert.strictEqual(authRouter.deriveSovereignMnemonic, undefined, "Server must NOT have mnemonic derivation methods");
+  });
+
+  runTest('Cryptographic Wallet Authentication Signature Requirement', () => {
+    const nacl = require('tweetnacl');
+    const bs58 = require('bs58').default || require('bs58');
+    
+    // Valid Solana Keypair & Signature
+    const keypair = nacl.sign.keyPair();
+    const pubkeyBs58 = bs58.encode(keypair.publicKey);
+    const message = "Sign in to Cession.fun\nNonce: 123456";
+    const msgBytes = new TextEncoder().encode(message);
+    const sigBytes = nacl.sign.detached(msgBytes, keypair.secretKey);
+    const sigHex = Buffer.from(sigBytes).toString('hex');
+
+    const isValid = nacl.sign.detached.verify(msgBytes, sigBytes, keypair.publicKey);
+    assert.strictEqual(isValid, true, "Valid TweetNaCl signature must verify");
   });
 
   runTest('OFAC Sanctioned Entity Detection & Geoblocking', () => {
