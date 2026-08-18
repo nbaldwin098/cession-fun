@@ -1,4 +1,7 @@
 (function () {
+  var lock = document.createElement('script');
+  lock.src = 'js/cession-user-lock.js';
+  document.head.appendChild(lock);
   function ready(fn) {
     if (!window.CessionUI || !window.CessionRank || !window.CessionMedia || !window.CessionEngine) {
       return setTimeout(function () { ready(fn); }, 40);
