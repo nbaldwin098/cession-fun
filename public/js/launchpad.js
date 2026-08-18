@@ -1893,6 +1893,36 @@ class CessionLaunchpadManager {
     }
   }
 
+  openDeployModal(initialPanel = 'launch') {
+    const deployModal = document.getElementById('deployModal');
+    if (deployModal) {
+      deployModal.style.display = 'flex';
+      this.switchCreatePanel(initialPanel);
+    }
+  }
+
+  switchCreatePanel(panel) {
+    const btnLaunch = document.getElementById('btnCreatePanelLaunch');
+    const btnStake = document.getElementById('btnCreatePanelStake');
+    const formLaunch = document.getElementById('deployCoinForm');
+    const panelStake = document.getElementById('createStakePanel');
+    const title = document.getElementById('createModalTitle');
+
+    if (panel === 'stake') {
+      if (btnLaunch) btnLaunch.classList.remove('active');
+      if (btnStake) btnStake.classList.add('active');
+      if (formLaunch) formLaunch.style.display = 'none';
+      if (panelStake) panelStake.style.display = 'block';
+      if (title) title.textContent = 'Lock & Stake Assets';
+    } else {
+      if (btnLaunch) btnLaunch.classList.add('active');
+      if (btnStake) btnStake.classList.remove('active');
+      if (formLaunch) formLaunch.style.display = 'block';
+      if (panelStake) panelStake.style.display = 'none';
+      if (title) title.textContent = 'Create a new coin';
+    }
+  }
+
   escapeHtml(str) {
     if (!str) return '';
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

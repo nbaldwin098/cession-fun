@@ -1291,6 +1291,16 @@ class CessionWalletEngine {
     const navBal = document.getElementById('navWalletBalance');
     const navAddr = document.getElementById('navWalletAddress');
 
+    // Wallet Screen elements
+    const walletDisconnected = document.getElementById('walletScreenDisconnected');
+    const walletConnected = document.getElementById('walletScreenConnected');
+    const walletAddr = document.getElementById('walletScreenAddress');
+    const walletSolBal = document.getElementById('walletScreenSolBal');
+    const walletChain = document.getElementById('walletScreenChain');
+    const walletTypeLabel = document.getElementById('walletConnectedTypeLabel');
+    const walletIconContainer = document.getElementById('walletActiveIconContainer');
+    const bnavWalletCircle = document.querySelector('#bnavWallet .bnav-wallet-circle');
+
     // Profile DOM elements
     const profileAddr = document.getElementById('profileAddressFull');
     const profileAvatar = document.getElementById('profileAvatar');
@@ -1303,9 +1313,23 @@ class CessionWalletEngine {
     const depositSol = document.getElementById('depositSolAddr');
     const depositEth = document.getElementById('depositEthAddr');
 
+    const phantomSvg = `<svg width="22" height="22" viewBox="0 0 128 128" fill="none"><path d="M110.5 44.5C103.8 21.8 84.4 7.2 61.2 7.2 30.6 7.2 5.8 32 5.8 62.6c0 14.5 5.6 27.8 14.8 37.7 5.6 6 12 11.2 12 19 0 1.2 1 2.2 2.2 2.2h6.8c1.2 0 2.2-1 2.2-2.2v-11.8c0-14.8-12-26.8-26.8-26.8-1.2 0-2.2-1-2.2-2.2V62.6c0-21 17-38 38-38 18.2 0 33.6 12.8 37 30.2 0.2 1.2 1.2 2 2.4 2h18.2c1.2 0 2.2-1 2.1-2.3z" fill="#AB47BC"/><circle cx="48" cy="48" r="6" fill="#FFF"/><circle cx="72" cy="48" r="6" fill="#FFF"/></svg>`;
+    const metamaskSvg = `<svg width="22" height="22" viewBox="0 0 32 32" fill="none"><path d="M28.2 3L18.4 10.3 19.8 6 28.2 3z" fill="#E2761B"/><path d="M3.8 3l8.3 3 1.5 4.3L3.8 3z" fill="#E2761B"/><path d="M24.2 22.3l-2.6 3.9 5.6 1.5 1.6-5.4-4.6 0z" fill="#E2761B"/><path d="M3.2 22.3l1.6 5.4 5.6-1.5-2.6-3.9-4.6 0z" fill="#E2761B"/><path d="M9.8 14.1l-1.6 2.4 5.4.2-.2-5.8-3.6 3.2z" fill="#E2761B"/><path d="M22.2 14.1l-3.6-3.2-.2 5.8 5.4-.2-1.6-2.4z" fill="#E2761B"/><path d="M10.4 26.2l3.4-1.7-2.9-2.3-.5 4z" fill="#E2761B"/><path d="M21.6 26.2l-.5-4-2.9 2.3 3.4 1.7z" fill="#E2761B"/><path d="M18.2 24.5l3.4-1.7-2.6-2.2h-6l-2.6 2.2 3.4 1.7 2.2.8 2.2-.8z" fill="#E4761B"/></svg>`;
+    const defaultWalletSvg = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>`;
+
     if (this.isAuthenticated && this.activeAddress) {
       if (btnConnect) btnConnect.style.display = 'none';
       if (pill) pill.style.display = 'flex';
+
+      if (walletDisconnected) walletDisconnected.style.display = 'none';
+      if (walletConnected) walletConnected.style.display = 'block';
+
+      const walletType = (this.activeWalletType || 'phantom').toLowerCase();
+      const isEvm = walletType.includes('metamask') || walletType.includes('evm') || this.activeAddress.startsWith('0x');
+      const activeSvg = walletType.includes('metamask') || isEvm ? metamaskSvg : phantomSvg;
+
+      if (walletIconContainer) walletIconContainer.innerHTML = activeSvg;
+      if (bnavWalletCircle) bnavWalletCircle.innerHTML = activeSvg;
 
       const shortAddr = this.activeAddress.length > 10
         ? `${this.activeAddress.substring(0, 5)}...${this.activeAddress.substring(this.activeAddress.length - 4)}`
@@ -1314,10 +1338,15 @@ class CessionWalletEngine {
       if (navAddr) navAddr.textContent = shortAddr;
       if (navBal) navBal.textContent = `${(this.balances.sol || 0.0).toFixed(2)} SOL`;
 
+      if (walletAddr) walletAddr.textContent = shortAddr;
+      if (walletSolBal) walletSolBal.textContent = `${(this.balances.sol || 0.0).toFixed(2)} SOL`;
+      if (walletChain) walletChain.textContent = isEvm ? 'Base EVM' : 'Solana Mainnet';
+      if (walletTypeLabel) walletTypeLabel.textContent = `CONNECTED (${isEvm ? 'METAMASK' : 'PHANTOM'})`;
+
       if (profileAddr) profileAddr.textContent = this.activeAddress;
       if (profileAvatar) profileAvatar.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(this.activeAddress)}`;
       if (profileVaultStatus) {
-        profileVaultStatus.innerHTML = `<span style="color: var(--pump-mint); font-weight: 700;">Connected (${(this.activeWalletType || 'Sovereign').toUpperCase()})</span>`;
+        profileVaultStatus.innerHTML = `<span style="color: var(--pump-mint); font-weight: 700;">Connected (${isEvm ? 'METAMASK' : 'PHANTOM'})</span>`;
       }
       if (profileSol) profileSol.textContent = `${(this.balances.sol || 0.0).toFixed(2)} SOL`;
       if (profileCess) profileCess.textContent = `${(this.balances.cess || 0).toLocaleString()} $CESS`;
@@ -1335,6 +1364,11 @@ class CessionWalletEngine {
       if (btnConnect) btnConnect.style.display = 'inline-flex';
       if (pill) pill.style.display = 'none';
 
+      if (walletDisconnected) walletDisconnected.style.display = 'block';
+      if (walletConnected) walletConnected.style.display = 'none';
+
+      if (bnavWalletCircle) bnavWalletCircle.innerHTML = defaultWalletSvg;
+
       if (profileAddr) profileAddr.textContent = 'Not Connected';
       if (profileAvatar) profileAvatar.src = 'https://api.dicebear.com/7.x/identicon/svg?seed=guest';
       if (profileVaultStatus) {
@@ -1344,7 +1378,7 @@ class CessionWalletEngine {
       if (profileCess) profileCess.textContent = '0 $CESS';
       if (profilePortfolioVal) profilePortfolioVal.textContent = '$0.00';
       if (profileHoldingsBody) {
-        profileHoldingsBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 30px;">No wallet connected. Connect your wallet or 1-Click Sovereign Vault to view holdings.</td></tr>`;
+        profileHoldingsBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 30px;">No wallet connected. Connect your wallet to view holdings.</td></tr>`;
       }
     }
   }
