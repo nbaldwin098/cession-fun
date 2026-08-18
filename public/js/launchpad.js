@@ -1784,7 +1784,7 @@ class CessionLaunchpadManager {
   <title>Cession Monthly Statement - ${data.month}</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #0b0f19; color: #f3f4f6; margin: 0; padding: 30px; line-height: 1.5; }
-    .header { border-bottom: 2px solid #1e293b; padding-bottom: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; }
+    .header { border-bottom: 2px solid #1e293b; padding-bottom: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start; }
     .title { font-size: 24px; font-weight: 800; color: #22c55e; margin: 0; }
     .sub { font-size: 13px; color: #94a3b8; margin-top: 4px; }
     .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
@@ -1795,9 +1795,19 @@ class CessionLaunchpadManager {
     th { text-align: left; border-bottom: 1px solid #334155; padding: 10px; color: #94a3b8; text-transform: uppercase; font-size: 11px; }
     td { padding: 10px; border-bottom: 1px solid #1e293b; }
     .disclaimer { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 14px; font-size: 12px; color: #f87171; line-height: 1.4; }
+    .print-btn { background: #22c55e; color: #050b14; border: none; padding: 8px 18px; font-weight: 800; font-size: 12px; border-radius: 6px; cursor: pointer; margin-bottom: 20px; }
+    @media print {
+      .print-btn { display: none; }
+      body { background: #fff; color: #0f172a; padding: 0; }
+      .card { background: #f8fafc; border: 1px solid #e2e8f0; }
+      th { color: #475569; border-bottom: 2px solid #cbd5e1; }
+      td { border-bottom: 1px solid #e2e8f0; }
+      .disclaimer { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
+    }
   </style>
 </head>
 <body>
+  <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
   <div class="header">
     <div>
       <div class="title">CESSION.FUN MONTHLY ACCOUNT STATEMENT</div>

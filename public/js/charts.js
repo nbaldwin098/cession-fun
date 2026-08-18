@@ -22,30 +22,30 @@ class CessionChartController {
       return;
     }
 
-    // Chart Configuration
+    // Chart Configuration matching Cession Dark Theme
     this.chart = LightweightCharts.createChart(this.chartContainer, {
       layout: {
-        background: { color: '#ffffff' },
-        textColor: '#475569',
+        background: { color: '#0b0f19' },
+        textColor: '#94a3b8',
         fontSize: 11,
         fontFamily: "'JetBrains Mono', monospace"
       },
       grid: {
-        vertLines: { color: '#f1f5f9' },
-        horzLines: { color: '#f1f5f9' }
+        vertLines: { color: 'rgba(30, 41, 59, 0.5)' },
+        horzLines: { color: 'rgba(30, 41, 59, 0.5)' }
       },
       crosshair: {
         mode: LightweightCharts.CrosshairMode.Normal,
       },
       rightPriceScale: {
-        borderColor: '#e2e8f0',
+        borderColor: '#1e293b',
         scaleMargins: {
           top: 0.1,
           bottom: 0.2,
         },
       },
       timeScale: {
-        borderColor: '#e2e8f0',
+        borderColor: '#1e293b',
         timeVisible: true,
         secondsVisible: false,
       },
@@ -53,16 +53,16 @@ class CessionChartController {
 
     // Candlestick Series
     this.candleSeries = this.chart.addCandlestickSeries({
-      upColor: '#16a34a',
-      downColor: '#dc2626',
+      upColor: '#22c55e',
+      downColor: '#ef4444',
       borderVisible: false,
-      wickUpColor: '#16a34a',
-      wickDownColor: '#dc2626',
+      wickUpColor: '#22c55e',
+      wickDownColor: '#ef4444',
     });
 
     // Volume Histogram Series
     this.volumeSeries = this.chart.addHistogramSeries({
-      color: '#cbd5e1',
+      color: '#334155',
       priceFormat: {
         type: 'volume',
       },
