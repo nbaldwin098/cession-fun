@@ -1,0 +1,14 @@
+.cx-xtab{
+  position:relative;
+  box-shadow:none !important;
+}
+.cx-xtab.on::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:10px;
+  height:2px;
+  background:#0c0c0c;
+  border-radius:1px;
+}
