@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cession Desk</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="padding:24px;max-width:720px;margin:0 auto;">
+  <h1>Cession Desk</h1>
+  <p class="cx-muted">Employees only. Read tickets and status. This page cannot move funds or export keys.</p>
+  <input class="form-input-pump" id="deskToken" type="password" placeholder="Desk token">
+  <button class="cx-launch" type="button" id="deskLoad">Open desk</button>
+  <pre id="deskOut" class="cx-muted"></pre>
+  <script>
+    document.getElementById('deskLoad').onclick = async function () {
+      const token = document.getElementById('deskToken').value;
+      const r = await fetch('/api/support/desk/tickets', { headers: { 'x-cession-desk': token } });
+      const d = await r.json();
+      document.getElementById('deskOut').textContent = JSON.stringify(d, null, 2);
+    };
+  </script>
+</body>
+</html>
