@@ -1,4 +1,8 @@
 (function () {
+  var line = document.createElement('link');
+  line.rel = 'stylesheet';
+  line.href = 'css/header-line.css';
+  document.head.appendChild(line);
   var lock = document.createElement('script');
   lock.src = 'js/cession-user-lock.js';
   document.head.appendChild(lock);
