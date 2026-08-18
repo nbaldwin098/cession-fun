@@ -47,6 +47,7 @@
       b.className = 'cx-float-search';
       b.type = 'button';
       b.setAttribute('aria-label', 'Search');
+      b.style.cssText = 'background:transparent;background-color:transparent;-webkit-appearance:none;appearance:none;border:0;box-shadow:none;';
       b.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0c0c0c" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
       b.onclick = function () { ui.openSearch(); };
       document.body.appendChild(b);
