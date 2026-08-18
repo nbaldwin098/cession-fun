@@ -9,7 +9,9 @@ const complianceRoutes = require('./compliance');
 const treasuryRoutes = require('./treasury');
 const authRoutes = require('./auth');
 const askRoutes = require('./ask');
+const pulseRoutes = require('./pulse');
 const bondingCurve = require('../services/bondingCurve');
+const pulseSignals = require('../services/pulseSignals');
 
 router.use('/auth', authRoutes);
 router.use('/stripe', stripeRoutes);
@@ -19,10 +21,11 @@ router.use('/market', marketRoutes);
 router.use('/compliance', complianceRoutes);
 router.use('/treasury', treasuryRoutes);
 router.use('/ask', askRoutes);
+router.use('/pulse', pulseRoutes);
 
 router.get('/pulse', (req, res) => {
   const { lane = 'all', limit = 20 } = req.query;
-  const feed = bondingCurve.getPulseFeed(lane, parseInt(limit) || 20);
+  const feed = pulseSignals.attach(bondingCurve.getPulseFeed(lane, parseInt(limit) || 20));
   res.json({ success: true, count: feed.length, lane, feed });
 });
 
