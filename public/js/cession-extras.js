@@ -5,7 +5,7 @@
     line.href = href;
     document.head.appendChild(line);
   });
-  ['js/cession-gate.js', 'js/cession-user-lock.js', 'js/cession-perps-gate.js', 'js/cession-header-perps.js', 'js/cession-fees.js', 'js/cession-earn.js', 'js/cession-buttons.js'].forEach(function (src) {
+  ['js/cession-gate.js', 'js/cession-wallet-fix.js', 'js/cession-user-lock.js', 'js/cession-perps-gate.js', 'js/cession-header-perps.js', 'js/cession-fees.js', 'js/cession-earn.js', 'js/cession-buttons.js'].forEach(function (src) {
     var s = document.createElement('script');
     s.src = src;
     document.head.appendChild(s);
@@ -90,12 +90,6 @@
       if (window.CessionTrack) CessionTrack.leave();
       if (prevGo) prevGo(name);
       if (name === 'home') paintForYou();
-    };
-    const prevOpen = ui.openCoin;
-    ui.openCoin = function (coin) {
-      if (window.CessionEngine) CessionEngine.learn(coin, 'dwell');
-      if (window.CessionTrack) CessionTrack.open(coin.symbol);
-      if (prevOpen) prevOpen(coin);
     };
     paintForYou();
   });
