@@ -8,7 +8,6 @@ const apiRoutes = require('./routes/api');
 const priceEngine = require('./services/priceEngine');
 const { rateLimit } = require('./middleware/rateLimit');
 require('./services/store').init();
-require('./services/mayhem').start();
 
 const app = express();
 const server = http.createServer(app);

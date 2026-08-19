@@ -13,54 +13,61 @@
       if (search) hdr.insertBefore(b, search);
       else hdr.appendChild(b);
     }
-    if (!document.getElementById('viewMayhem')) {
-      const page = document.createElement('main');
+    var page = document.getElementById('viewMayhem');
+    if (!page) {
+      page = document.createElement('main');
       page.className = 'page-view';
       page.id = 'viewMayhem';
-      page.innerHTML =
-        '<h1 class="cx-title">Mayhem</h1>' +
-        '<div class="cx-card">' +
-        '<p>Same model as Pump. Extra 1B to a house agent. 24 hours. Random buy or sell. Max one fill per second. Leftover burns.</p>' +
-        '<p class="cx-muted">Create flag is off. No coin can turn this on yet.</p>' +
-        '<p class="cx-muted" id="mayhemStatus">Loading…</p>' +
-        '</div>' +
-        '<div class="cx-feed" id="mayhemGrid"></div>';
-      const app = document.querySelector('.cx-app');
+      var app = document.querySelector('.cx-app');
       if (app) app.appendChild(page);
     }
-    const box = document.getElementById('deployMayhem');
-    if (box && box.closest('label')) box.closest('label').remove();
-    const prev = CessionUI.go;
+    page.innerHTML =
+      '<p class="cx-muted">Agent offline</p>' +
+      '<h1 class="cx-title">Mayhem Mode</h1>' +
+      '<div class="cx-card">' +
+      '<p>An agent trades your coin at launch to kickstart the tape.</p>' +
+      '<p class="cx-muted">Auto: the agent buys and sells on its own for 24 hours. The more people trade, the more it trades.</p>' +
+      '<p class="cx-muted">Manual: you trigger each agent fill. Size and side stay random.</p>' +
+      '</div>' +
+      '<div class="cx-card">' +
+      '<div class="cx-row"><span>Active coins</span><span>0</span></div>' +
+      '<div class="cx-row"><span>Agent 24h vol</span><span>0 SOL</span></div>' +
+      '<div class="cx-row"><span>Coins created 24h</span><span>0</span></div>' +
+      '<div class="cx-row"><span>Traders 24h</span><span>0</span></div>' +
+      '</div>' +
+      '<div class="cx-card">' +
+      '<strong>How it works</strong>' +
+      '<p class="cx-muted">Create with Mayhem on. Supply is 2B. 1B on the curve. 1B to the agent.</p>' +
+      '<p class="cx-muted">The agent random-walks buy and sell for 24 hours. At most one fill per second. Leftover agent tokens burn.</p>' +
+      '<p class="cx-muted">Activity is not guaranteed. The agent can buy or sell. This is not a return.</p>' +
+      '</div>' +
+      '<div class="cx-card">' +
+      '<strong>Top Mayhem traders</strong>' +
+      '<p class="cx-muted">No traders yet. Agent does not run until the program is live.</p>' +
+      '</div>' +
+      '<div class="cx-card">' +
+      '<strong>Active coins</strong>' +
+      '<p class="cx-muted">No Mayhem coins yet.</p>' +
+      '<button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create your own</button>' +
+      '</div>';
+    var flag = document.getElementById('deployMayhem');
+    if (flag && flag.closest('label')) flag.closest('label').remove();
+    var prev = CessionUI.go;
     CessionUI.go = function (name) {
       if (name === 'mayhem') {
         document.querySelectorAll('.page-view').forEach(function (el) {
-          const on = el.id === 'viewMayhem';
+          var on = el.id === 'viewMayhem';
           el.classList.toggle('active', on);
           el.style.display = on ? 'block' : 'none';
         });
         document.querySelectorAll('.cx-xtab').forEach(function (el) { el.classList.remove('on'); });
-        const t = document.getElementById('tabMayhem');
+        var t = document.getElementById('tabMayhem');
         if (t) t.classList.add('on');
-        loadMayhem();
         window.scrollTo(0, 0);
         return;
       }
       if (prev) prev(name);
     };
-    async function loadMayhem() {
-      const status = document.getElementById('mayhemStatus');
-      const grid = document.getElementById('mayhemGrid');
-      try {
-        const r = await fetch('/api/mayhem');
-        const d = await r.json();
-        if (status) status.textContent = d.reason || 'Mayhem is not live.';
-      } catch (e) {
-        if (status) status.textContent = 'Could not load Mayhem status.';
-      }
-      if (grid) {
-        grid.innerHTML = '<div class="cx-empty"><p class="cx-muted">No Mayhem coins. The create flag is off.</p></div>';
-      }
-    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
   else ready();
