@@ -1,4 +1,4 @@
-/* CessionRank v2.1 — spark reset, not launch-age death */
+/* CessionRank v2.2 — idle is 3 hours, not 15 minutes */
 (function (root) {
   function hoursSince(ts, fallbackHours) {
     const t = Date.parse(ts || 0);
@@ -50,8 +50,8 @@
     return Number(den) > 0 ? Math.min(1, Number(num || 0) / Number(den)) : 0;
   }
   function lambda(p) {
-    const idleMin = hoursSince(p.lastTradeAt, 24) * 60;
-    return idleMin >= 15 ? 0.5 : 0.15;
+    const idleHours = hoursSince(p.lastTradeAt, 24);
+    return idleHours >= 3 ? 0.5 : 0.15;
   }
   function prices(c, f) {
     const p = pulse(c);
