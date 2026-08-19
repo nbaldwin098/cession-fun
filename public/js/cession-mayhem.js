@@ -20,31 +20,16 @@
       page.innerHTML =
         '<h1 class="cx-title">Mayhem</h1>' +
         '<div class="cx-card">' +
-        '<p>Same model as Pump Mayhem. Opt-in at create. Labeled on the coin.</p>' +
-        '<p class="cx-muted">At launch the coin mints 2,000,000,000 tokens. 1B sits on the curve. 1B goes to a house agent.</p>' +
-        '<p class="cx-muted">For 24 hours the agent buys and sells at random, at most one trade per second, with a max SOL size per trade. Leftover agent tokens burn.</p>' +
-        '<p class="cx-muted">Auto: more human trades, more agent trades. Manual: the creator triggers each agent fill.</p>' +
-        '<p class="cx-muted">Activity is not guaranteed. The agent can buy or sell. This is not a return.</p>' +
-        '</div>' +
-        '<div class="cx-card">' +
-        '<strong>Agent</strong>' +
-        '<p class="cx-muted" id="mayhemStatus">Not live until the program is deployed. No agent trades run off-chain.</p>' +
-        '<button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create with Mayhem</button>' +
+        '<p>Same model as Pump. Extra 1B to a house agent. 24 hours. Random buy or sell. Max one fill per second. Leftover burns.</p>' +
+        '<p class="cx-muted">Create flag is off. No coin can turn this on yet.</p>' +
+        '<p class="cx-muted" id="mayhemStatus">Loading…</p>' +
         '</div>' +
         '<div class="cx-feed" id="mayhemGrid"></div>';
       const app = document.querySelector('.cx-app');
       if (app) app.appendChild(page);
     }
-    const form = document.getElementById('deployCoinForm');
-    if (form && !document.getElementById('deployMayhem')) {
-      const lab = document.createElement('label');
-      lab.className = 'gate-agree';
-      lab.style.color = '#111';
-      lab.innerHTML = '<input id="deployMayhem" type="checkbox"> Mayhem — extra 1B for a 24h agent. Same rules as Pump.';
-      const btn = form.querySelector('button[type="submit"]');
-      if (btn) form.insertBefore(lab, btn);
-      else form.appendChild(lab);
-    }
+    const box = document.getElementById('deployMayhem');
+    if (box && box.closest('label')) box.closest('label').remove();
     const prev = CessionUI.go;
     CessionUI.go = function (name) {
       if (name === 'mayhem') {
@@ -63,19 +48,17 @@
       if (prev) prev(name);
     };
     async function loadMayhem() {
+      const status = document.getElementById('mayhemStatus');
       const grid = document.getElementById('mayhemGrid');
-      if (!grid) return;
       try {
-        const r = await fetch('/api/pulse?lane=all&limit=50');
+        const r = await fetch('/api/mayhem');
         const d = await r.json();
-        const list = (d.feed || []).filter(function (c) { return c.mayhem || c.mayhemMode; });
-        grid.innerHTML = list.length
-          ? list.map(function (c) {
-            return '<div class="cx-card"><strong>' + (c.name || c.symbol) + '</strong><p class="cx-muted">Mayhem · ' + c.symbol + '</p></div>';
-          }).join('')
-          : '<div class="cx-empty"><p class="cx-muted">No Mayhem coins yet. Agent does not run until the program is live.</p></div>';
+        if (status) status.textContent = d.reason || 'Mayhem is not live.';
       } catch (e) {
-        grid.innerHTML = '<div class="cx-empty"><p class="cx-muted">No Mayhem coins yet.</p></div>';
+        if (status) status.textContent = 'Could not load Mayhem status.';
+      }
+      if (grid) {
+        grid.innerHTML = '<div class="cx-empty"><p class="cx-muted">No Mayhem coins. The create flag is off.</p></div>';
       }
     }
   }
