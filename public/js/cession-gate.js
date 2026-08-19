@@ -12,10 +12,24 @@
   }
   function already() { return localStorage.getItem('cession_onboarded') === '1'; }
   function gated() { return localStorage.getItem('cession_gate_ok') === '1'; }
+  function savedUser() { return String(localStorage.getItem('cession_username') || '').trim(); }
+  function afterUnlock() {
+    localStorage.setItem('cession_gate_ok', '1');
+    if (already() || savedUser()) {
+      if (savedUser()) localStorage.setItem('cession_onboarded', '1');
+      done();
+      return;
+    }
+    step('user');
+  }
   function step(name) {
     const root = document.getElementById('gateFlow');
     if (!root) return;
     if (name === 'user') {
+      if (savedUser()) {
+        step('secure');
+        return;
+      }
       root.innerHTML =
         '<div class="gate-on"><div class="gate-phone">' +
         '<img class="gate-k" src="brand/cession-c-mark.svg" alt="">' +
@@ -39,7 +53,7 @@
         '<div class="gate-on"><div class="gate-phone">' +
         '<img class="gate-k" src="brand/cession-c-mark.svg" alt="">' +
         '<h1>Secure your<br>account</h1>' +
-        '<p>Set up biometric authentication in Phantom or MetaMask. We do not hold keys.</p>' +
+        '<p>Set up biometric authentication in Phantom or MetaMask.</p>' +
         '<button class="gate-go" type="button" id="gateSecGo">Continue</button></div></div>';
       document.getElementById('gateSecGo').onclick = function () { step('wallet'); };
     }
@@ -65,6 +79,20 @@
       };
     }
   }
+  async function submitCode(input, err) {
+    err.textContent = '';
+    try {
+      const r = await fetch('/api/access/unlock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ code: input.value })
+      });
+      const d = await r.json();
+      if (!d.success) { err.textContent = d.error || 'Wrong code.'; return; }
+      afterUnlock();
+    } catch (e) { err.textContent = 'Could not reach the gate.'; }
+  }
   function land() {
     let g = document.getElementById('cessionGate');
     if (!g) {
@@ -75,6 +103,7 @@
     g.className = 'open';
     hideApp(true);
     g.innerHTML =
+      '<button class="gate-login" type="button" id="gateLogin">Login</button>' +
       '<div id="gateFlow"><div class="gate-land"><div class="gate-col">' +
       '<img class="gate-k" src="brand/cession-c-white.svg" alt="">' +
       '<p class="gate-skip">Skip the line.</p>' +
@@ -96,19 +125,22 @@
         input.focus();
         return;
       }
-      err.textContent = '';
+      submitCode(input, err);
+    };
+    document.getElementById('gateLogin').onclick = async function () {
       try {
-        const r = await fetch('/api/access/unlock', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'same-origin',
-          body: JSON.stringify({ code: input.value })
-        });
+        const r = await fetch('/api/access/gate', { credentials: 'same-origin' });
         const d = await r.json();
-        if (!d.success) { err.textContent = d.error || 'Wrong code.'; return; }
-        localStorage.setItem('cession_gate_ok', '1');
-        step('user');
-      } catch (e) { err.textContent = 'Could not reach the gate.'; }
+        if (d.open) {
+          afterUnlock();
+          return;
+        }
+      } catch (e) {}
+      mode = 'code';
+      btn.textContent = 'Enter Code';
+      wrap.classList.add('on');
+      input.placeholder = 'Enter your code';
+      input.focus();
     };
     input.addEventListener('keydown', function (e) { if (e.key === 'Enter') btn.click(); });
   }
@@ -118,12 +150,13 @@
     try {
       const r = await fetch('/api/access/gate', { credentials: 'same-origin' });
       const d = await r.json();
-      if (d.open && already()) {
+      if (d.open && (already() || savedUser())) {
         localStorage.setItem('cession_gate_ok', '1');
+        localStorage.setItem('cession_onboarded', '1');
         hideApp(false);
         return;
       }
-      if (d.open && !already()) {
+      if (d.open && !already() && !savedUser()) {
         land();
         step('user');
         return;

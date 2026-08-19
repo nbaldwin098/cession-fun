@@ -32,6 +32,18 @@ html.gated .modal-overlay-generic {
   background: #fff;
   color: #111;
 }
+.gate-login {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 2;
+  background: none;
+  border: 0;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 8px 0;
+}
 .gate-land {
   min-height: 100dvh;
   min-height: 100svh;
@@ -115,8 +127,6 @@ html.gated .modal-overlay-generic {
   color: #111;
   border-radius: 0;
   box-shadow: none;
-  outline: none;
-  filter: none;
   padding: 0;
 }
 .gate-phone h1 {
