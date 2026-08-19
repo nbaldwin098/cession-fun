@@ -9,3 +9,180 @@
   <link rel="stylesheet" href="css/gate.css">
   <link rel="icon" type="image/svg+xml" href="brand/cession-c-white.svg">
 </head>
+<body>
+  <header class="cx-top">
+    <button class="cx-xtab on" id="tabForYou" type="button" onclick="CessionUI.go('home')">For You</button>
+    <button class="cx-xtab" id="tabMint" type="button" onclick="CessionUI.go('mint')">Mint</button>
+    <button class="cx-xtab" id="tabFollowing" type="button" onclick="CessionUI.setHomeLane('following')">Following</button>
+    <button class="cx-xtab" id="tabAi" type="button" onclick="CessionUI.go('ai')">AI</button>
+    <button class="cx-search-btn" type="button" onclick="CessionUI.openSearch()" aria-label="Search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0c0c0c" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    </button>
+  </header>
+  <div class="cx-app">
+    <main class="page-view active" id="viewHome"><div class="cx-feed" id="forYouCoinsGrid"></div></main>
+    <main class="page-view" id="viewExplorePulse">
+      <h1 class="cx-title">Explore</h1>
+      <div class="cx-card" id="kingBox"><strong>King of the hill</strong><p class="cx-muted">No live coin yet.</p></div>
+      <div class="cx-card">
+        <strong>Global chat</strong>
+        <div class="cx-chat-log" id="chatLog" style="height:240px"></div>
+        <div class="cx-chat-row"><input class="cx-search" id="chatInput" placeholder="Message"><button class="cx-launch" type="button" onclick="CessionUI.sendChat()">Send</button></div>
+      </div>
+      <div class="cx-feed" id="exploreGrid"></div>
+    </main>
+    <main class="page-view" id="viewMint">
+      <h1 class="cx-title">Mint</h1>
+      <div class="cx-card">
+        <p class="cx-muted">Launch a coin for 0.05 SOL. Burn and fee claims unlock after the program is live.</p>
+        <button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create coin</button>
+      </div>
+      <h2 class="cx-title">Your coins</h2>
+      <div class="cx-card" id="mintManage"></div>
+    </main>
+    <main class="page-view" id="viewWallet">
+      <div class="cx-profile">
+        <label class="cx-avatar-wrap">
+          <img class="cx-avatar" id="profileAvatar" alt="">
+          <input type="file" id="avatarFile" accept="image/*" hidden>
+        </label>
+        <div>
+          <div id="profileName">anon</div>
+          <div class="cx-pnl" id="profilePnl">P/L 0</div>
+          <div class="cx-mono" id="walletScreenAddress">Not connected</div>
+        </div>
+      </div>
+      <div id="walletScreenDisconnected" class="cx-card">
+        <p class="cx-muted" id="connectHint">On phone, approve in the wallet then this tab comes back by itself.</p>
+        <button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button>
+        <button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button>
+      </div>
+      <div id="walletScreenConnected" style="display:none;">
+        <div class="cx-card">
+          <div class="cx-words" id="pnlRange">
+            <button class="on" type="button" data-range="7d">7d</button>
+            <button type="button" data-range="1m">1m</button>
+            <button type="button" data-range="6m">6m</button>
+            <button type="button" data-range="1y">1y</button>
+            <button type="button" data-range="all">∞</button>
+          </div>
+          <canvas id="pnlChart" width="640" height="220"></canvas>
+        </div>
+        <div class="cx-card">
+          <div class="cx-row"><span>Created</span><span id="youCreateCount">none</span></div>
+          <div class="cx-row"><span>Held</span><span id="youHoldCount">none</span></div>
+          <div class="cx-row"><span>Trades</span><span id="youTxCount">none</span></div>
+          <button class="cx-ghost" type="button" onclick="CessionUI.openSettings()">Settings</button>
+          <button class="cx-ghost" type="button" onclick="CessionUI.openStatement()">Statement</button>
+        </div>
+      </div>
+      <footer class="cx-you-footer">
+        <div class="cx-foot-row">
+          <button class="cx-foot-brand" id="footerBrand" type="button" aria-label="Cession">
+            <span class="cx-foot-clip"><img src="brand/cession-wordmark-white.svg" alt="Cession"></span>
+          </button>
+        </div>
+        <div>
+          <a href="javascript:CessionUI.go('explore')">Explore</a>
+          <a href="javascript:CessionUI.go('rewards')">Earn</a>
+          <a href="javascript:CessionUI.go('ai')">AI</a>
+          <a href="/legal">Legal</a>
+        </div>
+      </footer>
+    </main>
+    <main class="page-view" id="viewBots">
+      <h1 class="cx-title">Bots</h1>
+      <div class="cx-card">
+        <p class="cx-muted">Rules save now. They do not trade until the program is live.</p>
+        <select class="form-input-pump" id="botType"><option value="dca">DCA</option><option value="limit">Limit buy</option><option value="tp">Take profit</option><option value="sl">Stop</option></select>
+        <input class="form-input-pump" id="botSymbol" placeholder="Ticker">
+        <input class="form-input-pump" id="botBuy" type="number" step="0.01" placeholder="SOL amount">
+        <select class="form-input-pump" id="botInterval"><option value="1h">Every 1h</option><option value="6h">Every 6h</option><option value="1d">Every day</option></select>
+        <button class="cx-launch" type="button" onclick="CessionUI.saveBot()">Save bot</button>
+        <div id="botList" class="cx-muted"></div>
+      </div>
+    </main>
+    <main class="page-view" id="viewRewards">
+      <h1 class="cx-title">Earn</h1>
+      <p class="cx-muted">Not live until the program is deployed. Nothing here is a return.</p>
+      <div class="cx-card">
+        <div class="cx-row"><span>Creator</span><span>0 SOL</span></div>
+        <button class="cx-ghost" type="button" disabled>Claim creator</button>
+      </div>
+      <div class="cx-card">
+        <div class="cx-row"><span>Holder</span><span>0 SOL</span></div>
+        <button class="cx-ghost" type="button" disabled>Claim holder</button>
+      </div>
+      <div class="cx-card">
+        <div class="cx-row"><span>Trader</span><span>0 SOL</span></div>
+        <button class="cx-ghost" type="button" disabled>Claim trader</button>
+      </div>
+      <div class="cx-card">
+        <div class="cx-row"><span>Referral</span><span>0 SOL</span></div>
+        <button class="cx-ghost" type="button" onclick="CessionUI.copyReferral()">Copy link</button>
+        <button class="cx-ghost" type="button" disabled>Claim referral</button>
+      </div>
+      <div class="cx-card">
+        <p class="cx-muted">Earn native SOL in Phantom. About 6 to 8 percent. Not a Cession return.</p>
+        <button class="cx-launch" type="button" onclick="CessionUI.openPhantomStake()">Open Phantom</button>
+      </div>
+    </main>
+    <main class="page-view" id="viewPerps"><h1 class="cx-title">Perps</h1><div class="cx-card"><p class="cx-muted">Perpetuals are not live.</p></div></main>
+    <main class="page-view" id="viewAi">
+      <h1 class="cx-title">AI</h1>
+      <div id="askAiBox" class="cx-chat"><div class="cx-chat-log" id="aiLog"></div><div class="cx-chat-row"><input class="cx-search" id="aiInput" placeholder="Ask anything"><button class="cx-launch" type="button" onclick="CessionUI.sendAi()">Send</button></div></div>
+    </main>
+    <main class="page-view" id="viewCoin">
+      <button class="cx-ghost" type="button" onclick="CessionUI.go('home')">Back</button>
+      <h1 class="cx-title" id="coinTitle">Coin</h1>
+      <p class="cx-muted" id="coinMeta"></p>
+      <div class="cx-trade-row"><button class="cx-launch" type="button" onclick="CessionUI.openTrade('buy')">Buy</button><button class="cx-ghost" type="button" onclick="CessionUI.openTrade('sell')">Sell</button></div>
+    </main>
+  </div>
+  <button class="cx-askbar" id="askBanner" type="button" onclick="CessionUI.go('ai')">AI</button>
+  <nav class="bottom-nav-bar">
+    <button class="bottom-nav-slot active" id="bnavForYou" type="button" onclick="CessionUI.go('home')" aria-label="Home">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 3.2 3 11h2.2v9h5.1v-6.2h3.4V20h5.1v-9H21z"/></svg>
+    </button>
+    <button class="bottom-nav-slot" id="bnavPulse" type="button" onclick="CessionUI.go('explore')" aria-label="Explore">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M14.2 9.2 10 10.4 8.8 14.6l4.2-1.2 1.2-4.2z" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button class="bottom-nav-slot bnav-plus" id="bnavMint" type="button" onclick="CessionUI.go('mint')" aria-label="Mint">
+      <span class="bnav-plus-circle"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#111" stroke-width="2.4" fill="none"><path d="M12 5v14M5 12h14"/></svg></span>
+    </button>
+    <button class="bottom-nav-slot" id="bnavWallet" type="button" onclick="CessionUI.go('wallet')" aria-label="Portfolio">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M8 7V5.6A2.6 2.6 0 0 1 10.6 3h2.8A2.6 2.6 0 0 1 16 5.6V7"/></svg>
+    </button>
+    <button class="bottom-nav-slot" id="bnavExplore" type="button" onclick="CessionUI.go('rewards')" aria-label="Earn">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="12" r="7"/><circle cx="16" cy="12" r="7"/><path d="M10 9v6M8.5 12h3"/></svg>
+    </button>
+  </nav>
+  <div class="modal-overlay-generic" id="searchModal">
+    <div class="modal-box-pump">
+      <input class="form-input-pump" id="searchInput" placeholder="Search coins">
+      <div class="cx-words">
+        <button type="button" onclick="CessionUI.searchLane('new')">New</button>
+        <button type="button" onclick="CessionUI.searchLane('best')">Best</button>
+        <button type="button" onclick="CessionUI.searchLane('old')">Old</button>
+        <button type="button" onclick="CessionUI.searchLane('worst')">Worst</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay-generic" id="deployModal"><div class="modal-box-pump"><form id="deployCoinForm"><input class="form-input-pump" id="deployName" placeholder="Name" required><input class="form-input-pump" id="deploySymbol" placeholder="Ticker" required><input class="form-input-pump" id="deployMedia" type="url" placeholder="Image or video URL"><p class="cx-muted">Paste a .png .jpg .mp4 .webm or a YouTube link.</p><button class="cx-launch" type="submit">Launch 0.05 SOL</button></form></div></div>
+  <div class="modal-overlay-generic" id="usernameModal"><div class="modal-box-pump"><p class="cx-muted">Pick a username. It cannot be changed.</p><input class="form-input-pump" id="newUsername" placeholder="username"><button class="cx-launch" type="button" onclick="CessionUI.lockUsername()">Save forever</button></div></div>
+  <div class="modal-overlay-generic" id="walletModal"><div class="modal-box-pump"><button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button><button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button></div></div>
+  <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump"><input class="form-input-pump" id="presetBuySol" type="number" step="0.01" placeholder="Default buy SOL"><input class="form-input-pump" id="presetSlippage" type="number" step="0.1" placeholder="Slippage"><button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save presets</button><button class="cx-ghost" type="button" onclick="CessionUI.downloadCsv()">Download CSV</button></div></div>
+  <div class="modal-overlay-generic" id="statementModal"><div class="modal-box-pump"><div id="statementBody" class="cx-muted">No statements to display.</div><button class="cx-ghost" id="statementDownloadBtn" type="button" style="display:none;" onclick="CessionUI.downloadCsv()">Download</button></div></div>
+  <div class="modal-overlay-generic" id="stakeModal"><div class="modal-box-pump"><p class="cx-muted">Earn in Phantom. About 6 to 8 percent. Not a Cession return.</p><button class="cx-launch" type="button" onclick="CessionUI.openPhantomStake()">Open Phantom</button></div></div>
+  <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump"><strong id="tradeTitle">Buy</strong><p id="tradeCoinLabel" class="cx-muted"></p><p id="tradeFeeLine" class="cx-muted" style="display:none;">Trade fee 0.25%</p><input class="form-input-pump" id="tradeAmount" type="number"><input class="form-input-pump" id="tradeSlippage" type="number"><button class="cx-launch" type="button" onclick="CessionUI.confirmTrade()">Confirm</button></div></div>
+  <script src="js/cession-shell.js"></script>
+  <script src="js/cession-media.js"></script>
+  <script src="js/cession-rank.js"></script>
+  <script src="js/cession-engine.js"></script>
+  <script src="js/cession-track.js"></script>
+  <script src="js/cession-extras.js"></script>
+  <script src="js/cession-nav.js"></script>
+  <script src="js/wallet.js"></script>
+  <script src="js/trading.js"></script>
+</body>
+</html>
