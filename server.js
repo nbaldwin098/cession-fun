@@ -8,6 +8,7 @@ const apiRoutes = require('./routes/api');
 const priceEngine = require('./services/priceEngine');
 const { rateLimit } = require('./middleware/rateLimit');
 require('./services/store').init();
+require('./services/mayhem').start();
 
 const app = express();
 const server = http.createServer(app);
@@ -37,7 +38,7 @@ app.use('/api/support', rateLimit(20, 60000));
 app.use('/api', apiRoutes);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html', 'htm'] }));
 
-['/', '/explore', '/rewards', '/wallet', '/you', '/foryou', '/legal', '/r/:code'].forEach((route) => {
+['/', '/explore', '/rewards', '/wallet', '/you', '/foryou', '/legal', '/mayhem', '/r/:code'].forEach((route) => {
   app.get(route, (req, res) => {
     if (route === '/legal') return res.sendFile(path.join(__dirname, 'public', 'legal.html'));
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
