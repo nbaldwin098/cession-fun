@@ -1,11 +1,11 @@
 (function () {
-  ['css/header-line.css', 'css/page-pad.css'].forEach(function (href) {
+  ['css/header-line.css', 'css/page-pad.css', 'css/gate.css'].forEach(function (href) {
     var line = document.createElement('link');
     line.rel = 'stylesheet';
     line.href = href;
     document.head.appendChild(line);
   });
-  ['js/cession-user-lock.js', 'js/cession-perps-gate.js', 'js/cession-header-perps.js', 'js/cession-fees.js', 'js/cession-earn.js', 'js/cession-buttons.js'].forEach(function (src) {
+  ['js/cession-gate.js', 'js/cession-user-lock.js', 'js/cession-perps-gate.js', 'js/cession-header-perps.js', 'js/cession-fees.js', 'js/cession-earn.js', 'js/cession-buttons.js'].forEach(function (src) {
     var s = document.createElement('script');
     s.src = src;
     document.head.appendChild(s);
@@ -96,46 +96,6 @@
       if (window.CessionEngine) CessionEngine.learn(coin, 'dwell');
       if (window.CessionTrack) CessionTrack.open(coin.symbol);
       if (prevOpen) prevOpen(coin);
-      const title = document.getElementById('coinTitle');
-      let stage = document.getElementById('coinMedia');
-      if (title && !stage) {
-        stage = document.createElement('div');
-        stage.id = 'coinMedia';
-        title.parentNode.insertBefore(stage, title.nextSibling);
-      }
-      if (stage) stage.innerHTML = CessionMedia.pageHtml(coin.mediaUrl || '', coin.symbol);
-      const meta = document.getElementById('coinMeta');
-      if (!meta) return;
-      let bar = document.getElementById('followBar');
-      if (!bar) {
-        bar = document.createElement('div');
-        bar.id = 'followBar';
-        meta.parentNode.insertBefore(bar, meta.nextSibling);
-      }
-      bar.innerHTML = '<button class="cx-ghost" type="button" id="followCoinBtn">Follow coin</button><button class="cx-ghost" type="button" id="followUserBtn">Follow wallet</button>';
-      document.getElementById('followCoinBtn').onclick = function () {
-        CessionRank.followCoin(coin.symbol);
-        CessionEngine.learn(coin, 'follow');
-        if (window.CessionTrack) CessionTrack.emit('follow', coin.symbol, 0);
-      };
-      document.getElementById('followUserBtn').onclick = function () {
-        CessionRank.followUser(String(coin.creator || '').toLowerCase());
-      };
-    };
-    ui.copyReferral = function () {
-      const addr = localStorage.getItem('cession_address') || 'cession';
-      const url = location.origin + '/r/' + encodeURIComponent(addr.slice(0, 8));
-      if (navigator.clipboard) navigator.clipboard.writeText(url);
-      alert(url);
-    };
-    const fee = document.getElementById('tradeFeeLine');
-    const oldTrade = ui.openTrade;
-    ui.openTrade = function (side) {
-      if (oldTrade) oldTrade(side);
-      if (fee) {
-        fee.style.display = side === 'buy' ? 'block' : 'none';
-        fee.textContent = 'Trade 1.00%. Creator 0.50%. Holders 0.25%.';
-      }
     };
     paintForYou();
   });
