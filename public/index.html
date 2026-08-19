@@ -34,7 +34,7 @@
     <main class="page-view" id="viewMint">
       <h1 class="cx-title">Mint</h1>
       <div class="cx-card">
-        <p class="cx-muted">Launch a coin for 0.05 SOL. Burn and fee claims unlock after the program is live.</p>
+        <p class="cx-muted">Create is free. You only pay Solana rent. Burn and fee claims unlock after the program is live.</p>
         <button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create coin</button>
       </div>
       <h2 class="cx-title">Your coins</h2>
@@ -168,13 +168,13 @@
       </div>
     </div>
   </div>
-  <div class="modal-overlay-generic" id="deployModal"><div class="modal-box-pump"><form id="deployCoinForm"><input class="form-input-pump" id="deployName" placeholder="Name" required><input class="form-input-pump" id="deploySymbol" placeholder="Ticker" required><input class="form-input-pump" id="deployMedia" type="url" placeholder="Image or video URL"><p class="cx-muted">Paste a .png .jpg .mp4 .webm or a YouTube link.</p><button class="cx-launch" type="submit">Launch 0.05 SOL</button></form></div></div>
+  <div class="modal-overlay-generic" id="deployModal"><div class="modal-box-pump"><form id="deployCoinForm"><input class="form-input-pump" id="deployName" placeholder="Name" required><input class="form-input-pump" id="deploySymbol" placeholder="Ticker" required><input class="form-input-pump" id="deployMedia" type="url" placeholder="Image or video URL"><p class="cx-muted">Paste a .png .jpg .mp4 .webm or a YouTube link.</p><button class="cx-launch" type="submit">Launch</button></form></div></div>
   <div class="modal-overlay-generic" id="usernameModal"><div class="modal-box-pump"><p class="cx-muted">Pick a username. It cannot be changed.</p><input class="form-input-pump" id="newUsername" placeholder="username"><button class="cx-launch" type="button" onclick="CessionUI.lockUsername()">Save forever</button></div></div>
   <div class="modal-overlay-generic" id="walletModal"><div class="modal-box-pump"><button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button><button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button></div></div>
   <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump"><input class="form-input-pump" id="presetBuySol" type="number" step="0.01" placeholder="Default buy SOL"><input class="form-input-pump" id="presetSlippage" type="number" step="0.1" placeholder="Slippage"><button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save presets</button><button class="cx-ghost" type="button" onclick="CessionUI.downloadCsv()">Download CSV</button></div></div>
   <div class="modal-overlay-generic" id="statementModal"><div class="modal-box-pump"><div id="statementBody" class="cx-muted">No statements to display.</div><button class="cx-ghost" id="statementDownloadBtn" type="button" style="display:none;" onclick="CessionUI.downloadCsv()">Download</button></div></div>
   <div class="modal-overlay-generic" id="stakeModal"><div class="modal-box-pump"><p class="cx-muted">Earn in Phantom. About 6 to 8 percent. Not a Cession return.</p><button class="cx-launch" type="button" onclick="CessionUI.openPhantomStake()">Open Phantom</button></div></div>
-  <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump"><strong id="tradeTitle">Buy</strong><p id="tradeCoinLabel" class="cx-muted"></p><p id="tradeFeeLine" class="cx-muted" style="display:none;">Trade fee 0.25%</p><input class="form-input-pump" id="tradeAmount" type="number"><input class="form-input-pump" id="tradeSlippage" type="number"><button class="cx-launch" type="button" onclick="CessionUI.confirmTrade()">Confirm</button></div></div>
+  <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump"><strong id="tradeTitle">Buy</strong><p id="tradeCoinLabel" class="cx-muted"></p><p id="tradeFeeLine" class="cx-muted" style="display:none;">Trade 1.00%</p><input class="form-input-pump" id="tradeAmount" type="number"><input class="form-input-pump" id="tradeSlippage" type="number"><button class="cx-launch" type="button" onclick="CessionUI.confirmTrade()">Confirm</button></div></div>
   <script src="js/cession-shell.js"></script>
   <script src="js/cession-media.js"></script>
   <script src="js/cession-rank.js"></script>
