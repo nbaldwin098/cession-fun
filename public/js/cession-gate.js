@@ -26,10 +26,7 @@
     const root = document.getElementById('gateFlow');
     if (!root) return;
     if (name === 'user') {
-      if (savedUser()) {
-        step('secure');
-        return;
-      }
+      if (savedUser()) { step('secure'); return; }
       root.innerHTML =
         '<div class="gate-on"><div class="gate-phone">' +
         '<img class="gate-k" src="brand/cession-c-mark.svg" alt="">' +
@@ -117,7 +114,7 @@
     const input = document.getElementById('gateCode');
     const err = document.getElementById('gateErr');
     let mode = 'sign';
-    btn.onclick = async function () {
+    btn.onclick = function () {
       if (mode === 'sign') {
         mode = 'code';
         btn.textContent = 'Enter Code';
@@ -131,10 +128,7 @@
       try {
         const r = await fetch('/api/access/gate', { credentials: 'same-origin' });
         const d = await r.json();
-        if (d.open) {
-          afterUnlock();
-          return;
-        }
+        if (d.open) { afterUnlock(); return; }
       } catch (e) {}
       mode = 'code';
       btn.textContent = 'Enter Code';
@@ -146,23 +140,19 @@
   }
   async function boot() {
     if (already() && gated()) return;
-    hideApp(true);
+    land();
     try {
-      const r = await fetch('/api/access/gate', { credentials: 'same-origin' });
+      const ctrl = new AbortController();
+      const t = setTimeout(function () { ctrl.abort(); }, 4000);
+      const r = await fetch('/api/access/gate', { credentials: 'same-origin', signal: ctrl.signal });
+      clearTimeout(t);
       const d = await r.json();
       if (d.open && (already() || savedUser())) {
-        localStorage.setItem('cession_gate_ok', '1');
-        localStorage.setItem('cession_onboarded', '1');
-        hideApp(false);
+        afterUnlock();
         return;
       }
-      if (d.open && !already() && !savedUser()) {
-        land();
-        step('user');
-        return;
-      }
+      if (d.open && !already() && !savedUser()) step('user');
     } catch (e) {}
-    land();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
