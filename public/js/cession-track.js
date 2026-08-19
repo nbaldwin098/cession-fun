@@ -1,7 +1,6 @@
 (function () {
-  const viewer = localStorage.getItem('cession_address') || ('v_' + Math.random().toString(36).slice(2, 10));
-  if (!localStorage.getItem('cession_viewer')) localStorage.setItem('cession_viewer', viewer);
-  const who = localStorage.getItem('cession_viewer');
+  const viewer = localStorage.getItem('cession_address') || localStorage.getItem('cession_viewer') || ('v_' + Math.random().toString(36).slice(2, 10));
+  localStorage.setItem('cession_viewer', viewer);
   let lastHuman = 0;
   function markHuman() { lastHuman = Date.now(); }
   ['pointerdown', 'touchstart', 'keydown', 'scroll'].forEach(function (ev) {
@@ -11,6 +10,9 @@
     return document.hasFocus() && !document.hidden && (Date.now() - lastHuman) < 30000;
   }
   const seen = new WeakMap();
+  function who() {
+    return localStorage.getItem('cession_address') || localStorage.getItem('cession_viewer');
+  }
   function emit(type, symbol, ms) {
     if (!symbol) return;
     fetch('/api/pulse/event', {
@@ -22,7 +24,7 @@
         ms: ms || 0,
         human: isHuman(),
         address: localStorage.getItem('cession_address') || '',
-        viewer: who
+        viewer: who()
       })
     }).catch(function () {});
   }
@@ -79,6 +81,7 @@
   let dwellSymbol = '';
   window.CessionTrack = {
     emit: emit,
+    viewer: who,
     open: function (symbol) {
       if (dwellSymbol && dwellStart) emit('dwell', dwellSymbol, Date.now() - dwellStart);
       dwellSymbol = symbol;
