@@ -1,0 +1,27 @@
+#cessionGate{position:fixed;inset:0;z-index:200000;background:#000;color:#fff;display:none;overflow:auto}
+#cessionGate.open{display:block}
+.gate-land{min-height:100dvh;background:#000;padding:48px 28px 120px;display:flex;flex-direction:column;justify-content:center}
+.gate-k{width:54px;height:54px;margin-bottom:28px}
+.gate-skip{font-size:18px;opacity:.92;margin:0 0 18px}
+.gate-cta{display:inline-flex;align-items:center;gap:8px;background:#2563EB;color:#fff;border:0;border-radius:999px;height:46px;padding:0 22px;font-weight:600;font-size:16px}
+.gate-code{margin-top:14px;display:none;max-width:280px}
+.gate-code.on{display:block}
+.gate-code input{width:100%;height:46px;border:0;border-radius:12px;padding:0 14px;font-size:16px}
+.gate-err{color:#ff8aa2;font-size:13px;margin-top:8px;min-height:18px}
+.gate-hero{font-size:40px;font-weight:700;line-height:1.05;margin:28px 0 0}
+.gate-word{height:42px;margin-top:8px}
+.gate-on{min-height:100dvh;background:#4A5BF2;display:flex;flex-direction:column;align-items:center;padding:12px 12px 108px}
+.gate-phone{width:min(390px,100%);background:#fff;color:#111;border-radius:30px;padding:22px 22px 28px;min-height:640px}
+.gate-phone h1{font-size:28px;margin:18px 0 8px}
+.gate-phone p{color:#6E6E78;font-size:14px;line-height:1.4}
+.gate-phone input[type=text]{width:100%;border:0;border-bottom:1px solid #ECECF0;font-size:20px;padding:8px 0;margin:12px 0 18px}
+.gate-agree{display:flex;gap:10px;align-items:flex-start;font-size:12px;color:#6E6E78;line-height:1.35;margin:12px 0 22px}
+.gate-agree input{margin-top:2px}
+.gate-go{width:100%;height:48px;border:0;border-radius:24px;background:#2563EB;color:#fff;font-weight:600;font-size:16px}
+.gate-go[disabled]{background:#F1F1F3;color:#B6B6BE}
+.gate-go.ghost{background:#fff;color:#111;border:1px solid #e6e6ea;margin-top:10px}
+.gate-words{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}
+.gate-words span{background:#f4f4f7;border-radius:10px;padding:8px 10px;font-size:13px;user-select:none;-webkit-user-select:none}
+.gate-seed{filter:none}
+.gate-seed.hide{filter:blur(8px)}
+.gate-warn{background:#111;color:#fff;border-radius:12px;padding:12px;font-size:13px;line-height:1.4}
