@@ -10,7 +10,7 @@ function tier(marketCapUsd, stage) {
 }
 
 module.exports = {
-  createLamports: 50_000_000,
+  createLamports: 0,
   referral: 'bonus_or_discount_only',
   tier,
   graduation: { stayOnCession: true, bundleEligible: true, laterPool: true }
