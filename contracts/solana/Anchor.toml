@@ -1,17 +1,21 @@
 [toolchain]
+anchor_version = "1.1.2"
 
 [features]
 resolution = true
 skip-lint = false
 
-[programs.mainnet]
-cession_bonding_curve = "Epxb6TRhGwT1gQFj5xCLM6KtZUz9ajD7jZzkVrp3qBR9"
+[programs.devnet]
+cession_bonding_curve = "HojxiDLyQPErBmdx6tiC3Hutn5iajPbBEZ14C568zTha"
+
+[programs.localnet]
+cession_bonding_curve = "HojxiDLyQPErBmdx6tiC3Hutn5iajPbBEZ14C568zTha"
 
 [registry]
-url = "https://api.mainnet-beta.solana.com"
+url = "https://api.apr.dev"
 
 [provider]
-cluster = "mainnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
