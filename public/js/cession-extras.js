@@ -5,7 +5,7 @@
     line.href = href;
     document.head.appendChild(line);
   });
-  ['js/cession-config.js', 'js/cession-gate.js', 'js/cession-wallet-create.js', 'js/cession-user-lock.js', 'js/cession-perps-gate.js', 'js/cession-header-perps.js', 'js/cession-fees.js', 'js/cession-earn.js', 'js/cession-buttons.js', 'js/cession-mayhem.js'].forEach(function (src) {
+  ['js/cession-config.js', 'js/cession-gate.js', 'js/cession-wallet-create.js', 'js/cession-user-lock.js', 'js/cession-perps-gate.js', 'js/cession-header-perps.js', 'js/cession-fees.js', 'js/cession-earn.js', 'js/cession-buttons.js', 'js/cession-mayhem.js', 'js/cession-exchange.js'].forEach(function (src) {
     var s = document.createElement('script');
     s.src = src;
     document.head.appendChild(s);
@@ -22,7 +22,6 @@
     const chg = Number(c.change24h || 0);
     const payload = { symbol: c.symbol, name: c.name || c.symbol, mint: c.mintAddress || c.mint || '', creator: c.creator || '', mediaUrl: url };
     const p = JSON.stringify(payload);
-    const why = c._why || (window.CessionEngine ? CessionEngine.why(c) : '');
     const size = window.CessionEngine ? CessionEngine.tapSize() : 0.05;
     return '<div class="cx-card-coin" data-symbol="' + c.symbol + '">' +
       '<button type="button" class="cx-card-hit" onclick=\'CessionUI.openCoin(' + p + ')\'>' +
