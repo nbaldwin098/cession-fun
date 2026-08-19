@@ -3,6 +3,10 @@ html.gated, body.gated {
   overflow: hidden !important;
   height: 100%;
 }
+html.gated:has(.gate-on),
+body.gated:has(.gate-on) {
+  background: #fff !important;
+}
 html.gated .cx-top,
 html.gated .cx-app,
 html.gated .cx-askbar,
@@ -23,6 +27,10 @@ html.gated .modal-overlay-generic {
 }
 #cessionGate.open {
   display: block;
+}
+#cessionGate:has(.gate-on) {
+  background: #fff;
+  color: #111;
 }
 .gate-land {
   min-height: 100dvh;
@@ -95,18 +103,21 @@ html.gated .modal-overlay-generic {
 .gate-on {
   min-height: 100dvh;
   min-height: 100svh;
-  background: #4A5BF2;
+  background: #fff;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 24px 16px;
+  padding: 48px 24px 32px;
 }
 .gate-phone {
-  width: min(340px, 100%);
+  width: min(400px, 100%);
   background: #fff;
   color: #111;
-  border-radius: 30px;
-  padding: 28px 22px 24px;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+  filter: none;
+  padding: 0;
 }
 .gate-phone h1 {
   font-size: 28px;
