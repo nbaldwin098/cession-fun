@@ -33,9 +33,14 @@
   }
   function empty(t, s) { return '<div class="cx-empty"><h2>' + t + '</h2><p class="cx-muted">' + s + '</p></div>'; }
   function ad() { return '<div class="cx-ad">Skip, watch, or tap buy. The next card already knows.</div>'; }
+  function viewer() {
+    return (window.CessionTrack && CessionTrack.viewer && CessionTrack.viewer()) ||
+      localStorage.getItem('cession_address') ||
+      localStorage.getItem('cession_viewer') || '';
+  }
   async function live() {
     try {
-      const r = await fetch('/api/pulse?lane=all&limit=80');
+      const r = await fetch('/api/pulse?lane=all&limit=80&user=' + encodeURIComponent(viewer()));
       const d = await r.json();
       return (d.feed || []).filter(function (c) {
         const s = String(c.symbol || '').toUpperCase();
@@ -46,7 +51,7 @@
   async function paintForYou() {
     const grid = document.getElementById('forYouCoinsGrid');
     if (!grid) return;
-    const coins = CessionEngine.assemble(await live());
+    const coins = await live();
     const parts = [ad()];
     if (!coins.length) parts.push(empty('No live coins yet.', 'Be the first to add a coin.'));
     coins.forEach(function (c, i) { if (i && i % 6 === 0) parts.push(ad()); parts.push(card(c)); });
