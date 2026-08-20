@@ -34,11 +34,10 @@ app.use(express.urlencoded({ extended: true, limit: '200kb' }));
 app.use('/api/pulse', rateLimit(60, 60000));
 app.use('/api/ask', rateLimit(30, 60000));
 app.use('/api/support', rateLimit(20, 60000));
-app.use('/api/pay', rateLimit(40, 60000));
 app.use('/api', apiRoutes);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html', 'htm'] }));
 
-['/', '/explore', '/rewards', '/wallet', '/you', '/foryou', '/legal', '/mayhem', '/r/:code'].forEach((route) => {
+['/', '/explore', '/rewards', '/wallet', '/you', '/foryou', '/legal', '/r/:code'].forEach((route) => {
   app.get(route, (req, res) => {
     if (route === '/legal') return res.sendFile(path.join(__dirname, 'public', 'legal.html'));
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
