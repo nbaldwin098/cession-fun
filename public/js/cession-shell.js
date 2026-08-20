@@ -113,20 +113,30 @@
     const addr=address();if(!addr){drawPnl([]);return}
     try{const r=await fetch('/api/wallets/'+encodeURIComponent(addr)+'/pnl?range='+pnlRange);const d=await r.json();document.getElementById('profilePnl').textContent='P/L '+(d.total||0);localStorage.setItem('cession_pnl',String(d.total||0));drawPnl(d.points||[])}catch(e){drawPnl([])}
   }
+  async function syncUsernameFromSignup(addr){
+    const name=String(localStorage.getItem('cession_username')||'').trim().toLowerCase();
+    if(!addr||!name)return null;
+    localStorage.setItem('cession_username:'+addr,name);
+    try{
+      const r=await fetch('/api/auth/username',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:addr,username:name})});
+      const d=await r.json();
+      if(!d.success)return null;
+      document.getElementById('profileName').textContent=d.username;
+      return d.username;
+    }catch(e){return null}
+  }
   async function loadProfile(){
     const addr=address();if(!addr)return;
     try{
       const r=await fetch('/api/auth/profile/'+encodeURIComponent(addr));const d=await r.json();
-      if(d.username) document.getElementById('profileName').textContent=d.username;
       if(d.avatar) document.getElementById('profileAvatar').src=d.avatar;
-      if(d.exists && !d.usernameLocked) open('usernameModal');
-      if(!d.exists) open('usernameModal');
+      if(d.username){document.getElementById('profileName').textContent=d.username;localStorage.setItem('cession_username',String(d.username).toLowerCase());localStorage.setItem('cession_username:'+addr,String(d.username).toLowerCase());return}
+      const synced=await syncUsernameFromSignup(addr);
+      if(!synced){
+        const fallback=String(localStorage.getItem('cession_username:'+addr)||localStorage.getItem('cession_username')||'').trim();
+        if(fallback) document.getElementById('profileName').textContent=fallback;
+      }
     }catch(e){}
-  }
-  async function lockUsername(){
-    const name=document.getElementById('newUsername').value;
-    const r=await fetch('/api/auth/username',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:address(),username:name})});
-    const d=await r.json();if(!d.success)return toast(d.error||'Could not save');document.getElementById('profileName').textContent=d.username;close('usernameModal');
   }
   async function saveAvatar(dataUrl){
     await fetch('/api/auth/avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:address(),avatar:dataUrl})});
@@ -233,7 +243,7 @@
   }
   function connectPhantom(){if(window.solana){window.solana.connect().then(function(res){if(res.publicKey){saveAddr(res.publicKey.toString());sync()}});return}startTicket('phantom')}
   function connectMetaMask(){if(window.ethereum){window.ethereum.request({method:'eth_requestAccounts'}).then(function(a){if(a&&a[0]){saveAddr(a[0]);sync()}});return}startTicket('metamask')}
-  window.CessionUI={go:show,open:open,close:close,openCreate:function(){open('deployModal')},openSettings:function(){open('settingsModal')},openStatement:openStatement,downloadCsv:downloadCsv,savePresets:savePresets,openCoin:openCoin,openTrade:openTrade,shareCoin:shareCoin,followCreator:followCreator,setTradeStatus:setTradeStatus,confirmTrade:function(){const amount=Number(document.getElementById('tradeAmount')&&document.getElementById('tradeAmount').value||0);if(!address())return open('walletModal');if(!activeCoin||!(activeCoin.mintAddress||activeCoin.mint))return toast('No live mint to trade.');if(!Number.isFinite(amount)||amount<=0)return toast('Enter a valid amount.');setTradeStatus('pending','Trading requires wallet-signed on-chain transaction');toast('Trading flow is wallet-signed only. Connect wallet and confirm on-chain.');},connectPhantom:connectPhantom,connectMetaMask:connectMetaMask,claimApproved:function(){claimTicket(pendingTicket()).then(function(ok){if(!ok)toast('Not approved yet. Approve in the wallet, then tap again.')})},claimRewardsBonus:claimRewardsBonus,sendAi:sendAi,sendChat:sendChat,setAskMode:setAskMode,setHomeLane:setHomeLane,setExploreLane:setExploreLane,saveBot:saveBot,lockUsername:lockUsername,copyReferralLink:copyReferralLink};
+  window.CessionUI={go:show,open:open,close:close,openCreate:function(){open('deployModal')},openSettings:function(){open('settingsModal')},openStatement:openStatement,downloadCsv:downloadCsv,savePresets:savePresets,openCoin:openCoin,openTrade:openTrade,shareCoin:shareCoin,followCreator:followCreator,setTradeStatus:setTradeStatus,confirmTrade:function(){const amount=Number(document.getElementById('tradeAmount')&&document.getElementById('tradeAmount').value||0);if(!address())return open('walletModal');if(!activeCoin||!(activeCoin.mintAddress||activeCoin.mint))return toast('No live mint to trade.');if(!Number.isFinite(amount)||amount<=0)return toast('Enter a valid amount.');setTradeStatus('pending','Trading requires wallet-signed on-chain transaction');toast('Trading flow is wallet-signed only. Connect wallet and confirm on-chain.');},connectPhantom:connectPhantom,connectMetaMask:connectMetaMask,claimApproved:function(){claimTicket(pendingTicket()).then(function(ok){if(!ok)toast('Not approved yet. Approve in the wallet, then tap again.')})},claimRewardsBonus:claimRewardsBonus,sendAi:sendAi,sendChat:sendChat,setAskMode:setAskMode,setHomeLane:setHomeLane,setExploreLane:setExploreLane,saveBot:saveBot,copyReferralLink:copyReferralLink};
   window.CessionCard={visuals:cardVisuals,fmtMoney:fmtMoney,shortMint:shortMint};
   document.addEventListener('DOMContentLoaded',function(){
     const form=document.getElementById('deployCoinForm');if(form)form.addEventListener('submit',async function(e){e.preventDefault();const name=String(document.getElementById('deployName').value||'').trim();const symbol=String(document.getElementById('deploySymbol').value||'').trim().toUpperCase();const imageUrl=String(document.getElementById('deployMedia').value||'').trim();if(!name||!symbol)return toast('Name and ticker are required.');const payload={name:name,symbol:symbol,imageUrl:imageUrl||null,creator:address()||null};const btn=form.querySelector('button[type="submit"]');if(btn)btn.disabled=true;try{const r=await fetch('/api/tokens/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const d=await r.json();if(!d.success)return toast(d.error||'Could not create coin.');toast('Coin created.');close('deployModal');form.reset();const firstBuy=document.getElementById('deployFirstBuy');if(firstBuy)firstBuy.value='0.06';await load();}catch(err){toast('Could not create coin.')}finally{if(btn)btn.disabled=false;}});
