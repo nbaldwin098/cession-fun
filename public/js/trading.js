@@ -3,6 +3,10 @@
  * Strict Phantom / Solana Web3 Anchor instruction builder & MetaMask EVM caller
  */
 
+function publishTradeStatus(state, message) {
+  window.dispatchEvent(new CustomEvent('cession:trade-status', { detail: { state, message } }));
+}
+
 class PumpTradingManager {
   constructor() {
     this.activeToken = null;
@@ -162,6 +166,7 @@ class PumpTradingManager {
 
     try {
       let txHash = '';
+      publishTradeStatus('pending', `Awaiting wallet approval for ${this.side.toUpperCase()}`);
       if (this.btnPlaceTrade) this.btnPlaceTrade.textContent = `Approve ${this.side.toUpperCase()} in wallet...`;
 
       if (chain === 'Solana' && window.solana?.isPhantom && window.solanaWeb3 && window.solana.publicKey) {
@@ -171,7 +176,7 @@ class PumpTradingManager {
         const PROGRAM_ID = new web3.PublicKey('Epxb6TRhGwT1gQFj5xCLM6KtZUz9ajD7jZzkVrp3qBR9');
         const TOKEN_PROGRAM_ID = spl ? spl.TOKEN_PROGRAM_ID : new web3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
         const ASSOCIATED_TOKEN_PROGRAM_ID = spl ? spl.ASSOCIATED_TOKEN_PROGRAM_ID : new web3.PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
-        const TREASURY_PUBKEY = new web3.PublicKey('8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH');
+        const TREASURY_PUBKEY = new web3.PublicKey('9MeQ5XiESSZPUVNzqKQjB9JYEWZScH1shwsbQMfYUTRU');
 
         const mintPubkey = new web3.PublicKey(this.activeToken.mintAddress);
 
@@ -294,6 +299,7 @@ class PumpTradingManager {
         if (!txHash) {
           throw new Error('Transaction was cancelled or rejected in Phantom wallet.');
         }
+        publishTradeStatus('pending', 'Wallet signed. Awaiting network confirmation');
       } else if (chain === 'Ethereum' && window.ethereum) {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
@@ -331,15 +337,19 @@ class PumpTradingManager {
         throw new Error('On-chain signature missing.');
       }
 
+      publishTradeStatus('pending', 'Confirmed by wallet. Indexing on-chain transaction');
       if (this.btnPlaceTrade) this.btnPlaceTrade.textContent = 'Indexing transaction on-chain...';
 
       const endpoint = this.side === 'buy'
         ? `/api/tokens/${this.activeToken.symbol}/buy`
         : `/api/tokens/${this.activeToken.symbol}/sell`;
 
+      const storedRefCode=(localStorage.getItem('cession_ref')||'').toUpperCase();
+      const selfRefCode=trader?String(trader).replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,8):'';
+      const refCode=(storedRefCode&&storedRefCode!==selfRefCode)?storedRefCode:null;
       const payload = this.side === 'buy'
-        ? { solAmount: amount, buyer: trader, slippageTolerancePercent: this.slippagePercent, txHash }
-        : { tokenAmount: amount, seller: trader, slippageTolerancePercent: this.slippagePercent, txHash };
+        ? { solAmount: amount, buyer: trader, slippageTolerancePercent: this.slippagePercent, txHash, refCode }
+        : { tokenAmount: amount, seller: trader, slippageTolerancePercent: this.slippagePercent, txHash, refCode };
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -352,6 +362,7 @@ class PumpTradingManager {
 
       const data = await res.json();
       if (data.success) {
+        publishTradeStatus('confirmed', `${this.side === 'buy' ? 'Buy' : 'Sell'} confirmed on-chain`);
         const explorerUrl = chain === 'Solana'
           ? `https://solscan.io/tx/${txHash}`
           : `https://etherscan.io/tx/${txHash}`;
@@ -367,11 +378,13 @@ class PumpTradingManager {
         if (this.amountInput) this.amountInput.value = '';
         this.calculateQuote();
       } else {
+        publishTradeStatus('failed', data.error || 'Transaction was not indexed');
         if (window.launchpadManager) {
           window.launchpadManager.toast(data.error || 'Transaction failed on indexer', 'error');
         }
       }
     } catch (e) {
+      publishTradeStatus('failed', e.message || 'Transaction failed');
       console.error('On-chain trade error:', e);
       if (window.launchpadManager) {
         window.launchpadManager.toast('Trade aborted: ' + (e.message || 'Signature rejected'), 'error');

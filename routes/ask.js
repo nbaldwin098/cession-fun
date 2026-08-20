@@ -5,6 +5,15 @@ const router = express.Router();
 const ask = require('../services/askService');
 const CHAT = path.join(__dirname, '..', 'data', 'global_chat.json');
 
+function isSafeMediaUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && /\.(gif|png|webp|jpe?g)$/i.test(url.pathname);
+  } catch {
+    return false;
+  }
+}
+
 function readChat() {
   try { return JSON.parse(fs.readFileSync(CHAT, 'utf8')); }
   catch { return { messages: [] }; }
@@ -48,7 +57,11 @@ router.get('/chat', (req, res) => {
 
 router.post('/chat', (req, res) => {
   const text = String(req.body.text || '').trim().slice(0, 500);
-  const media = String(req.body.media || '').trim().slice(0, 500);
+  const requestedMedia = String(req.body.media || '').trim().slice(0, 500);
+  if (requestedMedia && !isSafeMediaUrl(requestedMedia)) {
+    return res.status(400).json({ success: false, error: 'Media must be an HTTPS image URL.' });
+  }
+  const media = requestedMedia || null;
   if (!text && !media) return res.status(400).json({ success: false, error: 'Message required' });
   const store = readChat();
   const msg = {
@@ -57,7 +70,7 @@ router.post('/chat', (req, res) => {
     username: String(req.body.username || 'anon').slice(0, 24),
     pnl: req.body.pnl || '0',
     text,
-    media: media || null,
+    media,
     at: new Date().toISOString()
   };
   store.messages = (store.messages || []).concat(msg).slice(-500);
@@ -66,13 +79,19 @@ router.post('/chat', (req, res) => {
 });
 
 router.get('/rewards/:address', (req, res) => {
-  res.json({
-    success: true,
-    address: req.params.address,
-    status: 'Not live yet',
-    accruedSol: 0,
-    rule: 'Holder share is 0.25 percent of trade fees, paid after real protocol volume.'
-  });
+  try {
+    const bondingCurve = require('../services/bondingCurve');
+    const rewards = bondingCurve.getRewardsSummary(req.params.address);
+    res.json({
+      success: true,
+      address: req.params.address,
+      status: rewards.points > 0 ? 'Accruing' : 'No volume yet',
+      rule: 'Earn 100 points per SOL traded, plus 20 points per SOL traded by wallets using your referral link. Higher tiers unlock trade-fee discounts.',
+      rewards
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
 });
 
 module.exports = router;

@@ -6,6 +6,115 @@
 const express = require('express');
 const router = express.Router();
 const bondingCurve = require('../services/bondingCurve');
+const bs58Module = require('bs58');
+
+const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
+const SOLANA_PROGRAM_ID = process.env.CESSION_SOLANA_PROGRAM_ID || 'Epxb6TRhGwT1gQFj5xCLM6KtZUz9ajD7jZzkVrp3qBR9';
+const SOLANA_SIGNATURE = /^[1-9A-HJ-NP-Za-km-z]{64,88}$/;
+const BUY_DISCRIMINATOR = Buffer.from([102, 6, 61, 18, 1, 218, 235, 234]);
+const SELL_DISCRIMINATOR = Buffer.from([51, 230, 131, 241, 36, 64, 51, 38]);
+const decodeBase58 = (bs58Module.default || bs58Module).decode;
+const MAX_TRADE_AGE_SECONDS = 10 * 60;
+
+function accountKey(key) {
+  return typeof key === 'string' ? key : key && key.pubkey;
+}
+
+function parseInstructionAmount(data, discriminator, decimals) {
+  const bytes = Buffer.from(decodeBase58(data));
+  if (bytes.length !== 24 || !bytes.subarray(0, 8).equals(discriminator)) return null;
+  const units = bytes.readBigUInt64LE(8);
+  if (units > BigInt(Number.MAX_SAFE_INTEGER)) return null;
+  return Number(units) / (10 ** decimals);
+}
+
+async function getConfirmedSolanaTrade(txHash, side, mint, trader) {
+  if (!SOLANA_SIGNATURE.test(txHash)) throw new Error('A valid Solana transaction signature is required.');
+
+  const response = await fetch(SOLANA_RPC, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'getTransaction',
+      params: [txHash, { encoding: 'json', commitment: 'finalized', maxSupportedTransactionVersion: 0 }]
+    })
+  });
+  if (!response.ok) throw new Error('Unable to verify the transaction on Solana.');
+  const payload = await response.json();
+  const transaction = payload.result;
+  if (!transaction || transaction.meta.err) throw new Error('Transaction is not a finalized successful Solana transaction.');
+  const now = Math.floor(Date.now() / 1000);
+  if (!Number.isInteger(transaction.blockTime) || transaction.blockTime > now + 60 || now - transaction.blockTime > MAX_TRADE_AGE_SECONDS) {
+    throw new Error('Transaction must be finalized within the last 10 minutes.');
+  }
+
+  const message = transaction.transaction && transaction.transaction.message;
+  const keys = message && message.accountKeys;
+  const expectedDiscriminator = side === 'BUY' ? BUY_DISCRIMINATOR : SELL_DISCRIMINATOR;
+  const decimals = side === 'BUY' ? 9 : 6;
+  const instruction = message && message.instructions.find((item) => {
+    const programId = item.programId || accountKey(keys[item.programIdIndex]);
+    return programId === SOLANA_PROGRAM_ID && Array.isArray(item.accounts) && item.accounts.length >= 2;
+  });
+  if (!instruction) throw new Error('Transaction does not contain a Cession trade instruction.');
+
+  const accounts = instruction.accounts.map((entry) => typeof entry === 'number' ? accountKey(keys[entry]) : entry);
+  if (accounts[0] !== trader || accounts[1] !== mint) {
+    throw new Error('Transaction signer or mint does not match the requested trade.');
+  }
+  // Account index 6 is the protocol treasury (see public/js/trading.js account ordering);
+  // the on-chain program now also pins this via an `address =` constraint, but we
+  // re-check here defense-in-depth so a stale/rogue client can't misroute the protocol fee.
+  if (accounts[6] !== bondingCurve.treasurySolAddress) {
+    throw new Error('Transaction does not pay the protocol treasury.');
+  }
+  const amount = parseInstructionAmount(instruction.data, expectedDiscriminator, decimals);
+  if (!amount || !Number.isFinite(amount)) throw new Error('Transaction instruction does not match the requested trade.');
+  return amount;
+}
+
+// Verifies a plain SOL transfer from `fromAddress` to the treasury wallet, used to gate
+// endpoints (bundle 1-click buy, initial creator buy) that credit tokens without a direct
+// on-chain program instruction, so they cannot mint value for free.
+async function getConfirmedSolTransferLamports(txHash, fromAddress) {
+  if (!SOLANA_SIGNATURE.test(txHash)) throw new Error('A valid Solana transaction signature is required.');
+  const treasury = bondingCurve.treasurySolAddress;
+
+  const response = await fetch(SOLANA_RPC, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'getTransaction',
+      params: [txHash, { encoding: 'jsonParsed', commitment: 'finalized', maxSupportedTransactionVersion: 0 }]
+    })
+  });
+  if (!response.ok) throw new Error('Unable to verify the transaction on Solana.');
+  const payload = await response.json();
+  const transaction = payload.result;
+  if (!transaction || transaction.meta.err) throw new Error('Transaction is not a finalized successful Solana transaction.');
+  const now = Math.floor(Date.now() / 1000);
+  if (!Number.isInteger(transaction.blockTime) || transaction.blockTime > now + 60 || now - transaction.blockTime > MAX_TRADE_AGE_SECONDS) {
+    throw new Error('Transaction must be finalized within the last 10 minutes.');
+  }
+
+  const message = transaction.transaction && transaction.transaction.message;
+  const instructions = (message && message.instructions) || [];
+  let lamportsToTreasury = 0;
+  for (const item of instructions) {
+    const parsed = item.parsed;
+    if (!parsed || parsed.type !== 'transfer' || !parsed.info) continue;
+    const programId = item.program || item.programId;
+    if (programId !== 'system') continue;
+    if (parsed.info.source !== fromAddress || parsed.info.destination !== treasury) continue;
+    lamportsToTreasury += Number(parsed.info.lamports || 0);
+  }
+  if (lamportsToTreasury <= 0) throw new Error('Transaction does not contain a matching SOL transfer to the Cession treasury.');
+  return lamportsToTreasury;
+}
 
 // Cession Pulse Ranked Feed Endpoint (For You Page)
 router.get('/pulse', (req, res) => {
@@ -89,20 +198,34 @@ router.post(['/collections/create', '/bundles/create'], (req, res) => {
   }
 });
 
-// 1-Click Buy Token Bundle
-router.post(['/collections/:id/buy', '/bundles/:id/buy'], (req, res) => {
+// 1-Click Buy Token Bundle (Requires Confirmed On-Chain SOL Transfer To Treasury)
+router.post(['/collections/:id/buy', '/bundles/:id/buy'], async (req, res) => {
   try {
-    const { solAmount, totalSolAmount, buyerAddress } = req.body;
-    const amount = totalSolAmount || solAmount;
+    const { solAmount, totalSolAmount, buyerAddress, txHash } = req.body;
+    const amount = parseFloat(totalSolAmount || solAmount);
+    const trader = String(buyerAddress || '').trim();
     if (!amount || amount <= 0) {
       return res.status(400).json({ success: false, error: 'Valid SOL amount is required for bundle purchase.' });
     }
-    const result = bondingCurve.buyCollection(
-      req.params.id,
-      amount,
-      buyerAddress || '0xCessionTrader'
-    );
-    res.json(result);
+    if (!txHash || typeof txHash !== 'string' || !trader) {
+      return res.status(400).json({ success: false, error: 'Transaction signature and buyer address are required.' });
+    }
+    const signature = txHash.trim();
+    if (bondingCurve.hasRecordedTransaction(signature)) return res.status(409).json({ success: false, error: 'Transaction has already been indexed.' });
+    const lamports = await getConfirmedSolTransferLamports(signature, trader);
+    if (lamports / 1e9 < amount - 1e-6) {
+      return res.status(400).json({ success: false, error: 'Confirmed transfer is less than the requested purchase amount.' });
+    }
+    if (bondingCurve.hasRecordedTransaction(signature) || !bondingCurve.reserveTransaction(signature)) {
+      return res.status(409).json({ success: false, error: 'Transaction is already being indexed.' });
+    }
+    try {
+      const result = bondingCurve.buyCollection(req.params.id, amount, trader);
+      bondingCurve.recordTransaction({ txHash: signature, wallet: trader, symbol: 'BUNDLE', side: 'BUY', solAmount: amount });
+      res.json({ ...result, txHash: signature });
+    } finally {
+      bondingCurve.releaseTransactionReservation(signature);
+    }
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
@@ -144,7 +267,7 @@ router.get('/:symbol', (req, res) => {
   if (!token) {
     return res.status(404).json({ success: false, error: 'Token not found.' });
   }
-  res.json({ success: true, token });
+  res.json({ success: true, token: { ...token, creatorStats: bondingCurve.getCreatorStats(token.creator) } });
 });
 
 // Get Token Chat (Trollbox)
@@ -164,7 +287,7 @@ router.post('/:symbol/chat', (req, res) => {
 });
 
 // Create/Deploy New Token (0.1 SOL Mint Fee Standard)
-router.post(['/create', '/deploy', '/launch'], (req, res) => {
+router.post(['/create', '/deploy', '/launch'], async (req, res) => {
   try {
     const { 
       name, 
@@ -183,119 +306,154 @@ router.post(['/create', '/deploy', '/launch'], (req, res) => {
       telegram = null,
       website = null,
       initialBuySol = null,
-      mintFeeSol = 0.1
+      mintFeeSol = 0.1,
+      txHash = null
     } = req.body;
 
     if (!name || !symbol) {
       return res.status(400).json({ success: false, error: 'Token name and symbol are required.' });
     }
 
-    const token = bondingCurve.createToken({
-      name,
-      symbol,
-      description,
-      imageUrl,
-      creator: creator || "0xCessionAnonDev",
-      chain: chain || "Solana",
-      devLockPercent: devLockPercent ? parseInt(devLockPercent) : 100,
-      tokenType,
-      isPrivate: isPrivate === true || isPrivate === 'true',
-      inviteCode,
-      antiDumpEnabled: antiDumpEnabled === null ? null : (antiDumpEnabled === true || antiDumpEnabled === 'true'),
-      targetCapUsd: targetCapUsd ? parseFloat(targetCapUsd) : 25000,
-      twitter,
-      telegram,
-      website,
-      mintFeeSol: parseFloat(mintFeeSol) || 0.1
-    });
-
-    let initialBuyResult = null;
+    const creatorAddress = creator || "0xCessionAnonDev";
     const initialAmount = initialBuySol ? parseFloat(initialBuySol) : 0;
+    let signature = null;
     if (initialAmount > 0) {
-      try {
-        initialBuyResult = bondingCurve.buyTokens(token.symbol, initialAmount, creator || "0xCessionAnonDev");
-      } catch (e) {
-        console.warn('Initial buy execution error:', e.message);
+      if (!txHash || typeof txHash !== 'string') {
+        return res.status(400).json({ success: false, error: 'A confirmed Solana transaction signature is required to fund the initial buy.' });
+      }
+      signature = txHash.trim();
+      if (bondingCurve.hasRecordedTransaction(signature)) {
+        return res.status(409).json({ success: false, error: 'Transaction has already been indexed.' });
+      }
+      const lamports = await getConfirmedSolTransferLamports(signature, creatorAddress);
+      if (lamports / 1e9 < initialAmount - 1e-6) {
+        return res.status(400).json({ success: false, error: 'Confirmed transfer is less than the requested initial buy amount.' });
+      }
+      if (bondingCurve.hasRecordedTransaction(signature) || !bondingCurve.reserveTransaction(signature)) {
+        return res.status(409).json({ success: false, error: 'Transaction is already being indexed.' });
       }
     }
 
-    res.status(201).json({ 
-      success: true, 
-      mintFee: 0.1,
-      token: initialBuyResult ? initialBuyResult.token : token,
-      initialTrade: initialBuyResult ? initialBuyResult.trade : null,
-      inviteUrl: token.isPrivate ? `/coin/${token.symbol}?key=${token.inviteCode}` : `/coin/${token.symbol}`
-    });
+    try {
+      const token = bondingCurve.createToken({
+        name,
+        symbol,
+        description,
+        imageUrl,
+        creator: creatorAddress,
+        chain: chain || "Solana",
+        devLockPercent: devLockPercent ? parseInt(devLockPercent) : 100,
+        tokenType,
+        isPrivate: isPrivate === true || isPrivate === 'true',
+        inviteCode,
+        antiDumpEnabled: antiDumpEnabled === null ? null : (antiDumpEnabled === true || antiDumpEnabled === 'true'),
+        targetCapUsd: targetCapUsd ? parseFloat(targetCapUsd) : 25000,
+        twitter,
+        telegram,
+        website,
+        mintFeeSol: parseFloat(mintFeeSol) || 0.1
+      });
+
+      let initialBuyResult = null;
+      if (initialAmount > 0) {
+        try {
+          initialBuyResult = bondingCurve.buyTokens(token.symbol, initialAmount, creatorAddress, signature);
+        } catch (e) {
+          console.warn('Initial buy execution error:', e.message);
+        }
+      }
+
+      res.status(201).json({ 
+        success: true, 
+        mintFee: 0.1,
+        token: initialBuyResult ? initialBuyResult.token : token,
+        initialTrade: initialBuyResult ? initialBuyResult.trade : null,
+        inviteUrl: token.isPrivate ? `/coin/${token.symbol}?key=${token.inviteCode}` : `/coin/${token.symbol}`
+      });
+    } finally {
+      if (signature) bondingCurve.releaseTransactionReservation(signature);
+    }
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
 });
 
+function sanitizeRefCode(refCode, trader) {
+  if (!refCode || typeof refCode !== 'string') return null;
+  const cleaned = refCode.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8);
+  if (!cleaned) return null;
+  const selfCode = trader ? String(trader).replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8) : '';
+  if (cleaned === selfCode) return null;
+  return cleaned;
+}
+
 // Buy on Bonding Curve (Requires Confirmed On-Chain Program Transaction Signature)
-router.post('/:symbol/buy', (req, res) => {
+router.post('/:symbol/buy', async (req, res) => {
   try {
-    const { solAmount, amount, buyerAddress, buyer, txHash } = req.body;
-    const buySol = parseFloat(solAmount || amount);
-    if (!buySol || buySol <= 0 || isNaN(buySol)) {
-      return res.status(400).json({ success: false, error: 'Valid SOL amount is required.' });
-    }
+    const { buyerAddress, buyer, txHash, refCode } = req.body;
+    const trader = String(buyerAddress || buyer || '').trim();
+    const token = bondingCurve.getToken(req.params.symbol);
+    if (!token || !token.mintAddress) return res.status(404).json({ success: false, error: 'Live token mint not found.' });
+    if (!txHash || typeof txHash !== 'string' || !trader) return res.status(400).json({ success: false, error: 'Transaction signature and buyer address are required.' });
+    const signature = txHash.trim();
+    if (bondingCurve.hasRecordedTransaction(signature)) return res.status(409).json({ success: false, error: 'Transaction has already been indexed.' });
+    const buySol = await getConfirmedSolanaTrade(signature, 'BUY', token.mintAddress, trader);
+    if (bondingCurve.hasRecordedTransaction(signature) || !bondingCurve.reserveTransaction(signature)) return res.status(409).json({ success: false, error: 'Transaction is already being indexed.' });
+    try {
+      const result = bondingCurve.buyTokens(
+        req.params.symbol,
+        buySol,
+        trader,
+        signature,
+        sanitizeRefCode(refCode, trader)
+      );
 
-    if (!txHash || typeof txHash !== 'string' || txHash.trim().length < 32) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Confirmed on-chain program transaction signature (txHash) is required to record a buy.' 
+      res.json({
+        success: true,
+        message: `Successfully bought ${Math.floor(result.tokensOut).toLocaleString()} $${result.token.symbol} on-chain!`,
+        token: result.token,
+        trade: result.trade,
+        txHash: signature
       });
+    } finally {
+      bondingCurve.releaseTransactionReservation(signature);
     }
-
-    const result = bondingCurve.buyTokens(
-      req.params.symbol,
-      buySol,
-      buyerAddress || buyer || '0xCessionTrader',
-      txHash
-    );
-
-    res.json({
-      success: true,
-      message: `Successfully bought ${Math.floor(result.tokensOut).toLocaleString()} $${result.token.symbol} on-chain!`,
-      token: result.token,
-      trade: result.trade,
-      txHash: txHash
-    });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
 });
 
 // Sell on Bonding Curve (Requires Confirmed On-Chain Program Transaction Signature)
-router.post('/:symbol/sell', (req, res) => {
+router.post('/:symbol/sell', async (req, res) => {
   try {
-    const { tokenAmount, amount, sellerAddress, seller, txHash } = req.body;
-    const sellTokens = parseFloat(tokenAmount || amount);
-    if (!sellTokens || sellTokens <= 0 || isNaN(sellTokens)) {
-      return res.status(400).json({ success: false, error: 'Valid token amount is required.' });
-    }
+    const { sellerAddress, seller, txHash, refCode } = req.body;
+    const trader = String(sellerAddress || seller || '').trim();
+    const token = bondingCurve.getToken(req.params.symbol);
+    if (!token || !token.mintAddress) return res.status(404).json({ success: false, error: 'Live token mint not found.' });
+    if (!txHash || typeof txHash !== 'string' || !trader) return res.status(400).json({ success: false, error: 'Transaction signature and seller address are required.' });
+    const signature = txHash.trim();
+    if (bondingCurve.hasRecordedTransaction(signature)) return res.status(409).json({ success: false, error: 'Transaction has already been indexed.' });
+    const sellTokens = await getConfirmedSolanaTrade(signature, 'SELL', token.mintAddress, trader);
+    if (bondingCurve.hasRecordedTransaction(signature) || !bondingCurve.reserveTransaction(signature)) return res.status(409).json({ success: false, error: 'Transaction is already being indexed.' });
+    try {
+      const result = bondingCurve.sellTokens(
+        req.params.symbol,
+        sellTokens,
+        trader,
+        signature,
+        sanitizeRefCode(refCode, trader)
+      );
 
-    if (!txHash || typeof txHash !== 'string' || txHash.trim().length < 32) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Confirmed on-chain program transaction signature (txHash) is required to record a sell.' 
+      res.json({
+        success: true,
+        message: `Successfully sold ${sellTokens.toLocaleString()} $${result.token.symbol} on-chain for ${result.solOut.toFixed(4)} SOL!`,
+        token: result.token,
+        trade: result.trade,
+        txHash: signature
       });
+    } finally {
+      bondingCurve.releaseTransactionReservation(signature);
     }
-
-    const result = bondingCurve.sellTokens(
-      req.params.symbol,
-      sellTokens,
-      sellerAddress || seller || '0xCessionTrader',
-      txHash
-    );
-
-    res.json({
-      success: true,
-      message: `Successfully sold ${sellTokens.toLocaleString()} $${result.token.symbol} on-chain for ${result.solOut.toFixed(4)} SOL!`,
-      token: result.token,
-      trade: result.trade,
-      txHash: txHash
-    });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
@@ -305,18 +463,25 @@ router.post('/:symbol/sell', (req, res) => {
 router.post('/:symbol/stake', (req, res) => {
   try {
     const { amount, durationDays = 90, userAddress } = req.body;
-    if (!amount || amount <= 0) {
+    const parsedAmount = parseFloat(amount);
+    const parsedDuration = parseInt(durationDays, 10);
+    const trader = String(userAddress || '').trim();
+    if (!parsedAmount || !Number.isFinite(parsedAmount) || parsedAmount <= 0 || parsedAmount > 1_000_000_000) {
       return res.status(400).json({ success: false, error: 'Valid staking amount is required.' });
     }
+    if (!trader) {
+      return res.status(400).json({ success: false, error: 'A wallet address is required to stake.' });
+    }
+    const boundedDuration = Number.isFinite(parsedDuration) ? Math.min(3650, Math.max(1, parsedDuration)) : 90;
     const result = bondingCurve.stakeTokens(
       req.params.symbol,
-      amount,
-      parseInt(durationDays) || 90,
-      userAddress || '0xUser'
+      parsedAmount,
+      boundedDuration,
+      trader
     );
     res.json({
       success: true,
-      message: `Successfully time-locked ${amount.toLocaleString()} $${result.token.symbol} for ${durationDays} days at ${result.stake.apy}% APY!`,
+      message: `Successfully time-locked ${parsedAmount.toLocaleString()} $${result.token.symbol} for ${boundedDuration} days at ${result.stake.apy}% APY!`,
       stake: result.stake,
       token: result.token
     });

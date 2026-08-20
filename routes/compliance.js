@@ -6,18 +6,23 @@
 const express = require('express');
 const router = express.Router();
 const ofacChecker = require('../services/ofacChecker');
+const accessRoutes = require('./access');
 
 /**
  * Screen a wallet connection + client IP / Geo location
  * Enforces dual-layer (client + server) "reasonable effort" compliance
  */
-router.post('/screen-connection', (req, res) => {
+router.post('/screen-connection', async (req, res) => {
   const { address, countryCode, regionCode } = req.body;
-  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+  const clientIp = accessRoutes.clientIp(req);
 
-  // 1. Geoblock Check
-  if (countryCode || regionCode) {
-    const geoCheck = ofacChecker.screenGeoLocation(countryCode, regionCode, clientIp);
+  // 1. Geoblock Check — the server-derived country (trusted edge header or IP geolocation)
+  // is authoritative; a client-declared countryCode is only used as a fallback when the
+  // server cannot determine a country, so it can never be used alone to bypass the block.
+  const serverCountry = await accessRoutes.countryOf(req);
+  const effectiveCountry = serverCountry || countryCode;
+  if (effectiveCountry || regionCode) {
+    const geoCheck = ofacChecker.screenGeoLocation(effectiveCountry, regionCode, clientIp);
     if (!geoCheck.allowed) {
       return res.status(403).json({
         success: false,
@@ -31,7 +36,7 @@ router.post('/screen-connection', (req, res) => {
 
   // 2. Wallet Address SDN Check
   if (address) {
-    const addrCheck = ofacChecker.screenAddress(address, clientIp, countryCode || 'UNKNOWN');
+    const addrCheck = ofacChecker.screenAddress(address, clientIp, effectiveCountry || 'UNKNOWN');
     if (!addrCheck.allowed) {
       return res.status(403).json({
         success: false,
@@ -71,7 +76,7 @@ router.post('/screen-address', (req, res) => {
   if (!address) {
     return res.status(400).json({ success: false, error: "Address is required for screening." });
   }
-  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+  const clientIp = accessRoutes.clientIp(req);
   const result = ofacChecker.screenAddress(address, clientIp);
   res.json({ success: true, result });
 });

@@ -12,6 +12,10 @@
     m.style.display = 'none';
     m.classList.remove('open');
   }
+  function shortMint(mint) {
+    const value = String(mint || '');
+    return value.length > 6 ? value.slice(0, 3) + '...' + value.slice(-3) : value;
+  }
   function addX(box, fn) {
     if (!box || box.querySelector('.cx-x')) return;
     const x = document.createElement('button');
@@ -102,7 +106,8 @@
         });
         box.innerHTML = list.length
           ? list.map(function (c) {
-            return '<div class="cx-card-coin"><div class="cx-media-empty"></div><div class="meta"><div class="name">' + (c.name || c.symbol) + '</div><div class="tick">' + c.symbol + '</div></div></div>';
+            const visuals = window.CessionCard ? CessionCard.visuals(c) : '';
+            return '<div class="cx-card-coin"><div class="cx-media-empty"></div><div class="meta"><div class="name">' + (c.name || c.symbol) + '</div><div class="tick">' + c.symbol + '</div><div class="tick">' + shortMint(c.mintAddress || c.mint) + '</div></div>' + visuals + '</div>';
           }).join('')
           : '<div class="cx-empty"><p class="cx-muted">No live coins yet.</p></div>';
       } catch (e) {

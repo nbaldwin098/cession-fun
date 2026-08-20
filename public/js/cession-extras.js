@@ -7,19 +7,19 @@
     fn();
   }
   function mediaUrl(c) { return c.mediaUrl || c.videoUrl || c.imageUrl || c.image || ''; }
+  function shortMint(mint) { const value = String(mint || ''); return value.length > 6 ? value.slice(0, 3) + '...' + value.slice(-3) : value; }
   function card(c) {
     const url = mediaUrl(c);
-    const chg = Number(c.change24h || 0);
     const payload = { symbol: c.symbol, name: c.name || c.symbol, mint: c.mintAddress || c.mint || '', creator: c.creator || '', mediaUrl: url };
     const p = JSON.stringify(payload);
     const size = window.CessionEngine ? CessionEngine.tapSize() : 0.05;
     const fuse = c.fuse ? '<div class="tick">FUSE</div>' : '';
+    const visuals = window.CessionCard ? CessionCard.visuals(c) : '';
     return '<div class="cx-card-coin" data-symbol="' + c.symbol + '">' +
       '<button type="button" class="cx-card-hit" onclick=\'CessionUI.openCoin(' + p + ')\'>' +
       (window.CessionMedia ? CessionMedia.cardHtml(url, c.symbol) : '') +
       '<div class="meta"><div class="name">' + (c.name || c.symbol) + '</div><div class="tick">' + c.symbol +
-      (chg ? (' ' + (chg > 0 ? '+' : '') + chg.toFixed(1) + '%') : '') +
-      '</div>' + fuse + '</div></button>' +
+      '</div><div class="tick">' + shortMint(c.mintAddress || c.mint) + '</div>' + fuse + '</div>' + visuals + '</button>' +
       '<button type="button" class="cx-tap" onclick=\'CessionUI.quickBuy(' + p + ')\'>Buy ' + size + ' SOL</button></div>';
   }
   function empty(t, s) { return '<div class="cx-empty"><h2>' + t + '</h2><p class="cx-muted">' + s + '</p></div>'; }

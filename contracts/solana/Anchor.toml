@@ -6,10 +6,10 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-cession_bonding_curve = "HojxiDLyQPErBmdx6tiC3Hutn5iajPbBEZ14C568zTha"
+cession_bonding_curve = "Epxb6TRhGwT1gQFj5xCLM6KtZUz9ajD7jZzkVrp3qBR9"
 
 [programs.localnet]
-cession_bonding_curve = "HojxiDLyQPErBmdx6tiC3Hutn5iajPbBEZ14C568zTha"
+cession_bonding_curve = "Epxb6TRhGwT1gQFj5xCLM6KtZUz9ajD7jZzkVrp3qBR9"
 
 [registry]
 url = "https://api.apr.dev"

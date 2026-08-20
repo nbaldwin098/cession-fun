@@ -8,7 +8,15 @@ async function init() {
   if (!url) return false;
   try {
     const { Pool } = require('pg');
-    pool = new Pool({ connectionString: url, ssl: { rejectUnauthorized: false } });
+    // Verify the DB server's TLS certificate by default (financial-grade: no silent MITM
+    // exposure for bonding-curve state/transactions). Only disable verification if an
+    // operator explicitly opts in (e.g. a provider using a self-signed cert with no CA
+    // bundle available), and prefer supplying DATABASE_CA_CERT over disabling checks.
+    const insecure = String(process.env.DATABASE_SSL_INSECURE || '').trim() === 'true';
+    const ssl = insecure
+      ? { rejectUnauthorized: false }
+      : { rejectUnauthorized: true, ca: process.env.DATABASE_CA_CERT || undefined };
+    pool = new Pool({ connectionString: url, ssl });
     await pool.query('CREATE TABLE IF NOT EXISTS cession_kv (k TEXT PRIMARY KEY, v JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW())');
     return true;
   } catch (e) {
