@@ -13,6 +13,13 @@ const app = express();
 const server = http.createServer(app);
 const ALLOW = (process.env.CORS_ORIGIN || 'https://cession.us,https://www.cession.us,https://cession.fun,https://www.cession.fun').split(',');
 
+// Trust exactly one reverse-proxy hop (the host platform's edge/LB). This makes
+// req.ip / req.headers['x-forwarded-for'] reflect only the value that platform actually
+// set, so it can no longer be spoofed by a client to bypass IP-keyed rate limits or
+// IP-based geo/compliance checks. Configurable in case the real deployment sits behind
+// more than one hop.
+app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS || 1));
+
 app.disable('x-powered-by');
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -34,6 +41,10 @@ app.use(express.urlencoded({ extended: true, limit: '200kb' }));
 app.use('/api/pulse', rateLimit(60, 60000));
 app.use('/api/ask', rateLimit(30, 60000));
 app.use('/api/support', rateLimit(20, 60000));
+app.use(['/api/tokens/create', '/api/tokens/deploy', '/api/tokens/launch'], rateLimit(6, 60000));
+app.use(/^\/api\/tokens\/[^/]+\/(buy|sell|stake)$/, rateLimit(30, 60000));
+app.use(['/api/tokens/collections/create', '/api/tokens/bundles/create'], rateLimit(6, 60000));
+app.use(/^\/api\/tokens\/(collections|bundles)\/[^/]+\/buy$/, rateLimit(20, 60000));
 app.use('/api', apiRoutes);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html', 'htm'] }));
 
@@ -65,7 +76,7 @@ wss.on('connection', (ws) => {
   ws.on('close', () => priceEngine.removeClient(ws));
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3057;
 server.listen(PORT, '0.0.0.0', () => {
   console.log('cession.us on', PORT);
 });

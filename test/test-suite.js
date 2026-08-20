@@ -61,6 +61,49 @@ async function main() {
     assert(king !== null && king.symbol === 'CESS', 'King of the Hill should be CESS');
   });
 
+  runTest('Creator reputation aggregates launches and volume', () => {
+    const stats = bondingCurve.getCreatorStats('0xFounderSovereign');
+    assert.strictEqual(stats.launches, 1, 'Creator should have one launch');
+    assert.strictEqual(stats.graduated, 0, 'New creator token should not be graduated');
+    assert(stats.volumeUsd >= 0, 'Creator volume should be a non-negative aggregate');
+  });
+
+  runTest('Transaction reservation prevents concurrent signature indexing', () => {
+    const signature = '1'.repeat(64);
+    assert.strictEqual(bondingCurve.reserveTransaction(signature), true, 'First reservation should succeed');
+    assert.strictEqual(bondingCurve.reserveTransaction(signature), false, 'Duplicate reservation should be blocked');
+    bondingCurve.releaseTransactionReservation(signature);
+    assert.strictEqual(bondingCurve.reserveTransaction(signature), true, 'Released reservation should be available again');
+    bondingCurve.releaseTransactionReservation(signature);
+  });
+
+  runTest('Token lookup cannot create state', () => {
+    const before = bondingCurve.getAllTokens().length;
+    assert.strictEqual(bondingCurve.getToken('DOES_NOT_EXIST'), null, 'Unknown token should not resolve');
+    assert.strictEqual(bondingCurve.getAllTokens().length, before, 'Unknown token lookup must not change state');
+  });
+
+  runTest('Rewards engine computes points from trading volume and referrals', () => {
+    const trader = '0xRewardsTrader111';
+    const referred = '0xRewardsReferred222';
+    const token = bondingCurve.createToken({
+      name: "Rewards Test Coin",
+      symbol: "RWRD",
+      creator: "0xRewardsCreator",
+      chain: "Solana",
+      devLockPercent: 100
+    });
+    const before = bondingCurve.getRewardsSummary(trader);
+    bondingCurve.buyTokens(token.symbol, 2, trader, 'a'.repeat(50) + Date.now());
+    const refCode = bondingCurve.getReferralCode(trader);
+    bondingCurve.buyTokens(token.symbol, 1, referred, 'b'.repeat(50) + Date.now(), refCode);
+    const after = bondingCurve.getRewardsSummary(trader);
+    assert(after.points > before.points, 'Points should increase after trading volume is recorded');
+    assert(after.referredWalletsCount >= 1, 'Referred wallet should be counted');
+    assert(after.referralVolumeSol >= 1, 'Referral volume should reflect the referred trade');
+    assert.strictEqual(bondingCurve.getRewardsSummary(trader).referralCode, refCode, 'Referral code should be deterministic for the same wallet');
+  });
+
   runTest('Constant Product Buy Math (x * y = k) & Symmetric 0.50% Fee Split (0.25% Treasury, 0.25% Burn)', () => {
     const token = bondingCurve.createToken({
       name: "Test Doge",
@@ -190,15 +233,14 @@ async function main() {
     assert(snipedCoin.realSolRaised >= 0.49, "Initial snipe on launch must be immediately filled into bonding curve");
   });
 
-  // Test 5: Transparent Protocol Reserves Treasury (Kraken Model)
-  console.log('\n[5] PROOF-OF-RESERVES TREASURY (KRAKEN MODEL):');
-  runTest('Public Reserves Ledger, Zero Private Keys, & Multi-Chain Addresses', () => {
+  // Test 5: Transparent Protocol Reserves Treasury (Public Address + Verifiable Explorers)
+  console.log('\n[5] PROOF-OF-RESERVES TREASURY (PUBLIC ADDRESS, NO INVENTED HOLDINGS):');
+  runTest('Public Reserves Points to a Real Solana Address & Verifiable Explorers, Never Fabricates Balances', () => {
     const reserves = treasuryService.getPublicReserves();
-    assert(reserves.totalReservesUsd > 0, "Total reserves USD must be positive");
-    assert(Array.isArray(reserves.tokenHoldings) && reserves.tokenHoldings.length >= 4, "Must track holdings of ETH, SOL, USDC, CALB");
-    assert(reserves.publicWallets.baseL2.address.startsWith("0x"), "Base L2 public address must be valid");
-    assert(reserves.publicWallets.solana.address.length >= 32, "Solana public address must be valid");
-    assert(reserves.burnStats.totalTokensBurned > 0, "Must track cumulative tokens burned to 0xdead");
+    assert(typeof reserves.address === 'string' && reserves.address.length >= 32, "Solana treasury address must be valid");
+    assert(reserves.explorerUrl.includes('solscan.io') && reserves.explorerUrl.includes(reserves.address), "Solscan explorer link must point at the real treasury address");
+    assert(reserves.arkhamUrl.includes('intel.arkm.com') && reserves.arkhamUrl.includes(reserves.address), "Arkham Intelligence link must point at the real treasury address");
+    assert(!('totalReservesUsd' in reserves), "Must never fabricate a USD reserves total the server can't verify");
   });
 
   // Test 6: Non-Custodial Cryptographic Security & OFAC Compliance

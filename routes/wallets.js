@@ -99,6 +99,24 @@ router.get('/:address/following', (req, res) => {
   res.json({ success: true, follows: list });
 });
 
+router.get('/:address/rewards', (req, res) => {
+  try {
+    const bondingCurve = require('../services/bondingCurve');
+    res.json({ success: true, rewards: bondingCurve.getRewardsSummary(req.params.address) });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+router.get('/rewards/leaderboard', (req, res) => {
+  try {
+    const bondingCurve = require('../services/bondingCurve');
+    res.json({ success: true, leaderboard: bondingCurve.getRewardsLeaderboard(20) });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.all(['/generate', '/derive', '/deposit'], (req, res) => {
   res.status(410).json({ success: false, error: 'Cession never creates wallets on the server.' });
 });

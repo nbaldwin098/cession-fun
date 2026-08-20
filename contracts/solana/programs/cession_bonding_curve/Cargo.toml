@@ -19,3 +19,16 @@ idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 [dependencies]
 anchor-lang = "1.1.2"
 anchor-spl = "1.1.2"
+
+# Deployment cost on Solana is proportional to the compiled program's on-chain size
+# (rent is paid per byte). These settings shrink the binary without changing any logic:
+# opt-level/lto/codegen-units minimize size, strip drops debug symbols. overflow-checks
+# is kept on (small size cost) so bonding-curve math panics instead of silently wrapping
+# on overflow/underflow — a financial-grade safety requirement that outweighs the size hit.
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+overflow-checks = true
+panic = "abort"

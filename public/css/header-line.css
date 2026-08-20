@@ -9,6 +9,6 @@
   right:0;
   bottom:10px;
   height:2px;
-  background:#0c0c0c;
+  background:var(--accent, #23d996);
   border-radius:1px;
 }

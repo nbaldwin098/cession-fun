@@ -5,6 +5,10 @@ use anchor_spl::token::{self, Burn, Mint, MintTo, Token, TokenAccount, Transfer}
 
 declare_id!("Epxb6TRhGwT1gQFj5xCLM6KtZUz9ajD7jZzkVrp3qBR9");
 
+// Protocol treasury: must match services/treasuryService.js and public/js/trading.js.
+// Pinned on-chain so no signer can redirect the protocol fee to an arbitrary wallet.
+pub const TREASURY_PUBKEY: Pubkey = pubkey!("9MeQ5XiESSZPUVNzqKQjB9JYEWZScH1shwsbQMfYUTRU");
+
 const CREATE_FEE: u64 = 50_000_000;
 const CREATOR_BPS: u64 = 50;
 const HOLDER_BPS: u64 = 25;
@@ -322,8 +326,8 @@ pub struct Create<'info> {
     /// CHECK: Fee vault PDA
     #[account(mut, seeds = [b"fee_vault", mint.key().as_ref()], bump)]
     pub fee_vault: AccountInfo<'info>,
-    /// CHECK: Protocol treasury
-    #[account(mut)]
+    /// CHECK: Protocol treasury, pinned to TREASURY_PUBKEY below.
+    #[account(mut, address = TREASURY_PUBKEY @ CessionError::InvalidTreasury)]
     pub treasury: AccountInfo<'info>,
     #[account(
         init,
@@ -371,8 +375,8 @@ pub struct Buy<'info> {
     pub fee_vault: AccountInfo<'info>,
     #[account(mut, has_one = mint)]
     pub buyer_token_account: Account<'info, TokenAccount>,
-    /// CHECK: Treasury
-    #[account(mut)]
+    /// CHECK: Treasury, pinned to TREASURY_PUBKEY below.
+    #[account(mut, address = TREASURY_PUBKEY @ CessionError::InvalidTreasury)]
     pub treasury: AccountInfo<'info>,
     #[account(mut, seeds = [b"curve", mint.key().as_ref()], bump)]
     pub curve_state: Account<'info, CurveState>,
@@ -396,8 +400,8 @@ pub struct Sell<'info> {
     pub fee_vault: AccountInfo<'info>,
     #[account(mut, has_one = mint)]
     pub seller_token_account: Account<'info, TokenAccount>,
-    /// CHECK: Treasury
-    #[account(mut)]
+    /// CHECK: Treasury, pinned to TREASURY_PUBKEY below.
+    #[account(mut, address = TREASURY_PUBKEY @ CessionError::InvalidTreasury)]
     pub treasury: AccountInfo<'info>,
     #[account(mut, seeds = [b"curve", mint.key().as_ref()], bump)]
     pub curve_state: Account<'info, CurveState>,
@@ -427,7 +431,7 @@ pub struct ClaimHolderFees<'info> {
     pub fee_vault: AccountInfo<'info>,
     #[account(mut, has_one = mint, constraint = token_vault.key() == curve_state.token_vault @ CessionError::InvalidVault)]
     pub token_vault: Account<'info, TokenAccount>,
-    #[account(has_one = mint)]
+    #[account(has_one = mint, constraint = holder_token_account.owner == signer.key() @ CessionError::UnauthorizedClaim)]
     pub holder_token_account: Account<'info, TokenAccount>,
     #[account(
         init_if_needed,
@@ -505,4 +509,6 @@ pub enum CessionError {
     ActiveCurveExists,
     #[msg("Invalid vault account supplied.")]
     InvalidVault,
+    #[msg("Treasury account does not match the protocol treasury.")]
+    InvalidTreasury,
 }

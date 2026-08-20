@@ -23,6 +23,13 @@
     <main class="page-view active" id="viewHome"><div class="cx-feed" id="forYouCoinsGrid"></div></main>
     <main class="page-view" id="viewExplorePulse">
       <h1 class="cx-title">Explore</h1>
+      <div class="cx-filter-row" aria-label="Discovery filters">
+        <select id="filterAge" aria-label="Maximum token age"><option value="all">Any age</option><option value="24">Under 24h</option><option value="168">Under 7d</option></select>
+        <select id="filterVolume" aria-label="Minimum volume"><option value="0">Any volume</option><option value="100">100+ USD volume</option><option value="1000">1k+ USD volume</option></select>
+        <select id="filterLiquidity" aria-label="Minimum liquidity"><option value="0">Any liquidity</option><option value="1">1+ SOL liquidity</option><option value="10">10+ SOL liquidity</option></select>
+        <select id="filterHolders" aria-label="Minimum holders"><option value="0">Any holders</option><option value="10">10+ holders</option><option value="100">100+ holders</option></select>
+        <label><input id="filterVerified" type="checkbox"> Safety 90+</label>
+      </div>
       <div class="cx-card" id="kingBox"><strong>King of the hill</strong><p class="cx-muted">No live coin yet.</p></div>
       <div class="cx-card">
         <strong>Global chat</strong>
@@ -90,6 +97,7 @@
           <a href="javascript:CessionUI.go('explore')">Explore</a>
           <a href="javascript:CessionUI.go('rewards')">Earn</a>
           <a href="javascript:CessionUI.go('ai')">AI</a>
+          <a href="https://intel.arkm.com/explorer/address/9MeQ5XiESSZPUVNzqKQjB9JYEWZScH1shwsbQMfYUTRU" target="_blank" rel="noopener noreferrer">Proof of Reserves</a>
           <a href="/legal">Legal</a>
         </div>
         <p class="cx-muted">cession.us · We do not hold keys · On-chain sends cannot be reversed</p>
@@ -110,7 +118,9 @@
     </main>
     <main class="page-view" id="viewRewards">
       <h1 class="cx-title">Earn</h1>
-      <p class="cx-muted">Not live until the program is deployed.</p>
+      <div class="cx-card" id="rewardsBody"><p class="cx-muted">Connect a wallet to see your points.</p></div>
+      <h2 class="cx-title">Top earners</h2>
+      <div class="cx-card" id="rewardsLeaderboard"><p class="cx-muted">Loading...</p></div>
     </main>
     <main class="page-view" id="viewPerps"><h1 class="cx-title">Perps</h1><div class="cx-card"><p class="cx-muted">Perpetuals are not offered in the United States.</p></div></main>
     <main class="page-view" id="viewAi">
@@ -122,7 +132,21 @@
       <h1 class="cx-title" id="coinTitle">Coin</h1>
       <p class="cx-muted" id="coinMeta"></p>
       <button class="cx-ghost" type="button" onclick="CessionPay.copyMintLabel(document.getElementById('coinMeta').textContent)">Copy token mint — not a deposit</button>
+      <button class="cx-ghost" type="button" onclick="CessionUI.shareCoin()">Share token card</button>
+      <div class="cx-card">
+        <strong>Trust and market snapshot</strong>
+        <div class="cx-row"><span>Mint</span><span id="coinTrust">Loading</span></div>
+        <div class="cx-row"><span>Creator</span><span id="coinCreator">Loading</span></div>
+        <div class="cx-row"><span>Safety</span><span id="coinSafety">Loading</span></div>
+        <div class="cx-row"><span>Warnings</span><span id="coinWarnings">Loading</span></div>
+        <div class="cx-row"><span>Market</span><span id="coinStats">Loading</span></div>
+      </div>
+      <div class="cx-trade-status" id="coinTradeStatus" data-state="idle" aria-live="polite">Ready to trade</div>
       <div class="cx-trade-row"><button class="cx-launch" type="button" onclick="CessionUI.openTrade('buy')">Buy</button><button class="cx-ghost" type="button" onclick="CessionUI.openTrade('sell')">Sell</button></div>
+      <aside class="cx-live-tape" id="coinTradeFeed" aria-live="polite">
+        <strong>Live trades</strong>
+        <div id="coinTradeFeedRows">Hover to view recent buys and sells.</div>
+      </aside>
     </main>
   </div>
   <button class="cx-askbar" id="askBanner" type="button" onclick="CessionUI.go('ai')">AI</button>

@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const DATA_FILE = path.join(__dirname, '..', 'data', 'bonding_state.json');
 const TX_FILE = path.join(__dirname, '..', 'data', 'transactions.json');
+const TX_RESERVATION_DIR = path.join(__dirname, '..', 'data', 'transaction_reservations');
 
 class BondingCurveEngine {
   constructor() {
@@ -18,7 +19,7 @@ class BondingCurveEngine {
     this.chatMessages = new Map();
     this.collections = new Map();
     this.totalProtocolBurnedUsd = 42890.50;
-    this.treasurySolAddress = process.env.TREASURY_SOL_ADDRESS || "8cdpVXsrQQDf84H4KC9pfqEKxUV9ZJjZZbeueWmJCCvH";
+    this.treasurySolAddress = process.env.TREASURY_SOL_ADDRESS || "9MeQ5XiESSZPUVNzqKQjB9JYEWZScH1shwsbQMfYUTRU";
     this.treasuryEvmAddress = process.env.TREASURY_EVM_ADDRESS || "0xE409f28fb1D6C5C090b1feE164DB09C365c07011";
     this.totalMintFeesCollectedSol = 48.6;
     this.totalTradingFeesCollectedSol = 24.3;
@@ -82,6 +83,41 @@ class BondingCurveEngine {
     return record;
   }
 
+  hasRecordedTransaction(txHash) {
+    if (!txHash || typeof txHash !== 'string') return false;
+    try {
+      const transactions = JSON.parse(fs.readFileSync(TX_FILE, 'utf8'));
+      return transactions.some(transaction => transaction.txHash === txHash.trim());
+    } catch (e) {
+      return false;
+    }
+  }
+
+  reserveTransaction(txHash) {
+    if (!txHash || typeof txHash !== 'string') return false;
+    const signature = txHash.trim();
+    if (!/^[1-9A-HJ-NP-Za-km-z]{64,88}$/.test(signature)) return false;
+    fs.mkdirSync(TX_RESERVATION_DIR, { recursive: true });
+    try {
+      fs.writeFileSync(path.join(TX_RESERVATION_DIR, signature), String(Date.now()), { flag: 'wx' });
+      return true;
+    } catch (error) {
+      if (error.code === 'EEXIST') return false;
+      throw error;
+    }
+  }
+
+  releaseTransactionReservation(txHash) {
+    if (!txHash || typeof txHash !== 'string') return;
+    const signature = txHash.trim();
+    if (!/^[1-9A-HJ-NP-Za-km-z]{64,88}$/.test(signature)) return;
+    try {
+      fs.unlinkSync(path.join(TX_RESERVATION_DIR, signature));
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
+  }
+
   getWalletTransactions(walletAddress) {
     this.ensureTxFileExists();
     if (!walletAddress) return [];
@@ -94,6 +130,86 @@ class BondingCurveEngine {
     } catch (e) {
       return [];
     }
+  }
+
+  // Deterministic, collision-resistant referral code derived from a wallet address so
+  // every wallet gets a stable code with no extra state to persist.
+  getReferralCode(walletAddress) {
+    if (!walletAddress) return 'CESSION';
+    const cleaned = String(walletAddress).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    return (cleaned.slice(0, 8) || 'CESSION');
+  }
+
+  /**
+   * Rewards & referral summary for a wallet: trading-volume points, referral overrides,
+   * and a tier derived from lifetime points. Entirely off-chain / simulated — no token
+   * custody or on-chain claim is involved, so it is safe to compute from indexed trades.
+   */
+  getRewardsSummary(walletAddress) {
+    if (!walletAddress) throw new Error('Wallet address is required.');
+    this.ensureTxFileExists();
+    let allTransactions = [];
+    try {
+      allTransactions = JSON.parse(fs.readFileSync(TX_FILE, 'utf8'));
+    } catch (e) {
+      allTransactions = [];
+    }
+
+    const referralCode = this.getReferralCode(walletAddress);
+    const ownTrades = this.getWalletTransactions(walletAddress);
+    const tradingVolumeSol = ownTrades.reduce((sum, t) => sum + Math.abs(Number(t.solAmount) || 0), 0);
+
+    const referredTrades = allTransactions.filter((t) => t.refCode === referralCode && t.wallet && t.wallet.toLowerCase() !== walletAddress.toLowerCase());
+    const referralVolumeSol = referredTrades.reduce((sum, t) => sum + Math.abs(Number(t.solAmount) || 0), 0);
+    const referredWallets = new Set(referredTrades.map((t) => t.wallet.toLowerCase()));
+
+    const tradingPoints = Math.round(tradingVolumeSol * 100);
+    const referralPoints = Math.round(referralVolumeSol * 20);
+    const points = tradingPoints + referralPoints;
+
+    const tiers = [
+      { name: 'Bronze', min: 0, feeDiscountPercent: 0 },
+      { name: 'Silver', min: 500, feeDiscountPercent: 5 },
+      { name: 'Gold', min: 2500, feeDiscountPercent: 10 },
+      { name: 'Diamond', min: 10000, feeDiscountPercent: 20 }
+    ];
+    let tier = tiers[0];
+    let nextTier = tiers[1];
+    for (let i = 0; i < tiers.length; i++) {
+      if (points >= tiers[i].min) {
+        tier = tiers[i];
+        nextTier = tiers[i + 1] || null;
+      }
+    }
+
+    return {
+      walletAddress,
+      referralCode,
+      referralUrl: `/r/${referralCode}`,
+      points,
+      tradingVolumeSol: Number(tradingVolumeSol.toFixed(4)),
+      referralVolumeSol: Number(referralVolumeSol.toFixed(4)),
+      tradingPoints,
+      referralPoints,
+      referredTradesCount: referredTrades.length,
+      referredWalletsCount: referredWallets.size,
+      tier: tier.name,
+      feeDiscountPercent: tier.feeDiscountPercent,
+      nextTier: nextTier ? { name: nextTier.name, pointsNeeded: Math.max(0, nextTier.min - points), feeDiscountPercent: nextTier.feeDiscountPercent } : null
+    };
+  }
+
+  getRewardsLeaderboard(limit = 20) {
+    this.ensureTxFileExists();
+    let allTransactions = [];
+    try {
+      allTransactions = JSON.parse(fs.readFileSync(TX_FILE, 'utf8'));
+    } catch (e) {
+      allTransactions = [];
+    }
+    const wallets = new Set(allTransactions.map((t) => t.wallet).filter(Boolean));
+    const summaries = Array.from(wallets).map((w) => this.getRewardsSummary(w));
+    return summaries.sort((a, b) => b.points - a.points).slice(0, limit);
   }
 
   getMonthlyStatement(walletAddress, monthStr) {
@@ -512,17 +628,6 @@ class BondingCurveEngine {
 
   getToken(symbol, accessKey = null) {
     const sym = symbol.toUpperCase();
-    if (!this.tokens.has(sym)) {
-      try {
-        this.createToken({
-          name: symbol,
-          symbol: sym,
-          description: `Fair launch token $${sym} on Cession bonding curve.`,
-          chain: "Solana",
-          tokenType: "sprint"
-        });
-      } catch (e) {}
-    }
     const t = this.tokens.get(sym);
     if (!t) return null;
     if (t.isPrivate && accessKey && t.inviteCode !== accessKey) {
@@ -535,22 +640,20 @@ class BondingCurveEngine {
     return this._enrichTokenMetrics(t);
   }
 
+  getCreatorStats(creator) {
+    const tokens = Array.from(this.tokens.values()).filter(token => token.creator === creator);
+    return {
+      launches: tokens.length,
+      graduated: tokens.filter(token => token.isGraduated).length,
+      volumeUsd: tokens.reduce((total, token) => total + Number(token.volume24hUsd || 0), 0)
+    };
+  }
+
   /**
    * Top Holders & Bubble Distribution
    */
   getTokenHolders(symbol) {
     const sym = symbol.toUpperCase();
-    if (!this.tokens.has(sym)) {
-      try {
-        this.createToken({
-          name: symbol,
-          symbol: sym,
-          description: `Fair launch token $${sym} on Cession bonding curve.`,
-          chain: "Solana",
-          tokenType: "sprint"
-        });
-      } catch (e) {}
-    }
     const token = this.tokens.get(sym);
     if (!token) throw new Error("Token not found.");
 
