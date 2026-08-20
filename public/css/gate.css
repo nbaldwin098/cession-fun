@@ -14,6 +14,9 @@ html.gated .bottom-nav-bar,
 html.gated .modal-overlay-generic {
   display: none !important;
 }
+:root {
+  --gate-vh: 1vh;
+}
 #cessionGate {
   position: fixed;
   top: 0;
@@ -47,6 +50,7 @@ html.gated .modal-overlay-generic {
 .gate-land {
   min-height: 100dvh;
   min-height: 100svh;
+  min-height: calc(var(--gate-vh) * 100);
   background: #000;
   padding: 56px 28px 40px;
   display: flex;
@@ -115,6 +119,7 @@ html.gated .modal-overlay-generic {
 .gate-on {
   min-height: 100dvh;
   min-height: 100svh;
+  min-height: calc(var(--gate-vh) * 100);
   background: #fff;
   display: flex;
   align-items: flex-start;
@@ -190,4 +195,54 @@ html.gated .modal-overlay-generic {
   padding: 12px;
   font-size: 13px;
   line-height: 1.4;
+}
+.gate-toolbar-tip {
+  position: absolute;
+  right: 16px;
+  left: 16px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 3;
+  display: none;
+  background: rgba(15, 15, 20, 0.92);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+}
+.gate-toolbar-tip.open { display: block; }
+.gate-toolbar-tip strong {
+  display: block;
+  font-size: 14px;
+  margin: 0 0 4px;
+}
+.gate-toolbar-tip p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 12px;
+  line-height: 1.35;
+  padding-right: 72px;
+}
+.gate-toolbar-tip-ok {
+  margin-top: 10px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #2563EB;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+.gate-toolbar-tip-close {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 19px;
+  line-height: 1;
 }

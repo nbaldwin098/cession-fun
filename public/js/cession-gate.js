@@ -1,4 +1,30 @@
 (function () {
+  function setGateViewport() {
+    const h = window.visualViewport && window.visualViewport.height
+      ? window.visualViewport.height
+      : window.innerHeight;
+    if (!h) return;
+    document.documentElement.style.setProperty('--gate-vh', (h * 0.01) + 'px');
+  }
+  function hideToolbarTip() {
+    const tip = document.getElementById('gateToolbarTip');
+    if (!tip) return;
+    tip.classList.remove('open');
+  }
+  function showToolbarTip() {
+    const tip = document.getElementById('gateToolbarTip');
+    if (!tip) return;
+    if (localStorage.getItem('cession_toolbar_tip_seen') === '1') return;
+    tip.classList.add('open');
+    const dismiss = function () {
+      localStorage.setItem('cession_toolbar_tip_seen', '1');
+      hideToolbarTip();
+    };
+    const close = document.getElementById('gateToolbarTipClose');
+    const ok = document.getElementById('gateToolbarTipOk');
+    if (close) close.onclick = dismiss;
+    if (ok) ok.onclick = dismiss;
+  }
   function hideApp(on) {
     document.documentElement.classList.toggle('gated', on);
     document.body.classList.toggle('gated', on);
@@ -23,6 +49,7 @@
     step('user');
   }
   function step(name) {
+    hideToolbarTip();
     const root = document.getElementById('gateFlow');
     if (!root) return;
     if (name === 'user') {
@@ -101,6 +128,12 @@
     hideApp(true);
     g.innerHTML =
       '<button class="gate-login" type="button" id="gateLogin">Login</button>' +
+      '<aside class="gate-toolbar-tip" id="gateToolbarTip" aria-live="polite">' +
+      '<button class="gate-toolbar-tip-close" id="gateToolbarTipClose" type="button" aria-label="Close">×</button>' +
+      '<strong>Hide your browser toolbar</strong>' +
+      '<p>For full-screen view, hide the URL bar/toolbar on your phone browser.</p>' +
+      '<button class="gate-toolbar-tip-ok" id="gateToolbarTipOk" type="button">Got it</button>' +
+      '</aside>' +
       '<div id="gateFlow"><div class="gate-land"><div class="gate-col">' +
       '<img class="gate-k" src="brand/cession-c-white.svg" alt="">' +
       '<p class="gate-skip">Skip the line.</p>' +
@@ -137,9 +170,14 @@
       input.focus();
     };
     input.addEventListener('keydown', function (e) { if (e.key === 'Enter') btn.click(); });
+    showToolbarTip();
   }
   async function boot() {
     if (already() && gated()) return;
+    setGateViewport();
+    window.addEventListener('resize', setGateViewport);
+    window.addEventListener('orientationchange', setGateViewport);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', setGateViewport);
     land();
     try {
       const ctrl = new AbortController();
