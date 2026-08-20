@@ -93,7 +93,7 @@
           <a href="javascript:CessionUI.go('ai')">AI</a>
           <a href="/legal">Legal</a>
         </div>
-        <p class="cx-muted">cession.us · Stripe / Coinbase process fiat · On-chain sends cannot be reversed</p>
+        <p class="cx-muted">cession.us · Stripe / Ramp / Transak / Coinbase · On-chain sends cannot be reversed</p>
       </footer>
     </main>
     <main class="page-view" id="viewBots">
@@ -212,15 +212,14 @@
   </div></div>
   <div class="modal-overlay-generic" id="payModal"><div class="modal-box-pump">
     <strong>Cession Pay</strong>
-    <p class="cx-muted" id="payNote">Official partner checkout. We never take your card.</p>
+    <p class="cx-muted" id="payNote">Stripe is reviewing. Ramp, Transak, and Coinbase go live when their keys are on Render.</p>
     <div class="cx-pay-row">
       <button type="button" data-pay-amt="20" class="on" onclick="CessionPay.setAmt('payAmount',20)">$20</button>
       <button type="button" data-pay-amt="50" onclick="CessionPay.setAmt('payAmount',50)">$50</button>
       <button type="button" data-pay-amt="100" onclick="CessionPay.setAmt('payAmount',100)">$100</button>
     </div>
     <input class="form-input-pump" id="payAmount" type="number" value="20">
-    <button class="cx-launch" type="button" onclick="CessionPay.startPay('card')">Card / Apple Pay</button>
-    <button class="cx-ghost" type="button" onclick="CessionPay.startPay('bank')">Bank (Plaid)</button>
+    <div id="payRails"></div>
   </div></div>
   <div class="modal-overlay-generic" id="receiveModal"><div class="modal-box-pump">
     <strong>Receive SOL</strong>
