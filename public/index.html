@@ -6,7 +6,8 @@
   <title>For You | Cession</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/gate.css">
-  <link rel="icon" type="image/svg+xml" href="brand/cession-c-white.svg">
+  <link rel="icon" type="image/svg+xml" href="brand/cession-c-mark.svg">
+  <link rel="apple-touch-icon" href="brand/cession-c-mark.svg">
 </head>
 <body>
   <header class="cx-top">
@@ -33,7 +34,7 @@
     <main class="page-view" id="viewMint">
       <h1 class="cx-title">Mint</h1>
       <div class="cx-card">
-        <p class="cx-muted">Create is free except Solana rent. First buy is required. Pit is on so the book moves.</p>
+        <p class="cx-muted">Create is free except Solana rent. First buy is required. Fuse is on so the book moves.</p>
         <button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create coin</button>
       </div>
       <h2 class="cx-title">Your coins</h2>
@@ -137,8 +138,9 @@
     <input class="form-input-pump" id="deployName" placeholder="Name" required>
     <input class="form-input-pump" id="deploySymbol" placeholder="Ticker" required>
     <input class="form-input-pump" id="deployMedia" type="url" placeholder="Image or video URL">
-    <input class="form-input-pump" id="deployFirstBuy" type="number" min="0.01" step="0.01" value="0.05" required>
-    <label class="cx-muted"><input type="checkbox" id="deployPit" checked> Pit on</label>
+    <input class="form-input-pump" id="deployFirstBuy" type="number" min="0.06" step="0.01" value="0.06" required>
+    <label class="cx-muted"><input type="checkbox" id="deployFuse" checked> Fuse on (2B supply, 24h, leftover burns)</label>
+    <select class="form-input-pump" id="deployFuseMode"><option value="auto">Auto</option><option value="manual">Manual</option></select>
     <button class="cx-launch" type="submit">Launch</button>
   </form></div></div>
   <div class="modal-overlay-generic" id="usernameModal"><div class="modal-box-pump"><p class="cx-muted">Pick a username. It cannot be changed.</p><input class="form-input-pump" id="newUsername" placeholder="username"><button class="cx-launch" type="button" onclick="CessionUI.lockUsername()">Save forever</button></div></div>
@@ -184,6 +186,7 @@
   <script src="js/cession-track.js"></script>
   <script src="js/cession-extras.js"></script>
   <script src="js/cession-nav.js"></script>
+  <script src="js/cession-fuse.js"></script>
   <script src="js/wallet.js"></script>
   <script src="js/trading.js"></script>
 </body>
