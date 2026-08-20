@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const walletEngine = require('../services/walletEngine');
 const ask = require('../services/askService');
+const bonusCampaign = require('../services/bonusCampaign');
 
 router.get('/screen/:address', (req, res) => {
   try {
@@ -102,7 +103,54 @@ router.get('/:address/following', (req, res) => {
 router.get('/:address/rewards', (req, res) => {
   try {
     const bondingCurve = require('../services/bondingCurve');
-    res.json({ success: true, rewards: bondingCurve.getRewardsSummary(req.params.address) });
+    const rewards = bondingCurve.getRewardsSummary(req.params.address);
+    const bonus = bonusCampaign.getStatus(req.params.address);
+    const bonusPoints = bonus.claimed ? Number(bonus.points || 0) : 0;
+    const pointsWithBonus = Number(rewards.points || 0) + bonusPoints;
+    const tiers = [
+      { name: 'Bronze', min: 0, feeDiscountPercent: 0 },
+      { name: 'Silver', min: 500, feeDiscountPercent: 5 },
+      { name: 'Gold', min: 2500, feeDiscountPercent: 10 },
+      { name: 'Diamond', min: 10000, feeDiscountPercent: 20 }
+    ];
+    let tier = tiers[0];
+    let nextTier = tiers[1];
+    for (let i = 0; i < tiers.length; i++) {
+      if (pointsWithBonus >= tiers[i].min) {
+        tier = tiers[i];
+        nextTier = tiers[i + 1] || null;
+      }
+    }
+    res.json({
+      success: true,
+      rewards: {
+        ...rewards,
+        points: pointsWithBonus,
+        bonusPoints,
+        tier: tier.name,
+        feeDiscountPercent: tier.feeDiscountPercent,
+        nextTier: nextTier ? { name: nextTier.name, pointsNeeded: Math.max(0, nextTier.min - pointsWithBonus), feeDiscountPercent: nextTier.feeDiscountPercent } : null
+      },
+      campaign: bonus
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+router.get('/:address/rewards-bonus', (req, res) => {
+  try {
+    const campaign = bonusCampaign.getStatus(req.params.address);
+    res.json({ success: true, campaign });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/:address/rewards-bonus/claim', (req, res) => {
+  try {
+    const claim = bonusCampaign.claim(req.params.address, req.body && req.body.code);
+    res.json({ success: true, claim });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }

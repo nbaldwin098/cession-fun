@@ -114,6 +114,7 @@
       });
       const d = await r.json();
       if (!d.success) { err.textContent = d.error || 'Wrong code.'; return; }
+      localStorage.setItem('cession_gate_code', String(input.value || '').trim().toUpperCase());
       afterUnlock();
     } catch (e) { err.textContent = 'Could not reach the gate.'; }
   }
