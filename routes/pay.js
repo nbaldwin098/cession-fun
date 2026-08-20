@@ -12,13 +12,6 @@ function looksAddr(s) {
 
 function rails() {
   return {
-    stripe: {
-      id: 'stripe',
-      name: 'Stripe',
-      ready: Boolean(process.env.STRIPE_SECRET_KEY),
-      status: process.env.STRIPE_ONRAMP_STATUS || (process.env.STRIPE_SECRET_KEY ? 'ready' : 'reviewing'),
-      methods: ['card', 'apple_pay', 'bank']
-    },
     ramp: {
       id: 'ramp',
       name: 'Ramp',
@@ -78,44 +71,31 @@ async function rpc(method, params) {
 
 router.get('/status', (req, res) => {
   const list = rails();
-  const anyReady = Object.values(list).some((r) => r.ready && r.status === 'ready');
+  const anyReady = Object.values(list).some((r) => r.ready);
   res.json({
     success: true,
     brand: 'Cession Pay',
-    stripeStatus: list.stripe.status,
     rails: list,
     anyReady,
     note: anyReady
       ? 'Pick a rail. Partners handle identity. We do not take your card.'
-      : 'Stripe is reviewing the onramp application. Add Ramp, Transak, or Coinbase keys to unlock a live checkout now.',
+      : 'Add a Ramp, Transak, or Coinbase key on Render to open live checkout.',
     presetsUsd: [20, 50, 100],
     todo: [
-      { id: 'stripe', title: 'Stripe onramp', state: 'reviewing' },
       { id: 'ramp', title: 'Ramp Network', state: list.ramp.ready ? 'ready' : 'add_RAMP_API_KEY' },
       { id: 'transak', title: 'Transak', state: list.transak.ready ? 'ready' : 'add_TRANSAK_API_KEY' },
-      { id: 'coinbase', title: 'Coinbase Onramp', state: list.coinbase.ready ? 'ready' : 'add_COINBASE_ONRAMP_APP_ID' },
-      { id: 'plaid', title: 'Plaid via Stripe bank', state: 'with_stripe_approval' }
+      { id: 'coinbase', title: 'Coinbase Onramp', state: list.coinbase.ready ? 'ready' : 'add_COINBASE_ONRAMP_APP_ID' }
     ]
   });
 });
 
 router.post('/session', (req, res) => {
   const amount = Math.max(5, Math.min(2000, Number(req.body.amountUsd || 20)));
-  const provider = String(req.body.provider || req.body.method || 'stripe');
+  let provider = String(req.body.provider || req.body.method || 'ramp');
+  if (provider === 'stripe' || provider === 'card' || provider === 'bank') provider = 'ramp';
   const address = String(req.body.address || '').trim();
   const list = rails();
-  const rail = list[provider] || list.stripe;
-
-  if (provider === 'stripe') {
-    return res.json({
-      success: false,
-      pending: true,
-      provider: 'stripe',
-      amountUsd: amount,
-      error: 'Stripe is reviewing the Cession onramp application. No card was charged. Use Ramp if a key is set.'
-    });
-  }
-
+  const rail = list[provider] || list.ramp;
   const url = checkoutUrl(provider, amount, address);
   if (!url) {
     return res.json({
