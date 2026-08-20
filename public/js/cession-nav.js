@@ -53,6 +53,17 @@
     });
     document.querySelectorAll('.cx-you-footer').forEach(bindLogo);
   }
+  function closeModal(m) {
+    m.style.display = 'none';
+    m.classList.remove('open');
+  }
+  function ensureCloseable(m) {
+    if (!m || m.dataset.closeable) return;
+    m.dataset.closeable = '1';
+    const box = m.querySelector('.modal-box-pump');
+    addX(box, function () { closeModal(m); });
+    m.addEventListener('click', function (e) { if (e.target === m) closeModal(m); });
+  }
   function ready() {
     if (!window.CessionUI) return setTimeout(ready, 40);
     const ui = window.CessionUI;
@@ -75,6 +86,7 @@
     }
     centerSheet('settingsModal');
     centerSheet('statementModal');
+    document.querySelectorAll('.modal-overlay-generic').forEach(ensureCloseable);
     placeFooters();
     ui.openSearch = function () {
       const m = document.getElementById('searchModal');
