@@ -7,6 +7,8 @@ const express = require('express');
 const router = express.Router();
 const bondingCurve = require('../services/bondingCurve');
 const bs58Module = require('bs58');
+const ofacChecker = require('../services/ofacChecker');
+const accessRoutes = require('./access');
 
 const SOLANA_RPC = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 const SOLANA_PROGRAM_ID = process.env.CESSION_SOLANA_PROGRAM_ID || 'Epxb6TRhGwT1gQFj5xCLM6KtZUz9ajD7jZzkVrp3qBR9';
@@ -15,6 +17,21 @@ const BUY_DISCRIMINATOR = Buffer.from([102, 6, 61, 18, 1, 218, 235, 234]);
 const SELL_DISCRIMINATOR = Buffer.from([51, 230, 131, 241, 36, 64, 51, 38]);
 const decodeBase58 = (bs58Module.default || bs58Module).decode;
 const MAX_TRADE_AGE_SECONDS = 10 * 60;
+
+// Server-side "reasonable effort" compliance gate. This mirrors the client-only
+// screen-connection flow, which is not reliably invoked from every entry point, so
+// every money-moving route (create/buy/sell/bundle-buy) enforces it directly here.
+async function complianceBlock(req, address) {
+  const clientIp = accessRoutes.clientIp(req);
+  const country = await accessRoutes.countryOf(req);
+  const geo = ofacChecker.screenGeoLocation(country, '', clientIp);
+  if (!geo.allowed) return geo;
+  if (address) {
+    const addr = ofacChecker.screenAddress(address, clientIp, country || 'UNKNOWN');
+    if (!addr.allowed) return addr;
+  }
+  return null;
+}
 
 function accountKey(key) {
   return typeof key === 'string' ? key : key && key.pubkey;
@@ -210,6 +227,8 @@ router.post(['/collections/:id/buy', '/bundles/:id/buy'], async (req, res) => {
     if (!txHash || typeof txHash !== 'string' || !trader) {
       return res.status(400).json({ success: false, error: 'Transaction signature and buyer address are required.' });
     }
+    const blocked = await complianceBlock(req, trader);
+    if (blocked) return res.status(403).json({ success: false, error: blocked.message, blockType: blocked.reason });
     const signature = txHash.trim();
     if (bondingCurve.hasRecordedTransaction(signature)) return res.status(409).json({ success: false, error: 'Transaction has already been indexed.' });
     const lamports = await getConfirmedSolTransferLamports(signature, trader);
@@ -315,6 +334,8 @@ router.post(['/create', '/deploy', '/launch'], async (req, res) => {
     }
 
     const creatorAddress = creator || "0xCessionAnonDev";
+    const blocked = await complianceBlock(req, creatorAddress);
+    if (blocked) return res.status(403).json({ success: false, error: blocked.message, blockType: blocked.reason });
     const initialAmount = initialBuySol ? parseFloat(initialBuySol) : 0;
     let signature = null;
     if (initialAmount > 0) {
@@ -395,6 +416,8 @@ router.post('/:symbol/buy', async (req, res) => {
     const token = bondingCurve.getToken(req.params.symbol);
     if (!token || !token.mintAddress) return res.status(404).json({ success: false, error: 'Live token mint not found.' });
     if (!txHash || typeof txHash !== 'string' || !trader) return res.status(400).json({ success: false, error: 'Transaction signature and buyer address are required.' });
+    const blocked = await complianceBlock(req, trader);
+    if (blocked) return res.status(403).json({ success: false, error: blocked.message, blockType: blocked.reason });
     const signature = txHash.trim();
     if (bondingCurve.hasRecordedTransaction(signature)) return res.status(409).json({ success: false, error: 'Transaction has already been indexed.' });
     const buySol = await getConfirmedSolanaTrade(signature, 'BUY', token.mintAddress, trader);
@@ -431,6 +454,8 @@ router.post('/:symbol/sell', async (req, res) => {
     const token = bondingCurve.getToken(req.params.symbol);
     if (!token || !token.mintAddress) return res.status(404).json({ success: false, error: 'Live token mint not found.' });
     if (!txHash || typeof txHash !== 'string' || !trader) return res.status(400).json({ success: false, error: 'Transaction signature and seller address are required.' });
+    const blocked = await complianceBlock(req, trader);
+    if (blocked) return res.status(403).json({ success: false, error: blocked.message, blockType: blocked.reason });
     const signature = txHash.trim();
     if (bondingCurve.hasRecordedTransaction(signature)) return res.status(409).json({ success: false, error: 'Transaction has already been indexed.' });
     const sellTokens = await getConfirmedSolanaTrade(signature, 'SELL', token.mintAddress, trader);

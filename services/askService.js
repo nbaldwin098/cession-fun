@@ -106,13 +106,17 @@ function bannerQuestion() {
   return 'Why is ' + mover.symbol + ' ' + (chg >= 0 ? 'up' : 'down') + ' ' + Math.abs(chg).toFixed(1) + '%?';
 }
 function saveBot(owner, rule) {
+  const symbol = String(rule.symbol || '').trim().toUpperCase();
+  if (!/^[A-Z0-9]{2,12}$/.test(symbol)) throw new Error('Ticker is required (2-12 letters/numbers).');
+  const buySol = Number(rule.buySol || 0);
+  if (!Number.isFinite(buySol) || buySol <= 0) throw new Error('SOL amount must be greater than 0.');
   const store = readJson('bots.json', { bots: [] });
   const bot = {
     id: 'bot_' + Date.now(),
     owner: owner || null,
     type: String(rule.type || 'dca'),
-    symbol: String(rule.symbol || '').toUpperCase(),
-    buySol: Number(rule.buySol || 0.05),
+    symbol,
+    buySol,
     slippage: Number(rule.slippage || 1),
     interval: rule.interval || '1h',
     live: false,

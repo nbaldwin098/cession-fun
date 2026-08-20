@@ -88,32 +88,66 @@
     centerSheet('statementModal');
     document.querySelectorAll('.modal-overlay-generic').forEach(ensureCloseable);
     placeFooters();
+    let activeSearchLane = 'all';
     ui.openSearch = function () {
       const m = document.getElementById('searchModal');
       if (!m) return;
       const box = m.querySelector('.modal-box-pump');
       addX(box, closeSearch);
+      if (box && !document.getElementById('searchLaneRow')) {
+        const row = document.createElement('div');
+        row.id = 'searchLaneRow';
+        row.className = 'cx-words';
+        row.innerHTML = '<button class="on" type="button" data-lane="all">All</button><button type="button" data-lane="best">Best</button><button type="button" data-lane="trending">Trending</button><button type="button" data-lane="new">New</button>';
+        row.addEventListener('click', function (e) {
+          const b = e.target.closest('button');
+          if (!b) return;
+          const lane = b.getAttribute('data-lane') || 'all';
+          activeSearchLane = lane;
+          row.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+          const input = document.getElementById('searchInput');
+          fillHits(activeSearchLane, input ? input.value : '');
+        });
+        box.appendChild(row);
+      }
       if (box && !document.getElementById('searchHits')) {
         const hits = document.createElement('div');
         hits.id = 'searchHits';
         hits.className = 'cx-feed';
         box.appendChild(hits);
       }
+      const input = document.getElementById('searchInput');
+      if (input && !input.dataset.searchBound) {
+        input.dataset.searchBound = '1';
+        input.addEventListener('input', function () {
+          fillHits(activeSearchLane, input.value || '');
+        });
+      }
       m.style.display = 'flex';
       m.classList.add('open');
       m.onclick = function (e) { if (e.target === m) closeSearch(); };
+      if (input) input.focus();
+      fillHits(activeSearchLane, input ? input.value : '');
     };
     ui.searchLane = function (lane) {
+      activeSearchLane = lane || 'all';
       if (ui.setExploreLane) ui.setExploreLane(lane);
-      fillHits(lane);
+      const input = document.getElementById('searchInput');
+      fillHits(activeSearchLane, input ? input.value : '');
     };
-    async function fillHits(lane) {
+    async function fillHits(lane, query) {
       const box = document.getElementById('searchHits');
       if (!box) return;
       try {
-        const r = await fetch('/api/pulse?lane=' + encodeURIComponent(lane || 'best') + '&limit=20');
+        const feedLane = lane && lane !== 'all' ? lane : 'all';
+        const r = await fetch('/api/pulse?lane=' + encodeURIComponent(feedLane) + '&limit=50');
         const d = await r.json();
+        const q = String(query || '').trim().toUpperCase();
         const list = (d.feed || []).filter(function (c) {
+          if (q) {
+            const text = ((c.symbol || '') + ' ' + (c.name || '')).toUpperCase();
+            if (text.indexOf(q) === -1) return false;
+          }
           return String(c.mintAddress || c.mint || '').length >= 32;
         });
         box.innerHTML = list.length

@@ -45,8 +45,12 @@ router.get('/bots', (req, res) => {
 });
 
 router.post('/bots', (req, res) => {
-  const bot = ask.saveBot(req.body.address, req.body);
-  res.json({ success: true, bot, notice: 'Rule saved. It will not place trades until the program is live.' });
+  try {
+    const bot = ask.saveBot(req.body.address, req.body);
+    res.json({ success: true, bot, notice: 'Rule saved. It will not place trades until the program is live.' });
+  } catch (e) {
+    res.status(400).json({ success: false, error: e.message });
+  }
 });
 
 router.get('/chat', (req, res) => {

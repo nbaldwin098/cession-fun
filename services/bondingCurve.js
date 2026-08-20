@@ -583,7 +583,10 @@ class BondingCurveEngine {
 
   getKingOfTheHill() {
     const ungraduated = Array.from(this.tokens.values()).filter(t => !t.isGraduated && !t.isPrivate);
-    if (ungraduated.length === 0) return this._enrichTokenMetrics(Array.from(this.tokens.values())[0]);
+    if (ungraduated.length === 0) {
+      const fallback = Array.from(this.tokens.values())[0];
+      return fallback ? this._enrichTokenMetrics(fallback) : null;
+    }
     ungraduated.sort((a, b) => b.curveProgressPercent - a.curveProgressPercent);
     return this._enrichTokenMetrics(ungraduated[0]);
   }
