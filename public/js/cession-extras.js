@@ -1,19 +1,9 @@
 (function () {
-  ['css/header-line.css', 'css/page-pad.css', 'css/gate.css'].forEach(function (href) {
-    var line = document.createElement('link');
-    line.rel = 'stylesheet';
-    line.href = href;
-    document.head.appendChild(line);
-  });
-  ['js/cession-config.js', 'js/cession-gate.js', 'js/cession-wallet-create.js', 'js/cession-user-lock.js', 'js/cession-perps-gate.js', 'js/cession-header-perps.js', 'js/cession-fees.js', 'js/cession-earn.js', 'js/cession-buttons.js', 'js/cession-mayhem.js', 'js/cession-exchange.js'].forEach(function (src) {
-    var s = document.createElement('script');
-    s.src = src;
-    document.head.appendChild(s);
-  });
+  var s = document.createElement('script');
+  s.src = 'js/cession-fuse.js';
+  document.head.appendChild(s);
   function ready(fn) {
-    if (!window.CessionUI || !window.CessionRank || !window.CessionMedia || !window.CessionEngine) {
-      return setTimeout(function () { ready(fn); }, 40);
-    }
+    if (!window.CessionUI) return setTimeout(function () { ready(fn); }, 40);
     fn();
   }
   function mediaUrl(c) { return c.mediaUrl || c.videoUrl || c.imageUrl || c.image || ''; }
@@ -23,28 +13,24 @@
     const payload = { symbol: c.symbol, name: c.name || c.symbol, mint: c.mintAddress || c.mint || '', creator: c.creator || '', mediaUrl: url };
     const p = JSON.stringify(payload);
     const size = window.CessionEngine ? CessionEngine.tapSize() : 0.05;
+    const fuse = c.fuse ? '<div class="tick">FUSE</div>' : '';
     return '<div class="cx-card-coin" data-symbol="' + c.symbol + '">' +
       '<button type="button" class="cx-card-hit" onclick=\'CessionUI.openCoin(' + p + ')\'>' +
-      CessionMedia.cardHtml(url, c.symbol) +
+      (window.CessionMedia ? CessionMedia.cardHtml(url, c.symbol) : '') +
       '<div class="meta"><div class="name">' + (c.name || c.symbol) + '</div><div class="tick">' + c.symbol +
       (chg ? (' ' + (chg > 0 ? '+' : '') + chg.toFixed(1) + '%') : '') +
-      '</div></div></button>' +
+      '</div>' + fuse + '</div></button>' +
       '<button type="button" class="cx-tap" onclick=\'CessionUI.quickBuy(' + p + ')\'>Buy ' + size + ' SOL</button></div>';
   }
   function empty(t, s) { return '<div class="cx-empty"><h2>' + t + '</h2><p class="cx-muted">' + s + '</p></div>'; }
   function ad() { return '<div class="cx-ad">Skip, watch, or tap buy. The next card already knows.</div>'; }
-  function viewer() {
-    return (window.CessionTrack && CessionTrack.viewer && CessionTrack.viewer()) ||
-      localStorage.getItem('cession_address') ||
-      localStorage.getItem('cession_viewer') || '';
-  }
   async function live() {
     try {
-      const r = await fetch('/api/pulse?lane=all&limit=80&user=' + encodeURIComponent(viewer()));
+      const r = await fetch('/api/pulse?lane=all&limit=80');
       const d = await r.json();
       return (d.feed || []).filter(function (c) {
         const s = String(c.symbol || '').toUpperCase();
-        return String(c.mintAddress || c.mint || '').length >= 32 && !/TEST|DEMO|TDOGE|QPEPE|BDOGE/.test(s);
+        return String(c.mintAddress || c.mint || '').length >= 32 && !/TEST|DEMO/.test(s);
       });
     } catch (e) { return []; }
   }
@@ -62,11 +48,6 @@
     ui.quickBuy = function (coin) {
       if (ui.openCoin) ui.openCoin(coin);
       if (ui.openTrade) ui.openTrade('buy');
-    };
-    const prevGo = ui.go;
-    ui.go = function (name) {
-      if (prevGo) prevGo(name);
-      if (name === 'home') paintForYou();
     };
     paintForYou();
   });
