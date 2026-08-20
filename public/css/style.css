@@ -96,6 +96,7 @@ body {
 .page-view { display: none; }
 .page-view.active { display: block; animation: cx-fade-in 0.22s var(--ease); }
 .cx-title { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 14px; }
+#viewExplorePulse > .cx-title { margin-top: 10px; }
 
 @keyframes cx-fade-in {
   from { opacity: 0; transform: translateY(4px); }
@@ -445,7 +446,25 @@ iframe.cx-media-full { height: 220px; border: 0; }
   box-shadow: var(--shadow-pop);
   border-radius: 20px 20px 0 0;
   padding: 18px 16px 28px;
+  position: relative;
 }
+.cx-x {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 5;
+  transition: background 0.15s var(--ease);
+}
+.cx-x:hover { background: rgba(255, 255, 255, 0.12); }
 
 @media (max-width: 639px) {
   #viewHome.page-view.active {
