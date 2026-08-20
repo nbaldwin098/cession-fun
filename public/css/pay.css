@@ -1,0 +1,6 @@
+.cx-pay-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.cx-pay-row button{flex:1;min-width:72px;height:40px;border-radius:999px;border:1px solid #e6e6e1;background:#fff;font-weight:650}
+.cx-pay-row button.on{background:#0c0c0c;color:#fff;border-color:#0c0c0c}
+.cx-warn{color:#dc2626;font-size:13px;margin:8px 0}
+.cx-ok{color:#16a34a;font-size:13px}
+.cx-addr-box{word-break:break-all;font-family:ui-monospace,Menlo,monospace;font-size:13px;padding:12px;border:1px solid #e6e6e1;border-radius:12px;background:#f7f7f4}
