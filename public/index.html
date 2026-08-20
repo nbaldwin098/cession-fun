@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>For You | Cession</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/media.css">
   <link rel="stylesheet" href="css/gate.css">
+  <link rel="stylesheet" href="css/pay.css">
   <link rel="icon" type="image/svg+xml" href="brand/cession-c-white.svg">
 </head>
 <body>
@@ -34,7 +34,7 @@
     <main class="page-view" id="viewMint">
       <h1 class="cx-title">Mint</h1>
       <div class="cx-card">
-        <p class="cx-muted">Create is free. You only pay Solana rent. Burn and fee claims unlock after the program is live.</p>
+        <p class="cx-muted">Create is free except Solana rent. First buy is required. Pit is on so the book moves.</p>
         <button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create coin</button>
       </div>
       <h2 class="cx-title">Your coins</h2>
@@ -58,6 +58,11 @@
         <button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button>
       </div>
       <div id="walletScreenConnected" style="display:none;">
+        <div class="cx-pay-row">
+          <button class="cx-launch" type="button" onclick="CessionPay.openPay()">Add money</button>
+          <button class="cx-ghost" type="button" onclick="CessionPay.openReceive()" style="margin-top:0">Receive</button>
+          <button class="cx-ghost" type="button" onclick="CessionPay.openSend()" style="margin-top:0">Send</button>
+        </div>
         <div class="cx-card">
           <div class="cx-words" id="pnlRange">
             <button class="on" type="button" data-range="7d">7d</button>
@@ -88,15 +93,17 @@
           <a href="javascript:CessionUI.go('ai')">AI</a>
           <a href="/legal">Legal</a>
         </div>
+        <p class="cx-muted">cession.us · Stripe / Coinbase process fiat · On-chain sends cannot be reversed</p>
       </footer>
     </main>
     <main class="page-view" id="viewBots">
       <h1 class="cx-title">Bots</h1>
       <div class="cx-card">
-        <p class="cx-muted">Rules save now. They do not trade until the program is live.</p>
+        <p class="cx-muted">Authors charge a fee on fills only. No monthly. They do not hold keys.</p>
         <select class="form-input-pump" id="botType"><option value="dca">DCA</option><option value="limit">Limit buy</option><option value="tp">Take profit</option><option value="sl">Stop</option></select>
         <input class="form-input-pump" id="botSymbol" placeholder="Ticker">
         <input class="form-input-pump" id="botBuy" type="number" step="0.01" placeholder="SOL amount">
+        <input class="form-input-pump" id="botFee" type="number" step="0.01" value="0.10" placeholder="Author fee %">
         <select class="form-input-pump" id="botInterval"><option value="1h">Every 1h</option><option value="6h">Every 6h</option><option value="1d">Every day</option></select>
         <button class="cx-launch" type="button" onclick="CessionUI.saveBot()">Save bot</button>
         <div id="botList" class="cx-muted"></div>
@@ -127,7 +134,7 @@
         <button class="cx-launch" type="button" onclick="CessionUI.openPhantomStake()">Open Phantom</button>
       </div>
     </main>
-    <main class="page-view" id="viewPerps"><h1 class="cx-title">Perps</h1><div class="cx-card"><p class="cx-muted">Perpetuals are not live.</p></div></main>
+    <main class="page-view" id="viewPerps"><h1 class="cx-title">Perps</h1><div class="cx-card"><p class="cx-muted">Perpetuals are not offered in the United States.</p></div></main>
     <main class="page-view" id="viewAi">
       <h1 class="cx-title">AI</h1>
       <div id="askAiBox" class="cx-chat"><div class="cx-chat-log" id="aiLog"></div><div class="cx-chat-row"><input class="cx-search" id="aiInput" placeholder="Ask anything"><button class="cx-launch" type="button" onclick="CessionUI.sendAi()">Send</button></div></div>
@@ -136,6 +143,7 @@
       <button class="cx-ghost" type="button" onclick="CessionUI.go('home')">Back</button>
       <h1 class="cx-title" id="coinTitle">Coin</h1>
       <p class="cx-muted" id="coinMeta"></p>
+      <button class="cx-ghost" type="button" id="copyMintBtn" onclick="CessionPay.copyMintLabel(document.getElementById('coinMeta').textContent)">Copy token mint — not a deposit</button>
       <div class="cx-trade-row"><button class="cx-launch" type="button" onclick="CessionUI.openTrade('buy')">Buy</button><button class="cx-ghost" type="button" onclick="CessionUI.openTrade('sell')">Sell</button></div>
     </main>
   </div>
@@ -168,14 +176,68 @@
       </div>
     </div>
   </div>
-  <div class="modal-overlay-generic" id="deployModal"><div class="modal-box-pump"><form id="deployCoinForm"><input class="form-input-pump" id="deployName" placeholder="Name" required><input class="form-input-pump" id="deploySymbol" placeholder="Ticker" required><input class="form-input-pump" id="deployMedia" type="url" placeholder="Image or video URL"><p class="cx-muted">Paste a .png .jpg .mp4 .webm or a YouTube link.</p><button class="cx-launch" type="submit">Launch</button></form></div></div>
+  <div class="modal-overlay-generic" id="deployModal"><div class="modal-box-pump"><form id="deployCoinForm">
+    <input class="form-input-pump" id="deployName" placeholder="Name" required>
+    <input class="form-input-pump" id="deploySymbol" placeholder="Ticker" required>
+    <input class="form-input-pump" id="deployMedia" type="url" placeholder="Image or video URL">
+    <input class="form-input-pump" id="deployFirstBuy" type="number" min="0.01" step="0.01" value="0.05" required>
+    <label class="cx-muted"><input type="checkbox" id="deployPit" checked> Pit on (agent trades 24h, leftover burns)</label>
+    <p class="cx-muted">First buy is required so the coin is not listed at zero.</p>
+    <button class="cx-launch" type="submit">Launch</button>
+  </form></div></div>
   <div class="modal-overlay-generic" id="usernameModal"><div class="modal-box-pump"><p class="cx-muted">Pick a username. It cannot be changed.</p><input class="form-input-pump" id="newUsername" placeholder="username"><button class="cx-launch" type="button" onclick="CessionUI.lockUsername()">Save forever</button></div></div>
   <div class="modal-overlay-generic" id="walletModal"><div class="modal-box-pump"><button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button><button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button></div></div>
-  <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump"><input class="form-input-pump" id="presetBuySol" type="number" step="0.01" placeholder="Default buy SOL"><input class="form-input-pump" id="presetSlippage" type="number" step="0.1" placeholder="Slippage"><button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save presets</button><button class="cx-ghost" type="button" onclick="CessionUI.downloadCsv()">Download CSV</button></div></div>
+  <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump">
+    <p class="cx-muted">Fast trade size in USD. Used on every coin tap.</p>
+    <input class="form-input-pump" id="presetBuySol" type="number" step="1" value="20" placeholder="Default buy USD">
+    <input class="form-input-pump" id="presetSlippage" type="number" step="0.1" placeholder="Slippage">
+    <input class="form-input-pump" id="presetDailyMax" type="number" step="1" placeholder="Daily max USD">
+    <button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save presets</button>
+    <button class="cx-ghost" type="button" onclick="CessionUI.downloadCsv()">Download CSV</button>
+  </div></div>
   <div class="modal-overlay-generic" id="statementModal"><div class="modal-box-pump"><div id="statementBody" class="cx-muted">No statements to display.</div><button class="cx-ghost" id="statementDownloadBtn" type="button" style="display:none;" onclick="CessionUI.downloadCsv()">Download</button></div></div>
   <div class="modal-overlay-generic" id="stakeModal"><div class="modal-box-pump"><p class="cx-muted">Earn in Phantom. About 6 to 8 percent. Not a Cession return.</p><button class="cx-launch" type="button" onclick="CessionUI.openPhantomStake()">Open Phantom</button></div></div>
-  <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump"><strong id="tradeTitle">Buy</strong><p id="tradeCoinLabel" class="cx-muted"></p><p id="tradeFeeLine" class="cx-muted" style="display:none;">Trade 1.00%</p><input class="form-input-pump" id="tradeAmount" type="number"><input class="form-input-pump" id="tradeSlippage" type="number"><button class="cx-launch" type="button" onclick="CessionUI.confirmTrade()">Confirm</button></div></div>
+  <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump">
+    <strong id="tradeTitle">Buy</strong>
+    <p id="tradeCoinLabel" class="cx-muted"></p>
+    <p id="tradeFeeLine" class="cx-muted">Trade 1.00%</p>
+    <div class="cx-pay-row">
+      <button type="button" data-trade-usd="5" onclick="CessionPay.tapTrade(5)">$5</button>
+      <button type="button" class="on" data-trade-usd="20" onclick="CessionPay.tapTrade(20)">$20</button>
+      <button type="button" data-trade-usd="50" onclick="CessionPay.tapTrade(50)">$50</button>
+    </div>
+    <input class="form-input-pump" id="tradeAmount" type="number" value="20">
+    <input class="form-input-pump" id="tradeSlippage" type="number" placeholder="Slippage">
+    <button class="cx-launch" type="button" onclick="CessionUI.confirmTrade()">Confirm</button>
+  </div></div>
+  <div class="modal-overlay-generic" id="payModal"><div class="modal-box-pump">
+    <strong>Cession Pay</strong>
+    <p class="cx-muted" id="payNote">Official partner checkout. We never take your card.</p>
+    <div class="cx-pay-row">
+      <button type="button" data-pay-amt="20" class="on" onclick="CessionPay.setAmt('payAmount',20)">$20</button>
+      <button type="button" data-pay-amt="50" onclick="CessionPay.setAmt('payAmount',50)">$50</button>
+      <button type="button" data-pay-amt="100" onclick="CessionPay.setAmt('payAmount',100)">$100</button>
+    </div>
+    <input class="form-input-pump" id="payAmount" type="number" value="20">
+    <button class="cx-launch" type="button" onclick="CessionPay.startPay('card')">Card / Apple Pay</button>
+    <button class="cx-ghost" type="button" onclick="CessionPay.startPay('bank')">Bank (Plaid)</button>
+  </div></div>
+  <div class="modal-overlay-generic" id="receiveModal"><div class="modal-box-pump">
+    <strong>Receive SOL</strong>
+    <p class="cx-muted" id="receiveHint">Your wallet only. Never a coin mint.</p>
+    <div class="cx-addr-box" id="receiveAddress"></div>
+    <button class="cx-launch" type="button" onclick="CessionPay.copyReceive()">Copy wallet</button>
+  </div></div>
+  <div class="modal-overlay-generic" id="sendModal"><div class="modal-box-pump">
+    <strong>Send SOL</strong>
+    <p class="cx-warn">On-chain sends cannot be reversed. Mints and programs are blocked.</p>
+    <input class="form-input-pump" id="sendDest" placeholder="Wallet address" onblur="CessionPay.checkSend()">
+    <p id="sendVerdict" class="cx-muted"></p>
+    <input class="form-input-pump" id="sendWord" placeholder="Type SEND">
+    <button class="cx-launch" id="sendGo" type="button" onclick="CessionPay.confirmSend()" disabled>Send</button>
+  </div></div>
   <script src="js/cession-shell.js"></script>
+  <script src="js/cession-pay.js"></script>
   <script src="js/cession-media.js"></script>
   <script src="js/cession-rank.js"></script>
   <script src="js/cession-engine.js"></script>
