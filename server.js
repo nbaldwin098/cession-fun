@@ -11,7 +11,7 @@ require('./services/store').init();
 
 const app = express();
 const server = http.createServer(app);
-const ALLOW = (process.env.CORS_ORIGIN || 'https://cession.fun,https://www.cession.fun,https://cession.us,https://www.cession.us').split(',');
+const ALLOW = (process.env.CORS_ORIGIN || 'https://cession.us,https://www.cession.us,https://cession.fun,https://www.cession.fun').split(',');
 
 app.disable('x-powered-by');
 app.use((req, res, next) => {
@@ -37,7 +37,7 @@ app.use('/api/support', rateLimit(20, 60000));
 app.use('/api', apiRoutes);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html', 'htm'] }));
 
-['/', '/explore', '/rewards', '/wallet', '/you', '/foryou', '/legal', '/r/:code'].forEach((route) => {
+['/', '/explore', '/rewards', '/wallet', '/you', '/foryou', '/legal', '/fuse', '/r/:code'].forEach((route) => {
   app.get(route, (req, res) => {
     if (route === '/legal') return res.sendFile(path.join(__dirname, 'public', 'legal.html'));
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -67,5 +67,5 @@ wss.on('connection', (ws) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
-  console.log('cession on', PORT);
+  console.log('cession.us on', PORT);
 });
