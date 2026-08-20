@@ -143,6 +143,18 @@
   }
   async function openStatement(){const addr=address();open('statementModal');const body=document.getElementById('statementBody');const btn=document.getElementById('statementDownloadBtn');if(!addr){body.textContent='No statements to display.';btn.style.display='none';return}try{const r=await fetch('/api/wallets/'+encodeURIComponent(addr)+'/statement');const d=await r.json();const n=d.count||(d.transactions||[]).length;if(!n){body.textContent='No statements to display.';btn.style.display='none'}else{body.textContent='Wallet '+addr+' · '+n+' trades';btn.style.display='block'}}catch(e){body.textContent='No statements to display.';btn.style.display='none'}}
   async function downloadCsv(){const addr=address();if(!addr)return toast('No statements to display.');const r=await fetch('/api/wallets/'+encodeURIComponent(addr)+'/trades');const d=await r.json();const rows=d.trades||[];if(!rows.length)return toast('No statements to display.');const csv=['time,type,symbol,sol,txHash'].concat(rows.map(function(t){return [t.time||'',t.type||'',t.symbol||'',t.sol||'',t.txHash||''].join(',')})).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='cession-statement.csv';a.click()}
+  async function claimRewardsBonus(){
+    const addr=address();
+    if(!addr)return toast('Connect a wallet first.');
+    const input=document.getElementById('bonusCodeInput');
+    const code=String(input&&input.value||'').trim().toUpperCase();
+    if(!code)return toast('Enter your promo code.');
+    const r=await fetch('/api/wallets/'+encodeURIComponent(addr)+'/rewards-bonus/claim',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code})});
+    const d=await r.json();
+    if(!d.success)return toast(d.error||'Could not claim promo.');
+    toast(d.claim&&d.claim.alreadyClaimed?'Promo already claimed.':'Promo claimed.');
+    loadRewards();
+  }
   async function loadRewards(){
     const body=document.getElementById('rewardsBody');
     const board=document.getElementById('rewardsLeaderboard');
@@ -155,15 +167,23 @@
         const d=await r.json();
         if(d.success&&body){
           const rw=d.rewards;
+          const campaign=d.campaign||{};
+          const autoCode=String(localStorage.getItem('cession_gate_code')||'').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32);
           const refLink=location.origin+rw.referralUrl;
           const nextLine=rw.nextTier?('<p class="cx-muted">'+rw.nextTier.pointsNeeded.toLocaleString()+' pts to '+rw.nextTier.name+' ('+rw.nextTier.feeDiscountPercent+'% fee discount)</p>'):'<p class="cx-muted">Max tier reached.</p>';
+          const bonusLine=rw.bonusPoints?('<div class="cx-row"><span>Promo bonus</span><span>'+Number(rw.bonusPoints||0).toLocaleString()+' pts · '+Number(campaign.solCredit||0).toFixed(3)+' SOL fee credit</span></div>'):'';
+          const promoClaim=campaign.claimed
+            ? '<p class="cx-muted">Promo claimed: '+Number(campaign.points||0).toLocaleString()+' pts · '+Number(campaign.solCredit||0).toFixed(3)+' SOL fee credit</p>'
+            : '<div class="cx-row"><input class="form-input-pump" id="bonusCodeInput" placeholder="Promo code" value="'+autoCode+'"><button class="cx-ghost" type="button" onclick="CessionUI.claimRewardsBonus()">Claim</button></div><p class="cx-muted">One-time onboarding promo.</p>';
           body.innerHTML='<div class="cx-row"><span>Tier</span><span>'+rw.tier+' ('+rw.feeDiscountPercent+'% fee discount)</span></div>'
             +'<div class="cx-row"><span>Points</span><span>'+rw.points.toLocaleString()+'</span></div>'
+            +bonusLine
             +'<div class="cx-row"><span>Trading volume</span><span>'+rw.tradingVolumeSol+' SOL</span></div>'
             +'<div class="cx-row"><span>Referrals</span><span>'+rw.referredWalletsCount+' wallets, '+rw.referralVolumeSol+' SOL</span></div>'
             +nextLine
             +'<div class="cx-addr-box" id="rewardsRefLink">'+refLink+'</div>'
-            +'<button class="cx-ghost" type="button" onclick="CessionUI.copyReferralLink()">Copy referral link</button>';
+            +'<button class="cx-ghost" type="button" onclick="CessionUI.copyReferralLink()">Copy referral link</button>'
+            +promoClaim;
         }
       }catch(e){if(body)body.innerHTML='<p class="cx-muted">Unable to load rewards right now.</p>'}
     }
@@ -213,7 +233,7 @@
   }
   function connectPhantom(){if(window.solana){window.solana.connect().then(function(res){if(res.publicKey){saveAddr(res.publicKey.toString());sync()}});return}startTicket('phantom')}
   function connectMetaMask(){if(window.ethereum){window.ethereum.request({method:'eth_requestAccounts'}).then(function(a){if(a&&a[0]){saveAddr(a[0]);sync()}});return}startTicket('metamask')}
-  window.CessionUI={go:show,open:open,close:close,openCreate:function(){open('deployModal')},openSettings:function(){open('settingsModal')},openStatement:openStatement,downloadCsv:downloadCsv,savePresets:savePresets,openCoin:openCoin,openTrade:openTrade,shareCoin:shareCoin,followCreator:followCreator,setTradeStatus:setTradeStatus,confirmTrade:function(){const amount=Number(document.getElementById('tradeAmount')&&document.getElementById('tradeAmount').value||0);if(!address())return open('walletModal');if(!activeCoin||!(activeCoin.mintAddress||activeCoin.mint))return toast('No live mint to trade.');if(!Number.isFinite(amount)||amount<=0)return toast('Enter a valid amount.');setTradeStatus('pending','Trading requires wallet-signed on-chain transaction');toast('Trading flow is wallet-signed only. Connect wallet and confirm on-chain.');},connectPhantom:connectPhantom,connectMetaMask:connectMetaMask,claimApproved:function(){claimTicket(pendingTicket()).then(function(ok){if(!ok)toast('Not approved yet. Approve in the wallet, then tap again.')})},sendAi:sendAi,sendChat:sendChat,setAskMode:setAskMode,setHomeLane:setHomeLane,setExploreLane:setExploreLane,saveBot:saveBot,lockUsername:lockUsername,copyReferralLink:copyReferralLink};
+  window.CessionUI={go:show,open:open,close:close,openCreate:function(){open('deployModal')},openSettings:function(){open('settingsModal')},openStatement:openStatement,downloadCsv:downloadCsv,savePresets:savePresets,openCoin:openCoin,openTrade:openTrade,shareCoin:shareCoin,followCreator:followCreator,setTradeStatus:setTradeStatus,confirmTrade:function(){const amount=Number(document.getElementById('tradeAmount')&&document.getElementById('tradeAmount').value||0);if(!address())return open('walletModal');if(!activeCoin||!(activeCoin.mintAddress||activeCoin.mint))return toast('No live mint to trade.');if(!Number.isFinite(amount)||amount<=0)return toast('Enter a valid amount.');setTradeStatus('pending','Trading requires wallet-signed on-chain transaction');toast('Trading flow is wallet-signed only. Connect wallet and confirm on-chain.');},connectPhantom:connectPhantom,connectMetaMask:connectMetaMask,claimApproved:function(){claimTicket(pendingTicket()).then(function(ok){if(!ok)toast('Not approved yet. Approve in the wallet, then tap again.')})},claimRewardsBonus:claimRewardsBonus,sendAi:sendAi,sendChat:sendChat,setAskMode:setAskMode,setHomeLane:setHomeLane,setExploreLane:setExploreLane,saveBot:saveBot,lockUsername:lockUsername,copyReferralLink:copyReferralLink};
   window.CessionCard={visuals:cardVisuals,fmtMoney:fmtMoney,shortMint:shortMint};
   document.addEventListener('DOMContentLoaded',function(){
     const form=document.getElementById('deployCoinForm');if(form)form.addEventListener('submit',async function(e){e.preventDefault();const name=String(document.getElementById('deployName').value||'').trim();const symbol=String(document.getElementById('deploySymbol').value||'').trim().toUpperCase();const imageUrl=String(document.getElementById('deployMedia').value||'').trim();if(!name||!symbol)return toast('Name and ticker are required.');const payload={name:name,symbol:symbol,imageUrl:imageUrl||null,creator:address()||null};const btn=form.querySelector('button[type="submit"]');if(btn)btn.disabled=true;try{const r=await fetch('/api/tokens/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const d=await r.json();if(!d.success)return toast(d.error||'Could not create coin.');toast('Coin created.');close('deployModal');form.reset();const firstBuy=document.getElementById('deployFirstBuy');if(firstBuy)firstBuy.value='0.06';await load();}catch(err){toast('Could not create coin.')}finally{if(btn)btn.disabled=false;}});
