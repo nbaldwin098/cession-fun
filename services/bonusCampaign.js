@@ -4,7 +4,6 @@ const path = require('path');
 const DATA_FILE = path.join(__dirname, '..', 'data', 'bonus_campaign.json');
 const BONUS_CODE = String(process.env.BONUS_CODE || 'FREESOL').trim().toUpperCase();
 const BONUS_POINTS = Number(process.env.BONUS_POINTS || 300);
-const BONUS_SOL_CREDIT = Number(process.env.BONUS_SOL_CREDIT || 0.02);
 
 function ensureStore() {
   if (!fs.existsSync(DATA_FILE)) {
@@ -36,8 +35,7 @@ function normalizeAddress(address) {
 function campaignMeta() {
   return {
     codeHint: BONUS_CODE ? (BONUS_CODE.slice(0, 2) + '***') : 'not-set',
-    points: BONUS_POINTS,
-    solCredit: BONUS_SOL_CREDIT
+    points: BONUS_POINTS
   };
 }
 
@@ -51,7 +49,6 @@ function getStatus(address) {
     claimed: !!claim,
     claimedAt: claim ? claim.claimedAt : null,
     points: claim ? claim.points : BONUS_POINTS,
-    solCredit: claim ? claim.solCredit : BONUS_SOL_CREDIT,
     codeHint: campaignMeta().codeHint
   };
 }
@@ -70,16 +67,14 @@ function claim(address, code) {
       walletAddress: wallet,
       alreadyClaimed: true,
       claimedAt: existing.claimedAt,
-      points: existing.points,
-      solCredit: existing.solCredit
+      points: existing.points
     };
   }
 
   const row = {
     walletAddress: wallet,
     claimedAt: new Date().toISOString(),
-    points: BONUS_POINTS,
-    solCredit: BONUS_SOL_CREDIT
+    points: BONUS_POINTS
   };
   store.claims.push(row);
   writeStore(store);
@@ -90,4 +85,3 @@ module.exports = {
   getStatus,
   claim
 };
-

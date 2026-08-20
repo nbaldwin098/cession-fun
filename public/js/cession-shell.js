@@ -171,9 +171,9 @@
           const autoCode=String(localStorage.getItem('cession_gate_code')||'').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32);
           const refLink=location.origin+rw.referralUrl;
           const nextLine=rw.nextTier?('<p class="cx-muted">'+rw.nextTier.pointsNeeded.toLocaleString()+' pts to '+rw.nextTier.name+' ('+rw.nextTier.feeDiscountPercent+'% fee discount)</p>'):'<p class="cx-muted">Max tier reached.</p>';
-          const bonusLine=rw.bonusPoints?('<div class="cx-row"><span>Promo bonus</span><span>'+Number(rw.bonusPoints||0).toLocaleString()+' pts · '+Number(campaign.solCredit||0).toFixed(3)+' SOL fee credit</span></div>'):'';
+          const bonusLine=rw.bonusPoints?('<div class="cx-row"><span>Promo bonus</span><span>'+Number(rw.bonusPoints||0).toLocaleString()+' pts</span></div>'):'';
           const promoClaim=campaign.claimed
-            ? '<p class="cx-muted">Promo claimed: '+Number(campaign.points||0).toLocaleString()+' pts · '+Number(campaign.solCredit||0).toFixed(3)+' SOL fee credit</p>'
+            ? '<p class="cx-muted">Promo claimed: '+Number(campaign.points||0).toLocaleString()+' pts</p>'
             : '<div class="cx-row"><input class="form-input-pump" id="bonusCodeInput" placeholder="Promo code" value="'+autoCode+'"><button class="cx-ghost" type="button" onclick="CessionUI.claimRewardsBonus()">Claim</button></div><p class="cx-muted">One-time onboarding promo.</p>';
           body.innerHTML='<div class="cx-row"><span>Tier</span><span>'+rw.tier+' ('+rw.feeDiscountPercent+'% fee discount)</span></div>'
             +'<div class="cx-row"><span>Points</span><span>'+rw.points.toLocaleString()+'</span></div>'
