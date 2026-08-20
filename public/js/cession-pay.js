@@ -1,7 +1,4 @@
 (function () {
-  const PRESET_USD = [20, 50, 100];
-  const PRESET_TRADE = [5, 20, 50];
-
   function $(id) { return document.getElementById(id); }
   function addr() {
     return (window.walletEngine && (window.walletEngine.activeAddress || window.walletEngine.address))
@@ -12,10 +9,7 @@
     if (window.CessionUI && CessionUI.open) return CessionUI.open(id);
     const m = $(id); if (m) { m.style.display = 'flex'; m.classList.add('open'); }
   }
-  function close(id) {
-    if (window.CessionUI && CessionUI.close) return CessionUI.close(id);
-    const m = $(id); if (m) { m.style.display = 'none'; m.classList.remove('open'); }
-  }
+
   function setAmt(id, n) {
     const el = $(id); if (el) el.value = n;
     document.querySelectorAll('[data-pay-amt]').forEach(function (b) {
@@ -30,6 +24,14 @@
       const d = await r.json();
       const note = $('payNote');
       if (note) note.textContent = d.note || '';
+      const list = $('payRails');
+      if (list && d.rails) {
+        list.innerHTML = Object.keys(d.rails).map(function (k) {
+          const rail = d.rails[k];
+          const label = rail.name + (rail.status === 'reviewing' ? ' · reviewing' : rail.ready ? '' : ' · add key');
+          return '<button type="button" class="cx-door" data-rail="' + rail.id + '" onclick="CessionPay.startPay(\'' + rail.id + '\')">' + label + '</button>';
+        }).join('');
+      }
     } catch (e) {}
     open('payModal');
   }
@@ -39,8 +41,6 @@
     const a = addr();
     const box = $('receiveAddress');
     if (box) box.textContent = a;
-    const hint = $('receiveHint');
-    if (hint) hint.textContent = 'This is your wallet. Never send SOL to a coin mint.';
     open('receiveModal');
   }
 
@@ -82,18 +82,22 @@
     if (word.toUpperCase() !== 'SEND') return toast('Type SEND to confirm.');
     const ok = await checkSend();
     if (!ok) return toast('Blocked. That address is not a wallet.');
-    toast('On-chain sends cannot be reversed. Sign in your wallet only if this is a wallet you own.');
+    toast('On-chain sends cannot be reversed.');
   }
 
-  async function startPay(method) {
+  async function startPay(provider) {
     const amount = Number(($('payAmount') && $('payAmount').value) || 20);
     const r = await fetch('/api/pay/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amountUsd: amount, method: method || 'card', address: addr() })
+      body: JSON.stringify({ amountUsd: amount, provider: provider, address: addr() })
     });
     const d = await r.json();
-    toast(d.error || d.note || 'Checkout pending Stripe approval.');
+    if (d.checkoutUrl) {
+      window.location.href = d.checkoutUrl;
+      return;
+    }
+    toast(d.error || 'Checkout not live on this rail yet.');
   }
 
   function tapTrade(usd) {
@@ -102,10 +106,6 @@
     document.querySelectorAll('[data-trade-usd]').forEach(function (b) {
       b.classList.toggle('on', Number(b.getAttribute('data-trade-usd')) === Number(usd));
     });
-    localStorage.setItem('cession_presets', JSON.stringify({
-      buyUsd: usd,
-      slippage: parseFloat(($('tradeSlippage') && $('tradeSlippage').value) || '1')
-    }));
   }
 
   window.CessionPay = {
@@ -118,8 +118,6 @@
     confirmSend: confirmSend,
     startPay: startPay,
     setAmt: setAmt,
-    tapTrade: tapTrade,
-    PRESET_USD: PRESET_USD,
-    PRESET_TRADE: PRESET_TRADE
+    tapTrade: tapTrade
   };
 })();
