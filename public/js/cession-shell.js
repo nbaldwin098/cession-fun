@@ -40,7 +40,7 @@
     document.querySelectorAll('.bottom-nav-slot').forEach(function(el){el.classList.remove('active')});
     const tab=document.getElementById(tabs[key]);if(tab)tab.classList.add('active');
     document.querySelectorAll('.cx-xtab').forEach(function(el){el.classList.remove('on')});
-    const hid=key==='home'?(homeLane==='following'?'tabFollowing':'tabForYou'):key==='perps'?'tabPerps':key==='rewards'?'tabRewards':null;
+    const hid=key==='home'?(homeLane==='following'?'tabFollowing':'tabForYou'):key==='perps'?'tabPerps':key==='rewards'?'tabRewards':key==='ai'?'tabAi':key==='bots'?'tabBots':null;
     if(hid){const h=document.getElementById(hid);if(h)h.classList.add('on')}
     if(key==='home'||key==='explore')load();
     if(key==='wallet')sync();
@@ -57,8 +57,21 @@
     const home=document.getElementById('forYouCoinsGrid');
     if(home){
       const parts=[ad()];
-      if(homeLane==='following') parts.push(empty('Following','Follow a creator from a coin page.'));
-      else {
+      if(homeLane==='following'){
+        const who=address();
+        if(!who) parts.push(empty('Following','Connect a wallet to track creators you follow.'));
+        else {
+          let followed=new Set();
+          try{
+            const fr=await fetch('/api/wallets/'+encodeURIComponent(who)+'/following');
+            const fd=await fr.json();
+            followed=new Set((fd.follows||[]).map(function(row){return String(row.creator||'').toLowerCase()}));
+          }catch(e){}
+          const ranked=cached.filter(function(c){return followed.has(String(c.creator||'').toLowerCase())}).sort(function(a,b){return forYouScore(b)-forYouScore(a)});
+          if(!ranked.length) parts.push(empty('Following','Follow a creator from a coin page.'));
+          ranked.forEach(function(c,i){if(i&&i%5===0)parts.push(ad());parts.push(card(c))});
+        }
+      } else {
         const ranked=cached.slice().sort(function(a,b){return forYouScore(b)-forYouScore(a)});
         if(!ranked.length) parts.push(empty('No live coins yet.','Be the first to add a coin.'));
         ranked.forEach(function(c,i){if(i&&i%5===0)parts.push(ad());parts.push(card(c))});
@@ -84,6 +97,7 @@
   async function refreshActiveCoin(){if(!activeCoin||!activeCoin.symbol)return;try{const r=await fetch('/api/tokens/'+encodeURIComponent(activeCoin.symbol));const d=await r.json();if(d.success&&d.token)renderCoin(d.token)}catch(e){}}
   async function openCoin(coin){activeCoin=coin;show('coin');renderCoin(coin);await refreshActiveCoin();if(coinTimer)clearInterval(coinTimer);coinTimer=setInterval(refreshActiveCoin,3000)}
   async function shareCoin(){if(!activeCoin)return;const mint=activeCoin.mintAddress||activeCoin.mint||'';const text='$'+(activeCoin.symbol||'TOKEN')+' · '+shortMint(mint)+' · '+Number(activeCoin.volume24hUsd||0).toFixed(0)+' USD volume';try{if(navigator.share){await navigator.share({title:activeCoin.name||activeCoin.symbol,text:text,url:location.href});setTradeStatus('idle','Share card sent')}else{await navigator.clipboard.writeText(text);setTradeStatus('idle','Share card copied')}}catch(e){if(e.name!=='AbortError')setTradeStatus('failed','Could not share this token card')}}
+  async function followCreator(){const follower=address();if(!follower)return open('walletModal');if(!activeCoin||!activeCoin.creator)return toast('No creator found for this coin.');const r=await fetch('/api/wallets/follow',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({follower:follower,creator:activeCoin.creator})});const d=await r.json();if(!d.success)return toast(d.error||'Could not follow creator.');toast('Now following this creator.');if(homeLane==='following')load()}
   function openTrade(side){if(!address()){open('walletModal');return}if(!activeCoin||!(activeCoin.mintAddress||activeCoin.mint))return toast('No live mint to trade.');document.getElementById('tradeTitle').textContent=side==='sell'?'Sell':'Buy';document.getElementById('tradeCoinLabel').textContent=activeCoin.symbol||'';setTradeStatus('pending','Ready for wallet confirmation');open('tradeModal')}
   function savePresets(){localStorage.setItem('cession_presets',JSON.stringify({buySol:parseFloat(document.getElementById('presetBuySol').value||'0.05'),slippage:parseFloat(document.getElementById('presetSlippage').value||'1')}));toast('Saved.')}
   function drawPnl(points){
@@ -164,7 +178,7 @@
     }catch(e){if(board)board.innerHTML='<p class="cx-muted">Unable to load leaderboard right now.</p>'}
   }
   function copyReferralLink(){const el=document.getElementById('rewardsRefLink');if(!el)return;const text=el.textContent;if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){toast('Referral link copied')})}else{toast(text)}}
-  async function saveBot(){const r=await fetch('/api/ask/bots',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:address(),type:document.getElementById('botType').value,symbol:document.getElementById('botSymbol').value,buySol:document.getElementById('botBuy').value,interval:document.getElementById('botInterval').value})});const d=await r.json();toast(d.notice||'Saved');loadBots()}
+  async function saveBot(){const symbol=String(document.getElementById('botSymbol').value||'').trim().toUpperCase();const buySol=Number(document.getElementById('botBuy').value||0);if(!/^[A-Z0-9]{2,12}$/.test(symbol))return toast('Ticker is required (2-12 letters/numbers).');if(!Number.isFinite(buySol)||buySol<=0)return toast('SOL amount must be greater than 0.');const r=await fetch('/api/ask/bots',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:address(),type:document.getElementById('botType').value,symbol:symbol,buySol:buySol,interval:document.getElementById('botInterval').value})});const d=await r.json();if(!d.success)return toast(d.error||'Could not save bot.');toast(d.notice||'Saved');loadBots()}
   async function loadBots(){const r=await fetch('/api/ask/bots?address='+encodeURIComponent(address()||''));const d=await r.json();const el=document.getElementById('botList');if(el)el.textContent=(d.bots||[]).map(function(b){return (b.type||'dca')+' '+b.symbol+' '+b.buySol+' SOL'}).join(' · ')||'No bots yet.'}
   function setAskMode(mode){askMode=mode;document.getElementById('askAiBox').style.display=mode==='ai'?'flex':'none';document.getElementById('askChatBox').style.display=mode==='chat'?'flex':'none';if(mode==='chat')startChat();else stopChat()}
   function safeMediaUrl(value){try{const url=new URL(value);return url.protocol==='https:'&&/\.(gif|png|webp|jpe?g)$/i.test(url.pathname)?url.href:''}catch(e){return ''}}
@@ -199,10 +213,10 @@
   }
   function connectPhantom(){if(window.solana){window.solana.connect().then(function(res){if(res.publicKey){saveAddr(res.publicKey.toString());sync()}});return}startTicket('phantom')}
   function connectMetaMask(){if(window.ethereum){window.ethereum.request({method:'eth_requestAccounts'}).then(function(a){if(a&&a[0]){saveAddr(a[0]);sync()}});return}startTicket('metamask')}
-  window.CessionUI={go:show,open:open,close:close,openCreate:function(){open('deployModal')},openSettings:function(){open('settingsModal')},openStatement:openStatement,downloadCsv:downloadCsv,savePresets:savePresets,openCoin:openCoin,openTrade:openTrade,shareCoin:shareCoin,setTradeStatus:setTradeStatus,confirmTrade:function(){setTradeStatus('pending','Awaiting wallet signature');toast('Sign this trade in your wallet.')},connectPhantom:connectPhantom,connectMetaMask:connectMetaMask,claimApproved:function(){claimTicket(pendingTicket()).then(function(ok){if(!ok)toast('Not approved yet. Approve in the wallet, then tap again.')})},openStake:function(){open('stakeModal')},openPhantomStake:function(){location.href='https://phantom.app/ul/browse/'+encodeURIComponent('https://help.phantom.com')},sendAi:sendAi,sendChat:sendChat,setAskMode:setAskMode,setHomeLane:setHomeLane,saveBot:saveBot,lockUsername:lockUsername,copyReferralLink:copyReferralLink};
+  window.CessionUI={go:show,open:open,close:close,openCreate:function(){open('deployModal')},openSettings:function(){open('settingsModal')},openStatement:openStatement,downloadCsv:downloadCsv,savePresets:savePresets,openCoin:openCoin,openTrade:openTrade,shareCoin:shareCoin,followCreator:followCreator,setTradeStatus:setTradeStatus,confirmTrade:function(){const amount=Number(document.getElementById('tradeAmount')&&document.getElementById('tradeAmount').value||0);if(!address())return open('walletModal');if(!activeCoin||!(activeCoin.mintAddress||activeCoin.mint))return toast('No live mint to trade.');if(!Number.isFinite(amount)||amount<=0)return toast('Enter a valid amount.');setTradeStatus('pending','Trading requires wallet-signed on-chain transaction');toast('Trading flow is wallet-signed only. Connect wallet and confirm on-chain.');},connectPhantom:connectPhantom,connectMetaMask:connectMetaMask,claimApproved:function(){claimTicket(pendingTicket()).then(function(ok){if(!ok)toast('Not approved yet. Approve in the wallet, then tap again.')})},sendAi:sendAi,sendChat:sendChat,setAskMode:setAskMode,setHomeLane:setHomeLane,setExploreLane:setExploreLane,saveBot:saveBot,lockUsername:lockUsername,copyReferralLink:copyReferralLink};
   window.CessionCard={visuals:cardVisuals,fmtMoney:fmtMoney,shortMint:shortMint};
   document.addEventListener('DOMContentLoaded',function(){
-    const form=document.getElementById('deployCoinForm');if(form)form.addEventListener('submit',function(e){e.preventDefault();toast('Create is not live until the program is deployed.')});
+    const form=document.getElementById('deployCoinForm');if(form)form.addEventListener('submit',async function(e){e.preventDefault();const name=String(document.getElementById('deployName').value||'').trim();const symbol=String(document.getElementById('deploySymbol').value||'').trim().toUpperCase();const imageUrl=String(document.getElementById('deployMedia').value||'').trim();if(!name||!symbol)return toast('Name and ticker are required.');const payload={name:name,symbol:symbol,imageUrl:imageUrl||null,creator:address()||null};const btn=form.querySelector('button[type="submit"]');if(btn)btn.disabled=true;try{const r=await fetch('/api/tokens/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const d=await r.json();if(!d.success)return toast(d.error||'Could not create coin.');toast('Coin created.');close('deployModal');form.reset();const firstBuy=document.getElementById('deployFirstBuy');if(firstBuy)firstBuy.value='0.06';await load();}catch(err){toast('Could not create coin.')}finally{if(btn)btn.disabled=false;}});
     const words=document.getElementById('exploreWords');if(words)words.addEventListener('click',function(e){const b=e.target.closest('button');if(b)setExploreLane(b.getAttribute('data-lane'))});
     const ranges=document.getElementById('pnlRange');if(ranges)ranges.addEventListener('click',function(e){const b=e.target.closest('button');if(!b)return;pnlRange=b.getAttribute('data-range');ranges.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b)});loadPnl()});
     ['filterAge','filterVolume','filterLiquidity','filterHolders','filterVerified'].forEach(function(id){const control=document.getElementById(id);if(control)control.addEventListener('change',load)});
