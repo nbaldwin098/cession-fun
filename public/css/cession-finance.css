@@ -1,63 +1,62 @@
-/* Cession Clear Money — own system. Reference only: calm hierarchy from major exchanges. */
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+/* Cession — 99% white, 1% powder blue. High-tech consumer finance. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-  --cx-ink: #0c0e12;
-  --cx-ink-soft: #3a3f4b;
-  --cx-muted: #6b7280;
-  --cx-line: #e8eaef;
-  --cx-line-strong: #d5d8e0;
-  --cx-paper: #ffffff;
-  --cx-wash: #f3f4f7;
-  --cx-wash-2: #eef0f4;
-  --cx-accent: #2f3bff;
-  --cx-accent-hover: #2430e0;
-  --cx-accent-soft: rgba(47, 59, 255, 0.08);
-  --cx-up: #0f9f6e;
-  --cx-up-soft: rgba(15, 159, 110, 0.1);
-  --cx-down: #e11d48;
-  --cx-down-soft: rgba(225, 29, 72, 0.08);
-  --cx-radius: 14px;
-  --cx-radius-sm: 10px;
-  --cx-radius-pill: 999px;
-  --cx-shadow: 0 1px 2px rgba(12, 14, 18, 0.04), 0 8px 24px rgba(12, 14, 18, 0.04);
-  --cx-font: "DM Sans", Inter, -apple-system, BlinkMacSystemFont, sans-serif;
-  --cx-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --cx-white: #ffffff;
+  --cx-canvas: #ffffff;
+  --cx-soft: #f7f9fc;
+  --cx-powder: #dbe7f5;
+  --cx-powder-deep: #c5d8ef;
+  --cx-ink: #0b0d10;
+  --cx-ink-2: #3c4450;
+  --cx-muted: #8b93a0;
+  --cx-line: #eef1f6;
+  --cx-line-2: #e2e7ef;
+  --cx-up: #098458;
+  --cx-down: #d12b4a;
+  --cx-btn: #0b0d10;
+  --cx-btn-hover: #1a1d24;
+  --cx-radius: 16px;
+  --cx-radius-sm: 12px;
+  --cx-pill: 999px;
+  --cx-font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --nav-h: 64px;
 }
 
 html, body {
-  background: var(--cx-wash) !important;
+  background: var(--cx-white) !important;
   color: var(--cx-ink) !important;
   font-family: var(--cx-font) !important;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Header */
+/* Header — pure white */
 .cx-top {
-  background: rgba(255, 255, 255, 0.92) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
   border-bottom: 1px solid var(--cx-line) !important;
-  backdrop-filter: blur(16px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  backdrop-filter: blur(12px) !important;
   height: 56px !important;
-  gap: 20px !important;
+  gap: 22px !important;
 }
 .cx-xtab {
   color: var(--cx-ink) !important;
   font-weight: 600 !important;
   font-size: 14px !important;
-  opacity: 0.45 !important;
+  opacity: 0.4 !important;
   padding-bottom: 14px !important;
+  box-shadow: none !important;
 }
 .cx-xtab.on {
   opacity: 1 !important;
-  box-shadow: inset 0 -2px 0 var(--cx-accent) !important;
-  color: var(--cx-ink) !important;
+  box-shadow: inset 0 -2px 0 var(--cx-ink) !important;
 }
 .cx-search-btn svg { stroke: var(--cx-ink) !important; }
 
 .cx-app {
-  width: min(720px, 100%) !important;
-  padding: 20px 16px 32px !important;
+  width: min(640px, 100%) !important;
+  margin: 0 auto !important;
+  padding: 12px 20px 40px !important;
+  background: var(--cx-white);
 }
 
 .cx-title {
@@ -65,203 +64,226 @@ html, body {
   font-weight: 700 !important;
   letter-spacing: -0.04em !important;
   color: var(--cx-ink) !important;
-  margin-bottom: 16px !important;
 }
 
 /* Cards */
-.cx-card,
-.cx-ad,
-.cx-empty {
-  background: var(--cx-paper) !important;
+.cx-card, .cx-ad, .cx-empty {
+  background: var(--cx-white) !important;
   border: 1px solid var(--cx-line) !important;
   border-radius: var(--cx-radius) !important;
-  box-shadow: var(--cx-shadow) !important;
+  box-shadow: none !important;
   padding: 18px !important;
   margin-bottom: 12px !important;
 }
-.cx-muted { color: var(--cx-muted) !important; font-size: 13px !important; }
-.cx-mono { font-family: var(--cx-mono) !important; color: var(--cx-muted) !important; }
-.cx-row {
-  border-bottom-color: var(--cx-line) !important;
-  color: var(--cx-ink-soft) !important;
-}
+.cx-muted { color: var(--cx-muted) !important; }
+.cx-row { border-bottom-color: var(--cx-line) !important; color: var(--cx-ink-2) !important; }
 
-/* Primary actions */
-.cx-launch {
-  background: var(--cx-accent) !important;
+/* Coinbase-style primary buttons: solid dark, full pill, tall */
+.cx-launch,
+.cx-btn-primary {
+  background: var(--cx-btn) !important;
   color: #fff !important;
   border: 0 !important;
-  border-radius: var(--cx-radius-pill) !important;
-  height: 48px !important;
+  border-radius: var(--cx-pill) !important;
+  height: 52px !important;
   font-weight: 600 !important;
-  box-shadow: 0 8px 20px rgba(47, 59, 255, 0.22) !important;
+  font-size: 15px !important;
+  box-shadow: none !important;
+  filter: none !important;
+  letter-spacing: -0.01em;
+}
+.cx-launch:hover,
+.cx-btn-primary:hover {
+  background: var(--cx-btn-hover) !important;
   filter: none !important;
 }
-.cx-launch:hover { background: var(--cx-accent-hover) !important; filter: none !important; }
 .cx-ghost,
-.cx-door {
-  background: var(--cx-paper) !important;
-  border: 1px solid var(--cx-line-strong) !important;
+.cx-door,
+.cx-btn-secondary {
+  background: var(--cx-white) !important;
+  border: 1px solid var(--cx-line-2) !important;
   color: var(--cx-ink) !important;
-  border-radius: var(--cx-radius-sm) !important;
-  height: 48px !important;
+  border-radius: var(--cx-pill) !important;
+  height: 52px !important;
   font-weight: 600 !important;
+  box-shadow: none !important;
 }
 .cx-ghost:hover,
 .cx-door:hover {
-  background: var(--cx-wash) !important;
-  border-color: var(--cx-ink-soft) !important;
+  background: var(--cx-soft) !important;
+  border-color: var(--cx-powder-deep) !important;
 }
 
 .cx-search,
 .form-input-pump {
-  background: var(--cx-paper) !important;
-  border: 1px solid var(--cx-line-strong) !important;
+  background: var(--cx-soft) !important;
+  border: 1px solid transparent !important;
   color: var(--cx-ink) !important;
   border-radius: var(--cx-radius-sm) !important;
-  height: 48px !important;
+  height: 52px !important;
 }
 .cx-search:focus,
 .form-input-pump:focus {
-  border-color: var(--cx-accent) !important;
-  box-shadow: 0 0 0 3px var(--cx-accent-soft) !important;
+  border-color: var(--cx-powder-deep) !important;
+  background: var(--cx-white) !important;
+  box-shadow: 0 0 0 3px var(--cx-powder) !important;
 }
 
-/* Exchange balance hero */
-.cx-balance-hero {
-  background: var(--cx-paper);
-  border: 1px solid var(--cx-line);
-  border-radius: 20px;
-  padding: 24px 20px 20px;
-  box-shadow: var(--cx-shadow);
-  margin-bottom: 12px;
+/* Portfolio hero + chart */
+.cx-pf {
+  background: var(--cx-white);
+  padding: 8px 0 4px;
 }
-.cx-balance-label {
-  font-size: 13px;
+.cx-pf-label {
+  font-size: 14px;
   font-weight: 500;
   color: var(--cx-muted);
-  margin: 0 0 6px;
+  margin: 0 0 4px;
 }
-.cx-balance-num {
-  font-size: 36px;
+.cx-pf-value {
+  font-size: 40px;
   font-weight: 700;
   letter-spacing: -0.05em;
   line-height: 1.1;
   color: var(--cx-ink);
   font-variant-numeric: tabular-nums;
 }
-.cx-balance-delta {
-  margin-top: 8px;
-  font-size: 14px;
+.cx-pf-delta {
+  margin-top: 6px;
+  font-size: 15px;
   font-weight: 600;
-  font-family: var(--cx-mono);
+  font-variant-numeric: tabular-nums;
 }
-.cx-balance-delta.up { color: var(--cx-up); }
-.cx-balance-delta.down { color: var(--cx-down); }
-.cx-action-grid {
+.cx-pf-delta.up { color: var(--cx-up); }
+.cx-pf-delta.down { color: var(--cx-down); }
+.cx-pf-chart-wrap {
+  margin: 16px 0 8px;
+  height: 160px;
+  position: relative;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(219, 231, 245, 0.45) 0%, rgba(255, 255, 255, 0) 70%);
+}
+.cx-pf-chart-wrap canvas {
+  width: 100% !important;
+  height: 160px !important;
+  display: block;
+}
+.cx-pf-ranges {
+  display: flex;
+  gap: 4px;
+  margin: 8px 0 18px;
+  padding: 4px;
+  background: var(--cx-soft);
+  border-radius: var(--cx-pill);
+}
+.cx-pf-ranges button {
+  flex: 1;
+  height: 32px;
+  border: 0;
+  border-radius: var(--cx-pill);
+  background: transparent;
+  color: var(--cx-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.cx-pf-ranges button.on {
+  background: var(--cx-white);
+  color: var(--cx-ink);
+  box-shadow: 0 1px 2px rgba(11, 13, 16, 0.06);
+}
+.cx-pf-actions {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-  margin-top: 18px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
-.cx-action-grid button {
-  height: 44px;
-  border-radius: 12px;
+.cx-pf-actions button {
+  height: 48px;
+  border-radius: var(--cx-pill);
   font-weight: 600;
   font-size: 14px;
-  border: 1px solid var(--cx-line-strong);
-  background: var(--cx-wash);
-  color: var(--cx-ink);
+  border: 0;
 }
-.cx-action-grid button.primary {
-  background: var(--cx-accent);
-  border-color: var(--cx-accent);
+.cx-pf-actions .buy {
+  background: var(--cx-btn);
   color: #fff;
 }
-.cx-pill-status {
+.cx-pf-actions .sell,
+.cx-pf-actions .send {
+  background: var(--cx-powder);
+  color: var(--cx-ink);
+}
+.cx-pf-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 14px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: var(--cx-accent-soft);
-  color: var(--cx-accent);
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: var(--cx-pill);
+  background: var(--cx-soft);
+  color: var(--cx-ink-2);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
 }
 .cx-section-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: var(--cx-muted);
-  margin: 18px 0 8px;
+  margin: 20px 0 8px;
 }
 
-/* Bottom nav — floating but light */
+/* Bottom nav white */
 .bottom-nav-bar {
-  background: rgba(255, 255, 255, 0.94) !important;
+  background: rgba(255, 255, 255, 0.97) !important;
   border: 1px solid var(--cx-line) !important;
   color: var(--cx-ink) !important;
-  box-shadow: 0 12px 40px rgba(12, 14, 18, 0.1) !important;
-  height: var(--nav-h) !important;
+  box-shadow: 0 8px 32px rgba(11, 13, 16, 0.08) !important;
 }
-.bottom-nav-slot {
-  color: var(--cx-muted) !important;
-  opacity: 1 !important;
-}
-.bottom-nav-slot.active {
-  color: var(--cx-accent) !important;
-}
+.bottom-nav-slot { color: var(--cx-muted) !important; opacity: 1 !important; }
+.bottom-nav-slot.active { color: var(--cx-ink) !important; }
 .bnav-plus-circle {
-  background: var(--cx-accent) !important;
-  box-shadow: 0 6px 16px rgba(47, 59, 255, 0.25);
+  background: var(--cx-btn) !important;
+  box-shadow: none !important;
 }
 .bnav-plus-circle svg { stroke: #fff !important; }
 
 .cx-askbar {
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: var(--cx-white) !important;
   border: 1px solid var(--cx-line) !important;
-  color: var(--cx-ink-soft) !important;
-  border-radius: 12px !important;
-  box-shadow: var(--cx-shadow) !important;
+  color: var(--cx-ink-2) !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
 }
 
 .modal-box-pump {
-  background: var(--cx-paper) !important;
+  background: var(--cx-white) !important;
   border-color: var(--cx-line) !important;
   color: var(--cx-ink) !important;
 }
 .cx-words button {
-  background: var(--cx-wash) !important;
-  border-color: var(--cx-line) !important;
+  background: var(--cx-soft) !important;
+  border-color: transparent !important;
   color: var(--cx-muted) !important;
 }
 .cx-words button.on {
-  background: var(--cx-accent) !important;
-  color: #fff !important;
-  border-color: var(--cx-accent) !important;
+  background: var(--cx-powder) !important;
+  color: var(--cx-ink) !important;
 }
 .cx-card-coin {
-  background: var(--cx-paper) !important;
+  background: var(--cx-white) !important;
   border-color: var(--cx-line) !important;
 }
-.cx-chip-chg.up { color: var(--cx-up) !important; background: var(--cx-up-soft) !important; }
-.cx-chip-chg.down { color: var(--cx-down) !important; background: var(--cx-down-soft) !important; }
 .cx-tap {
-  background: var(--cx-accent) !important;
+  background: var(--cx-btn) !important;
   color: #fff !important;
-  box-shadow: 0 6px 16px rgba(47, 59, 255, 0.2) !important;
+  box-shadow: none !important;
 }
 .cx-msg.me {
-  background: var(--cx-accent) !important;
+  background: var(--cx-btn) !important;
   color: #fff !important;
 }
-.cx-you-footer {
-  border-top-color: var(--cx-line) !important;
-}
-.cx-you-footer a { color: var(--cx-muted) !important; }
+.cx-chip-chg.up { color: var(--cx-up) !important; background: rgba(9, 132, 88, 0.08) !important; }
+.cx-chip-chg.down { color: var(--cx-down) !important; background: rgba(209, 43, 74, 0.08) !important; }
 .cx-pay-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -269,8 +291,8 @@ html, body {
 }
 .cx-pay-row button {
   height: 44px;
-  border-radius: 12px;
-  border: 1px solid var(--cx-line-strong);
-  background: var(--cx-wash);
+  border-radius: var(--cx-pill);
+  border: 1px solid var(--cx-line-2);
+  background: var(--cx-soft);
   font-weight: 600;
 }

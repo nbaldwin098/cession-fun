@@ -4,6 +4,37 @@ const walletEngine = require('../services/walletEngine');
 const ask = require('../services/askService');
 const bonusCampaign = require('../services/bonusCampaign');
 
+function rangeDays(range) {
+  const r = String(range || '7d').toLowerCase();
+  if (r === '1d' || r === 'day') return 1;
+  if (r === '1w' || r === '7d' || r === 'week') return 7;
+  if (r === '1m' || r === 'month') return 30;
+  if (r === '1y' || r === 'year') return 365;
+  if (r === 'all') return 730;
+  return 7;
+}
+
+function buildSeries(txs, days) {
+  const points = [];
+  let value = 0;
+  const sorted = (txs || []).slice().sort((a, b) => {
+    return Date.parse(a.time || a.createdAt || 0) - Date.parse(b.time || b.createdAt || 0);
+  });
+  const steps = days <= 1 ? 24 : days;
+  const stepMs = days <= 1 ? 3600000 : 86400000;
+  for (let i = steps; i >= 0; i--) {
+    const t = Date.now() - i * stepMs;
+    sorted.forEach((tx) => {
+      const when = Date.parse(tx.time || tx.createdAt || 0);
+      if (when && when <= t && when > t - stepMs) {
+        value += Number(tx.pnl || tx.sol || tx.amountUsd || 0);
+      }
+    });
+    points.push({ t, v: Number(value.toFixed(4)) });
+  }
+  return { points, total: value };
+}
+
 router.get('/screen/:address', (req, res) => {
   try {
     const screen = walletEngine.screenWallet(req.params.address);
@@ -17,19 +48,39 @@ router.get('/:address/pnl', (req, res) => {
   try {
     const bondingCurve = require('../services/bondingCurve');
     const range = String(req.query.range || '7d');
-    const days = range === '1m' ? 30 : range === '6m' ? 180 : range === '1y' ? 365 : range === 'all' ? 365 : 7;
+    const days = rangeDays(range);
     const txs = bondingCurve.getWalletTransactions(req.params.address) || [];
-    const points = [];
-    let value = 0;
-    for (let i = days; i >= 0; i--) {
-      const t = Date.now() - i * 86400000;
-      txs.forEach((tx) => {
-        const when = Date.parse(tx.time || tx.createdAt || 0);
-        if (when && when <= t && when > t - 86400000) value += Number(tx.pnl || tx.sol || 0);
-      });
-      points.push({ t, v: Number(value.toFixed(4)) });
-    }
-    res.json({ success: true, range, total: value, points });
+    const series = buildSeries(txs, days);
+    res.json({
+      success: true,
+      range,
+      days,
+      total: series.total,
+      points: series.points,
+      empty: !(txs && txs.length)
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.get('/:address/portfolio', (req, res) => {
+  try {
+    const bondingCurve = require('../services/bondingCurve');
+    const range = String(req.query.range || '7d');
+    const days = rangeDays(range);
+    const address = req.params.address;
+    const txs = bondingCurve.getWalletTransactions(address) || [];
+    const series = buildSeries(txs, days);
+    res.json({
+      success: true,
+      address,
+      range,
+      balanceUsd: series.total,
+      points: series.points,
+      tradeCount: txs.length,
+      empty: !txs.length
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
