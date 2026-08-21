@@ -1,5 +1,6 @@
 (function () {
   var gateMode = 'sign'; // 'sign' | 'login'
+  var codeOpen = false;
 
   function setGateViewport() {
     var h = window.visualViewport && window.visualViewport.height
@@ -44,18 +45,15 @@
 
   function afterUnlock() {
     localStorage.setItem('cession_gate_ok', '1');
-    // Returning login: already has username → enter site
     if (already() || savedUser()) {
       if (savedUser()) localStorage.setItem('cession_onboarded', '1');
       done();
       return;
     }
-    // Login mode without a saved username: still need wallet path, skip heavy sign-up if possible
     if (gateMode === 'login') {
       step('wallet');
       return;
     }
-    // New sign-up
     step('user');
   }
 
@@ -115,7 +113,9 @@
     }
   }
 
+  // Same secret code path for Sign up and Login
   async function submitCode(input, err) {
+    if (!input || !err) return;
     err.textContent = '';
     var code = String(input.value || '').trim();
     if (!code) {
@@ -130,12 +130,24 @@
         body: JSON.stringify({ code: code })
       });
       var d = await r.json();
-      if (!d.success) { err.textContent = d.error || 'Wrong code.'; return; }
+      if (!d.success) {
+        err.textContent = d.error || 'Wrong code.';
+        return;
+      }
       localStorage.setItem('cession_gate_code', code.toUpperCase());
       afterUnlock();
     } catch (e) {
       err.textContent = 'Could not reach the gate.';
     }
+  }
+
+  function openCodeField(btn, wrap, input, err, label) {
+    codeOpen = true;
+    wrap.classList.add('on');
+    btn.textContent = label || 'Login';
+    input.placeholder = 'Enter your code';
+    err.textContent = '';
+    input.focus();
   }
 
   function land() {
@@ -147,6 +159,7 @@
     }
     g.className = 'open';
     hideApp(true);
+    codeOpen = false;
     g.innerHTML =
       '<button class="gate-login" type="button" id="gateLogin">Login</button>' +
       '<aside class="gate-toolbar-tip" id="gateToolbarTip" aria-live="polite">' +
@@ -168,28 +181,32 @@
     var wrap = document.getElementById('gateCodeWrap');
     var input = document.getElementById('gateCode');
     var err = document.getElementById('gateErr');
-    var codeOpen = false;
 
     btn.onclick = function () {
-      gateMode = 'sign';
+      // First press on Sign up: open code field
       if (!codeOpen) {
-        codeOpen = true;
-        btn.textContent = 'Enter Code';
-        wrap.classList.add('on');
-        input.placeholder = 'Enter code';
-        input.focus();
+        gateMode = 'sign';
+        openCodeField(btn, wrap, input, err, 'Enter Code');
         return;
       }
+      // Second press (Enter Code or Login label): same unlock API
       submitCode(input, err);
     };
 
     document.getElementById('gateLogin').onclick = async function () {
       gateMode = 'login';
-      // Already unlocked this browser + has account → go in
+
       if (gated() && (already() || savedUser())) {
         done();
         return;
       }
+
+      // Second press: code field already open → submit same secret code
+      if (codeOpen) {
+        await submitCode(input, err);
+        return;
+      }
+
       try {
         var r = await fetch('/api/access/gate', { credentials: 'same-origin' });
         var d = await r.json();
@@ -202,18 +219,14 @@
           return;
         }
       } catch (e) {}
-      // Need code: show field; blue button becomes login submit
-      codeOpen = true;
-      wrap.classList.add('on');
-      btn.textContent = 'Login';
-      input.placeholder = 'Enter your code';
-      input.focus();
-      err.textContent = '';
+
+      // First press: show the same code field Sign up uses
+      openCodeField(btn, wrap, input, err, 'Login');
     };
 
-    // When blue button says Login, it still uses same handler → submitCode
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
+        e.preventDefault();
         if (codeOpen) submitCode(input, err);
         else btn.click();
       }
