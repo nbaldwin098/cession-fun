@@ -1,11 +1,11 @@
 html.gated, body.gated {
-  background: #000 !important;
+  background: #0c0e12 !important;
   overflow: hidden !important;
   height: 100%;
 }
 html.gated:has(.gate-on),
 body.gated:has(.gate-on) {
-  background: #fff !important;
+  background: #f3f4f7 !important;
 }
 html.gated .cx-top,
 html.gated .cx-app,
@@ -19,21 +19,17 @@ html.gated .modal-overlay-generic {
 }
 #cessionGate {
   position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   z-index: 2147483000;
-  background: #000;
+  background: #0c0e12;
   color: #fff;
   display: none;
+  font-family: "DM Sans", Inter, -apple-system, sans-serif;
 }
-#cessionGate.open {
-  display: block;
-}
+#cessionGate.open { display: block; }
 #cessionGate:has(.gate-on) {
-  background: #fff;
-  color: #111;
+  background: #f3f4f7;
+  color: #0c0e12;
 }
 .gate-login {
   position: absolute;
@@ -49,55 +45,50 @@ html.gated .modal-overlay-generic {
 }
 .gate-land {
   min-height: 100dvh;
-  min-height: 100svh;
   min-height: calc(var(--gate-vh) * 100);
-  background: #000;
+  background: #0c0e12;
   padding: 56px 28px 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
-.gate-col {
-  width: min(320px, 100%);
-}
+.gate-col { width: min(320px, 100%); }
 .gate-k {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   margin-bottom: 28px;
   display: block;
 }
 .gate-skip {
-  font-size: 22px;
+  font-size: 20px;
   margin: 0 0 18px;
   font-weight: 400;
+  color: rgba(255,255,255,0.72);
 }
 .gate-cta {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  background: #2563EB;
+  background: #2f3bff;
   color: #fff;
   border: 0;
   border-radius: 999px;
-  height: 48px;
+  height: 52px;
   font-weight: 600;
   font-size: 16px;
+  box-shadow: 0 10px 28px rgba(47, 59, 255, 0.35);
 }
-.gate-code {
-  display: none;
-  width: 100%;
-  margin-top: 12px;
-}
+.gate-code { display: none; width: 100%; margin-top: 12px; }
 .gate-code.on { display: block; }
 .gate-code input {
   width: 100%;
-  height: 48px;
+  height: 52px;
   border: 0;
   border-radius: 999px;
   padding: 0 18px;
   font-size: 16px;
-  color: #111;
+  color: #0c0e12;
 }
 .gate-err {
   color: #ff8aa2;
@@ -106,21 +97,21 @@ html.gated .modal-overlay-generic {
   min-height: 16px;
 }
 .gate-hero {
-  font-size: 36px;
+  font-size: 34px;
   font-weight: 700;
   line-height: 1.05;
-  margin: 36px 0 0;
+  letter-spacing: -0.03em;
+  margin: 40px 0 0;
 }
 .gate-word {
-  height: 40px;
-  margin-top: 10px;
+  height: 36px;
+  margin-top: 12px;
   display: block;
 }
 .gate-on {
   min-height: 100dvh;
-  min-height: 100svh;
   min-height: calc(var(--gate-vh) * 100);
-  background: #fff;
+  background: #f3f4f7;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -129,25 +120,27 @@ html.gated .modal-overlay-generic {
 .gate-phone {
   width: min(400px, 100%);
   background: #fff;
-  color: #111;
-  border-radius: 0;
-  box-shadow: none;
-  padding: 0;
+  color: #0c0e12;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(12,14,18,0.04), 0 12px 32px rgba(12,14,18,0.06);
+  padding: 28px 24px 32px;
+  border: 1px solid #e8eaef;
 }
 .gate-phone h1 {
   font-size: 28px;
   line-height: 1.15;
+  letter-spacing: -0.03em;
   margin: 16px 0 12px;
 }
-.gate-phone p { color: #6E6E78; font-size: 13px; line-height: 1.4; }
+.gate-phone p { color: #6b7280; font-size: 14px; line-height: 1.45; }
 .gate-phone input[type=text] {
   width: 100%;
   border: 0;
-  border-bottom: 1px solid #ECECF0;
+  border-bottom: 1px solid #e8eaef;
   font-size: 20px;
-  padding: 10px 0;
+  padding: 12px 0;
   margin: 8px 0 16px;
-  color: #111;
+  color: #0c0e12;
   background: transparent;
 }
 .gate-agree {
@@ -155,46 +148,26 @@ html.gated .modal-overlay-generic {
   gap: 10px;
   align-items: flex-start;
   font-size: 12px;
-  color: #6E6E78;
-  line-height: 1.35;
+  color: #6b7280;
+  line-height: 1.4;
   margin: 8px 0 20px;
 }
 .gate-go {
   width: 100%;
-  height: 48px;
+  height: 52px;
   border: 0;
-  border-radius: 24px;
-  background: #2563EB;
+  border-radius: 999px;
+  background: #2f3bff;
   color: #fff;
   font-weight: 600;
+  font-size: 15px;
 }
-.gate-go[disabled] { background: #F1F1F3; color: #B6B6BE; }
+.gate-go[disabled] { background: #eef0f4; color: #9ca3af; }
 .gate-go.ghost {
   background: #fff;
-  color: #111;
-  border: 1px solid #e6e6ea;
+  color: #0c0e12;
+  border: 1px solid #d5d8e0;
   margin-top: 10px;
-}
-.gate-words {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin: 16px 0;
-}
-.gate-words span {
-  background: #f4f4f7;
-  border-radius: 10px;
-  padding: 8px 10px;
-  font-size: 13px;
-  user-select: none;
-}
-.gate-warn {
-  background: #111;
-  color: #fff;
-  border-radius: 12px;
-  padding: 12px;
-  font-size: 13px;
-  line-height: 1.4;
 }
 .gate-toolbar-tip {
   position: absolute;
@@ -203,22 +176,17 @@ html.gated .modal-overlay-generic {
   bottom: max(16px, env(safe-area-inset-bottom));
   z-index: 3;
   display: none;
-  background: rgba(15, 15, 20, 0.92);
+  background: rgba(12, 14, 18, 0.94);
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
-  padding: 14px 14px 12px;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+  padding: 14px;
 }
 .gate-toolbar-tip.open { display: block; }
-.gate-toolbar-tip strong {
-  display: block;
-  font-size: 14px;
-  margin: 0 0 4px;
-}
+.gate-toolbar-tip strong { display: block; font-size: 14px; margin: 0 0 4px; }
 .gate-toolbar-tip p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255,255,255,0.8);
   font-size: 12px;
   line-height: 1.35;
   padding-right: 72px;
@@ -228,7 +196,7 @@ html.gated .modal-overlay-generic {
   border: 0;
   border-radius: 999px;
   padding: 8px 12px;
-  background: #2563EB;
+  background: #2f3bff;
   color: #fff;
   font-size: 12px;
   font-weight: 600;
@@ -242,7 +210,6 @@ html.gated .modal-overlay-generic {
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255,255,255,0.78);
   font-size: 19px;
-  line-height: 1;
 }
