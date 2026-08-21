@@ -1,5 +1,5 @@
 (function () {
-  var gateMode = 'sign'; // 'sign' | 'login'
+  var gateMode = 'sign';
   var codeOpen = false;
 
   function setGateViewport() {
@@ -32,26 +32,54 @@
     document.documentElement.classList.toggle('gated', on);
     document.body.classList.toggle('gated', on);
   }
-  function done() {
+  function goHome() {
     localStorage.setItem('cession_onboarded', '1');
     localStorage.setItem('cession_gate_ok', '1');
     var g = document.getElementById('cessionGate');
     if (g) g.classList.remove('open');
     hideApp(false);
+    if (window.CessionExchange && typeof CessionExchange.go === 'function') {
+      try { CessionExchange.go(); } catch (e) {}
+    }
   }
   function already() { return localStorage.getItem('cession_onboarded') === '1'; }
   function gated() { return localStorage.getItem('cession_gate_ok') === '1'; }
   function savedUser() { return String(localStorage.getItem('cession_username') || '').trim(); }
+  function savedWallet() {
+    return String(
+      localStorage.getItem('cession_address') ||
+      localStorage.getItem('walletAddress') ||
+      (window.walletEngine && (window.walletEngine.activeAddress || window.walletEngine.address)) ||
+      ''
+    ).trim();
+  }
+  function isReturningUser() {
+    return Boolean(already() && savedUser() && savedWallet());
+  }
 
   function afterUnlock() {
     localStorage.setItem('cession_gate_ok', '1');
-    if (already() || savedUser()) {
-      if (savedUser()) localStorage.setItem('cession_onboarded', '1');
-      done();
+
+    // Fully saved session → homepage (Exchange)
+    if (isReturningUser()) {
+      goHome();
       return;
     }
+
+    // Login path: always crypto wallet next (unless fully saved above)
     if (gateMode === 'login') {
+      // Has username but no wallet → wallet only
+      if (savedUser()) {
+        step('wallet');
+        return;
+      }
       step('wallet');
+      return;
+    }
+
+    // Sign up path
+    if (savedUser()) {
+      step('secure');
       return;
     }
     step('user');
@@ -91,29 +119,36 @@
       document.getElementById('gateSecGo').onclick = function () { step('wallet'); };
     }
     if (name === 'wallet') {
+      var title = gateMode === 'login' ? 'Log in with<br>your wallet' : 'Get approved to<br>start trading';
+      var sub = gateMode === 'login'
+        ? 'Connect the wallet linked to your account.'
+        : "You're almost there";
       root.innerHTML =
         '<div class="gate-on"><div class="gate-phone">' +
         '<img class="gate-k" src="brand/cession-c-mark.svg" alt="">' +
-        '<h1>Get approved to<br>start trading</h1>' +
-        '<p>You\'re almost there</p>' +
+        '<h1>' + title + '</h1>' +
+        '<p>' + sub + '</p>' +
         '<button class="gate-go" type="button" id="gatePh">Connect Phantom</button>' +
         '<button class="gate-go ghost" type="button" id="gateMm">Connect MetaMask</button>' +
-        '<button class="gate-go ghost" type="button" id="gateMake">Create a wallet</button></div></div>';
+        (gateMode === 'login' ? '' : '<button class="gate-go ghost" type="button" id="gateMake">Create a wallet</button>') +
+        '</div></div>';
       document.getElementById('gatePh').onclick = function () {
-        done();
+        goHome();
         if (window.CessionUI && CessionUI.connectPhantom) CessionUI.connectPhantom();
       };
       document.getElementById('gateMm').onclick = function () {
-        done();
+        goHome();
         if (window.CessionUI && CessionUI.connectMetaMask) CessionUI.connectMetaMask();
       };
-      document.getElementById('gateMake').onclick = function () {
-        if (window.CessionWalletCreate) CessionWalletCreate.start();
-      };
+      var make = document.getElementById('gateMake');
+      if (make) {
+        make.onclick = function () {
+          if (window.CessionWalletCreate) CessionWalletCreate.start();
+        };
+      }
     }
   }
 
-  // Same secret code path for Sign up and Login
   async function submitCode(input, err) {
     if (!input || !err) return;
     err.textContent = '';
@@ -183,25 +218,23 @@
     var err = document.getElementById('gateErr');
 
     btn.onclick = function () {
-      // First press on Sign up: open code field
       if (!codeOpen) {
         gateMode = 'sign';
         openCodeField(btn, wrap, input, err, 'Enter Code');
         return;
       }
-      // Second press (Enter Code or Login label): same unlock API
       submitCode(input, err);
     };
 
     document.getElementById('gateLogin').onclick = async function () {
       gateMode = 'login';
 
-      if (gated() && (already() || savedUser())) {
-        done();
+      // Already fully saved on this device → homepage
+      if (isReturningUser()) {
+        goHome();
         return;
       }
 
-      // Second press: code field already open → submit same secret code
       if (codeOpen) {
         await submitCode(input, err);
         return;
@@ -210,17 +243,12 @@
       try {
         var r = await fetch('/api/access/gate', { credentials: 'same-origin' });
         var d = await r.json();
-        if (d.open && (already() || savedUser())) {
-          afterUnlock();
-          return;
-        }
-        if (d.open && !savedUser()) {
+        if (d.open) {
           afterUnlock();
           return;
         }
       } catch (e) {}
 
-      // First press: show the same code field Sign up uses
       openCodeField(btn, wrap, input, err, 'Login');
     };
 
@@ -235,7 +263,14 @@
   }
 
   async function boot() {
-    if (already() && gated()) return;
+    if (isReturningUser() && gated()) {
+      hideApp(false);
+      return;
+    }
+    if (already() && gated() && savedUser()) {
+      hideApp(false);
+      return;
+    }
     setGateViewport();
     window.addEventListener('resize', setGateViewport);
     window.addEventListener('orientationchange', setGateViewport);
@@ -247,8 +282,8 @@
       var r = await fetch('/api/access/gate', { credentials: 'same-origin', signal: ctrl.signal });
       clearTimeout(t);
       var d = await r.json();
-      if (d.open && (already() || savedUser())) {
-        afterUnlock();
+      if (d.open && isReturningUser()) {
+        goHome();
         return;
       }
       if (d.open && !already() && !savedUser()) step('user');
