@@ -1,0 +1,169 @@
+/* Official receive / send sheets — no overlap */
+.modal-overlay-generic {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(11, 13, 16, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+.modal-overlay-generic.open,
+.modal-overlay-generic[style*="flex"] {
+  display: flex !important;
+}
+.cx-sheet {
+  width: min(440px, 100%);
+  max-height: min(92vh, 720px);
+  overflow: auto;
+  background: #ffffff;
+  border-radius: 20px 20px 0 0;
+  border: 1px solid #eef1f6;
+  border-bottom: 0;
+  padding: 12px 20px 28px;
+  position: relative;
+  box-shadow: 0 -8px 40px rgba(11, 13, 16, 0.12);
+  color: #0b0d10;
+}
+.cx-sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: #e2e7ef;
+  margin: 4px auto 14px;
+}
+.cx-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.cx-sheet-head h2 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.cx-sheet-x {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: #f7f9fc;
+  color: #0b0d10;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.cx-sheet-sub {
+  font-size: 13px;
+  color: #8b93a0;
+  margin: 0 0 18px;
+  line-height: 1.4;
+}
+.cx-qr-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 16px;
+  background: #f7f9fc;
+  border: 1px solid #eef1f6;
+  border-radius: 16px;
+  margin-bottom: 14px;
+}
+.cx-qr-card img {
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px;
+  border: 1px solid #eef1f6;
+  image-rendering: pixelated;
+}
+.cx-addr-block {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #eef1f6;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.cx-addr-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #8b93a0;
+  margin-bottom: 6px;
+}
+.cx-addr-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  word-break: break-all;
+  color: #0b0d10;
+  user-select: all;
+}
+.cx-sheet-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+.cx-sheet-actions .cx-launch,
+.cx-sheet-actions .cx-ghost {
+  margin: 0;
+  width: 100%;
+}
+.cx-sheet-note {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(219, 231, 245, 0.5);
+  border: 1px solid #dbe7f5;
+  font-size: 12px;
+  color: #3c4450;
+  line-height: 1.4;
+}
+.cx-sheet-field {
+  margin-bottom: 12px;
+}
+.cx-sheet-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5c6370;
+  margin-bottom: 6px;
+}
+.cx-copy-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 100px;
+  transform: translateX(-50%);
+  z-index: 300;
+  background: #0b0d10;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.cx-copy-toast.show { opacity: 1; }
+@media (min-width: 640px) {
+  .modal-overlay-generic {
+    align-items: center;
+    padding: 24px;
+  }
+  .cx-sheet {
+    border-radius: 20px;
+    border-bottom: 1px solid #eef1f6;
+    max-height: 85vh;
+  }
+  .cx-sheet-handle { display: none; }
+}
