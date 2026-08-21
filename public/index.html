@@ -6,6 +6,7 @@
   <title>Exchange | Cession</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/cession-finance.css">
+  <link rel="stylesheet" href="css/cession-sheets.css">
   <link rel="stylesheet" href="css/gate.css">
   <link rel="icon" type="image/svg+xml" href="brand/cession-c-mark.svg">
   <link rel="apple-touch-icon" href="brand/cession-c-mark.svg">
@@ -43,7 +44,6 @@
         </div>
         <div class="cx-pf-chip">Buffer available · 0.95% trade fee</div>
       </div>
-
       <p class="cx-section-label">Protection</p>
       <div class="cx-card">
         <strong>Send buffer</strong>
@@ -52,8 +52,11 @@
           Hold sends for 15 minutes so you can cancel a mistake
         </label>
         <div id="bufferQueue"></div>
+        <div class="cx-pay-row" style="margin-top:12px">
+          <button class="cx-ghost" type="button" onclick="CessionPay.openReceive()" style="margin-top:0">Receive</button>
+          <button class="cx-launch" type="button" onclick="CessionPay.openSend()" style="margin-top:0">Send</button>
+        </div>
       </div>
-
       <p class="cx-section-label">Support</p>
       <div class="cx-card">
         <p class="cx-muted">Chat about balances, fees, or buffer status.</p>
@@ -64,10 +67,10 @@
     <main class="page-view" id="viewExplorePulse">
       <h1 class="cx-title">Explore</h1>
       <div class="cx-filter-row" aria-label="Discovery filters">
-        <select id="filterAge" aria-label="Maximum token age"><option value="all">Any age</option><option value="24">Under 24h</option><option value="168">Under 7d</option></select>
-        <select id="filterVolume" aria-label="Minimum volume"><option value="0">Any volume</option><option value="100">100+ USD volume</option><option value="1000">1k+ USD volume</option></select>
-        <select id="filterLiquidity" aria-label="Minimum liquidity"><option value="0">Any liquidity</option><option value="1">1+ SOL liquidity</option><option value="10">10+ SOL liquidity</option></select>
-        <select id="filterHolders" aria-label="Minimum holders"><option value="0">Any holders</option><option value="10">10+ holders</option><option value="100">100+ holders</option></select>
+        <select id="filterAge"><option value="all">Any age</option><option value="24">Under 24h</option><option value="168">Under 7d</option></select>
+        <select id="filterVolume"><option value="0">Any volume</option><option value="100">100+ USD</option><option value="1000">1k+ USD</option></select>
+        <select id="filterLiquidity"><option value="0">Any liquidity</option><option value="1">1+ SOL</option><option value="10">10+ SOL</option></select>
+        <select id="filterHolders"><option value="0">Any holders</option><option value="10">10+</option><option value="100">100+</option></select>
         <label><input id="filterVerified" type="checkbox"> Safety 90+</label>
       </div>
       <div class="cx-words" id="exploreWords">
@@ -88,10 +91,9 @@
     <main class="page-view" id="viewMint">
       <h1 class="cx-title">Mint</h1>
       <div class="cx-card">
-        <p class="cx-muted">Game mint. Create is free except Solana rent. Exchange trade fee is 0.95%.</p>
+        <p class="cx-muted">Game mint. Create is free except Solana rent.</p>
         <button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create coin</button>
       </div>
-      <h2 class="cx-title">Your coins</h2>
       <div class="cx-card" id="mintManage"></div>
     </main>
     <main class="page-view" id="viewWallet">
@@ -107,7 +109,7 @@
         </div>
       </div>
       <div id="walletScreenDisconnected" class="cx-card">
-        <p class="cx-muted" id="connectHint">On phone, approve in the wallet then this tab comes back by itself.</p>
+        <p class="cx-muted" id="connectHint">Approve in your wallet app, then return here.</p>
         <button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button>
         <button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button>
       </div>
@@ -145,33 +147,18 @@
           <a href="javascript:CessionExchange.game()">Game</a>
           <a href="javascript:CessionUI.go('rewards')">Earn</a>
           <a href="javascript:CessionUI.go('ai')">Support</a>
-          <a href="https://intel.arkm.com/explorer/address/9MeQ5XiESSZPUVNzqKQjB9JYEWZScH1shwsbQMfYUTRU" target="_blank" rel="noopener noreferrer">Proof of Reserves</a>
           <a href="/legal">Legal</a>
         </div>
-        <p class="cx-muted">cession.us · Optional buffer · Clear 0.95%</p>
       </footer>
     </main>
     <main class="page-view" id="viewBots">
       <h1 class="cx-title">Bots</h1>
-      <div class="cx-card">
-        <p class="cx-muted">Authors charge a fee on fills only.</p>
-        <select class="form-input-pump" id="botType"><option value="dca">DCA</option><option value="limit">Limit buy</option><option value="tp">Take profit</option><option value="sl">Stop</option></select>
-        <input class="form-input-pump" id="botSymbol" placeholder="Ticker">
-        <input class="form-input-pump" id="botBuy" type="number" step="0.01" placeholder="SOL amount">
-        <input class="form-input-pump" id="botFee" type="number" step="0.01" value="0.10" placeholder="Author fee %">
-        <select class="form-input-pump" id="botInterval"><option value="1h">Every 1h</option><option value="6h">Every 6h</option><option value="1d">Every day</option></select>
-        <button class="cx-launch" type="button" onclick="CessionUI.saveBot()">Save bot</button>
-        <div id="botList" class="cx-muted"></div>
-      </div>
+      <div class="cx-card" id="botList"></div>
     </main>
     <main class="page-view" id="viewRewards">
       <h1 class="cx-title">Earn</h1>
-      <div class="cx-card">
-        <p class="cx-muted" data-fee-line>0.95% trade fee · daily customer rebate when live</p>
-      </div>
-      <div class="cx-card" id="rewardsBody"><p class="cx-muted">Connect a wallet to see your points.</p></div>
-      <h2 class="cx-title">Top earners</h2>
-      <div class="cx-card" id="rewardsLeaderboard"><p class="cx-muted">Loading...</p></div>
+      <div class="cx-card" id="rewardsBody"><p class="cx-muted">Connect a wallet to see points.</p></div>
+      <div class="cx-card" id="rewardsLeaderboard"></div>
     </main>
     <main class="page-view" id="viewPerps"><h1 class="cx-title">Perps</h1><div class="cx-card"><p class="cx-muted">Perpetuals are not offered in the United States.</p></div></main>
     <main class="page-view" id="viewAi">
@@ -182,16 +169,6 @@
       <button class="cx-ghost" type="button" onclick="CessionExchange.game()">Back</button>
       <h1 class="cx-title" id="coinTitle">Coin</h1>
       <p class="cx-muted" id="coinMeta"></p>
-      <button class="cx-ghost" type="button" onclick="CessionPay.copyMintLabel(document.getElementById('coinMeta').textContent)">Copy token mint — not a deposit</button>
-      <div class="cx-card">
-        <strong>Trust and market snapshot</strong>
-        <div class="cx-row"><span>Mint</span><span id="coinTrust">Loading</span></div>
-        <div class="cx-row"><span>Creator</span><span id="coinCreator">Loading</span></div>
-        <div class="cx-row"><span>Safety</span><span id="coinSafety">Loading</span></div>
-        <div class="cx-row"><span>Warnings</span><span id="coinWarnings">Loading</span></div>
-        <div class="cx-row"><span>Market</span><span id="coinStats">Loading</span></div>
-      </div>
-      <div class="cx-trade-status" id="coinTradeStatus" data-state="idle" aria-live="polite">Ready to trade</div>
       <div class="cx-trade-row"><button class="cx-launch" type="button" onclick="CessionUI.openTrade('buy')">Buy</button><button class="cx-ghost" type="button" onclick="CessionUI.openTrade('sell')">Sell</button></div>
     </main>
   </div>
@@ -200,9 +177,10 @@
     <button class="bottom-nav-slot active" id="bnavExchange" type="button" onclick="CessionExchange.go()" aria-label="Home"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h10M4 17h7"/><path d="M16 10l4 2-4 2"/></svg></button>
     <button class="bottom-nav-slot" id="bnavForYou" type="button" onclick="CessionExchange.game()" aria-label="Game"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 3.2 3 11h2.2v9h5.1v-6.2h3.4V20h5.1v-9H21z"/></svg></button>
     <button class="bottom-nav-slot bnav-plus" id="bnavMint" type="button" onclick="CessionUI.go('mint')" aria-label="Mint"><span class="bnav-plus-circle"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#111" stroke-width="2.4" fill="none"><path d="M12 5v14M5 12h14"/></svg></span></button>
-    <button class="bottom-nav-slot" id="bnavWallet" type="button" onclick="CessionUI.go('wallet')" aria-label="Portfolio"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M8 7V5.6A2.6 2.6 0 0 1 10.6 3h2.8A2.6 2.6 0 0 1 16 5.6V7"/></svg></button>
-    <button class="bottom-nav-slot" id="bnavExplore" type="button" onclick="CessionUI.go('rewards')" aria-label="Earn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="12" r="7"/><circle cx="16" cy="12" r="7"/><path d="M10 9v6M8.5 12h3"/></svg></button>
+    <button class="bottom-nav-slot" id="bnavWallet" type="button" onclick="CessionUI.go('wallet')" aria-label="Wallet"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M8 7V5.6A2.6 2.6 0 0 1 10.6 3h2.8A2.6 2.6 0 0 1 16 5.6V7"/></svg></button>
+    <button class="bottom-nav-slot" id="bnavExplore" type="button" onclick="CessionUI.go('rewards')" aria-label="Earn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="12" r="7"/><circle cx="16" cy="12" r="7"/></svg></button>
   </nav>
+
   <div class="modal-overlay-generic" id="searchModal"><div class="modal-box-pump"><input class="form-input-pump" id="searchInput" placeholder="Search"></div></div>
   <div class="modal-overlay-generic" id="deployModal"><div class="modal-box-pump"><form id="deployCoinForm">
     <input class="form-input-pump" id="deployName" placeholder="Name" required>
@@ -213,19 +191,25 @@
     <select class="form-input-pump" id="deployFuseMode"><option value="auto">Auto</option><option value="manual">Manual</option></select>
     <button class="cx-launch" type="submit">Launch in Game</button>
   </form></div></div>
-  <div class="modal-overlay-generic" id="walletModal"><div class="modal-box-pump"><button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button><button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button></div></div>
-  <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump">
-    <input class="form-input-pump" id="presetBuySol" type="number" step="1" value="20" placeholder="Default buy USD">
-    <input class="form-input-pump" id="presetSlippage" type="number" step="0.1" placeholder="Slippage">
-    <label class="cx-muted" style="display:block;margin:8px 0"><input type="checkbox" id="settingsBuffer" checked> Default buffer on</label>
-    <button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save presets</button>
+  <div class="modal-overlay-generic" id="walletModal"><div class="cx-sheet">
+    <div class="cx-sheet-handle"></div>
+    <div class="cx-sheet-head"><h2>Connect wallet</h2><button class="cx-sheet-x" type="button" data-close-sheet="walletModal" aria-label="Close">×</button></div>
+    <p class="cx-sheet-sub">Phantom or MetaMask. We never hold your keys.</p>
+    <button class="cx-launch" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button>
+    <button class="cx-ghost" type="button" onclick="CessionUI.connectMetaMask()" style="margin-top:10px">Connect MetaMask</button>
   </div></div>
-  <div class="modal-overlay-generic" id="statementModal"><div class="modal-box-pump"><div id="statementBody" class="cx-muted">No statements to display.</div><button class="cx-ghost" id="statementDownloadBtn" type="button" style="display:none;" onclick="CessionUI.downloadCsv()">Download</button></div></div>
+  <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump">
+    <input class="form-input-pump" id="presetBuySol" type="number" step="1" value="20">
+    <input class="form-input-pump" id="presetSlippage" type="number" step="0.1">
+    <label class="cx-muted"><input type="checkbox" id="settingsBuffer" checked> Default buffer on</label>
+    <button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save</button>
+  </div></div>
+  <div class="modal-overlay-generic" id="statementModal"><div class="modal-box-pump"><div id="statementBody" class="cx-muted">No statements to display.</div></div></div>
   <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump">
     <strong id="tradeTitle">Buy</strong>
     <p id="tradeCoinLabel" class="cx-muted"></p>
     <p id="tradeFeeLine" class="cx-muted">Trade 0.95%</p>
-    <label class="cx-muted" style="display:block;margin:8px 0"><input type="checkbox" id="tradeBufferToggle" checked> Buffer 15 min</label>
+    <label class="cx-muted"><input type="checkbox" id="tradeBufferToggle" checked> Buffer 15 min</label>
     <div class="cx-pay-row">
       <button type="button" onclick="CessionPay.tapTrade(5)">$5</button>
       <button type="button" onclick="CessionPay.tapTrade(20)">$20</button>
@@ -234,21 +218,61 @@
     <input class="form-input-pump" id="tradeAmount" type="number" value="20">
     <button class="cx-launch" type="button" onclick="CessionUI.confirmTrade()">Confirm</button>
   </div></div>
-  <div class="modal-overlay-generic" id="receiveModal"><div class="modal-box-pump">
-    <strong>Receive SOL</strong>
-    <p class="cx-muted">Your wallet only. Never a coin mint.</p>
-    <div class="cx-addr-box" id="receiveAddress"></div>
-    <button class="cx-launch" type="button" onclick="CessionPay.copyReceive()">Copy wallet</button>
-  </div></div>
-  <div class="modal-overlay-generic" id="sendModal"><div class="modal-box-pump">
-    <strong>Send SOL</strong>
-    <p class="cx-muted">With buffer on, cancel for 15 minutes.</p>
-    <input class="form-input-pump" id="sendDest" placeholder="Wallet address" onblur="CessionPay.checkSend()">
-    <p id="sendVerdict" class="cx-muted"></p>
-    <label class="cx-muted" style="display:block;margin:8px 0"><input type="checkbox" id="sendBufferToggle" checked> Buffer 15 min</label>
-    <input class="form-input-pump" id="sendWord" placeholder="Type SEND">
-    <button class="cx-launch" id="sendGo" type="button" onclick="CessionPay.confirmSend()" disabled>Send</button>
-  </div></div>
+
+  <!-- Receive sheet -->
+  <div class="modal-overlay-generic" id="receiveModal">
+    <div class="cx-sheet" role="dialog" aria-labelledby="receiveTitle">
+      <div class="cx-sheet-handle"></div>
+      <div class="cx-sheet-head">
+        <h2 id="receiveTitle">Receive</h2>
+        <button class="cx-sheet-x" type="button" data-close-sheet="receiveModal" aria-label="Close">×</button>
+      </div>
+      <p class="cx-sheet-sub">Scan the QR or copy your Solana wallet address. This is not a token mint.</p>
+      <div class="cx-qr-card">
+        <img id="receiveQr" width="200" height="200" alt="Wallet QR code">
+        <div class="cx-addr-block">
+          <div class="cx-addr-label">Wallet address</div>
+          <div class="cx-addr-value" id="receiveAddress"></div>
+          <div class="cx-muted" style="margin-top:8px;font-size:12px" id="receiveAddressShort"></div>
+        </div>
+      </div>
+      <div class="cx-sheet-actions">
+        <button class="cx-launch" type="button" onclick="CessionPay.copyReceive()">Copy address</button>
+        <button class="cx-ghost" type="button" data-close-sheet="receiveModal">Done</button>
+      </div>
+      <div class="cx-sheet-note" id="receiveWarn">Only send assets on Solana to this address. Sending to a mint can lose funds permanently.</div>
+    </div>
+  </div>
+
+  <!-- Send sheet -->
+  <div class="modal-overlay-generic" id="sendModal">
+    <div class="cx-sheet" role="dialog" aria-labelledby="sendTitle">
+      <div class="cx-sheet-handle"></div>
+      <div class="cx-sheet-head">
+        <h2 id="sendTitle">Send</h2>
+        <button class="cx-sheet-x" type="button" data-close-sheet="sendModal" aria-label="Close">×</button>
+      </div>
+      <p class="cx-sheet-sub">We block known mint addresses. With buffer on, you can cancel for 15 minutes.</p>
+      <div class="cx-sheet-field">
+        <label for="sendDest">Destination wallet</label>
+        <input class="form-input-pump" id="sendDest" placeholder="Paste Solana address" autocomplete="off" oninput="CessionPay.checkSend()" onblur="CessionPay.checkSend()">
+        <p id="sendVerdict" class="cx-muted" style="min-height:18px;margin-top:6px"></p>
+      </div>
+      <div class="cx-sheet-field">
+        <label><input type="checkbox" id="sendBufferToggle" checked> Buffer 15 minutes (recommended)</label>
+      </div>
+      <div class="cx-sheet-field">
+        <label for="sendWord">Type SEND to confirm</label>
+        <input class="form-input-pump" id="sendWord" placeholder="SEND" autocomplete="off">
+      </div>
+      <div class="cx-sheet-actions">
+        <button class="cx-launch" id="sendGo" type="button" onclick="CessionPay.confirmSend()" disabled>Send</button>
+        <button class="cx-ghost" type="button" data-close-sheet="sendModal">Cancel</button>
+      </div>
+      <div class="cx-sheet-note">Without buffer, on-chain transfers cannot be reversed after broadcast.</div>
+    </div>
+  </div>
+
   <script src="js/cession-config.js"></script>
   <script src="js/cession-shell.js"></script>
   <script src="js/cession-pay.js"></script>
