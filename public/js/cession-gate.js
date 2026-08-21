@@ -1,27 +1,29 @@
 (function () {
+  var gateMode = 'sign'; // 'sign' | 'login'
+
   function setGateViewport() {
-    const h = window.visualViewport && window.visualViewport.height
+    var h = window.visualViewport && window.visualViewport.height
       ? window.visualViewport.height
       : window.innerHeight;
     if (!h) return;
     document.documentElement.style.setProperty('--gate-vh', (h * 0.01) + 'px');
   }
   function hideToolbarTip() {
-    const tip = document.getElementById('gateToolbarTip');
+    var tip = document.getElementById('gateToolbarTip');
     if (!tip) return;
     tip.classList.remove('open');
   }
   function showToolbarTip() {
-    const tip = document.getElementById('gateToolbarTip');
+    var tip = document.getElementById('gateToolbarTip');
     if (!tip) return;
     if (localStorage.getItem('cession_toolbar_tip_seen') === '1') return;
     tip.classList.add('open');
-    const dismiss = function () {
+    var dismiss = function () {
       localStorage.setItem('cession_toolbar_tip_seen', '1');
       hideToolbarTip();
     };
-    const close = document.getElementById('gateToolbarTipClose');
-    const ok = document.getElementById('gateToolbarTipOk');
+    var close = document.getElementById('gateToolbarTipClose');
+    var ok = document.getElementById('gateToolbarTipOk');
     if (close) close.onclick = dismiss;
     if (ok) ok.onclick = dismiss;
   }
@@ -32,25 +34,34 @@
   function done() {
     localStorage.setItem('cession_onboarded', '1');
     localStorage.setItem('cession_gate_ok', '1');
-    const g = document.getElementById('cessionGate');
+    var g = document.getElementById('cessionGate');
     if (g) g.classList.remove('open');
     hideApp(false);
   }
   function already() { return localStorage.getItem('cession_onboarded') === '1'; }
   function gated() { return localStorage.getItem('cession_gate_ok') === '1'; }
   function savedUser() { return String(localStorage.getItem('cession_username') || '').trim(); }
+
   function afterUnlock() {
     localStorage.setItem('cession_gate_ok', '1');
+    // Returning login: already has username → enter site
     if (already() || savedUser()) {
       if (savedUser()) localStorage.setItem('cession_onboarded', '1');
       done();
       return;
     }
+    // Login mode without a saved username: still need wallet path, skip heavy sign-up if possible
+    if (gateMode === 'login') {
+      step('wallet');
+      return;
+    }
+    // New sign-up
     step('user');
   }
+
   function step(name) {
     hideToolbarTip();
-    const root = document.getElementById('gateFlow');
+    var root = document.getElementById('gateFlow');
     if (!root) return;
     if (name === 'user') {
       if (savedUser()) { step('secure'); return; }
@@ -61,9 +72,9 @@
         '<input id="gateUser" type="text" maxlength="20" placeholder="username" autocomplete="off">' +
         '<label class="gate-agree"><input id="gateAgree" type="checkbox"> I agree to the privacy policy and user agreement that my trading stats, including profits, open positions, payouts, and volume will be public alongside any comments or posts I make under my username.</label>' +
         '<button class="gate-go" id="gateUserGo" type="button" disabled>Continue</button></div></div>';
-      const u = document.getElementById('gateUser');
-      const a = document.getElementById('gateAgree');
-      const b = document.getElementById('gateUserGo');
+      var u = document.getElementById('gateUser');
+      var a = document.getElementById('gateAgree');
+      var b = document.getElementById('gateUserGo');
       function chk() { b.disabled = !(u.value.trim().length >= 3 && a.checked); }
       u.oninput = chk;
       a.onchange = chk;
@@ -103,23 +114,32 @@
       };
     }
   }
+
   async function submitCode(input, err) {
     err.textContent = '';
+    var code = String(input.value || '').trim();
+    if (!code) {
+      err.textContent = 'Enter your access code.';
+      return;
+    }
     try {
-      const r = await fetch('/api/access/unlock', {
+      var r = await fetch('/api/access/unlock', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ code: input.value })
+        body: JSON.stringify({ code: code })
       });
-      const d = await r.json();
+      var d = await r.json();
       if (!d.success) { err.textContent = d.error || 'Wrong code.'; return; }
-      localStorage.setItem('cession_gate_code', String(input.value || '').trim().toUpperCase());
+      localStorage.setItem('cession_gate_code', code.toUpperCase());
       afterUnlock();
-    } catch (e) { err.textContent = 'Could not reach the gate.'; }
+    } catch (e) {
+      err.textContent = 'Could not reach the gate.';
+    }
   }
+
   function land() {
-    let g = document.getElementById('cessionGate');
+    var g = document.getElementById('cessionGate');
     if (!g) {
       g = document.createElement('div');
       g.id = 'cessionGate';
@@ -143,36 +163,64 @@
       '<div class="gate-hero">Early access to</div>' +
       '<img class="gate-word" src="brand/cession-wordmark-white.svg" alt="Cession">' +
       '</div></div></div>';
-    const btn = document.getElementById('gateSign');
-    const wrap = document.getElementById('gateCodeWrap');
-    const input = document.getElementById('gateCode');
-    const err = document.getElementById('gateErr');
-    let mode = 'sign';
+
+    var btn = document.getElementById('gateSign');
+    var wrap = document.getElementById('gateCodeWrap');
+    var input = document.getElementById('gateCode');
+    var err = document.getElementById('gateErr');
+    var codeOpen = false;
+
     btn.onclick = function () {
-      if (mode === 'sign') {
-        mode = 'code';
+      gateMode = 'sign';
+      if (!codeOpen) {
+        codeOpen = true;
         btn.textContent = 'Enter Code';
         wrap.classList.add('on');
+        input.placeholder = 'Enter code';
         input.focus();
         return;
       }
       submitCode(input, err);
     };
+
     document.getElementById('gateLogin').onclick = async function () {
+      gateMode = 'login';
+      // Already unlocked this browser + has account → go in
+      if (gated() && (already() || savedUser())) {
+        done();
+        return;
+      }
       try {
-        const r = await fetch('/api/access/gate', { credentials: 'same-origin' });
-        const d = await r.json();
-        if (d.open) { afterUnlock(); return; }
+        var r = await fetch('/api/access/gate', { credentials: 'same-origin' });
+        var d = await r.json();
+        if (d.open && (already() || savedUser())) {
+          afterUnlock();
+          return;
+        }
+        if (d.open && !savedUser()) {
+          afterUnlock();
+          return;
+        }
       } catch (e) {}
-      mode = 'code';
-      btn.textContent = 'Enter Code';
+      // Need code: show field; blue button becomes login submit
+      codeOpen = true;
       wrap.classList.add('on');
+      btn.textContent = 'Login';
       input.placeholder = 'Enter your code';
       input.focus();
+      err.textContent = '';
     };
-    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') btn.click(); });
+
+    // When blue button says Login, it still uses same handler → submitCode
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        if (codeOpen) submitCode(input, err);
+        else btn.click();
+      }
+    });
     showToolbarTip();
   }
+
   async function boot() {
     if (already() && gated()) return;
     setGateViewport();
@@ -181,11 +229,11 @@
     if (window.visualViewport) window.visualViewport.addEventListener('resize', setGateViewport);
     land();
     try {
-      const ctrl = new AbortController();
-      const t = setTimeout(function () { ctrl.abort(); }, 4000);
-      const r = await fetch('/api/access/gate', { credentials: 'same-origin', signal: ctrl.signal });
+      var ctrl = new AbortController();
+      var t = setTimeout(function () { ctrl.abort(); }, 4000);
+      var r = await fetch('/api/access/gate', { credentials: 'same-origin', signal: ctrl.signal });
       clearTimeout(t);
-      const d = await r.json();
+      var d = await r.json();
       if (d.open && (already() || savedUser())) {
         afterUnlock();
         return;
