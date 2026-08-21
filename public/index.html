@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>For You | Cession</title>
+  <title>Exchange | Cession</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/gate.css">
   <link rel="icon" type="image/svg+xml" href="brand/cession-c-mark.svg">
@@ -11,17 +11,46 @@
 </head>
 <body>
   <header class="cx-top">
-    <button class="cx-xtab on" id="tabForYou" type="button" onclick="CessionUI.setHomeLane('foryou')">For You</button>
+    <button class="cx-xtab on" id="tabExchange" type="button" onclick="CessionExchange.go()">Exchange</button>
+    <button class="cx-xtab" id="tabForYou" type="button" onclick="CessionExchange.game()">Game</button>
     <button class="cx-xtab" id="tabMint" type="button" onclick="CessionUI.go('mint')">Mint</button>
-    <button class="cx-xtab" id="tabFollowing" type="button" onclick="CessionUI.setHomeLane('following')">Following</button>
-    <button class="cx-xtab" id="tabBots" type="button" onclick="CessionUI.go('bots')">Bots</button>
     <button class="cx-xtab" id="tabAi" type="button" onclick="CessionUI.go('ai')">AI</button>
     <button class="cx-search-btn" type="button" onclick="CessionUI.openSearch()" aria-label="Search">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0c0c0c" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
     </button>
   </header>
   <div class="cx-app">
-    <main class="page-view active" id="viewHome"><div class="cx-feed" id="forYouCoinsGrid"></div></main>
+    <main class="page-view active" id="viewExchange">
+      <h1 class="cx-title">Exchange</h1>
+      <div class="cx-card">
+        <strong>Clear pricing</strong>
+        <p class="cx-muted" data-fee-line>0.95% trade fee · daily customer rebate when live</p>
+        <p class="cx-muted">Security, support, and an optional buffer so a wrong send is not final for 15 minutes.</p>
+      </div>
+      <div class="cx-card">
+        <strong>Send buffer</strong>
+        <label class="cx-muted" style="display:block;margin:8px 0">
+          <input type="checkbox" id="bufferToggle" checked>
+          Hold sends and trades for 15 minutes so I can cancel
+        </label>
+        <div id="bufferQueue"></div>
+        <div class="cx-pay-row" style="margin-top:12px">
+          <button class="cx-ghost" type="button" onclick="CessionPay.openReceive()" style="margin-top:0">Receive</button>
+          <button class="cx-launch" type="button" onclick="CessionPay.openSend()" style="margin-top:0">Send</button>
+        </div>
+      </div>
+      <div class="cx-card">
+        <strong>AI support</strong>
+        <p class="cx-muted">Ask about balances, fees, buffer status, or the game.</p>
+        <button class="cx-ghost" type="button" onclick="CessionUI.go('ai')">Open AI</button>
+      </div>
+      <div class="cx-card">
+        <strong>Game</strong>
+        <p class="cx-muted">Coins and Fuse are entertainment on this site, not the main product.</p>
+        <button class="cx-ghost" type="button" onclick="CessionExchange.game()">Open Game</button>
+      </div>
+    </main>
+    <main class="page-view" id="viewHome"><div class="cx-feed" id="forYouCoinsGrid"></div></main>
     <main class="page-view" id="viewExplorePulse">
       <h1 class="cx-title">Explore</h1>
       <div class="cx-filter-row" aria-label="Discovery filters">
@@ -49,7 +78,7 @@
     <main class="page-view" id="viewMint">
       <h1 class="cx-title">Mint</h1>
       <div class="cx-card">
-        <p class="cx-muted">Create is free except Solana rent. First buy is required. Fuse is on so the book moves.</p>
+        <p class="cx-muted">Game mint. Create is free except Solana rent. Exchange trade fee is 0.95%.</p>
         <button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create coin</button>
       </div>
       <h2 class="cx-title">Your coins</h2>
@@ -102,13 +131,14 @@
           </button>
         </div>
         <div>
-          <a href="javascript:CessionUI.go('explore')">Explore</a>
+          <a href="javascript:CessionExchange.go()">Exchange</a>
+          <a href="javascript:CessionExchange.game()">Game</a>
           <a href="javascript:CessionUI.go('rewards')">Earn</a>
           <a href="javascript:CessionUI.go('ai')">AI</a>
           <a href="https://intel.arkm.com/explorer/address/9MeQ5XiESSZPUVNzqKQjB9JYEWZScH1shwsbQMfYUTRU" target="_blank" rel="noopener noreferrer">Proof of Reserves</a>
           <a href="/legal">Legal</a>
         </div>
-        <p class="cx-muted">cession.us · We do not hold keys · On-chain sends cannot be reversed</p>
+        <p class="cx-muted">cession.us · Optional buffer · Clear 0.95% · On-chain without buffer cannot be reversed</p>
       </footer>
     </main>
     <main class="page-view" id="viewBots">
@@ -126,6 +156,10 @@
     </main>
     <main class="page-view" id="viewRewards">
       <h1 class="cx-title">Earn</h1>
+      <div class="cx-card">
+        <p class="cx-muted" data-fee-line>0.95% trade fee · daily customer rebate when live</p>
+        <p class="cx-muted">Auto-staking and daily compound are planned. Partner yield first; on-platform later.</p>
+      </div>
       <div class="cx-card" id="rewardsBody"><p class="cx-muted">Connect a wallet to see your points.</p></div>
       <h2 class="cx-title">Top earners</h2>
       <div class="cx-card" id="rewardsLeaderboard"><p class="cx-muted">Loading...</p></div>
@@ -136,7 +170,7 @@
       <div id="askAiBox" class="cx-chat"><div class="cx-chat-log" id="aiLog"></div><div class="cx-chat-row"><input class="cx-search" id="aiInput" placeholder="Ask anything"><button class="cx-launch" type="button" onclick="CessionUI.sendAi()">Send</button></div></div>
     </main>
     <main class="page-view" id="viewCoin">
-      <button class="cx-ghost" type="button" onclick="CessionUI.setHomeLane('foryou')">Back</button>
+      <button class="cx-ghost" type="button" onclick="CessionExchange.game()">Back</button>
       <h1 class="cx-title" id="coinTitle">Coin</h1>
       <p class="cx-muted" id="coinMeta"></p>
       <button class="cx-ghost" type="button" onclick="CessionPay.copyMintLabel(document.getElementById('coinMeta').textContent)">Copy token mint — not a deposit</button>
@@ -160,8 +194,8 @@
   </div>
   <button class="cx-askbar" id="askBanner" type="button" onclick="CessionUI.go('ai')">AI</button>
   <nav class="bottom-nav-bar">
-    <button class="bottom-nav-slot active" id="bnavForYou" type="button" onclick="CessionUI.setHomeLane('foryou')" aria-label="Home"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 3.2 3 11h2.2v9h5.1v-6.2h3.4V20h5.1v-9H21z"/></svg></button>
-    <button class="bottom-nav-slot" id="bnavPulse" type="button" onclick="CessionUI.go('explore')" aria-label="Explore"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M14.2 9.2 10 10.4 8.8 14.6l4.2-1.2 1.2-4.2z" fill="currentColor" stroke="none"/></svg></button>
+    <button class="bottom-nav-slot active" id="bnavExchange" type="button" onclick="CessionExchange.go()" aria-label="Exchange"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h10M4 17h7"/><path d="M16 10l4 2-4 2"/></svg></button>
+    <button class="bottom-nav-slot" id="bnavForYou" type="button" onclick="CessionExchange.game()" aria-label="Game"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 3.2 3 11h2.2v9h5.1v-6.2h3.4V20h5.1v-9H21z"/></svg></button>
     <button class="bottom-nav-slot bnav-plus" id="bnavMint" type="button" onclick="CessionUI.go('mint')" aria-label="Mint"><span class="bnav-plus-circle"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#111" stroke-width="2.4" fill="none"><path d="M12 5v14M5 12h14"/></svg></span></button>
     <button class="bottom-nav-slot" id="bnavWallet" type="button" onclick="CessionUI.go('wallet')" aria-label="Portfolio"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M8 7V5.6A2.6 2.6 0 0 1 10.6 3h2.8A2.6 2.6 0 0 1 16 5.6V7"/></svg></button>
     <button class="bottom-nav-slot" id="bnavExplore" type="button" onclick="CessionUI.go('rewards')" aria-label="Earn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="12" r="7"/><circle cx="16" cy="12" r="7"/><path d="M10 9v6M8.5 12h3"/></svg></button>
@@ -174,12 +208,13 @@
     <input class="form-input-pump" id="deployFirstBuy" type="number" min="0.06" step="0.01" value="0.06" required>
     <label class="cx-muted"><input type="checkbox" id="deployFuse" checked> Fuse on (2B supply, 24h, leftover burns)</label>
     <select class="form-input-pump" id="deployFuseMode"><option value="auto">Auto</option><option value="manual">Manual</option></select>
-    <button class="cx-launch" type="submit">Launch</button>
+    <button class="cx-launch" type="submit">Launch in Game</button>
   </form></div></div>
   <div class="modal-overlay-generic" id="walletModal"><div class="modal-box-pump"><button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button><button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button></div></div>
   <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump">
     <input class="form-input-pump" id="presetBuySol" type="number" step="1" value="20" placeholder="Default buy USD">
     <input class="form-input-pump" id="presetSlippage" type="number" step="0.1" placeholder="Slippage">
+    <label class="cx-muted" style="display:block;margin:8px 0"><input type="checkbox" id="settingsBuffer" checked> Default buffer on</label>
     <button class="cx-ghost" type="button" onclick="CessionUI.savePresets()">Save presets</button>
     <button class="cx-ghost" type="button" onclick="CessionUI.downloadCsv()">Download CSV</button>
   </div></div>
@@ -187,7 +222,8 @@
   <div class="modal-overlay-generic" id="tradeModal"><div class="modal-box-pump">
     <strong id="tradeTitle">Buy</strong>
     <p id="tradeCoinLabel" class="cx-muted"></p>
-    <p id="tradeFeeLine" class="cx-muted">Trade 0.50%</p>
+    <p id="tradeFeeLine" class="cx-muted">Trade 0.95%. Clear pricing. Part of fees is paid back to customers daily when live.</p>
+    <label class="cx-muted" style="display:block;margin:8px 0"><input type="checkbox" id="tradeBufferToggle" checked> Buffer 15 min (cancel before release)</label>
     <div class="cx-pay-row">
       <button type="button" onclick="CessionPay.tapTrade(5)">$5</button>
       <button type="button" onclick="CessionPay.tapTrade(20)">$20</button>
@@ -204,14 +240,19 @@
   </div></div>
   <div class="modal-overlay-generic" id="sendModal"><div class="modal-box-pump">
     <strong>Send SOL</strong>
-    <p class="cx-muted">On-chain sends cannot be reversed. Mints are blocked.</p>
+    <p class="cx-muted">With buffer on, you can cancel for 15 minutes. Without buffer, on-chain sends cannot be reversed. Mints are blocked.</p>
     <input class="form-input-pump" id="sendDest" placeholder="Wallet address" onblur="CessionPay.checkSend()">
     <p id="sendVerdict" class="cx-muted"></p>
+    <label class="cx-muted" style="display:block;margin:8px 0"><input type="checkbox" id="sendBufferToggle" checked> Buffer 15 min</label>
     <input class="form-input-pump" id="sendWord" placeholder="Type SEND">
     <button class="cx-launch" id="sendGo" type="button" onclick="CessionPay.confirmSend()" disabled>Send</button>
   </div></div>
+  <script src="js/cession-config.js"></script>
   <script src="js/cession-shell.js"></script>
   <script src="js/cession-pay.js"></script>
+  <script src="js/cession-buffer.js"></script>
+  <script src="js/cession-fees.js"></script>
+  <script src="js/cession-exchange-boot.js"></script>
   <script src="js/cession-media.js"></script>
   <script src="js/cession-rank.js"></script>
   <script src="js/cession-engine.js"></script>
