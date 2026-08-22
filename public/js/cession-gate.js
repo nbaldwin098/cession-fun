@@ -217,9 +217,17 @@
     var input = document.getElementById('gateCode');
     var err = document.getElementById('gateErr');
 
-    btn.onclick = function () {
+    btn.onclick = async function () {
+      gateMode = 'sign';
       if (!codeOpen) {
-        gateMode = 'sign';
+        try {
+          var r = await fetch('/api/access/gate', { credentials: 'same-origin' });
+          var d = await r.json();
+          if (d.open) {
+            afterUnlock();
+            return;
+          }
+        } catch (e) {}
         openCodeField(btn, wrap, input, err, 'Enter Code');
         return;
       }
@@ -232,19 +240,7 @@
         goHome();
         return;
       }
-      if (codeOpen) {
-        await submitCode(input, err);
-        return;
-      }
-      try {
-        var r = await fetch('/api/access/gate', { credentials: 'same-origin' });
-        var d = await r.json();
-        if (d.open) {
-          afterUnlock();
-          return;
-        }
-      } catch (e) {}
-      openCodeField(btn, wrap, input, err, 'Login');
+      afterUnlock();
     };
 
     input.addEventListener('keydown', function (e) {
