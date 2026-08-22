@@ -87,9 +87,9 @@
       root.innerHTML =
         '<div class="gate-on"><div class="gate-phone">' +
         '<img class="gate-k" src="brand/cession-c-mark.svg" alt="">' +
-        '<h1>Claim your<br>username</h1>' +
+        '<h1>Pick a<br>username</h1>' +
         '<input id="gateUser" type="text" maxlength="20" placeholder="username" autocomplete="off">' +
-        '<label class="gate-agree"><input id="gateAgree" type="checkbox"> I agree to the privacy policy and user agreement that my trading stats, including profits, open positions, payouts, and volume will be public alongside any comments or posts I make under my username.</label>' +
+        '<label class="gate-agree"><input id="gateAgree" type="checkbox"> Trading stats under this name can be public. I agree to the <a href="/legal" style="color:inherit;text-decoration:underline">terms</a>.</label>' +
         '<button class="gate-go" id="gateUserGo" type="button" disabled>Continue</button></div></div>';
       var u = document.getElementById('gateUser');
       var a = document.getElementById('gateAgree');
@@ -106,16 +106,16 @@
       root.innerHTML =
         '<div class="gate-on"><div class="gate-phone">' +
         '<img class="gate-k" src="brand/cession-c-mark.svg" alt="">' +
-        '<h1>Secure your<br>account</h1>' +
-        '<p>Set up biometric authentication in Phantom or MetaMask.</p>' +
+        '<h1>Almost there</h1>' +
+        '<p>Next: connect the wallet you actually use. Biometrics live in your wallet app, not here.</p>' +
         '<button class="gate-go" type="button" id="gateSecGo">Continue</button></div></div>';
       document.getElementById('gateSecGo').onclick = function () { step('wallet'); };
     }
     if (name === 'wallet') {
-      var title = gateMode === 'login' ? 'Log in with<br>your wallet' : 'Get approved to<br>start trading';
+      var title = gateMode === 'login' ? 'Connect your<br>wallet' : 'Connect a<br>wallet';
       var sub = gateMode === 'login'
-        ? 'Connect the wallet linked to your account.'
-        : "You're almost there";
+        ? 'Same wallet you used before.'
+        : 'Phantom, MetaMask, or Trust. One approval.';
       root.innerHTML =
         '<div class="gate-on"><div class="gate-phone">' +
         '<img class="gate-k" src="brand/cession-c-mark.svg" alt="">' +
@@ -205,10 +205,10 @@
       '</aside>' +
       '<div id="gateFlow"><div class="gate-land"><div class="gate-col">' +
       '<img class="gate-k" src="brand/cession-c-white.svg" alt="">' +
-      '<p class="gate-skip">Skip the line.</p>' +
-      '<button class="gate-cta" type="button" id="gateSign">Sign up</button>' +
+      '<p class="gate-skip">Early access.</p>' +
+      '<button class="gate-cta" type="button" id="gateSign">Get in</button>' +
       '<div class="gate-code" id="gateCodeWrap"><input id="gateCode" type="text" autocomplete="off" placeholder="Enter code"><div class="gate-err" id="gateErr"></div></div>' +
-      '<div class="gate-hero">Early access to</div>' +
+      '<div class="gate-hero">Built for people who actually trade</div>' +
       '<img class="gate-word" src="brand/cession-wordmark-white.svg" alt="Cession">' +
       '</div></div></div>';
 
