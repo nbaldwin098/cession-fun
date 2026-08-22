@@ -7,19 +7,18 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/cession-finance.css">
   <link rel="stylesheet" href="css/cession-sheets.css">
+  <link rel="stylesheet" href="css/cession-baas-caas.css">
   <link rel="stylesheet" href="css/gate.css">
   <link rel="icon" type="image/svg+xml" href="brand/cession-c-mark.svg">
   <link rel="apple-touch-icon" href="brand/cession-c-mark.svg">
 </head>
 <body>
   <header class="cx-top">
-    <button class="cx-xtab on" id="tabExchange" type="button" onclick="CessionExchange.go()">Home</button>
-    <button class="cx-xtab" id="tabForYou" type="button" onclick="CessionExchange.game()">Game</button>
-    <button class="cx-xtab" id="tabMint" type="button" onclick="CessionUI.go('mint')">Mint</button>
-    <button class="cx-xtab" id="tabAi" type="button" onclick="CessionUI.go('ai')">Support</button>
-    <button class="cx-search-btn" type="button" onclick="CessionUI.openSearch()" aria-label="Search">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0b0d10" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-    </button>
+    <button class="cx-xtab" id="tabWallet" type="button" onclick="CessionUI.go('wallet')">Wallet</button>
+    <button class="cx-xtab" id="tabBanking" type="button" onclick="CessionBaas && CessionBaas.go()">Banking</button>
+    <button class="cx-xtab on" id="tabExchange" type="button" onclick="CessionExchange.go()">Exchange</button>
+    <button class="cx-xtab" id="tabForYou" type="button" onclick="CessionExchange.game()">Xchange</button>
+    <button class="cx-xtab" id="tabAi" type="button" onclick="CessionUI.go('ai')">Copilot</button>
   </header>
   <div class="cx-app">
     <main class="page-view active" id="viewExchange">
@@ -38,8 +37,8 @@
           <button type="button" data-range="all">All</button>
         </div>
         <div class="cx-pf-actions">
-          <button type="button" class="buy" onclick="CessionUI.go('explore')">Buy</button>
-          <button type="button" class="sell" onclick="CessionUI.go('explore')">Sell</button>
+          <button type="button" class="buy" onclick="CessionCaas && CessionCaas.openBuy()">Buy</button>
+          <button type="button" class="sell" onclick="CessionCaas && CessionCaas.openBuy()">Sell</button>
           <button type="button" class="send" onclick="CessionPay.openSend()">Send</button>
         </div>
         <div class="cx-pf-chip">Buffer available · 0.95% trade fee</div>
@@ -60,8 +59,15 @@
       <p class="cx-section-label">Support</p>
       <div class="cx-card">
         <p class="cx-muted">Chat about balances, fees, or buffer status.</p>
-        <button class="cx-ghost" type="button" onclick="CessionUI.go('ai')" style="margin-top:8px">Open chat</button>
+        <button class="cx-ghost" type="button" onclick="CessionUI.go('ai')" style="margin-top:8px">Open Copilot</button>
       </div>
+    </main>
+    <main class="page-view" id="viewBanking">
+      <div id="baasHero" class="cx-baas-hero"></div>
+      <div id="baasCards" class="cx-baas-cards"></div>
+      <p class="cx-baas-section">Recent</p>
+      <div id="baasRecent" class="cx-baas-list"></div>
+      <p class="cx-muted" id="baasPowered" style="margin:16px 0;font-size:12px"></p>
     </main>
     <main class="page-view" id="viewHome"><div class="cx-feed" id="forYouCoinsGrid"></div></main>
     <main class="page-view" id="viewExplorePulse">
@@ -91,7 +97,7 @@
     <main class="page-view" id="viewMint">
       <h1 class="cx-title">Mint</h1>
       <div class="cx-card">
-        <p class="cx-muted">Game mint. Create is free except Solana rent.</p>
+        <p class="cx-muted">Inside Xchange. Create is free except Solana rent.</p>
         <button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create coin</button>
       </div>
       <div class="cx-card" id="mintManage"></div>
@@ -136,20 +142,6 @@
           <button class="cx-ghost" type="button" onclick="CessionUI.openStatement()">Statement</button>
         </div>
       </div>
-      <footer class="cx-you-footer">
-        <div class="cx-foot-row">
-          <button class="cx-foot-brand" id="footerBrand" type="button" aria-label="Cession">
-            <span class="cx-foot-clip"><img src="brand/cession-wordmark-white.svg" alt="Cession"></span>
-          </button>
-        </div>
-        <div>
-          <a href="javascript:CessionExchange.go()">Home</a>
-          <a href="javascript:CessionExchange.game()">Game</a>
-          <a href="javascript:CessionUI.go('rewards')">Earn</a>
-          <a href="javascript:CessionUI.go('ai')">Support</a>
-          <a href="/legal">Legal</a>
-        </div>
-      </footer>
     </main>
     <main class="page-view" id="viewBots">
       <h1 class="cx-title">Bots</h1>
@@ -162,7 +154,7 @@
     </main>
     <main class="page-view" id="viewPerps"><h1 class="cx-title">Perps</h1><div class="cx-card"><p class="cx-muted">Perpetuals are not offered in the United States.</p></div></main>
     <main class="page-view" id="viewAi">
-      <h1 class="cx-title">Support</h1>
+      <h1 class="cx-title">Copilot</h1>
       <div id="askAiBox" class="cx-chat"><div class="cx-chat-log" id="aiLog"></div><div class="cx-chat-row"><input class="cx-search" id="aiInput" placeholder="Ask about your account"><button class="cx-launch" type="button" onclick="CessionUI.sendAi()">Send</button></div></div>
     </main>
     <main class="page-view" id="viewCoin">
@@ -172,13 +164,12 @@
       <div class="cx-trade-row"><button class="cx-launch" type="button" onclick="CessionUI.openTrade('buy')">Buy</button><button class="cx-ghost" type="button" onclick="CessionUI.openTrade('sell')">Sell</button></div>
     </main>
   </div>
-  <button class="cx-askbar" id="askBanner" type="button" onclick="CessionUI.go('ai')">Ask support</button>
   <nav class="bottom-nav-bar">
-    <button class="bottom-nav-slot active" id="bnavExchange" type="button" onclick="CessionExchange.go()" aria-label="Home"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h10M4 17h7"/><path d="M16 10l4 2-4 2"/></svg></button>
-    <button class="bottom-nav-slot" id="bnavForYou" type="button" onclick="CessionExchange.game()" aria-label="Game"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 3.2 3 11h2.2v9h5.1v-6.2h3.4V20h5.1v-9H21z"/></svg></button>
-    <button class="bottom-nav-slot bnav-plus" id="bnavMint" type="button" onclick="CessionUI.go('mint')" aria-label="Mint"><span class="bnav-plus-circle"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#111" stroke-width="2.4" fill="none"><path d="M12 5v14M5 12h14"/></svg></span></button>
-    <button class="bottom-nav-slot" id="bnavWallet" type="button" onclick="CessionUI.go('wallet')" aria-label="Wallet"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M8 7V5.6A2.6 2.6 0 0 1 10.6 3h2.8A2.6 2.6 0 0 1 16 5.6V7"/></svg></button>
-    <button class="bottom-nav-slot" id="bnavExplore" type="button" onclick="CessionUI.go('rewards')" aria-label="Earn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="12" r="7"/><circle cx="16" cy="12" r="7"/></svg></button>
+    <button class="bottom-nav-slot" id="bnavWallet" type="button" onclick="CessionUI.go('wallet')" aria-label="Wallet"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M8 7V5.6A2.6 2.6 0 0 1 10.6 3h2.8A2.6 2.6 0 0 1 16 5.6V7"/></svg><span style="font-size:10px;margin-top:2px">Wallet</span></button>
+    <button class="bottom-nav-slot" id="bnavBanking" type="button" onclick="CessionBaas && CessionBaas.go()" aria-label="Banking"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><path d="M7 14h2"/><path d="M12 14h2"/></svg><span style="font-size:10px;margin-top:2px">Banking</span></button>
+    <button class="bottom-nav-slot active" id="bnavExchange" type="button" onclick="CessionExchange.go()" aria-label="Exchange"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h10M4 17h7"/><path d="M16 10l4 2-4 2"/></svg><span style="font-size:10px;margin-top:2px">Exchange</span></button>
+    <button class="bottom-nav-slot" id="bnavMint" type="button" onclick="CessionExchange.game()" aria-label="Xchange"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg><span style="font-size:10px;margin-top:2px">Xchange</span></button>
+    <button class="bottom-nav-slot" id="bnavAi" type="button" onclick="CessionUI.go('ai')" aria-label="Copilot"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a7 7 0 0 1 7 7v1.5a2.5 2.5 0 0 1-2.5 2.5H14l-2 3-2-3H7.5A2.5 2.5 0 0 1 5 11.5V10a7 7 0 0 1 7-7z"/><circle cx="9.5" cy="10" r="1"/><circle cx="14.5" cy="10" r="1"/></svg><span style="font-size:10px;margin-top:2px">Copilot</span></button>
   </nav>
 
   <div class="modal-overlay-generic" id="searchModal"><div class="modal-box-pump"><input class="form-input-pump" id="searchInput" placeholder="Search"></div></div>
@@ -187,9 +178,7 @@
     <input class="form-input-pump" id="deploySymbol" placeholder="Ticker" required>
     <input class="form-input-pump" id="deployMedia" type="url" placeholder="Image or video URL">
     <input class="form-input-pump" id="deployFirstBuy" type="number" min="0.06" step="0.01" value="0.06" required>
-    <label class="cx-muted"><input type="checkbox" id="deployFuse" checked> Fuse on</label>
-    <select class="form-input-pump" id="deployFuseMode"><option value="auto">Auto</option><option value="manual">Manual</option></select>
-    <button class="cx-launch" type="submit">Launch in Game</button>
+    <button class="cx-launch" type="submit">Launch in Xchange</button>
   </form></div></div>
   <div class="modal-overlay-generic" id="walletModal"><div class="cx-sheet">
     <div class="cx-sheet-handle"></div>
@@ -210,66 +199,24 @@
     <p id="tradeCoinLabel" class="cx-muted"></p>
     <p id="tradeFeeLine" class="cx-muted">Trade 0.95%</p>
     <label class="cx-muted"><input type="checkbox" id="tradeBufferToggle" checked> Buffer 15 min</label>
-    <div class="cx-pay-row">
-      <button type="button" onclick="CessionPay.tapTrade(5)">$5</button>
-      <button type="button" onclick="CessionPay.tapTrade(20)">$20</button>
-      <button type="button" onclick="CessionPay.tapTrade(50)">$50</button>
-    </div>
     <input class="form-input-pump" id="tradeAmount" type="number" value="20">
     <button class="cx-launch" type="button" onclick="CessionUI.confirmTrade()">Confirm</button>
   </div></div>
-
-  <!-- Receive sheet -->
   <div class="modal-overlay-generic" id="receiveModal">
-    <div class="cx-sheet" role="dialog" aria-labelledby="receiveTitle">
+    <div class="cx-sheet" role="dialog">
       <div class="cx-sheet-handle"></div>
-      <div class="cx-sheet-head">
-        <h2 id="receiveTitle">Receive</h2>
-        <button class="cx-sheet-x" type="button" data-close-sheet="receiveModal" aria-label="Close">×</button>
-      </div>
-      <p class="cx-sheet-sub">Scan the QR or copy your Solana wallet address. This is not a token mint.</p>
-      <div class="cx-qr-card">
-        <img id="receiveQr" width="200" height="200" alt="Wallet QR code">
-        <div class="cx-addr-block">
-          <div class="cx-addr-label">Wallet address</div>
-          <div class="cx-addr-value" id="receiveAddress"></div>
-          <div class="cx-muted" style="margin-top:8px;font-size:12px" id="receiveAddressShort"></div>
-        </div>
-      </div>
-      <div class="cx-sheet-actions">
-        <button class="cx-launch" type="button" onclick="CessionPay.copyReceive()">Copy address</button>
-        <button class="cx-ghost" type="button" data-close-sheet="receiveModal">Done</button>
-      </div>
-      <div class="cx-sheet-note" id="receiveWarn">Only send assets on Solana to this address. Sending to a mint can lose funds permanently.</div>
+      <div class="cx-sheet-head"><h2>Receive</h2><button class="cx-sheet-x" type="button" data-close-sheet="receiveModal" aria-label="Close">×</button></div>
+      <div class="cx-qr-card"><img id="receiveQr" width="200" height="200" alt="Wallet QR code"><div class="cx-addr-block"><div class="cx-addr-label">Wallet address</div><div class="cx-addr-value" id="receiveAddress"></div></div></div>
+      <div class="cx-sheet-actions"><button class="cx-launch" type="button" onclick="CessionPay.copyReceive()">Copy address</button></div>
     </div>
   </div>
-
-  <!-- Send sheet -->
   <div class="modal-overlay-generic" id="sendModal">
-    <div class="cx-sheet" role="dialog" aria-labelledby="sendTitle">
+    <div class="cx-sheet" role="dialog">
       <div class="cx-sheet-handle"></div>
-      <div class="cx-sheet-head">
-        <h2 id="sendTitle">Send</h2>
-        <button class="cx-sheet-x" type="button" data-close-sheet="sendModal" aria-label="Close">×</button>
-      </div>
-      <p class="cx-sheet-sub">We block known mint addresses. With buffer on, you can cancel for 15 minutes.</p>
-      <div class="cx-sheet-field">
-        <label for="sendDest">Destination wallet</label>
-        <input class="form-input-pump" id="sendDest" placeholder="Paste Solana address" autocomplete="off" oninput="CessionPay.checkSend()" onblur="CessionPay.checkSend()">
-        <p id="sendVerdict" class="cx-muted" style="min-height:18px;margin-top:6px"></p>
-      </div>
-      <div class="cx-sheet-field">
-        <label><input type="checkbox" id="sendBufferToggle" checked> Buffer 15 minutes (recommended)</label>
-      </div>
-      <div class="cx-sheet-field">
-        <label for="sendWord">Type SEND to confirm</label>
-        <input class="form-input-pump" id="sendWord" placeholder="SEND" autocomplete="off">
-      </div>
-      <div class="cx-sheet-actions">
-        <button class="cx-launch" id="sendGo" type="button" onclick="CessionPay.confirmSend()" disabled>Send</button>
-        <button class="cx-ghost" type="button" data-close-sheet="sendModal">Cancel</button>
-      </div>
-      <div class="cx-sheet-note">Without buffer, on-chain transfers cannot be reversed after broadcast.</div>
+      <div class="cx-sheet-head"><h2>Send</h2><button class="cx-sheet-x" type="button" data-close-sheet="sendModal" aria-label="Close">×</button></div>
+      <div class="cx-sheet-field"><label for="sendDest">Destination wallet</label><input class="form-input-pump" id="sendDest" placeholder="Paste Solana address" oninput="CessionPay.checkSend()"><p id="sendVerdict" class="cx-muted"></p></div>
+      <div class="cx-sheet-field"><label><input type="checkbox" id="sendBufferToggle" checked> Buffer 15 minutes</label></div>
+      <div class="cx-sheet-actions"><button class="cx-launch" id="sendGo" type="button" onclick="CessionPay.confirmSend()" disabled>Send</button></div>
     </div>
   </div>
 
@@ -280,6 +227,8 @@
   <script src="js/cession-fees.js"></script>
   <script src="js/cession-portfolio.js"></script>
   <script src="js/cession-exchange-boot.js"></script>
+  <script src="js/cession-baas.js"></script>
+  <script src="js/cession-caas.js"></script>
   <script src="js/cession-media.js"></script>
   <script src="js/cession-rank.js"></script>
   <script src="js/cession-engine.js"></script>
