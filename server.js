@@ -7,27 +7,21 @@ const WebSocket = require('ws');
 const apiRoutes = require('./routes/api');
 const priceEngine = require('./services/priceEngine');
 const { rateLimit } = require('./middleware/rateLimit');
+const { securityHeaders, requireJson, noStore } = require('./middleware/security');
 require('./services/store').init();
+const bufferQueue = require('./services/bufferQueue');
+setInterval(() => { bufferQueue.releaseDue().catch(() => {}); }, 30000);
 
 const app = express();
 const server = http.createServer(app);
 const ALLOW = (process.env.CORS_ORIGIN || 'https://cession.us,https://www.cession.us,https://cession.fun,https://www.cession.fun').split(',');
 
-// Trust exactly one reverse-proxy hop (the host platform's edge/LB). This makes
-// req.ip / req.headers['x-forwarded-for'] reflect only the value that platform actually
-// set, so it can no longer be spoofed by a client to bypass IP-keyed rate limits or
-// IP-based geo/compliance checks. Configurable in case the real deployment sits behind
-// more than one hop.
 app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS || 1));
 
 app.disable('x-powered-by');
-app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('Referrer-Policy', 'same-origin');
-  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  next();
-});
+app.use(securityHeaders);
+app.use(noStore);
+app.use(requireJson);
 app.use(cors({
   origin: function (origin, cb) {
     if (!origin) return cb(null, true);
@@ -41,6 +35,10 @@ app.use(express.urlencoded({ extended: true, limit: '200kb' }));
 app.use('/api/pulse', rateLimit(60, 60000));
 app.use('/api/ask', rateLimit(30, 60000));
 app.use('/api/support', rateLimit(20, 60000));
+app.use('/api/baas', rateLimit(60, 60000));
+app.use('/api/caas', rateLimit(40, 60000));
+app.use('/api/webhooks', rateLimit(120, 60000));
+app.use('/api/ledger', rateLimit(60, 60000));
 app.use(['/api/tokens/create', '/api/tokens/deploy', '/api/tokens/launch'], rateLimit(6, 60000));
 app.use(/^\/api\/tokens\/[^/]+\/(buy|sell|stake)$/, rateLimit(30, 60000));
 app.use(['/api/tokens/collections/create', '/api/tokens/bundles/create'], rateLimit(6, 60000));
@@ -55,28 +53,10 @@ app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html', 'h
   });
 });
 
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'healthy', uptime: process.uptime(), timestamp: new Date().toISOString() });
-});
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-const wss = new WebSocket.Server({ server, path: '/ws' });
-wss.on('connection', (ws) => {
-  priceEngine.addClient(ws);
-  ws.on('message', (message) => {
-    try {
-      const data = JSON.parse(message.toString());
-      if (data.action === 'SUBSCRIBE' && data.symbol) {
-        ws.send(JSON.stringify({ type: 'CANDLE_HISTORY', symbol: data.symbol, candles: priceEngine.getCandles(data.symbol) }));
-      }
-    } catch (err) {}
-  });
-  ws.on('close', () => priceEngine.removeClient(ws));
-});
-
-const PORT = process.env.PORT || 3057;
-server.listen(PORT, '0.0.0.0', () => {
+const PORT = Number(process.env.PORT || 3057);
+server.listen(PORT, () => {
   console.log('cession.us on', PORT);
+  try { priceEngine.start && priceEngine.start(); } catch (e) {}
 });
+
+module.exports = { app, server };
