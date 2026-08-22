@@ -8,7 +8,7 @@ const apiRoutes = require('./routes/api');
 const priceEngine = require('./services/priceEngine');
 const { rateLimit } = require('./middleware/rateLimit');
 const { securityHeaders, requireJson, noStore } = require('./middleware/security');
-require('./services/store').init();
+const store = require('./services/store');
 const bufferQueue = require('./services/bufferQueue');
 setInterval(() => { bufferQueue.releaseDue().catch(() => {}); }, 30000);
 
@@ -17,7 +17,6 @@ const server = http.createServer(app);
 const ALLOW = (process.env.CORS_ORIGIN || 'https://cession.us,https://www.cession.us,https://cession.fun,https://www.cession.fun').split(',');
 
 app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS || 1));
-
 app.disable('x-powered-by');
 app.use(securityHeaders);
 app.use(noStore);
@@ -53,10 +52,41 @@ app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html', 'h
   });
 });
 
-const PORT = Number(process.env.PORT || 3057);
-server.listen(PORT, () => {
-  console.log('cession.us on', PORT);
-  try { priceEngine.start && priceEngine.start(); } catch (e) {}
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    uptime: process.uptime(),
+    store: store.status(),
+    timestamp: new Date().toISOString()
+  });
+});
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-module.exports = { app, server };
+const wss = new WebSocket.Server({ server, path: '/ws' });
+wss.on('connection', (ws) => {
+  priceEngine.addClient(ws);
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message.toString());
+      if (data.action === 'SUBSCRIBE' && data.symbol) {
+        ws.send(JSON.stringify({ type: 'CANDLE_HISTORY', symbol: data.symbol, candles: priceEngine.getCandles(data.symbol) }));
+      }
+    } catch (err) {}
+  });
+  ws.on('close', () => priceEngine.removeClient(ws));
+});
+
+const PORT = process.env.PORT || 3057;
+store.init().then((pg) => {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log('cession.us on', PORT, pg ? '(postgres)' : '(file store)');
+    try { priceEngine.start && priceEngine.start(); } catch (e) {}
+  });
+}).catch((e) => {
+  console.warn('[store] init error', e && e.message);
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log('cession.us on', PORT, '(file store fallback)');
+  });
+});
