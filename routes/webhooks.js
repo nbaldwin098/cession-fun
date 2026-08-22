@@ -1,3 +1,6 @@
+/**
+ * Partner webhook ingress — Coinbase Onramp + BaaS bank events.
+ */
 const express = require('express');
 const router = express.Router();
 const caas = require('../services/caasService');
