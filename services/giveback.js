@@ -1,3 +1,6 @@
+/**
+ * Daily crypto give-back + profit-share style rewards.
+ */
 const store = require('./store');
 const ledger = require('./ledger');
 const crypto = require('crypto');
