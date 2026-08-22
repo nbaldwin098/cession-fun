@@ -45,7 +45,6 @@
           <button type="button" class="sell" onclick="CessionCaas && CessionCaas.openBuy()">Sell</button>
           <button type="button" class="send" onclick="CessionPay.openSend()">Send</button>
         </div>
-        <div class="cx-pf-chip">Buy/sell via partner APIs · balances from your wallet only</div>
       </div>
       <p class="cx-section-label">Protection</p>
       <div class="cx-card">
@@ -85,7 +84,7 @@
       <div class="cx-card" id="baasGiveback"><p class="cx-muted">Loading…</p></div>
       <p class="cx-baas-section">Family</p>
       <div class="cx-card" id="baasFamily"><p class="cx-muted">Loading…</p></div>
-      <p class="cx-powered" id="baasPowered">Banking services provided by a licensed BaaS partner. Cession does not hold customer funds.</p>
+      <p class="cx-powered" id="baasPowered">Banking services provided by a licensed partner. Cession does not hold customer funds.</p>
     </main>
     <main class="page-view" id="viewHome"><div class="cx-feed" id="forYouCoinsGrid"></div></main>
     <main class="page-view" id="viewExplorePulse">
@@ -95,19 +94,18 @@
     <main class="page-view" id="viewMint">
       <h1 class="cx-title">Create</h1>
       <div class="cx-card">
-        <p class="cx-muted">Fair launch. Optional Fuse agent is a checkbox on the create form — not a separate page.</p>
+        <p class="cx-muted">Fair launch. Optional Fuse agent is on the create form.</p>
         <button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create coin</button>
       </div>
     </main>
     <main class="page-view" id="viewWallet">
-      <div class="cx-baas-status" id="walletHubNote">On-chain balances only. Cession does not custody funds.</div>
       <div class="cx-baas-hero" id="walletHubHero">
         <div class="cx-baas-sub">Active wallet</div>
         <div class="cx-baas-balance">0</div>
-        <div class="cx-baas-sub">Connect a wallet to read chain balances</div>
+        <div class="cx-baas-sub">Connect Phantom, MetaMask, or Trust</div>
       </div>
       <div id="walletScreenDisconnected" class="cx-card">
-        <p class="cx-muted" id="connectHint">Approve in your wallet app, then return here. Phantom · MetaMask · Trust only.</p>
+        <p class="cx-muted" id="connectHint">Approve in your wallet app, then return here.</p>
         <button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button>
         <button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button>
         <button class="cx-door" type="button" onclick="CessionUI.connectTrust()">Connect Trust Wallet</button>
@@ -120,6 +118,8 @@
           <button class="cx-ghost" type="button" onclick="CessionPay.openSend()" style="margin-top:0">Send</button>
           <button class="cx-launch" type="button" onclick="CessionUI.open('walletModal')" style="margin-top:0">Add wallet</button>
         </div>
+        <p class="cx-baas-section">Assets</p>
+        <div id="walletAssetsList" class="cx-baas-list"></div>
         <p class="cx-baas-section">Tracked wallets</p>
         <div id="walletHubList" class="cx-wallet-list"></div>
       </div>
@@ -147,14 +147,14 @@
     <input class="form-input-pump" id="deploySymbol" placeholder="Ticker" required>
     <input class="form-input-pump" id="deployMedia" type="url" placeholder="Image or video URL">
     <input class="form-input-pump" id="deployFirstBuy" type="number" min="0.06" step="0.01" value="0.06" required>
-    <label class="cx-muted"><input type="checkbox" id="deployFuse" checked> Fuse agent on create (optional 24h bot on your coin)</label>
+    <label class="cx-muted"><input type="checkbox" id="deployFuse" checked> Fuse agent on create</label>
     <select class="form-input-pump" id="deployFuseMode"><option value="auto">Auto</option><option value="manual">Manual</option></select>
     <button class="cx-launch" type="submit">Launch in Game</button>
   </form></div></div>
   <div class="modal-overlay-generic" id="walletModal"><div class="cx-sheet">
     <div class="cx-sheet-handle"></div>
     <div class="cx-sheet-head"><h2>Connect wallet</h2><button class="cx-sheet-x" type="button" data-close-sheet="walletModal" aria-label="Close">×</button></div>
-    <p class="cx-sheet-sub">Phantom, MetaMask, or Trust Wallet only. No in-app wallets.</p>
+    <p class="cx-sheet-sub">Phantom, MetaMask, or Trust Wallet</p>
     <button class="cx-launch" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button>
     <button class="cx-ghost" type="button" onclick="CessionUI.connectMetaMask()" style="margin-top:10px">Connect MetaMask</button>
     <button class="cx-ghost" type="button" onclick="CessionUI.connectTrust()" style="margin-top:10px">Connect Trust Wallet</button>
