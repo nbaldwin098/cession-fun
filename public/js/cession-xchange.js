@@ -42,6 +42,12 @@
   }
 
   function create() {
+    var a = addr();
+    if (!a) {
+      alert('Connect Phantom, MetaMask, or Trust first');
+      if (window.CessionUI) CessionUI.open('walletModal');
+      return;
+    }
     var name = ($('xchName') || {}).value || '';
     var sym = ($('xchSymbol') || {}).value || '';
     if (!name || !sym) {
