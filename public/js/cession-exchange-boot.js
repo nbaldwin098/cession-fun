@@ -29,7 +29,6 @@
       if (b) b.classList.add('active');
       document.title = 'Xchange | Cession';
     }
-
     if (window.CessionCaas && typeof CessionCaas.maybeGeoPrompt === 'function') {
       CessionCaas.maybeGeoPrompt(enter);
     } else {
