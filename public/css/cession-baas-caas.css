@@ -1,0 +1,240 @@
+/* Cession BaaS + CaaS polished surfaces — money-app first */
+
+.cx-baas-hero {
+  background: linear-gradient(180deg, #f7f9fc 0%, #ffffff 100%);
+  border: 1px solid var(--cx-line);
+  border-radius: var(--cx-radius);
+  padding: 20px 18px 18px;
+  margin-bottom: 16px;
+}
+
+.cx-baas-balance {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--cx-ink);
+}
+
+.cx-baas-sub {
+  font-size: 13px;
+  color: var(--cx-muted);
+  margin-top: 4px;
+}
+
+.cx-baas-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.cx-baas-row button {
+  flex: 1;
+  height: 44px;
+  border-radius: var(--cx-pill);
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+}
+
+.cx-baas-row .primary {
+  background: var(--cx-btn);
+  color: #fff;
+}
+
+.cx-baas-row .ghost {
+  background: var(--cx-soft);
+  color: var(--cx-ink);
+  border: 1px solid var(--cx-line-2);
+}
+
+.cx-baas-cards {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.cx-card-debit {
+  background: linear-gradient(135deg, #0b0d10 0%, #1a1f2a 100%);
+  color: #fff;
+  border-radius: 18px;
+  padding: 18px;
+  min-height: 120px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cx-card-debit .chip {
+  width: 36px;
+  height: 28px;
+  background: linear-gradient(135deg, #d4af37, #f5e6a3);
+  border-radius: 6px;
+  margin-bottom: 18px;
+}
+
+.cx-card-debit .number {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 17px;
+  letter-spacing: 0.12em;
+  margin-bottom: 12px;
+}
+
+.cx-card-debit .meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.cx-baas-section {
+  margin: 22px 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cx-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cx-baas-list {
+  background: var(--cx-white);
+  border: 1px solid var(--cx-line);
+  border-radius: var(--cx-radius);
+  overflow: hidden;
+}
+
+.cx-baas-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--cx-line);
+  font-size: 14px;
+}
+
+.cx-baas-item:last-child { border-bottom: none; }
+
+.cx-baas-item .left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cx-baas-item .title { font-weight: 500; color: var(--cx-ink); }
+.cx-baas-item .sub { font-size: 12px; color: var(--cx-muted); }
+.cx-baas-item .amt { font-weight: 600; font-variant-numeric: tabular-nums; }
+.cx-baas-item .amt.up { color: var(--cx-up); }
+.cx-baas-item .amt.down { color: var(--cx-down); }
+
+.cx-caas-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 13, 16, 0.45);
+  z-index: 9998;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+}
+
+.cx-caas-modal.open { display: flex; }
+
+.cx-caas-box {
+  background: #fff;
+  border-radius: 20px 20px 16px 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 22px 20px 18px;
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.12);
+}
+
+.cx-caas-quote .row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--cx-ink-2);
+  padding: 4px 0;
+}
+
+.cx-caas-quote .row.total {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--cx-ink);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--cx-line-2);
+}
+
+.cx-caas-asset-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 10px 0 14px;
+}
+
+.cx-caas-asset-pills button {
+  border: 1px solid var(--cx-line-2);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cx-caas-asset-pills button.on {
+  background: var(--cx-ink);
+  color: #fff;
+  border-color: var(--cx-ink);
+}
+
+.cx-geo-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 13, 16, 0.45);
+  z-index: 9999;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+}
+
+.cx-geo-modal.open { display: flex; }
+
+.cx-geo-box {
+  background: #fff;
+  border-radius: 20px 20px 16px 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 22px 20px 18px;
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.12);
+}
+
+.cx-geo-box h3 { margin: 0 0 8px; font-size: 18px; font-weight: 700; }
+.cx-geo-box p { margin: 0 0 16px; font-size: 14px; color: var(--cx-ink-2); line-height: 1.45; }
+
+.cx-geo-actions { display: flex; gap: 10px; }
+.cx-geo-actions button {
+  flex: 1;
+  height: 46px;
+  border-radius: var(--cx-pill);
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+}
+.cx-geo-actions .ok { background: var(--cx-btn); color: #fff; }
+.cx-geo-actions .cancel { background: var(--cx-soft); color: var(--cx-ink); }
+
+.cx-demo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
