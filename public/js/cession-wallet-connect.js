@@ -1,9 +1,6 @@
 /**
- * Wallet connect for desktop (extensions) + mobile (apps).
- *
- * Phantom mobile (Safari/Chrome): official encrypted deeplink → approve in app → redirect back.
- * MetaMask / Trust mobile: open site inside their browser (only path that works without WalletConnect), then connect.
- * Desktop: injected provider, connect + one sign-in.
+ * Wallet connect — desktop extensions + mobile apps.
+ * Phantom mobile: encrypted deeplink → decrypt pubkey on return → enter app.
  */
 (function () {
   'use strict';
@@ -18,9 +15,6 @@
   }
   function isMobile() {
     return /Android|iPhone|iPad|iPod|Mobile/i.test(ua());
-  }
-  function isIOS() {
-    return /iPhone|iPad|iPod/i.test(ua());
   }
 
   function inWalletWebView() {
@@ -57,6 +51,14 @@
     }, 2800);
   }
 
+  function cleanUrl() {
+    try {
+      if (window.history && history.replaceState) {
+        history.replaceState({}, '', location.origin + location.pathname);
+      }
+    } catch (e) {}
+  }
+
   function enterApp() {
     try {
       localStorage.setItem('cession_onboarded', '1');
@@ -65,14 +67,21 @@
       if (g) g.classList.remove('open');
       document.documentElement.classList.remove('gated');
       document.body.classList.remove('gated');
-      if (location.search && /phantom_|errorCode/.test(location.search)) {
-        var clean = location.origin + location.pathname;
-        if (window.history && history.replaceState) history.replaceState({}, '', clean);
-      }
+      cleanUrl();
       if (window.CessionExchange && typeof CessionExchange.go === 'function') {
         CessionExchange.go();
       }
     } catch (e) {}
+  }
+
+  function closeModal() {
+    var m = document.getElementById('walletModal');
+    if (m) m.classList.remove('open');
+  }
+
+  function sync() {
+    if (window.walletEngine && window.walletEngine.renderState) window.walletEngine.renderState();
+    if (window.CessionWalletHub && CessionWalletHub.render) CessionWalletHub.render();
   }
 
   function saveAddr(a, kind) {
@@ -114,23 +123,14 @@
     }
     signing = true;
     CessionSession.establish(kind || localStorage.getItem('cession_wallet_type') || 'phantom')
-      .then(function (r) {
+      .then(function () {
         signing = false;
-        if (r && r.ok) enterApp();
+        enterApp();
       })
       .catch(function () {
         signing = false;
+        enterApp();
       });
-  }
-
-  function closeModal() {
-    var m = document.getElementById('walletModal');
-    if (m) m.classList.remove('open');
-  }
-
-  function sync() {
-    if (window.walletEngine && window.walletEngine.renderState) window.walletEngine.renderState();
-    if (window.CessionWalletHub && CessionWalletHub.render) CessionWalletHub.render();
   }
 
   var B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
@@ -188,14 +188,14 @@
 
   function getOrCreatePhantomDappKey(nacl) {
     try {
-      var raw = sessionStorage.getItem(PHANTOM_SK_KEY);
+      var raw = localStorage.getItem(PHANTOM_SK_KEY);
       if (raw) {
         var arr = JSON.parse(raw);
         return nacl.box.keyPair.fromSecretKey(new Uint8Array(arr));
       }
     } catch (e) {}
     var kp = nacl.box.keyPair();
-    sessionStorage.setItem(PHANTOM_SK_KEY, JSON.stringify(Array.from(kp.secretKey)));
+    localStorage.setItem(PHANTOM_SK_KEY, JSON.stringify(Array.from(kp.secretKey)));
     return kp;
   }
 
@@ -258,9 +258,7 @@
         var kp = getOrCreatePhantomDappKey(nacl);
         var dappPk = b58encode(kp.publicKey);
         var appUrl = encodeURIComponent(originUrl());
-        var redirect = encodeURIComponent(
-          location.origin + location.pathname + '?phantom_cb=1'
-        );
+        var redirect = encodeURIComponent(location.origin + location.pathname + '?phantom_cb=1');
         var url =
           'https://phantom.app/ul/v1/connect' +
           '?app_url=' +
@@ -285,13 +283,45 @@
     window.location.href = url;
   }
 
+  function finishPhantomLogin(pubkey) {
+    if (!pubkey) return;
+    lastSaved = '';
+    localStorage.setItem('cession_address', pubkey);
+    localStorage.setItem('cession_wallet_type', 'phantom');
+    if (window.walletEngine) {
+      window.walletEngine.activeAddress = pubkey;
+      window.walletEngine.activeWalletType = 'phantom';
+      window.walletEngine.isAuthenticated = true;
+      if (window.walletEngine.renderState) window.walletEngine.renderState();
+    }
+    if (window.CessionWalletHub && CessionWalletHub.setActive) {
+      CessionWalletHub.setActive(pubkey, 'phantom');
+    }
+    closeModal();
+    sync();
+    cleanUrl();
+    var provider = getPhantomProvider();
+    if (provider && window.CessionSession && CessionSession.establish) {
+      CessionSession.establish('phantom')
+        .then(function () {
+          enterApp();
+        })
+        .catch(function () {
+          enterApp();
+        });
+      return;
+    }
+    enterApp();
+  }
+
   function handlePhantomRedirect() {
     var params = new URLSearchParams(location.search || '');
-    if (params.get('errorCode')) {
+    if (!params.get('data') && location.hash && location.hash.indexOf('data=') >= 0) {
+      params = new URLSearchParams(location.hash.replace(/^#/, ''));
+    }
+    if (params.get('errorCode') || params.get('errorMessage')) {
       toast('Phantom connect cancelled');
-      if (window.history && history.replaceState) {
-        history.replaceState({}, '', location.origin + location.pathname);
-      }
+      cleanUrl();
       return;
     }
     var data = params.get('data');
@@ -305,23 +335,35 @@
     }
 
     loadNacl(function (err, nacl) {
-      if (err || !nacl) return;
+      if (err || !nacl) {
+        toast('Could not finish Phantom login — refresh and try again');
+        return;
+      }
       try {
         var kp = getOrCreatePhantomDappKey(nacl);
         var shared = nacl.box.before(b58decode(phantomPk), kp.secretKey);
         var decrypted = nacl.box.open.after(b58decode(data), b58decode(nonce), shared);
         if (!decrypted) {
-          toast('Could not read Phantom response');
+          toast('Phantom response invalid — try Connect again');
+          cleanUrl();
           return;
         }
         var json = JSON.parse(new TextDecoder().decode(decrypted));
-        if (json.public_key) {
-          if (json.session) sessionStorage.setItem(PHANTOM_SESSION_KEY, json.session);
-          saveAddr(json.public_key, 'phantom');
+        if (!json.public_key) {
+          toast('No wallet in Phantom response');
+          cleanUrl();
+          return;
         }
+        if (json.session) {
+          try {
+            localStorage.setItem(PHANTOM_SESSION_KEY, json.session);
+          } catch (e0) {}
+        }
+        finishPhantomLogin(json.public_key);
       } catch (e) {
         console.warn('[phantom redirect]', e);
         toast('Phantom handoff failed — try Connect again');
+        cleanUrl();
       }
     });
   }
@@ -393,6 +435,11 @@
       handlePhantomRedirect();
 
       if (localStorage.getItem('cession_address') && localStorage.getItem('cession_session')) {
+        enterApp();
+        return;
+      }
+      // Already have address from prior Phantom redirect — enter
+      if (localStorage.getItem('cession_address') && localStorage.getItem('cession_wallet_type') === 'phantom') {
         enterApp();
         return;
       }
