@@ -1,14 +1,20 @@
 /**
- * Live prices from Coinbase Exchange public WebSocket + REST bootstrap.
- * No simulated ticks for real pairs. One real price source.
+ * Live prices from Binance public REST + WebSocket.
  */
 const WebSocket = require('ws');
 const https = require('https');
 
 const PRODUCTS = [
-  'BTC-USD', 'ETH-USD', 'SOL-USD', 'XRP-USD', 'DOGE-USD', 'LINK-USD',
-  'AVAX-USD', 'ADA-USD', 'DOT-USD', 'LTC-USD', 'BCH-USD', 'UNI-USD',
-  'AAVE-USD', 'ATOM-USD', 'NEAR-USD'
+  { symbol: 'BTC-USDT', bin: 'btcusdt' },
+  { symbol: 'ETH-USDT', bin: 'ethusdt' },
+  { symbol: 'SOL-USDT', bin: 'solusdt' },
+  { symbol: 'XRP-USDT', bin: 'xrpusdt' },
+  { symbol: 'DOGE-USDT', bin: 'dogeusdt' },
+  { symbol: 'LINK-USDT', bin: 'linkusdt' },
+  { symbol: 'AVAX-USDT', bin: 'avaxusdt' },
+  { symbol: 'ADA-USDT', bin: 'adausdt' },
+  { symbol: 'DOT-USDT', bin: 'dotusdt' },
+  { symbol: 'BNB-USDT', bin: 'bnbusdt' }
 ];
 
 function emptyTicker(symbol) {
@@ -20,7 +26,7 @@ function emptyTicker(symbol) {
     low24h: null,
     volume24h: null,
     lastUpdate: null,
-    source: 'coinbase',
+    source: 'binance',
     live: false
   };
 }
@@ -28,14 +34,16 @@ function emptyTicker(symbol) {
 class PriceEngine {
   constructor() {
     this.tickers = {};
-    PRODUCTS.forEach((s) => { this.tickers[s] = emptyTicker(s); });
+    PRODUCTS.forEach((p) => {
+      this.tickers[p.symbol] = emptyTicker(p.symbol);
+    });
     this.candles = new Map();
-    this.orderbooks = new Map();
     this.listeners = new Set();
-    this.coinbaseWs = null;
+    this.ws = null;
     this.reconnectTimer = null;
     this._bootstrapRest();
-    this._connectCoinbaseWebSocket();
+    this._connectWs();
+    setInterval(() => this._bootstrapRest().catch(() => {}), 30000);
   }
 
   _httpsGet(url) {
@@ -45,7 +53,11 @@ class PriceEngine {
           let body = '';
           res.on('data', (c) => (body += c));
           res.on('end', () => {
-            try { resolve(JSON.parse(body)); } catch (e) { reject(e); }
+            try {
+              resolve(JSON.parse(body));
+            } catch (e) {
+              reject(e);
+            }
           });
         })
         .on('error', reject);
@@ -53,136 +65,121 @@ class PriceEngine {
   }
 
   async _bootstrapRest() {
-    for (const product of PRODUCTS) {
-      try {
-        const t = await this._httpsGet('https://api.exchange.coinbase.com/products/' + product + '/ticker');
-        const stats = await this._httpsGet('https://api.exchange.coinbase.com/products/' + product + '/stats').catch(() => null);
-        const price = parseFloat(t.price);
-        if (!isFinite(price)) continue;
-        const row = this.tickers[product] || emptyTicker(product);
-        row.price = price;
-        row.volume24h = stats && stats.volume ? parseFloat(stats.volume) : parseFloat(t.volume || 0);
-        if (stats) {
-          row.high24h = stats.high ? parseFloat(stats.high) : price;
-          row.low24h = stats.low ? parseFloat(stats.low) : price;
-          const open = stats.open ? parseFloat(stats.open) : null;
-          if (open && open > 0) row.change24h = ((price - open) / open) * 100;
-        }
-        row.lastUpdate = Date.now();
-        row.live = true;
-        row.source = 'coinbase';
-        this.tickers[product] = row;
-        this._seedCandle(product, price);
-      } catch (e) {}
-    }
-    console.log('[PriceEngine] REST bootstrap done');
-  }
-
-  _seedCandle(symbol, price) {
-    if (!this.candles.has(symbol)) this.candles.set(symbol, []);
-    const list = this.candles.get(symbol);
-    if (list.length === 0) {
-      list.push({ time: Math.floor(Date.now() / 1000), open: price, high: price, low: price, close: price, volume: 0 });
-    }
-  }
-
-  _connectCoinbaseWebSocket() {
     try {
-      this.coinbaseWs = new WebSocket('wss://ws-feed.exchange.coinbase.com');
-      this.coinbaseWs.on('open', () => {
-        console.log('[PriceEngine] Coinbase WS live');
-        this.coinbaseWs.send(JSON.stringify({ type: 'subscribe', product_ids: PRODUCTS, channels: ['ticker'] }));
+      const all = await this._httpsGet('https://api.binance.com/api/v3/ticker/24hr');
+      const map = {};
+      PRODUCTS.forEach((p) => {
+        map[p.bin.toUpperCase()] = p.symbol;
       });
-      this.coinbaseWs.on('message', (data) => {
-        try {
-          const msg = JSON.parse(data.toString());
-          if (msg.type === 'ticker' && msg.product_id && msg.price) {
-            this._handleCoinbaseTick(msg.product_id, parseFloat(msg.price), parseFloat(msg.volume_24h || 0));
-          }
-        } catch (err) {}
-      });
-      this.coinbaseWs.on('error', () => console.warn('[PriceEngine] Coinbase WS error'));
-      this.coinbaseWs.on('close', () => {
-        clearTimeout(this.reconnectTimer);
-        this.reconnectTimer = setTimeout(() => this._connectCoinbaseWebSocket(), 5000);
+      all.forEach((row) => {
+        const sym = map[row.symbol];
+        if (!sym) return;
+        const price = parseFloat(row.lastPrice);
+        if (!isFinite(price)) return;
+        const t = this.tickers[sym] || emptyTicker(sym);
+        t.price = price;
+        t.change24h = parseFloat(row.priceChangePercent);
+        t.high24h = parseFloat(row.highPrice);
+        t.low24h = parseFloat(row.lowPrice);
+        t.volume24h = parseFloat(row.volume);
+        t.lastUpdate = Date.now();
+        t.live = true;
+        t.source = 'binance';
+        this.tickers[sym] = t;
       });
     } catch (e) {
-      console.warn('[PriceEngine] WS init failed', e.message);
+      console.warn('[PriceEngine] Binance REST failed', e.message);
     }
   }
 
-  _handleCoinbaseTick(symbol, price, volume24h) {
-    if (!isFinite(price)) return;
-    let ticker = this.tickers[symbol];
-    if (!ticker) {
-      ticker = emptyTicker(symbol);
-      this.tickers[symbol] = ticker;
-    }
-    ticker.price = price;
-    if (ticker.high24h == null || price > ticker.high24h) ticker.high24h = price;
-    if (ticker.low24h == null || price < ticker.low24h) ticker.low24h = price;
-    if (volume24h > 0) ticker.volume24h = volume24h;
-    ticker.lastUpdate = Date.now();
-    ticker.live = true;
-    ticker.source = 'coinbase';
-    this._updateCandle(symbol, price);
-    this._broadcast({ type: 'TICK', data: ticker });
-  }
-
-  _updateCandle(symbol, price) {
-    if (!this.candles.has(symbol)) this.candles.set(symbol, []);
-    const list = this.candles.get(symbol);
-    const now = Math.floor(Date.now() / 1000);
-    if (list.length === 0) {
-      list.push({ time: now, open: price, high: price, low: price, close: price, volume: 1 });
-      return;
-    }
-    const last = list[list.length - 1];
-    if (now - last.time < 60) {
-      last.high = Math.max(last.high, price);
-      last.low = Math.min(last.low, price);
-      last.close = price;
-      last.volume += 0.1;
-    } else {
-      list.push({ time: now, open: last.close, high: Math.max(last.close, price), low: Math.min(last.close, price), close: price, volume: 1 });
-      if (list.length > 500) list.shift();
+  _connectWs() {
+    try {
+      const streams = PRODUCTS.map((p) => p.bin + '@ticker').join('/');
+      const url = 'wss://stream.binance.com:9443/stream?streams=' + streams;
+      this.ws = new WebSocket(url);
+      this.ws.on('open', () => console.log('[PriceEngine] Binance WS live'));
+      this.ws.on('message', (data) => {
+        try {
+          const msg = JSON.parse(data.toString());
+          const d = msg.data || msg;
+          if (!d || !d.s) return;
+          const bin = String(d.s).toLowerCase();
+          const prod = PRODUCTS.find((p) => p.bin === bin);
+          if (!prod) return;
+          const price = parseFloat(d.c);
+          if (!isFinite(price)) return;
+          const t = this.tickers[prod.symbol] || emptyTicker(prod.symbol);
+          t.price = price;
+          if (d.P != null) t.change24h = parseFloat(d.P);
+          if (d.h) t.high24h = parseFloat(d.h);
+          if (d.l) t.low24h = parseFloat(d.l);
+          if (d.v) t.volume24h = parseFloat(d.v);
+          t.lastUpdate = Date.now();
+          t.live = true;
+          t.source = 'binance';
+          this.tickers[prod.symbol] = t;
+          this._broadcast({ type: 'TICK', data: t });
+        } catch (e) {}
+      });
+      this.ws.on('close', () => {
+        clearTimeout(this.reconnectTimer);
+        this.reconnectTimer = setTimeout(() => this._connectWs(), 5000);
+      });
+      this.ws.on('error', () => {
+        try {
+          this.ws.close();
+        } catch (e) {}
+      });
+    } catch (e) {
+      console.warn('[PriceEngine] Binance WS init failed', e.message);
     }
   }
 
   addClient(ws) {
     this.listeners.add(ws);
-    try { ws.send(JSON.stringify({ type: 'SNAPSHOT', tickers: this.tickers })); } catch (e) {}
+    try {
+      ws.send(JSON.stringify({ type: 'SNAPSHOT', tickers: this.tickers }));
+    } catch (e) {}
   }
 
-  removeClient(ws) { this.listeners.delete(ws); }
+  removeClient(ws) {
+    this.listeners.delete(ws);
+  }
 
   _broadcast(msg) {
     const payload = JSON.stringify(msg);
-    for (const ws of this.listeners) {
-      if (ws.readyState === WebSocket.OPEN) {
-        try { ws.send(payload); } catch (e) {}
+    for (const c of this.listeners) {
+      if (c.readyState === WebSocket.OPEN) {
+        try {
+          c.send(payload);
+        } catch (e) {}
       }
     }
   }
 
   getTicker(symbol) {
     const s = String(symbol || '').toUpperCase();
-    const key = s.includes('-') ? s : s + '-USD';
-    return this.tickers[key] || this.tickers[s] || null;
+    if (this.tickers[s]) return this.tickers[s];
+    if (this.tickers[s + '-USDT']) return this.tickers[s + '-USDT'];
+    if (this.tickers[s.replace('-USD', '-USDT')]) return this.tickers[s.replace('-USD', '-USDT')];
+    return null;
   }
 
   getAllTickers() {
     return Object.values(this.tickers).filter((t) => t.price != null);
   }
 
-  getCandles(symbol) {
-    const s = String(symbol || '').toUpperCase();
-    const key = s.includes('-') ? s : s + '-USD';
-    return this.candles.get(key) || this.candles.get(s) || [];
+  getCandles() {
+    return [];
   }
 
-  getOrderbook() { return { bids: [], asks: [] }; }
-  getProducts() { return PRODUCTS.slice(); }
+  getOrderbook() {
+    return { bids: [], asks: [] };
+  }
+
+  getProducts() {
+    return PRODUCTS.map((p) => p.symbol);
+  }
 }
 
 module.exports = new PriceEngine();

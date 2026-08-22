@@ -1,19 +1,39 @@
 /**
- * Live watchlist — Coinbase Exchange public WebSocket in the browser.
+ * Live watchlist — Binance public WebSocket + REST.
  */
 (function () {
   'use strict';
 
-  var PRODUCTS = [
-    'BTC-USD', 'ETH-USD', 'SOL-USD', 'XRP-USD', 'DOGE-USD', 'LINK-USD',
-    'AVAX-USD', 'ADA-USD', 'DOT-USD', 'LTC-USD', 'BCH-USD', 'UNI-USD',
-    'AAVE-USD', 'ATOM-USD', 'NEAR-USD'
+  var MAP = [
+    { show: 'BTC', bin: 'btcusdt' },
+    { show: 'ETH', bin: 'ethusdt' },
+    { show: 'SOL', bin: 'solusdt' },
+    { show: 'XRP', bin: 'xrpusdt' },
+    { show: 'DOGE', bin: 'dogeusdt' },
+    { show: 'LINK', bin: 'linkusdt' },
+    { show: 'AVAX', bin: 'avaxusdt' },
+    { show: 'ADA', bin: 'adausdt' },
+    { show: 'DOT', bin: 'dotusdt' },
+    { show: 'LTC', bin: 'ltcusdt' },
+    { show: 'BCH', bin: 'bchusdt' },
+    { show: 'UNI', bin: 'uniusdt' },
+    { show: 'AAVE', bin: 'aaveusdt' },
+    { show: 'ATOM', bin: 'atomusdt' },
+    { show: 'NEAR', bin: 'nearusdt' },
+    { show: 'BNB', bin: 'bnbusdt' },
+    { show: 'PEPE', bin: 'pepeusdt' },
+    { show: 'SUI', bin: 'suiusdt' },
+    { show: 'APT', bin: 'aptusdt' },
+    { show: 'ARB', bin: 'arbusdt' }
   ];
-  var DEFAULT = ['BTC-USD', 'ETH-USD', 'SOL-USD', 'XRP-USD', 'DOGE-USD', 'LINK-USD', 'AVAX-USD', 'ADA-USD'];
-  var KEY = 'cession_watchlist_v1';
+
+  var DEFAULT = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'LINK', 'AVAX', 'ADA'];
+  var KEY = 'cession_watchlist_bin_v1';
   var prices = {};
   var ws = null;
   var reconnectTimer = null;
+  var byBin = {};
+  MAP.forEach(function (m) { byBin[m.bin] = m.show; });
 
   function loadList() {
     try {
@@ -34,6 +54,7 @@
     if (n == null || !isFinite(n)) return '—';
     if (n >= 1000) return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
     if (n >= 1) return Number(n).toFixed(2);
+    if (n >= 0.01) return Number(n).toFixed(4);
     return Number(n).toPrecision(4);
   }
 
@@ -50,13 +71,13 @@
     if (m) m.classList.remove('open');
   }
 
-  function setPrice(sym, price, vol) {
+  function setPrice(show, price, changePct) {
     if (!isFinite(price)) return;
-    var prev = prices[sym] && prices[sym].price;
-    prices[sym] = {
-      symbol: sym,
+    var prev = prices[show] && prices[show].price;
+    prices[show] = {
+      symbol: show,
       price: price,
-      volume24h: vol || (prices[sym] && prices[sym].volume24h) || null,
+      change24h: isFinite(changePct) ? changePct : (prices[show] && prices[show].change24h),
       lastUpdate: Date.now(),
       flash: prev != null && prev !== price
     };
@@ -64,23 +85,23 @@
     renderStrip();
   }
 
+  function streamUrl() {
+    var streams = MAP.map(function (m) { return m.bin + '@ticker'; }).join('/');
+    return 'wss://stream.binance.com:9443/stream?streams=' + streams;
+  }
+
   function connectWs() {
     try {
       if (ws && (ws.readyState === 0 || ws.readyState === 1)) return;
-      ws = new WebSocket('wss://ws-feed.exchange.coinbase.com');
-      ws.onopen = function () {
-        ws.send(JSON.stringify({
-          type: 'subscribe',
-          product_ids: PRODUCTS,
-          channels: ['ticker']
-        }));
-      };
+      ws = new WebSocket(streamUrl());
       ws.onmessage = function (ev) {
         try {
           var msg = JSON.parse(ev.data);
-          if (msg.type === 'ticker' && msg.product_id && msg.price) {
-            setPrice(msg.product_id, parseFloat(msg.price), parseFloat(msg.volume_24h || 0));
-          }
+          var d = msg.data || msg;
+          if (!d || !d.s) return;
+          var show = byBin[String(d.s).toLowerCase()];
+          if (!show) return;
+          setPrice(show, parseFloat(d.c), parseFloat(d.P));
         } catch (e) {}
       };
       ws.onclose = function () {
@@ -94,14 +115,27 @@
   }
 
   async function bootstrapRest() {
-    for (var i = 0; i < PRODUCTS.length; i++) {
-      var sym = PRODUCTS[i];
+    try {
+      var r = await fetch('https://api.binance.com/api/v3/ticker/24hr');
+      if (!r.ok) throw new Error('binance rest');
+      var all = await r.json();
+      var want = {};
+      MAP.forEach(function (m) { want[m.bin.toUpperCase()] = m.show; });
+      all.forEach(function (row) {
+        var show = want[row.symbol];
+        if (!show) return;
+        setPrice(show, parseFloat(row.lastPrice), parseFloat(row.priceChangePercent));
+      });
+      return;
+    } catch (e) {}
+    for (var i = 0; i < MAP.length; i++) {
+      var m = MAP[i];
       try {
-        var r = await fetch('https://api.exchange.coinbase.com/products/' + sym + '/ticker');
-        if (!r.ok) continue;
-        var d = await r.json();
-        setPrice(sym, parseFloat(d.price), parseFloat(d.volume || 0));
-      } catch (e) {}
+        var r2 = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=' + m.bin.toUpperCase());
+        if (!r2.ok) continue;
+        var d = await r2.json();
+        setPrice(m.show, parseFloat(d.price));
+      } catch (err) {}
     }
   }
 
@@ -110,25 +144,26 @@
     if (!box) return;
     var q = ((document.getElementById('searchInput') || {}).value || '').toUpperCase().trim();
     var list = loadList();
-    var html = '<p class="cx-muted" style="padding:8px 4px;font-size:12px">Live · Coinbase ticker</p>';
+    var html = '<p class="cx-muted" style="padding:8px 4px;font-size:12px">Live · Binance</p>';
     list.forEach(function (sym) {
       var t = prices[sym];
       if (q && sym.indexOf(q) < 0) return;
-      var base = sym.replace('-USD', '');
+      var chg = t && isFinite(t.change24h)
+        ? ' <span class="cx-pf-delta ' + (t.change24h < 0 ? 'down' : 'up') + '" style="font-size:12px">' +
+          (t.change24h >= 0 ? '+' : '') + t.change24h.toFixed(2) + '%</span>'
+        : '';
       html +=
-        '<div class="cx-search-row' + (t && t.flash ? ' cx-flash' : '') + '">' +
-        '<div><strong>' + base + '</strong><span class="cx-muted"> ' + sym + '</span></div>' +
-        '<div class="cx-search-price">$' + fmt(t && t.price) + '</div></div>';
-      if (t) t.flash = false;
+        '<div class="cx-search-row"><div><strong>' + sym + '</strong></div>' +
+        '<div class="cx-search-price">$' + fmt(t && t.price) + chg + '</div></div>';
     });
     if (q) {
-      PRODUCTS.forEach(function (sym) {
-        if (list.indexOf(sym) >= 0) return;
-        if (sym.indexOf(q) < 0) return;
-        var t = prices[sym];
+      MAP.forEach(function (m) {
+        if (list.indexOf(m.show) >= 0) return;
+        if (m.show.indexOf(q) < 0) return;
+        var t = prices[m.show];
         html +=
-          '<div class="cx-search-row" data-add="' + sym + '" style="cursor:pointer">' +
-          '<div><strong>' + sym.replace('-USD', '') + '</strong><span class="cx-muted"> Add</span></div>' +
+          '<div class="cx-search-row" data-add="' + m.show + '" style="cursor:pointer">' +
+          '<div><strong>' + m.show + '</strong><span class="cx-muted"> Add</span></div>' +
           '<div class="cx-search-price">$' + fmt(t && t.price) + '</div></div>';
       });
     }
@@ -153,7 +188,7 @@
       .slice(0, 5)
       .map(function (sym) {
         var t = prices[sym];
-        return '<div class="cx-mkt-chip"><span>' + sym.replace('-USD', '') + '</span><strong>$' + fmt(t && t.price) + '</strong></div>';
+        return '<div class="cx-mkt-chip"><span>' + sym + '</span><strong>$' + fmt(t && t.price) + '</strong></div>';
       })
       .join('');
   }
@@ -169,7 +204,9 @@
       if (t && t.getAttribute && t.getAttribute('data-close-sheet') === 'searchModal') closeModal();
     });
     bootstrapRest().then(connectWs);
-    setInterval(bootstrapRest, 15000);
+    setInterval(function () {
+      if (!ws || ws.readyState !== 1) bootstrapRest();
+    }, 20000);
   }
 
   window.CessionSearch = { open: openModal, close: closeModal, load: bootstrapRest, refresh: bootstrapRest };
