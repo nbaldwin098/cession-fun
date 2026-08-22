@@ -22,7 +22,6 @@
 
       const checking = d.accounts && d.accounts.checking ? d.accounts.checking.available : 0;
       const savings = d.accounts && d.accounts.savings ? d.accounts.savings.available : 0;
-      const cashback = d.cashback ? d.cashback.thisMonth : 0;
 
       hero.innerHTML =
         '<div class="cx-baas-sub">Available balance</div>' +
