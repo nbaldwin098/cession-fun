@@ -21,135 +21,201 @@
     <button type="button" class="cx-header-search" id="btnHeaderSearch" onclick="CessionSearch && CessionSearch.open()" aria-label="Search markets">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
     </button>
-    <button class="cx-xtab" id="tabWallet" type="button" style="display:none" tabindex="-1" aria-hidden="true"></button>
-    <button class="cx-xtab" id="tabBanking" type="button" style="display:none" tabindex="-1" aria-hidden="true"></button>
-    <button class="cx-xtab on" id="tabExchange" type="button" style="display:none" tabindex="-1" aria-hidden="true"></button>
-    <button class="cx-xtab" id="tabForYou" type="button" style="display:none" tabindex="-1" aria-hidden="true"></button>
-    <button class="cx-xtab" id="tabAi" type="button" style="display:none" tabindex="-1" aria-hidden="true"></button>
   </header>
   <div class="cx-app">
     <main class="page-view active" id="viewExchange">
-      <div class="cx-markets-strip" id="exchangeMarketsStrip"></div>
       <div class="cx-pf">
-        <div class="cx-active-pill">Wallet · <span data-active-wallet>No wallet</span></div>
-        <p class="cx-pf-label">Portfolio balance</p>
+        <p class="cx-pf-label">Portfolio</p>
         <div class="cx-pf-value" id="pfValue">$0.00</div>
-        <div class="cx-pf-delta up" id="pfDelta">No activity in this period yet</div>
-        <div class="cx-pf-chart-wrap">
-          <canvas id="pfChart" width="640" height="160" aria-label="Portfolio chart"></canvas>
-        </div>
-        <div class="cx-pf-ranges" role="tablist" aria-label="Chart range">
-          <button type="button" data-range="1d">1D</button>
-          <button type="button" class="on" data-range="7d">1W</button>
-          <button type="button" data-range="1m">1M</button>
-          <button type="button" data-range="1y">1Y</button>
-          <button type="button" data-range="all">All</button>
-        </div>
+        <div class="cx-pf-delta" id="pfDelta">Daily PnL · $0.00</div>
+        <div class="cx-mkt-strip" id="exchangeMarketsStrip"></div>
         <div class="cx-pf-actions">
           <button type="button" class="buy" onclick="CessionCaas && CessionCaas.openBuy()">Buy</button>
-          <button type="button" class="sell" onclick="CessionCaas && CessionCaas.openSell && CessionCaas.openSell() || (CessionCaas && CessionCaas.openBuy())">Sell</button>
-          <button type="button" class="send" onclick="CessionPay.openSend()">Send</button>
+          <button type="button" class="sell" onclick="CessionCaas && CessionCaas.openSell && CessionCaas.openSell()">Sell</button>
+          <button type="button" class="send" onclick="CessionPay && CessionPay.openSend()">Send</button>
         </div>
+      </div>
+      <div class="cx-card" style="margin-top:12px">
+        <p class="cx-section-label">Order</p>
+        <div class="cx-pay-row" style="margin-bottom:10px">
+          <button type="button" class="cx-ghost on" id="exOrderMarket" onclick="document.getElementById('exOrderMarket').classList.add('on');document.getElementById('exOrderLimit').classList.remove('on');document.getElementById('exLimitFields').style.display='none'">Market</button>
+          <button type="button" class="cx-ghost" id="exOrderLimit" onclick="document.getElementById('exOrderLimit').classList.add('on');document.getElementById('exOrderMarket').classList.remove('on');document.getElementById('exLimitFields').style.display='block'">Limit</button>
+        </div>
+        <label class="cx-label">Pair</label>
+        <select id="exPair" class="cx-input"><option>BTC/USDT</option><option>ETH/USDT</option><option>SOL/USDT</option><option>XRP/USDT</option><option>DOGE/USDT</option></select>
+        <div id="exLimitFields" style="display:none">
+          <label class="cx-label">Limit price (USDT)</label>
+          <input class="cx-input" id="exLimitPrice" type="number" step="any" placeholder="0.00">
+        </div>
+        <label class="cx-label">Amount</label>
+        <input class="cx-input" id="exAmount" type="number" step="any" placeholder="0.00">
+        <label class="cx-label" style="display:flex;align-items:center;gap:8px;margin-top:8px">
+          <input type="checkbox" id="exBufferOpt"> Optional buffer delay
+        </label>
+        <div class="cx-pay-row" style="margin-top:12px">
+          <button type="button" class="cx-launch buy" style="flex:1" onclick="CessionCaas && CessionCaas.openBuy()">Buy</button>
+          <button type="button" class="cx-ghost sell" style="flex:1" onclick="CessionCaas && CessionCaas.openSell && CessionCaas.openSell()">Sell</button>
+        </div>
+      </div>
+      <div class="cx-card" style="margin-top:12px">
+        <p class="cx-section-label">Open orders</p>
+        <p class="cx-muted" id="exOpenOrders">No open orders</p>
+      </div>
+      <div class="cx-card" style="margin-top:12px">
+        <p class="cx-section-label">Recent trades</p>
+        <p class="cx-muted" id="exRecentTrades">No trades yet</p>
       </div>
     </main>
     <main class="page-view" id="viewBanking">
-      <div class="cx-chime-bank" id="baasComingSoon">
-        <p class="cx-chime-greet">Banking</p>
-        <div class="cx-chime-balance-block">
-          <p class="cx-chime-bal-label">Available balance</p>
-          <p class="cx-chime-bal">$0.00</p>
-          <span class="cx-chime-pill">Coming soon</span>
-        </div>
-        <div class="cx-chime-card">
-          <p class="cx-chime-card-title">What you get</p>
-          <div class="cx-chime-row"><span>Cash back on eligible spend</span><span class="cx-chime-val">5%</span></div>
-          <div class="cx-chime-row"><span>Daily crypto bonuses</span><span class="cx-chime-val">When funded</span></div>
-          <div class="cx-chime-row"><span>Annual fees</span><span class="cx-chime-val">None</span></div>
-          <div class="cx-chime-row"><span>Savings and checking</span><span class="cx-chime-val">Up to 6.5%</span></div>
-        </div>
-        <div class="cx-chime-card">
-          <p class="cx-chime-card-title">Request early access</p>
-          <form id="baasWaitForm" class="cx-baas-wait">
-            <input class="form-input-pump" id="baasWaitEmail" type="email" placeholder="Email" required autocomplete="email">
-            <input class="form-input-pump" id="baasWaitNote" type="text" placeholder="Optional note" maxlength="280">
-            <button class="cx-launch" type="submit" id="baasWaitBtn">Request access</button>
-            <p class="cx-muted" id="baasWaitMsg" style="margin-top:10px;min-height:1.2em"></p>
-          </form>
+      <div class="cx-card" style="text-align:center;padding:28px 18px">
+        <p class="cx-title" style="margin-bottom:6px">Coming soon</p>
+        <p class="cx-muted">Powerful banking built for everyday use.</p>
+        <span class="cx-chime-pill" style="display:inline-block;margin-top:10px">Coming soon</span>
+      </div>
+      <div class="cx-card" style="margin-top:12px">
+        <p class="cx-section-label">What to expect</p>
+        <div class="cx-chime-row"><span>Multi-currency accounts</span><span class="cx-chime-val">Yes</span></div>
+        <div class="cx-chime-row"><span>Bank transfers and wires</span><span class="cx-chime-val">Yes</span></div>
+        <div class="cx-chime-row"><span>Instant deposits</span><span class="cx-chime-val">Yes</span></div>
+        <div class="cx-chime-row"><span>Priority support</span><span class="cx-chime-val">Yes</span></div>
+        <div class="cx-chime-row"><span>Cash back</span><span class="cx-chime-val">5%</span></div>
+        <div class="cx-chime-row"><span>Annual fees</span><span class="cx-chime-val">None</span></div>
+        <div class="cx-chime-row"><span>Savings / checking</span><span class="cx-chime-val">Up to 6.5%</span></div>
+      </div>
+      <div class="cx-card" style="margin-top:12px">
+        <p class="cx-section-label">Request access</p>
+        <p class="cx-muted" style="margin-bottom:8px">Available soon for eligible users.</p>
+        <input class="cx-input" id="baasRequestEmail" type="email" placeholder="Enter your email">
+        <button class="cx-launch" type="button" style="margin-top:10px;width:100%" onclick="(function(){var e=document.getElementById('baasRequestEmail');if(!e||!e.value){alert('Enter email');return;}var k='cession_baas_requests';var a=[];try{a=JSON.parse(localStorage.getItem(k)||'[]')}catch(x){}a.push({email:e.value,t:Date.now()});localStorage.setItem(k,JSON.stringify(a));e.value='';alert('Request saved');})()">Request access</button>
+      </div>
+    </main>
+    <main class="page-view" id="viewXchange">
+      <h1 class="cx-title">Xchange</h1>
+      <p class="cx-muted">Create coins, trade the curve, optional Fuse. Real buys only.</p>
+      <div class="cx-pay-row" style="margin:12px 0">
+        <button type="button" class="cx-xch-lane on" data-lane="feed" onclick="CessionXchange.lane('feed')">Live</button>
+        <button type="button" class="cx-xch-lane" data-lane="create" onclick="CessionXchange.lane('create')">Create</button>
+        <button type="button" class="cx-xch-lane" data-lane="trade" onclick="CessionXchange.lane('trade')">Trade</button>
+        <button type="button" class="cx-xch-lane" data-lane="exposure" onclick="CessionXchange.lane('exposure')">Exposure</button>
+      </div>
+      <div id="xchLaneFeed">
+        <p class="cx-section-label">Daily PnL</p>
+        <div class="cx-card"><div class="cx-pf-value" style="font-size:22px" id="xchDailyPnl">$0.00</div><p class="cx-muted">From real activity only</p></div>
+        <p class="cx-section-label" style="margin-top:14px">Live coins</p>
+        <div id="xchLiveList" class="cx-baas-list"><p class="cx-muted">No live coins yet</p></div>
+      </div>
+      <div id="xchLaneCreate" style="display:none">
+        <div class="cx-card">
+          <label class="cx-label">Name</label>
+          <input class="cx-input" id="xchName" placeholder="Token name">
+          <label class="cx-label">Symbol</label>
+          <input class="cx-input" id="xchSymbol" placeholder="TICKER" maxlength="10">
+          <label class="cx-label">Supply</label>
+          <input class="cx-input" id="xchSupply" type="number" value="1000000000">
+          <label class="cx-label" style="display:flex;align-items:center;gap:8px;margin-top:10px">
+            <input type="checkbox" id="xchFuse"> Optional Fuse
+          </label>
+          <button class="cx-launch" type="button" style="width:100%;margin-top:12px" onclick="CessionXchange && CessionXchange.create && CessionXchange.create()">Create coin</button>
         </div>
       </div>
-      <div id="baasLiveDash" style="display:none" aria-hidden="true"></div>
-    </main>
-    <main class="page-view" id="viewHome"><div class="cx-feed" id="forYouCoinsGrid"></div></main>
-    <main class="page-view" id="viewExplorePulse"><h1 class="cx-title">Explore</h1><div class="cx-feed" id="exploreGrid"></div></main>
-    <main class="page-view" id="viewMint">
-      <h1 class="cx-title">Create</h1>
-      <div class="cx-card">
-        <p class="cx-muted">Fair launch. Optional Fuse agent is on the create form.</p>
-        <button class="cx-launch" type="button" onclick="CessionUI.openCreate()">Create coin</button>
+      <div id="xchLaneTrade" style="display:none">
+        <div class="cx-card">
+          <div class="cx-pay-row" style="margin-bottom:10px">
+            <button type="button" class="cx-ghost on">Market</button>
+            <button type="button" class="cx-ghost">Limit</button>
+          </div>
+          <label class="cx-label">You pay</label>
+          <input class="cx-input" id="xchPay" type="number" placeholder="0.00">
+          <label class="cx-label">You receive (est.)</label>
+          <input class="cx-input" id="xchRecv" type="number" placeholder="0.00" readonly>
+          <button class="cx-launch" type="button" style="width:100%;margin-top:12px">Buy</button>
+        </div>
+        <div class="cx-card" style="margin-top:12px">
+          <p class="cx-section-label">Recent trades</p>
+          <p class="cx-muted">No trades yet</p>
+        </div>
+      </div>
+      <div id="xchLaneExposure" style="display:none">
+        <div class="cx-card">
+          <p class="cx-muted">Synthetic exposure only. US: view only; live leverage not offered in the US.</p>
+          <label class="cx-label">Size</label>
+          <input class="cx-input" type="number" placeholder="0.00">
+          <label class="cx-label">Leverage (up to 100x demo)</label>
+          <input class="cx-input" type="number" value="1" min="1" max="100">
+          <button class="cx-launch" type="button" style="width:100%;margin-top:12px" onclick="CessionXchange.openExposure && CessionXchange.openExposure()">Open exposure</button>
+        </div>
+        <p class="cx-section-label" style="margin-top:14px">Your positions</p>
+        <div id="xchPositions" class="cx-baas-list"><p class="cx-muted">No positions</p></div>
       </div>
     </main>
     <main class="page-view" id="viewWallet">
-      <div class="cx-baas-hero" id="walletHubHero">
-        <div class="cx-baas-sub">Active wallet</div>
-        <div class="cx-baas-balance">0</div>
-        <div class="cx-baas-sub">Connect Phantom, MetaMask, or Trust</div>
-      </div>
-      <div id="walletScreenDisconnected" class="cx-card">
-        <p class="cx-muted" id="connectHint">On mobile, the wallet app opens. Approve, then you return here.</p>
+      <p class="cx-pf-label">Total balance</p>
+      <div class="cx-pf-value" id="walletTotalBal">$0.00</div>
+      <div id="walletScreenDisconnected">
+        <p class="cx-muted" style="margin:12px 0">Connect Phantom, MetaMask, or Trust. Balances from your wallet only.</p>
         <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectPhantom()"><span>Phantom</span></button>
         <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectMetaMask()"><span>MetaMask</span></button>
         <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectTrust()"><span>Trust Wallet</span></button>
       </div>
       <div id="walletScreenConnected" style="display:none;">
         <div class="cx-pay-row">
-          <button class="cx-ghost" type="button" onclick="CessionPay.openReceive()" style="margin-top:0">Receive</button>
-          <button class="cx-ghost" type="button" onclick="CessionPay.openSend()" style="margin-top:0">Send</button>
-          <button class="cx-launch" type="button" onclick="CessionUI.open('walletModal')" style="margin-top:0">Add wallet</button>
+          <button class="cx-ghost" type="button" onclick="CessionPay.openReceive()">Receive</button>
+          <button class="cx-ghost" type="button" onclick="CessionPay.openSend()">Send</button>
+          <button class="cx-launch" type="button" onclick="CessionUI.open('walletModal')">Add wallet</button>
         </div>
         <p class="cx-baas-section">Assets</p>
-        <div id="walletAssetsList" class="cx-baas-list"></div>
+        <div id="walletAssetsList" class="cx-baas-list"><p class="cx-muted">Your assets will appear here.</p></div>
         <p class="cx-baas-section">Tracked wallets</p>
         <div id="walletHubList" class="cx-wallet-list"></div>
       </div>
+      <p class="cx-baas-section" style="margin-top:16px">Top markets</p>
+      <div class="cx-card" id="walletTopMarkets">
+        <div class="cx-chime-row"><span>BTC</span><span class="cx-chime-val" data-sym="BTC">—</span></div>
+        <div class="cx-chime-row"><span>ETH</span><span class="cx-chime-val" data-sym="ETH">—</span></div>
+        <div class="cx-chime-row"><span>SOL</span><span class="cx-chime-val" data-sym="SOL">—</span></div>
+        <div class="cx-chime-row"><span>XRP</span><span class="cx-chime-val" data-sym="XRP">—</span></div>
+        <div class="cx-chime-row"><span>DOGE</span><span class="cx-chime-val" data-sym="DOGE">—</span></div>
+      </div>
     </main>
     <main class="page-view" id="viewAi">
-      <div id="copilotGate" class="cx-copilot-gate">
-        <h1 class="cx-title">Copilot</h1>
-        <p class="cx-muted">Before you use Copilot, review and accept the terms. Copilot can discuss product features and education. It is not financial, legal, or tax advice.</p>
-        <div class="cx-card cx-copilot-legal">
-          <p><strong>Terms of use</strong></p>
-          <ul class="cx-legal-list">
-            <li>Responses may be incomplete or wrong. Verify anything important yourself.</li>
-            <li>We may log messages for safety and support. Do not send seed phrases, passwords, or private keys.</li>
-            <li>Copilot does not execute trades or move funds unless you confirm in your own wallet.</li>
-            <li>See <a href="/faq">FAQ</a> and <a href="/legal">Legal</a>.</li>
-          </ul>
-          <label class="cx-muted" style="display:flex;gap:8px;align-items:flex-start;margin:14px 0">
-            <input type="checkbox" id="copilotAccept" style="margin-top:3px">
-            <span>I have read the FAQ and legal disclosures and agree to use Copilot under these terms.</span>
+      <h1 class="cx-title">Copilot</h1>
+      <div id="copilotGate">
+        <p class="cx-muted">Before you use Copilot, review and accept the terms. Not financial advice.</p>
+        <div class="cx-card" style="margin-top:12px">
+          <p class="cx-section-label">Terms of use</p>
+          <ol class="cx-muted" style="padding-left:18px;line-height:1.5">
+            <li>Informational purposes only.</li>
+            <li>Not a substitute for professional advice.</li>
+            <li>You are responsible for your own decisions.</li>
+            <li>Copilot does not execute trades or move funds unless you confirm in your wallet.</li>
+          </ol>
+          <label style="display:flex;gap:10px;align-items:flex-start;margin:14px 0">
+            <input type="checkbox" id="copilotAgree">
+            <span>I agree to use Copilot under these terms.</span>
           </label>
           <button class="cx-launch" type="button" id="copilotStartBtn" onclick="CessionCopilot && CessionCopilot.start()">Continue</button>
         </div>
       </div>
-      <div id="askAiBox" class="cx-chat cx-chat-live" style="display:none">
-        <div class="cx-chat-log" id="aiLog"></div>
-        <div class="cx-chat-row">
-          <input class="cx-search" id="aiInput" placeholder="Message" autocomplete="off">
-          <button class="cx-launch cx-chat-send" type="button" onclick="CessionUI.sendAi()">Send</button>
+      <div id="copilotChat" style="display:none">
+        <div id="copilotMessages" class="cx-card" style="min-height:220px;max-height:50vh;overflow:auto"></div>
+        <div class="cx-pay-row" style="margin-top:10px">
+          <input class="cx-input" id="copilotInput" placeholder="Message" style="flex:1">
+          <button class="cx-launch" type="button" onclick="CessionCopilot && CessionCopilot.send()">Send</button>
         </div>
+        <p class="cx-muted" style="font-size:11px;margin-top:8px">Not financial advice.</p>
       </div>
     </main>
+    <main class="page-view" id="viewHome"><div class="cx-feed" id="forYouCoinsGrid"></div></main>
     <main class="page-view" id="viewCoin">
       <button class="cx-ghost" type="button" onclick="CessionExchange.game()">Back</button>
       <h1 class="cx-title" id="coinTitle">Coin</h1>
-      <p class="cx-muted" id="coinMeta"></p>
     </main>
   </div>
   <nav class="bottom-nav-bar">
     <button class="bottom-nav-slot" id="bnavWallet" type="button" onclick="CessionUI.go('wallet')" aria-label="Wallet"><span>Wallet</span></button>
     <button class="bottom-nav-slot" id="bnavBanking" type="button" data-nav="banking" onclick="event.preventDefault();if(window.CessionBaas)CessionBaas.go();" aria-label="Banking"><span>Banking</span></button>
     <button class="bottom-nav-slot active" id="bnavExchange" type="button" onclick="CessionExchange.go()" aria-label="Exchange"><span>Exchange</span></button>
-    <button class="bottom-nav-slot" id="bnavMint" type="button" onclick="CessionExchange.game()" aria-label="Xchange"><span>Xchange</span></button>
+    <button class="bottom-nav-slot" id="bnavMint" type="button" onclick="CessionUI.go('xchange');if(window.CessionXchange)CessionXchange.lane('feed')" aria-label="Xchange"><span>Xchange</span></button>
     <button class="bottom-nav-slot" id="bnavAi" type="button" onclick="CessionUI.go('ai')" aria-label="Copilot"><span>Copilot</span></button>
   </nav>
   <div class="modal-overlay-generic" id="searchModal"><div class="cx-sheet" style="max-width:420px">
@@ -161,7 +227,6 @@
   <div class="modal-overlay-generic" id="walletModal"><div class="cx-sheet">
     <div class="cx-sheet-handle"></div>
     <div class="cx-sheet-head"><h2>Connect wallet</h2><button class="cx-sheet-x" type="button" data-close-sheet="walletModal" aria-label="Close">×</button></div>
-    <p class="cx-sheet-sub">Phantom, MetaMask, or Trust.</p>
     <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectPhantom()"><span>Phantom</span></button>
     <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectMetaMask()"><span>MetaMask</span></button>
     <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectTrust()"><span>Trust Wallet</span></button>
@@ -170,8 +235,8 @@
     <div class="cx-sheet" role="dialog">
       <div class="cx-sheet-handle"></div>
       <div class="cx-sheet-head"><h2>Send</h2><button class="cx-sheet-x" type="button" data-close-sheet="sendModal" aria-label="Close">×</button></div>
-      <div class="cx-sheet-field"><label for="sendDest">Destination wallet</label><input class="form-input-pump" id="sendDest" placeholder="Paste address" oninput="CessionPay.checkSend()"><p id="sendVerdict" class="cx-muted"></p></div>
-      <label class="cx-muted" style="display:block;margin:8px 0"><input type="checkbox" id="sendBufferToggle" checked> Buffer 15 minutes</label>
+      <div class="cx-sheet-field"><label for="sendDest">Destination</label><input class="form-input-pump" id="sendDest" placeholder="Paste address" oninput="CessionPay.checkSend()"><p id="sendVerdict" class="cx-muted"></p></div>
+      <label class="cx-muted" style="display:block;margin:8px 0"><input type="checkbox" id="sendBufferToggle"> Buffer 15 minutes</label>
       <div class="cx-sheet-actions"><button class="cx-launch" id="sendGo" type="button" onclick="CessionPay.confirmSend()" disabled>Send</button></div>
     </div>
   </div>
@@ -179,7 +244,7 @@
     <div class="cx-sheet" role="dialog">
       <div class="cx-sheet-handle"></div>
       <div class="cx-sheet-head"><h2>Receive</h2><button class="cx-sheet-x" type="button" data-close-sheet="receiveModal" aria-label="Close">×</button></div>
-      <div class="cx-qr-card"><img id="receiveQr" width="200" height="200" alt=""><div class="cx-addr-block"><div class="cx-addr-label">Wallet address</div><div class="cx-addr-value" id="receiveAddress"></div></div></div>
+      <div class="cx-qr-card"><img id="receiveQr" width="200" height="200" alt=""><div class="cx-addr-block"><div class="cx-addr-label">Address</div><div class="cx-addr-value" id="receiveAddress"></div></div></div>
       <div class="cx-sheet-actions"><button class="cx-launch" type="button" onclick="CessionPay.copyReceive()">Copy address</button></div>
     </div>
   </div>
@@ -188,7 +253,6 @@
       <a href="/faq">FAQ</a>
       <a href="/legal">Legal</a>
       <a href="mailto:support@cession.us">Support</a>
-      <button type="button" class="cx-footer-link" onclick="CessionUI && CessionUI.go('ai')">Copilot</button>
     </div>
   </footer>
   <script src="js/cession-config.js"></script>
