@@ -45,7 +45,7 @@
           <button type="button" class="sell" onclick="CessionCaas && CessionCaas.openBuy()">Sell</button>
           <button type="button" class="send" onclick="CessionPay.openSend()">Send</button>
         </div>
-        <div class="cx-pf-chip">Buffer available · Clear fees · CaaS powered</div>
+        <div class="cx-pf-chip">Buy/sell via partner APIs · balances from your wallet only</div>
       </div>
       <p class="cx-section-label">Protection</p>
       <div class="cx-card">
@@ -100,23 +100,28 @@
       </div>
     </main>
     <main class="page-view" id="viewWallet">
-      <div class="cx-profile">
-        <div>
-          <div id="profileName">anon</div>
-          <div class="cx-mono" id="walletScreenAddress">Not connected</div>
-        </div>
+      <div class="cx-baas-status" id="walletHubNote">On-chain balances only. Cession does not custody funds.</div>
+      <div class="cx-baas-hero" id="walletHubHero">
+        <div class="cx-baas-sub">Active wallet</div>
+        <div class="cx-baas-balance">0</div>
+        <div class="cx-baas-sub">Connect a wallet to read chain balances</div>
       </div>
       <div id="walletScreenDisconnected" class="cx-card">
-        <p class="cx-muted" id="connectHint">Approve in your wallet app, then return here.</p>
+        <p class="cx-muted" id="connectHint">Approve in your wallet app, then return here. Phantom · MetaMask · Trust only.</p>
         <button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button>
         <button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button>
         <button class="cx-door" type="button" onclick="CessionUI.connectTrust()">Connect Trust Wallet</button>
       </div>
       <div id="walletScreenConnected" style="display:none;">
+        <p class="cx-baas-section">Active address</p>
+        <div class="cx-mono" id="walletScreenAddress" style="font-size:12px;word-break:break-all;margin-bottom:12px">—</div>
         <div class="cx-pay-row">
           <button class="cx-ghost" type="button" onclick="CessionPay.openReceive()" style="margin-top:0">Receive</button>
           <button class="cx-ghost" type="button" onclick="CessionPay.openSend()" style="margin-top:0">Send</button>
+          <button class="cx-launch" type="button" onclick="CessionUI.open('walletModal')" style="margin-top:0">Add wallet</button>
         </div>
+        <p class="cx-baas-section">Tracked wallets</p>
+        <div id="walletHubList" class="cx-wallet-list"></div>
       </div>
     </main>
     <main class="page-view" id="viewAi">
@@ -186,6 +191,7 @@
   <script src="js/cession-fuse.js"></script>
   <script src="js/wallet.js"></script>
   <script src="js/cession-wallet-connect.js"></script>
+  <script src="js/cession-wallet-hub.js"></script>
   <script src="js/trading.js"></script>
 </body>
 </html>
