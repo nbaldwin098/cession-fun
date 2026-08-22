@@ -9,7 +9,7 @@
     document.querySelectorAll('.bottom-nav-slot').forEach(function (t) { t.classList.remove('active'); });
     var b = document.getElementById('bnavExchange');
     if (b) b.classList.add('active');
-    document.title = 'Home | Cession';
+    document.title = 'Exchange | Cession';
   }
 
   function goGame() {
@@ -30,7 +30,6 @@
       document.title = 'Xchange | Cession';
     }
 
-    // Soft geo prompt for US users before entering leverage-capable Xchange
     if (window.CessionCaas && typeof CessionCaas.maybeGeoPrompt === 'function') {
       CessionCaas.maybeGeoPrompt(enter);
     } else {

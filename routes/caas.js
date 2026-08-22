@@ -31,7 +31,7 @@ router.post('/quote', (req, res) => {
   const { asset = 'SOL', amountUsd = 100, side = 'buy' } = req.body || {};
   const price = PRICES[String(asset).toUpperCase()] || PRICES.SOL;
   const usd = Math.max(5, Number(amountUsd) || 100);
-  const platformFeePct = 0.35; // thin markup so still competitive
+  const platformFeePct = 0.35;
   const networkFeeUsd = asset === 'SOL' ? 0.002 : 0.15;
   const feeUsd = +(usd * (platformFeePct / 100)).toFixed(2);
   const netUsd = +(usd - feeUsd - networkFeeUsd).toFixed(2);
@@ -61,7 +61,6 @@ router.post('/quote', (req, res) => {
 });
 
 router.post('/order', (req, res) => {
-  // Demo only — never executes real money
   const { quoteId, walletAddress, bufferMinutes = 0 } = req.body || {};
   if (!walletAddress) {
     return res.status(400).json({ ok: false, error: 'walletAddress required' });
