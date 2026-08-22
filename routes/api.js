@@ -19,6 +19,7 @@ const webhookRoutes = require('./webhooks');
 const ledgerRoutes = require('./ledger');
 const walletBalanceRoutes = require('./walletBalances');
 const waitlistRoutes = require('./waitlist');
+const configRoutes = require('./config');
 const pulseSignals = require('../services/pulseSignals');
 const bondingCurve = require('../services/bondingCurve');
 
@@ -40,6 +41,7 @@ router.use('/webhooks', webhookRoutes);
 router.use('/ledger', ledgerRoutes);
 router.use('/wallet-balances', walletBalanceRoutes);
 router.use('/waitlist', waitlistRoutes);
+router.use('/config', configRoutes);
 
 router.get('/desk/overview', support.deskAuth, (req, res) => {
   support.audit({ action: 'overview' });
