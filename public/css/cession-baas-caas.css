@@ -103,3 +103,32 @@
   font-size: 11px; color: var(--cx-muted); text-transform: uppercase; letter-spacing: 0.04em;
 }
 .cx-asset-row .amt { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* mobile pass */
+@media (max-width: 480px) {
+  .cx-baas-balance { font-size: 28px; }
+  .cx-wallet-card-bal { font-size: 18px; }
+  .cx-pay-row { flex-wrap: wrap; }
+  .cx-pay-row > * { flex: 1 1 40%; }
+  .bottom-nav-bar { padding-bottom: env(safe-area-inset-bottom, 0); }
+  .cx-sheet { max-height: 90vh; overflow: auto; }
+  .cx-pf-value { font-size: 28px; }
+}
+.cx-active-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--cx-muted);
+  background: var(--cx-soft, #f3f6fa);
+  border: 1px solid var(--cx-line);
+  border-radius: 999px;
+  padding: 4px 10px;
+  margin-bottom: 10px;
+}
+.cx-dest-note {
+  font-size: 12px;
+  color: var(--cx-muted);
+  margin-top: 8px;
+  line-height: 1.4;
+}

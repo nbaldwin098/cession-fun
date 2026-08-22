@@ -8,6 +8,7 @@ const apiRoutes = require('./routes/api');
 const priceEngine = require('./services/priceEngine');
 const { rateLimit } = require('./middleware/rateLimit');
 const { securityHeaders, requireJson, noStore } = require('./middleware/security');
+const { requestLog } = require('./middleware/requestLog');
 const store = require('./services/store');
 const bufferQueue = require('./services/bufferQueue');
 setInterval(() => { bufferQueue.releaseDue().catch(() => {}); }, 30000);
@@ -17,8 +18,10 @@ const server = http.createServer(app);
 const ALLOW = (process.env.CORS_ORIGIN || 'https://cession.us,https://www.cession.us,https://cession.fun,https://www.cession.fun').split(',');
 
 app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS || 1));
+
 app.disable('x-powered-by');
 app.use(securityHeaders);
+app.use(requestLog);
 app.use(noStore);
 app.use(requireJson);
 app.use(cors({
@@ -53,12 +56,7 @@ app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html', 'h
 });
 
 app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    uptime: process.uptime(),
-    store: store.status(),
-    timestamp: new Date().toISOString()
-  });
+  res.status(200).json({ status: 'healthy', uptime: process.uptime(), timestamp: new Date().toISOString() });
 });
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
