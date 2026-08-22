@@ -1,8 +1,14 @@
 (function () {
   function goExchange() {
-    document.querySelectorAll('.page-view').forEach(function (el) { el.classList.remove('active'); });
+    document.querySelectorAll('.page-view').forEach(function (el) {
+      el.classList.remove('active');
+      el.style.display = 'none';
+    });
     var v = document.getElementById('viewExchange');
-    if (v) v.classList.add('active');
+    if (v) {
+      v.classList.add('active');
+      v.style.display = 'block';
+    }
     document.querySelectorAll('.cx-xtab').forEach(function (t) { t.classList.remove('on'); });
     var tab = document.getElementById('tabExchange');
     if (tab) tab.classList.add('on');
@@ -14,12 +20,22 @@
 
   function goGame() {
     function enter() {
+      if (window.CessionXchange && typeof CessionXchange.go === 'function') {
+        CessionXchange.go();
+        return;
+      }
       if (window.CessionUI && typeof CessionUI.setHomeLane === 'function') {
         CessionUI.setHomeLane('foryou');
       } else {
-        document.querySelectorAll('.page-view').forEach(function (el) { el.classList.remove('active'); });
+        document.querySelectorAll('.page-view').forEach(function (el) {
+          el.classList.remove('active');
+          el.style.display = 'none';
+        });
         var h = document.getElementById('viewHome');
-        if (h) h.classList.add('active');
+        if (h) {
+          h.classList.add('active');
+          h.style.display = 'block';
+        }
       }
       document.querySelectorAll('.cx-xtab').forEach(function (t) { t.classList.remove('on'); });
       var tab = document.getElementById('tabForYou');
@@ -29,6 +45,7 @@
       if (b) b.classList.add('active');
       document.title = 'Xchange | Cession';
     }
+
     if (window.CessionCaas && typeof CessionCaas.maybeGeoPrompt === 'function') {
       CessionCaas.maybeGeoPrompt(enter);
     } else {
