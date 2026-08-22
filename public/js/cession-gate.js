@@ -53,8 +53,12 @@
       ''
     ).trim();
   }
+  function hasSession() {
+    return Boolean(localStorage.getItem('cession_session'));
+  }
   function isReturningUser() {
-    return Boolean(already() && savedUser() && savedWallet());
+    if (savedWallet() && hasSession()) return true;
+    return Boolean(already() && savedWallet() && (savedUser() || hasSession()));
   }
 
   function afterUnlock() {
@@ -127,9 +131,13 @@
           tries++;
           var a = (window.walletEngine && (window.walletEngine.activeAddress || window.walletEngine.address))
             || localStorage.getItem('cession_address') || '';
-          if (a) { clearInterval(t); goHome(); return; }
+          if (a) {
+            clearInterval(t);
+            goHome();
+            return;
+          }
           if (tries > 60) clearInterval(t);
-        }, 500);
+        }, 400);
         if (kind === 'phantom' && window.CessionUI && CessionUI.connectPhantom) CessionUI.connectPhantom();
         else if (kind === 'metamask' && window.CessionUI && CessionUI.connectMetaMask) CessionUI.connectMetaMask();
         else if (kind === 'trust' && window.CessionUI && CessionUI.connectTrust) CessionUI.connectTrust();
@@ -250,12 +258,17 @@
   }
 
   async function boot() {
-    if (isReturningUser() && gated()) {
+    if (savedWallet() && localStorage.getItem('cession_session')) {
+      hideApp(false);
+      var g0 = document.getElementById('cessionGate');
+      if (g0) g0.classList.remove('open');
+      return;
+    }
+    if (already() && gated() && savedWallet()) {
       hideApp(false);
       return;
     }
-    // Require wallet for returning access — username alone is not enough
-    if (already() && gated() && savedUser() && savedWallet()) {
+    if (isReturningUser() && gated()) {
       hideApp(false);
       return;
     }
@@ -265,16 +278,25 @@
     if (window.visualViewport) window.visualViewport.addEventListener('resize', setGateViewport);
     land();
     try {
+      var inside =
+        (window.phantom && window.phantom.solana) ||
+        (window.solana && window.solana.isPhantom) ||
+        (window.ethereum && (window.ethereum.isMetaMask || window.ethereum.isTrust || window.ethereum.isTrustWallet));
+      if (inside && !savedWallet()) {
+        step('wallet');
+      }
+    } catch (e0) {}
+    try {
       var ctrl = new AbortController();
       var t = setTimeout(function () { ctrl.abort(); }, 4000);
       var r = await fetch('/api/access/gate', { credentials: 'same-origin', signal: ctrl.signal });
       clearTimeout(t);
       var d = await r.json();
-      if (d.open && isReturningUser()) {
+      if (d.open && (isReturningUser() || (savedWallet() && localStorage.getItem('cession_session')))) {
         goHome();
         return;
       }
-      if (d.open && !already() && !savedUser()) step('user');
+      if (d.open && !already() && !savedUser() && !savedWallet()) step('user');
     } catch (e) {}
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
