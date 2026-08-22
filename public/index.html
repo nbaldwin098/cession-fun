@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Exchange | Cession</title>
+  <title>Cession — trade, wallets, fair launches</title>
+  <meta name="description" content="Non-custodial crypto. Connect Phantom, MetaMask, or Trust. Spot trading, fair-launch coins, banking partner when live. We never hold your keys.">
+  <meta name="theme-color" content="#0a0a0c">
+  <meta property="og:title" content="Cession">
+  <meta property="og:description" content="Non-custodial crypto. Your wallet. Real prices. Fair launches. Banking partner when ready.">
+  <meta property="og:url" content="https://cession.fun/">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://cession.fun/brand/cession-c-mark.svg">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Cession">
+  <meta name="twitter:description" content="Non-custodial crypto. Your wallet. Real prices. Fair launches.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/cession-finance.css">
   <link rel="stylesheet" href="css/cession-sheets.css">
@@ -91,20 +101,21 @@
     </main>
     <main class="page-view" id="viewBanking">
       <div class="cx-card" style="text-align:center;padding:28px 18px">
-        <p class="cx-title" style="margin-bottom:6px">Coming soon</p>
-        <p class="cx-muted">Powerful banking built for everyday use.</p>
-        <span class="cx-chime-pill" style="display:inline-block;margin-top:10px">Coming soon</span>
+        <p class="cx-title" style="margin-bottom:6px">Banking</p>
+        <p class="cx-muted" style="max-width:280px;margin:0 auto;line-height:1.45">Not live yet. When it is, accounts and cards come from a licensed partner — we never take deposits.</p>
       </div>
       <div class="cx-card" style="margin-top:12px">
-        <p class="cx-section-label">What to expect</p>
-        <div class="cx-chime-row"><span>Cash back</span><span class="cx-chime-val">5%</span></div>
-        <div class="cx-chime-row"><span>Annual fees</span><span class="cx-chime-val">None</span></div>
-        <div class="cx-chime-row"><span>Savings / checking</span><span class="cx-chime-val">Up to 6.5%</span></div>
+        <p class="cx-section-label">Target features</p>
+        <div class="cx-chime-row"><span>Cash back</span><span class="cx-chime-val">~5%</span></div>
+        <div class="cx-chime-row"><span>Annual fees</span><span class="cx-chime-val">$0</span></div>
+        <div class="cx-chime-row"><span>Savings / checking</span><span class="cx-chime-val">Competitive APY</span></div>
+        <div class="cx-chime-row"><span>Crypto ↔ card</span><span class="cx-chime-val">Same app</span></div>
       </div>
       <div class="cx-card" style="margin-top:12px">
-        <p class="cx-section-label">Request access</p>
-        <input class="cx-input" id="baasRequestEmail" type="email" placeholder="Enter your email">
-        <button class="cx-launch" type="button" style="margin-top:10px;width:100%" onclick="(function(){var e=document.getElementById('baasRequestEmail');if(!e||!e.value){alert('Enter email');return;}var k='cession_baas_requests';var a=[];try{a=JSON.parse(localStorage.getItem(k)||'[]')}catch(x){}a.push({email:e.value,t:Date.now()});localStorage.setItem(k,JSON.stringify(a));e.value='';alert('Request saved');})()">Request access</button>
+        <p class="cx-section-label">Want in early?</p>
+        <p class="cx-muted" style="margin-bottom:10px;font-size:13px">Drop your email. We only use it for banking access.</p>
+        <input class="cx-input" id="baasRequestEmail" type="email" placeholder="you@email.com" autocomplete="email">
+        <button class="cx-launch" type="button" style="margin-top:10px;width:100%" onclick="(function(){var e=document.getElementById('baasRequestEmail');if(!e||!e.value||e.value.indexOf('@')<0){alert('Need a real email');return;}var k='cession_baas_requests';var a=[];try{a=JSON.parse(localStorage.getItem(k)||'[]')}catch(x){}a.push({email:e.value.trim(),t:Date.now()});localStorage.setItem(k,JSON.stringify(a));try{fetch('/api/waitlist/banking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:e.value.trim(),source:'banking'})}).catch(function(){})}catch(z){}e.value='';alert('Got it — we will reach out when banking opens.');})()">Join the list</button>
       </div>
     </main>
     <main class="page-view" id="viewXchange">
@@ -196,7 +207,7 @@
     <main class="page-view" id="viewAi">
       <h1 class="cx-title">Copilot</h1>
       <div id="copilotGate">
-        <p class="cx-muted">Before you use Copilot, review and accept the terms. Not financial advice.</p>
+        <p class="cx-muted">Copilot can answer product questions. It is not financial advice. Accept the terms to chat.</p>
         <div class="cx-card" style="margin-top:12px">
           <p class="cx-section-label">Terms of use</p>
           <ol class="cx-muted" style="padding-left:18px;line-height:1.5">
@@ -265,6 +276,7 @@
       <a href="/faq">FAQ</a>
       <a href="/legal">Legal</a>
       <a href="mailto:support@cession.us">Support</a>
+      <span class="cx-footer-note">Non-custodial · Your keys</span>
     </div>
   </footer>
   <script src="js/cession-config.js"></script>
