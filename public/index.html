@@ -27,6 +27,7 @@
   <div class="cx-app">
     <main class="page-view active" id="viewExchange">
       <div class="cx-pf">
+        <div class="cx-active-pill">Wallet · <span data-active-wallet>No wallet</span></div>
         <p class="cx-pf-label">Portfolio balance</p>
         <div class="cx-pf-value" id="pfValue">$0.00</div>
         <div class="cx-pf-delta up" id="pfDelta">No activity in this period yet</div>
@@ -42,9 +43,10 @@
         </div>
         <div class="cx-pf-actions">
           <button type="button" class="buy" onclick="CessionCaas && CessionCaas.openBuy()">Buy</button>
-          <button type="button" class="sell" onclick="CessionCaas && CessionCaas.openBuy()">Sell</button>
+          <button type="button" class="sell" onclick="CessionCaas && CessionCaas.openSell && CessionCaas.openSell() || (CessionCaas && CessionCaas.openBuy())">Sell</button>
           <button type="button" class="send" onclick="CessionPay.openSend()">Send</button>
         </div>
+        <p class="cx-dest-note">Buy settles to your active wallet. Sell can route to banking when partner is live. Send uses your wallet only.</p>
       </div>
       <p class="cx-section-label">Protection</p>
       <div class="cx-card">
@@ -63,9 +65,11 @@
       <div class="cx-card">
         <p class="cx-muted">Chat about balances, fees, or buffer status.</p>
         <button class="cx-ghost" type="button" onclick="CessionUI.go('ai')" style="margin-top:8px">Open Copilot</button>
+        <a class="cx-muted" href="/legal" style="display:inline-block;margin-top:12px;font-size:12px">Legal & disclosures</a>
       </div>
     </main>
     <main class="page-view" id="viewBanking">
+      <div class="cx-active-pill">Wallet · <span data-active-wallet>No wallet</span></div>
       <div class="cx-baas-status" id="baasWalletStatus">Connect Phantom, MetaMask, or Trust Wallet</div>
       <div class="cx-baas-hero" id="baasHero">
         <div class="cx-baas-sub">Available balance</div>
@@ -188,6 +192,7 @@
   <script src="js/cession-caas.js"></script>
   <script src="js/cession-nav.js"></script>
   <script src="js/cession-gate.js"></script>
+  <script src="js/cession-perps-gate.js"></script>
   <script src="js/cession-fuse.js"></script>
   <script src="js/wallet.js"></script>
   <script src="js/cession-wallet-connect.js"></script>
