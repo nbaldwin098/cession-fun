@@ -1,6 +1,6 @@
 /**
- * Wallet connect — desktop extensions + mobile apps.
- * Phantom mobile: encrypted deeplink → decrypt pubkey on return → enter app.
+ * Wallet connect — desktop extensions + mobile in-app browser.
+ * MetaMask/Trust/Phantom mobile: open cession.fun inside the wallet browser, then connect.
  */
 (function () {
   'use strict';
@@ -48,7 +48,7 @@
     clearTimeout(el._t);
     el._t = setTimeout(function () {
       el.classList.remove('show');
-    }, 2800);
+    }, 3200);
   }
 
   function cleanUrl() {
@@ -109,6 +109,7 @@
       return;
     }
     if (!same) signInOnce(kind);
+    else enterApp();
   }
 
   function signInOnce(kind) {
@@ -131,72 +132,6 @@
         signing = false;
         enterApp();
       });
-  }
-
-  var B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-  function b58encode(bytes) {
-    var digits = [0];
-    for (var i = 0; i < bytes.length; i++) {
-      var carry = bytes[i];
-      for (var j = 0; j < digits.length; j++) {
-        carry += digits[j] << 8;
-        digits[j] = carry % 58;
-        carry = (carry / 58) | 0;
-      }
-      while (carry) {
-        digits.push(carry % 58);
-        carry = (carry / 58) | 0;
-      }
-    }
-    var str = '';
-    for (var z = 0; z < bytes.length && bytes[z] === 0; z++) str += '1';
-    for (var k = digits.length - 1; k >= 0; k--) str += B58[digits[k]];
-    return str;
-  }
-  function b58decode(str) {
-    var bytes = [0];
-    for (var i = 0; i < str.length; i++) {
-      var val = B58.indexOf(str[i]);
-      if (val < 0) throw new Error('bad b58');
-      var carry = val;
-      for (var j = 0; j < bytes.length; j++) {
-        carry += bytes[j] * 58;
-        bytes[j] = carry & 0xff;
-        carry >>= 8;
-      }
-      while (carry) {
-        bytes.push(carry & 0xff);
-        carry >>= 8;
-      }
-    }
-    for (var z = 0; z < str.length && str[z] === '1'; z++) bytes.push(0);
-    return new Uint8Array(bytes.reverse());
-  }
-
-  function loadNacl(cb) {
-    if (window.nacl && window.nacl.box) return cb(null, window.nacl);
-    var s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js';
-    s.onload = function () {
-      cb(null, window.nacl);
-    };
-    s.onerror = function () {
-      cb(new Error('nacl load failed'));
-    };
-    document.head.appendChild(s);
-  }
-
-  function getOrCreatePhantomDappKey(nacl) {
-    try {
-      var raw = localStorage.getItem(PHANTOM_SK_KEY);
-      if (raw) {
-        var arr = JSON.parse(raw);
-        return nacl.box.keyPair.fromSecretKey(new Uint8Array(arr));
-      }
-    } catch (e) {}
-    var kp = nacl.box.keyPair();
-    localStorage.setItem(PHANTOM_SK_KEY, JSON.stringify(Array.from(kp.secretKey)));
-    return kp;
   }
 
   function getPhantomProvider() {
@@ -248,130 +183,17 @@
     return true;
   }
 
-  function connectPhantomMobileDeeplink() {
-    loadNacl(function (err, nacl) {
-      if (err || !nacl) {
-        openInPhantomBrowser();
-        return;
-      }
-      try {
-        var kp = getOrCreatePhantomDappKey(nacl);
-        var dappPk = b58encode(kp.publicKey);
-        var appUrl = encodeURIComponent(originUrl());
-        var redirect = encodeURIComponent(location.origin + location.pathname + '?phantom_cb=1');
-        var url =
-          'https://phantom.app/ul/v1/connect' +
-          '?app_url=' +
-          appUrl +
-          '&dapp_encryption_public_key=' +
-          dappPk +
-          '&redirect_link=' +
-          redirect +
-          '&cluster=mainnet-beta';
-        toast('Opening Phantom — approve, then you come back here');
-        window.location.href = url;
-      } catch (e) {
-        openInPhantomBrowser();
-      }
-    });
-  }
-
   function openInPhantomBrowser() {
     var ref = encodeURIComponent(originUrl());
     var url = 'https://phantom.app/ul/browse/' + encodeURIComponent(fullUrl()) + '?ref=' + ref;
-    toast('Open cession.fun inside Phantom, then tap Connect');
+    toast('Opening inside Phantom — tap Connect Phantom when the site loads');
     window.location.href = url;
-  }
-
-  function finishPhantomLogin(pubkey) {
-    if (!pubkey) return;
-    lastSaved = '';
-    localStorage.setItem('cession_address', pubkey);
-    localStorage.setItem('cession_wallet_type', 'phantom');
-    if (window.walletEngine) {
-      window.walletEngine.activeAddress = pubkey;
-      window.walletEngine.activeWalletType = 'phantom';
-      window.walletEngine.isAuthenticated = true;
-      if (window.walletEngine.renderState) window.walletEngine.renderState();
-    }
-    if (window.CessionWalletHub && CessionWalletHub.setActive) {
-      CessionWalletHub.setActive(pubkey, 'phantom');
-    }
-    closeModal();
-    sync();
-    cleanUrl();
-    var provider = getPhantomProvider();
-    if (provider && window.CessionSession && CessionSession.establish) {
-      CessionSession.establish('phantom')
-        .then(function () {
-          enterApp();
-        })
-        .catch(function () {
-          enterApp();
-        });
-      return;
-    }
-    enterApp();
-  }
-
-  function handlePhantomRedirect() {
-    var params = new URLSearchParams(location.search || '');
-    if (!params.get('data') && location.hash && location.hash.indexOf('data=') >= 0) {
-      params = new URLSearchParams(location.hash.replace(/^#/, ''));
-    }
-    if (params.get('errorCode') || params.get('errorMessage')) {
-      toast('Phantom connect cancelled');
-      cleanUrl();
-      return;
-    }
-    var data = params.get('data');
-    var nonce = params.get('nonce');
-    var phantomPk = params.get('phantom_encryption_public_key');
-    if (!data || !nonce || !phantomPk) {
-      if (params.get('phantom_cb') === '1' || params.get('phantom_connect') === '1') {
-        if (connectPhantomInjected()) return;
-      }
-      return;
-    }
-
-    loadNacl(function (err, nacl) {
-      if (err || !nacl) {
-        toast('Could not finish Phantom login — refresh and try again');
-        return;
-      }
-      try {
-        var kp = getOrCreatePhantomDappKey(nacl);
-        var shared = nacl.box.before(b58decode(phantomPk), kp.secretKey);
-        var decrypted = nacl.box.open.after(b58decode(data), b58decode(nonce), shared);
-        if (!decrypted) {
-          toast('Phantom response invalid — try Connect again');
-          cleanUrl();
-          return;
-        }
-        var json = JSON.parse(new TextDecoder().decode(decrypted));
-        if (!json.public_key) {
-          toast('No wallet in Phantom response');
-          cleanUrl();
-          return;
-        }
-        if (json.session) {
-          try {
-            localStorage.setItem(PHANTOM_SESSION_KEY, json.session);
-          } catch (e0) {}
-        }
-        finishPhantomLogin(json.public_key);
-      } catch (e) {
-        console.warn('[phantom redirect]', e);
-        toast('Phantom handoff failed — try Connect again');
-        cleanUrl();
-      }
-    });
   }
 
   function connectPhantom() {
     if (connectPhantomInjected()) return;
     if (isMobile()) {
-      connectPhantomMobileDeeplink();
+      openInPhantomBrowser();
       return;
     }
     window.open('https://phantom.app/download', '_blank', 'noopener');
@@ -401,7 +223,7 @@
     }
     if (isMobile()) {
       var path = location.host + location.pathname + location.search;
-      toast('Opens in MetaMask — then tap Connect MetaMask');
+      toast('Opening inside MetaMask — tap Connect MetaMask when the site loads');
       window.location.href = 'https://link.metamask.io/dapp/' + path;
       return;
     }
@@ -422,7 +244,7 @@
       return;
     }
     if (isMobile()) {
-      toast('Opens in Trust — then tap Connect Trust');
+      toast('Opening inside Trust — tap Connect Trust when the site loads');
       window.location.href =
         'https://link.trustwallet.com/open_url?coin_id=60&url=' + encodeURIComponent(fullUrl());
       return;
@@ -432,23 +254,19 @@
 
   function resumeIfConnected() {
     try {
-      handlePhantomRedirect();
-
-      if (localStorage.getItem('cession_address') && localStorage.getItem('cession_session')) {
-        enterApp();
-        return;
-      }
-      // Already have address from prior Phantom redirect — enter
-      if (localStorage.getItem('cession_address') && localStorage.getItem('cession_wallet_type') === 'phantom') {
+      if (localStorage.getItem('cession_address')) {
         enterApp();
         return;
       }
 
       var inside = inWalletWebView();
-      if (inside && !localStorage.getItem('cession_address')) {
+      if (inside) {
         if (inside === 'phantom') connectPhantomInjected();
         else if (inside === 'metamask') connectMetaMask();
         else if (inside === 'trust') connectTrust();
+        setTimeout(function () {
+          if (localStorage.getItem('cession_address')) enterApp();
+        }, 1200);
         return;
       }
 
