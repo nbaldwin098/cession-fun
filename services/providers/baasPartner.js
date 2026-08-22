@@ -1,89 +1,90 @@
 /**
- * Banking-as-a-Service partner adapter. Demo unless BAAS_API_KEY set.
+ * Banking-as-a-Service partner adapter.
+ * ZERO inventing balances. Without BAAS_API_KEY every money field is 0 / empty.
  */
-const crypto = require('crypto');
-
 function MODE() {
   const key = String(process.env.BAAS_API_KEY || '').trim();
   return key ? 'live' : 'demo';
 }
 
-function demoWalletSeed(wallet) {
-  const h = crypto.createHash('sha256').update(String(wallet || 'anon')).digest();
-  const n = h.readUInt32BE(0);
-  const checking = 500 + (n % 9000) / 10;
-  const savings = 200 + (n % 5000) / 10;
-  return {
-    checking: +checking.toFixed(2),
-    savings: +savings.toFixed(2),
-    cashbackMonth: +((n % 4000) / 100).toFixed(2),
-    cashbackLife: +((n % 20000) / 100).toFixed(2)
-  };
-}
-
 async function getCustomerSummary(wallet) {
   const mode = MODE();
-  const seed = demoWalletSeed(wallet);
   const cashbackRate = Number(process.env.BAAS_CASHBACK_PCT || 1.5);
+
+  if (mode === 'live') {
+    return {
+      ok: true,
+      demo: false,
+      mode: 'live',
+      asOf: new Date().toISOString(),
+      wallet: wallet || null,
+      disclosure:
+        'Banking services provided by a licensed BaaS partner. Cession does not hold customer funds.',
+      accounts: {
+        checking: { id: null, available: 0, currency: 'USD', status: 'pending_partner' },
+        savings: {
+          id: null,
+          available: 0,
+          currency: 'USD',
+          apyDisplay: process.env.BAAS_SAVINGS_APY_DISPLAY || '—',
+          status: 'pending_partner'
+        }
+      },
+      cashback: { thisMonth: 0, lifetime: 0, rateDisplay: cashbackRate + '% on eligible spend' },
+      cards: [],
+      family: { parentAccounts: 0, kidAccounts: 0, note: 'Available when partner is fully linked.' },
+      provider: process.env.BAAS_PROVIDER_NAME || 'BaaS Partner',
+      source: 'partner_api'
+    };
+  }
+
   return {
     ok: true,
-    demo: mode !== 'live',
-    mode,
+    demo: true,
+    mode: 'demo',
     asOf: new Date().toISOString(),
     wallet: wallet || null,
     disclosure:
-      'Banking services will be provided by a licensed BaaS partner. Cession does not hold customer funds or full personal information except for fraud / non-payment cases.',
+      'No banking balances until a licensed BaaS partner is connected. Cession never invents or displays fictional funds.',
     accounts: {
-      checking: {
-        id: mode === 'live' ? undefined : 'acc_demo_chk',
-        available: seed.checking,
-        currency: 'USD',
-        status: 'active'
-      },
+      checking: { id: null, available: 0, currency: 'USD', status: 'unavailable' },
       savings: {
-        id: mode === 'live' ? undefined : 'acc_demo_sav',
-        available: seed.savings,
+        id: null,
+        available: 0,
         currency: 'USD',
-        apyDisplay: process.env.BAAS_SAVINGS_APY_DISPLAY || '4.15%',
-        status: 'active'
+        apyDisplay: process.env.BAAS_SAVINGS_APY_DISPLAY || '—',
+        status: 'unavailable'
       }
     },
     cashback: {
-      thisMonth: seed.cashbackMonth,
-      lifetime: seed.cashbackLife,
-      rateDisplay: cashbackRate + '% on eligible spend'
+      thisMonth: 0,
+      lifetime: 0,
+      rateDisplay: cashbackRate + '% on eligible spend (when live)'
     },
-    cards: [
-      {
-        id: 'card_demo_1',
-        last4: '4242',
-        network: 'Visa',
-        status: 'active',
-        type: 'debit',
-        label: 'Cession Debit'
-      }
-    ],
+    cards: [],
     family: {
-      parentAccounts: 1,
+      parentAccounts: 0,
       kidAccounts: 0,
-      note: 'Parent & kid accounts available when live BaaS partner is connected.'
+      note: 'Family accounts available after partner KYC goes live.'
     },
-    provider: mode === 'live' ? (process.env.BAAS_PROVIDER_NAME || 'BaaS Partner') : 'BaaS Partner (demo)'
+    provider: 'Not connected',
+    source: 'none',
+    message: 'Connect BAAS_API_KEY for live balances. Showing $0 until then.'
   };
 }
 
 async function listTransactions(wallet, limit = 20) {
   const mode = MODE();
+  if (mode === 'live') {
+    return { ok: true, demo: false, wallet, items: [], source: 'partner_api' };
+  }
   return {
     ok: true,
-    demo: mode !== 'live',
+    demo: true,
     wallet,
-    items: [
-      { id: 'tx1', title: 'Cashback credit', sub: 'Monthly rewards', amount: 4.2, dir: 'up', when: 'Today' },
-      { id: 'tx2', title: 'Card spend', sub: 'Debit ••••4242', amount: -6.5, dir: 'down', when: 'Yesterday' },
-      { id: 'tx3', title: 'ACH deposit', sub: 'From external bank', amount: 500, dir: 'up', when: '3d ago' },
-      { id: 'tx4', title: 'Daily crypto give-back', sub: 'SOL micro-reward', amount: 0.12, dir: 'up', when: '4d ago' }
-    ].slice(0, limit)
+    items: [],
+    source: 'none',
+    message: 'No transactions until BaaS partner is live.'
   };
 }
 
@@ -92,17 +93,25 @@ async function createAchDeposit({ wallet, amount, externalAccountRef }) {
   const amt = Math.max(1, Number(amount) || 0);
   if (!wallet) return { ok: false, error: 'wallet required' };
   if (amt < 1) return { ok: false, error: 'amount too small' };
+  if (mode !== 'live') {
+    return {
+      ok: false,
+      demo: true,
+      error:
+        'Banking partner not connected. ACH deposits are disabled until BAAS_API_KEY is set. No funds were moved.'
+    };
+  }
   return {
     ok: true,
-    demo: mode !== 'live',
-    mode,
-    transferId: (mode === 'live' ? 'ach_' : 'ach_demo_') + Date.now(),
-    status: mode === 'live' ? 'pending' : 'pending_demo',
+    demo: false,
+    mode: 'live',
+    transferId: 'ach_' + Date.now(),
+    status: 'pending',
     amount: amt,
     currency: 'USD',
     wallet,
     externalAccountRef: externalAccountRef || null,
-    message: mode === 'live' ? 'ACH deposit initiated with partner bank.' : 'Demo ACH recorded. Connect BAAS_API_KEY for live deposits.'
+    message: 'ACH deposit initiated with partner bank.'
   };
 }
 
@@ -110,24 +119,35 @@ async function createAchWithdraw({ wallet, amount, externalAccountRef }) {
   const mode = MODE();
   const amt = Math.max(1, Number(amount) || 0);
   if (!wallet) return { ok: false, error: 'wallet required' };
+  if (mode !== 'live') {
+    return {
+      ok: false,
+      demo: true,
+      error:
+        'Banking partner not connected. Withdrawals disabled until BAAS_API_KEY is set. No funds were moved.'
+    };
+  }
   return {
     ok: true,
-    demo: mode !== 'live',
-    mode,
-    transferId: (mode === 'live' ? 'achw_' : 'achw_demo_') + Date.now(),
-    status: mode === 'live' ? 'pending' : 'pending_demo',
+    demo: false,
+    mode: 'live',
+    transferId: 'achw_' + Date.now(),
+    status: 'pending',
     amount: amt,
     currency: 'USD',
     wallet,
     externalAccountRef: externalAccountRef || null,
-    message: mode === 'live' ? 'ACH withdrawal initiated.' : 'Demo withdrawal recorded. Partner executes when live.'
+    message: 'ACH withdrawal initiated.'
   };
 }
 
 async function freezeCard({ cardId, wallet, reason }) {
+  if (MODE() !== 'live') {
+    return { ok: false, demo: true, error: 'No card issued — partner not live.' };
+  }
   return {
     ok: true,
-    demo: MODE() !== 'live',
+    demo: false,
     cardId,
     wallet,
     status: 'frozen',
