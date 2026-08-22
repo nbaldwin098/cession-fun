@@ -28,7 +28,7 @@
         <p class="cx-pf-label">Portfolio</p>
         <div class="cx-pf-value" id="pfValue">$0.00</div>
         <div class="cx-pf-delta" id="pfDelta">Daily PnL · $0.00</div>
-        <div class="cx-mkt-strip" id="exchangeMarketsStrip"></div>
+        <div class="cx-markets-strip" id="exchangeMarketsStrip"></div>
         <div class="cx-pf-actions">
           <button type="button" class="buy" onclick="CessionCaas && CessionCaas.openBuy()">Buy</button>
           <button type="button" class="sell" onclick="CessionCaas && CessionCaas.openSell && CessionCaas.openSell()">Sell</button>
@@ -149,32 +149,42 @@
       </div>
     </main>
     <main class="page-view" id="viewWallet">
-      <p class="cx-pf-label">Total balance</p>
-      <div class="cx-pf-value" id="walletTotalBal">$0.00</div>
-      <div id="walletScreenDisconnected">
-        <p class="cx-muted" style="margin:12px 0">Connect Phantom, MetaMask, or Trust. Balances from your wallet only.</p>
-        <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectPhantom()"><span>Phantom</span></button>
-        <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectMetaMask()"><span>MetaMask</span></button>
-        <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectTrust()"><span>Trust Wallet</span></button>
-      </div>
-      <div id="walletScreenConnected" style="display:none;">
-        <div class="cx-pay-row">
-          <button class="cx-ghost" type="button" onclick="CessionPay.openReceive()">Receive</button>
-          <button class="cx-ghost" type="button" onclick="CessionPay.openSend()">Send</button>
-          <button class="cx-launch" type="button" onclick="CessionUI.open('walletModal')">Add wallet</button>
+      <div class="cx-wallet-shell">
+        <div class="cx-wallet-hero">
+          <p class="cx-pf-label">Total Balance</p>
+          <div class="cx-pf-value" id="walletTotalBal">$0.00</div>
+          <div class="cx-pf-delta" id="walletDailyDelta">$0.00 (0.00%) Today</div>
+          <button type="button" class="cx-launch cx-send-receive" onclick="CessionUI.open('walletModal')">Send & Receive</button>
         </div>
-        <p class="cx-baas-section">Assets</p>
-        <div id="walletAssetsList" class="cx-baas-list"><p class="cx-muted">Your assets will appear here.</p></div>
-        <p class="cx-baas-section">Tracked wallets</p>
-        <div id="walletHubList" class="cx-wallet-list"></div>
-      </div>
-      <p class="cx-baas-section" style="margin-top:16px">Top markets</p>
-      <div class="cx-card" id="walletTopMarkets">
-        <div class="cx-chime-row"><span>BTC</span><span class="cx-chime-val" data-sym="BTC">—</span></div>
-        <div class="cx-chime-row"><span>ETH</span><span class="cx-chime-val" data-sym="ETH">—</span></div>
-        <div class="cx-chime-row"><span>SOL</span><span class="cx-chime-val" data-sym="SOL">—</span></div>
-        <div class="cx-chime-row"><span>XRP</span><span class="cx-chime-val" data-sym="XRP">—</span></div>
-        <div class="cx-chime-row"><span>DOGE</span><span class="cx-chime-val" data-sym="DOGE">—</span></div>
+        <div class="cx-wallet-section-head">
+          <span>Assets</span>
+          <button type="button" class="cx-link-btn">View All</button>
+        </div>
+        <div class="cx-card cx-asset-card" id="walletAssetsList">
+          <p class="cx-muted" style="padding:8px 0">Connect a wallet. Assets from your wallet appear here.</p>
+        </div>
+        <div class="cx-wallet-section-head">
+          <span>Tracked Wallets</span>
+          <button type="button" class="cx-link-btn" onclick="CessionUI.open('walletModal')">View All</button>
+        </div>
+        <div class="cx-card" id="walletHubList">
+          <div id="walletScreenDisconnected">
+            <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectPhantom()"><span>Phantom</span></button>
+            <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectMetaMask()"><span>MetaMask</span></button>
+            <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectTrust()"><span>Trust Wallet</span></button>
+          </div>
+          <div id="walletScreenConnected" style="display:none"></div>
+        </div>
+        <div class="cx-wallet-section-head">
+          <span>Top Markets</span>
+        </div>
+        <div class="cx-card" id="walletTopMarkets">
+          <div class="cx-asset-row"><div class="cx-asset-left"><span class="cx-asset-name">Bitcoin</span><span class="cx-asset-sub">BTC</span></div><div class="cx-asset-right"><span class="cx-asset-amt" data-sym="BTC">—</span></div></div>
+          <div class="cx-asset-row"><div class="cx-asset-left"><span class="cx-asset-name">Ethereum</span><span class="cx-asset-sub">ETH</span></div><div class="cx-asset-right"><span class="cx-asset-amt" data-sym="ETH">—</span></div></div>
+          <div class="cx-asset-row"><div class="cx-asset-left"><span class="cx-asset-name">Solana</span><span class="cx-asset-sub">SOL</span></div><div class="cx-asset-right"><span class="cx-asset-amt" data-sym="SOL">—</span></div></div>
+          <div class="cx-asset-row"><div class="cx-asset-left"><span class="cx-asset-name">XRP</span><span class="cx-asset-sub">XRP</span></div><div class="cx-asset-right"><span class="cx-asset-amt" data-sym="XRP">—</span></div></div>
+          <div class="cx-asset-row"><div class="cx-asset-left"><span class="cx-asset-name">Dogecoin</span><span class="cx-asset-sub">DOGE</span></div><div class="cx-asset-right"><span class="cx-asset-amt" data-sym="DOGE">—</span></div></div>
+        </div>
       </div>
     </main>
     <main class="page-view" id="viewAi">
