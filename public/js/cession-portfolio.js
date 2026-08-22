@@ -1,4 +1,9 @@
+/**
+ * Exchange portfolio: only real trade history or $0.
+ * Never invent balances or baseline growth.
+ */
 (function () {
+  'use strict';
   var range = '7d';
   var points = [];
 
@@ -8,12 +13,19 @@
       localStorage.getItem('walletAddress') ||
       (window.walletEngine && (window.walletEngine.activeAddress || window.walletEngine.address)) ||
       ''
-    );
+    ).trim();
   }
 
   function fmtUsd(n) {
     var v = Number(n) || 0;
     return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function zeroSeries() {
+    var now = Date.now();
+    var out = [];
+    for (var i = 0; i < 8; i++) out.push({ t: now - (7 - i) * 86400000, v: 0 });
+    return out;
   }
 
   function draw() {
@@ -28,7 +40,7 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
-    var data = points.length ? points : baseline();
+    var data = points.length ? points : zeroSeries();
     var vals = data.map(function (p) { return Number(p.v) || 0; });
     var min = Math.min.apply(null, vals);
     var max = Math.max.apply(null, vals);
@@ -52,7 +64,6 @@
     ctx.lineWidth = 2;
     ctx.lineJoin = 'round';
     ctx.stroke();
-
     ctx.lineTo(w - pad, h - pad);
     ctx.lineTo(pad, h - pad);
     ctx.closePath();
@@ -70,35 +81,29 @@
     var deltaEl = document.getElementById('pfDelta');
     if (valEl) valEl.textContent = fmtUsd(last);
     if (deltaEl) {
-      deltaEl.className = 'cx-pf-delta ' + (delta >= 0 ? 'up' : 'down');
-      var sign = delta >= 0 ? '+' : '';
-      deltaEl.textContent = sign + fmtUsd(Math.abs(delta)).replace('$', '$') + ' (' + sign + pct.toFixed(2) + '%)';
-      if (!points.length) deltaEl.textContent = 'No activity in this period yet';
+      if (!points.length || (last === 0 && first === 0)) {
+        deltaEl.className = 'cx-pf-delta';
+        deltaEl.textContent = 'No activity in this period yet';
+      } else {
+        deltaEl.className = 'cx-pf-delta ' + (delta >= 0 ? 'up' : 'down');
+        var sign = delta >= 0 ? '+' : '';
+        deltaEl.textContent = sign + fmtUsd(Math.abs(delta)) + ' (' + sign + pct.toFixed(2) + '%)';
+      }
     }
   }
 
-  function baseline() {
-    var n = 48;
-    var out = [];
-    for (var i = 0; i < n; i++) out.push({ t: i, v: 0 });
-    return out;
-  }
-
-  async function load(r) {
-    range = r || range;
-    document.querySelectorAll('.cx-pf-ranges button').forEach(function (b) {
-      b.classList.toggle('on', b.getAttribute('data-range') === range);
-    });
+  async function refresh() {
     var a = addr();
+    points = [];
     if (!a) {
-      points = [];
       draw();
       return;
     }
     try {
-      var res = await fetch('/api/wallets/' + encodeURIComponent(a) + '/pnl?range=' + encodeURIComponent(range));
+      var res = await fetch('/api/wallets/' + encodeURIComponent(a) + '/portfolio?range=' + encodeURIComponent(range));
       var d = await res.json();
       points = (d && d.points) || [];
+      if (d && d.empty) points = [];
     } catch (e) {
       points = [];
     }
@@ -106,17 +111,33 @@
   }
 
   function bind() {
-    document.querySelectorAll('.cx-pf-ranges button').forEach(function (b) {
-      b.addEventListener('click', function () {
-        load(b.getAttribute('data-range'));
+    document.querySelectorAll('[data-range]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('[data-range]').forEach(function (b) {
+          b.classList.remove('on');
+        });
+        btn.classList.add('on');
+        range = btn.getAttribute('data-range') || '7d';
+        refresh();
       });
     });
-    window.addEventListener('resize', function () { draw(); });
-    load(range);
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
-  else bind();
+  window.CessionPortfolio = {
+    refresh: refresh,
+    setRange: function (r) {
+      range = r || '7d';
+      refresh();
+    }
+  };
 
-  window.CessionPortfolio = { load: load, draw: draw, refresh: function () { return load(range); } };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      bind();
+      refresh();
+    });
+  } else {
+    bind();
+    refresh();
+  }
 })();
