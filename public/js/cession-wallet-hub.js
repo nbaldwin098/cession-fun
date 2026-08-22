@@ -1,5 +1,5 @@
 /**
- * Multi-wallet hub + Assets (Xchange holdings + native coins).
+ * Multi-wallet hub + Assets (on-chain native + SPL + Xchange holdings).
  */
 (function () {
   'use strict';
@@ -43,8 +43,10 @@
       list.push({ address: addr, type: kind || 'unknown', label: short(addr), addedAt: Date.now() });
       saveTracked(list);
     }
+    paintActiveStrip();
     render();
     if (window.CessionPortfolio && CessionPortfolio.refresh) CessionPortfolio.refresh();
+    if (window.CessionBaas && CessionBaas.refresh) CessionBaas.refresh();
   }
 
   function short(a) {
@@ -54,10 +56,20 @@
 
   function esc(s) {
     return String(s == null ? '' : s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      .replace(/&/g, '&')
+      .replace(/</g, '<')
+      .replace(/>/g, '>')
+      .replace(/"/g, '"');
+  }
+
+  function paintActiveStrip() {
+    var a = active();
+    document.querySelectorAll('[data-active-wallet]').forEach(function (el) {
+      el.textContent = a ? short(a) : 'No wallet';
+    });
+    document.querySelectorAll('[data-active-wallet-full]').forEach(function (el) {
+      el.textContent = a || 'Connect a wallet';
+    });
   }
 
   async function fetchBalances(address) {
@@ -132,7 +144,14 @@
       .map(function (a) {
         var amt = Number(a.amount) || 0;
         var label = a.symbol || 'Asset';
-        var tag = a.source === 'xchange' ? 'Xchange' : a.source === 'chain' ? 'Wallet' : '';
+        var tag =
+          a.source === 'xchange'
+            ? 'Xchange'
+            : a.source === 'solana_token_account'
+            ? 'SPL'
+            : a.source === 'solana_rpc' || a.source === 'eth_rpc' || a.source === 'chain'
+            ? 'Wallet'
+            : '';
         return (
           '<div class="cx-asset-row">' +
           '<div class="left">' +
@@ -140,6 +159,7 @@
           esc(label) +
           '</span>' +
           (tag ? '<span class="sub">' + tag + '</span>' : '') +
+          (a.mint ? '<span class="sub" style="text-transform:none">' + esc(short(a.mint)) + '</span>' : '') +
           '</div>' +
           '<div class="amt">' +
           amt.toLocaleString(undefined, { maximumFractionDigits: 6 }) +
@@ -150,6 +170,7 @@
   }
 
   async function render() {
+    paintActiveStrip();
     var list = loadTracked();
     var act = active();
     if (act && !list.some(function (w) { return w.address === act; })) {
@@ -195,7 +216,8 @@
     }
 
     var native = await fetchBalances(act);
-    var b0 = (native.balances && native.balances[0]) || null;
+    var bals = native.balances || [];
+    var b0 = bals[0] || null;
     var nativeAmt = b0 ? Number(b0.amount) || 0 : 0;
     var nativeSym = b0 ? b0.symbol : '';
 
@@ -210,15 +232,21 @@
     drawMini(document.getElementById('walletHubChart'));
 
     var xAssets = await fetchXchangeAssets(act);
-    var assets = xAssets.slice();
-    if (b0) {
-      assets.unshift({
-        symbol: b0.symbol,
-        amount: nativeAmt,
-        mint: '',
-        source: 'chain'
+    var assets = [];
+    bals.forEach(function (b) {
+      assets.push({
+        symbol: b.symbol,
+        amount: Number(b.amount) || 0,
+        mint: b.mint || '',
+        source: b.source || 'chain'
       });
-    }
+    });
+    xAssets.forEach(function (x) {
+      var exists = assets.some(function (a) {
+        return a.mint && x.mint && a.mint === x.mint;
+      });
+      if (!exists) assets.push(x);
+    });
     renderAssets(assets);
 
     var lines = [];
@@ -323,7 +351,8 @@
     render: render,
     setActive: setActive,
     active: active,
-    tracked: loadTracked
+    tracked: loadTracked,
+    paintActiveStrip: paintActiveStrip
   };
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -339,6 +368,7 @@
       },
       true
     );
+    paintActiveStrip();
     setTimeout(function () {
       var a = active();
       if (a) setActive(a, localStorage.getItem('cession_wallet_type'));
