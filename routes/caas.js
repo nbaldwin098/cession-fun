@@ -1,8 +1,14 @@
+/**
+ * CaaS HTTP surface — Coinbase-style headless buy flow.
+ */
 const express = require('express');
 const router = express.Router();
 const caas = require('../services/caasService');
 const leverage = require('../services/leverageService');
 const bufferQueue = require('../services/bufferQueue');
+const auth = require('./auth');
+const requireAuth = auth.requireAuth;
+const sessionWalletMatches = auth.sessionWalletMatches;
 
 function walletOf(req) {
   return (
@@ -37,12 +43,16 @@ router.post('/quote', async (req, res) => {
   }
 });
 
-router.post('/order', async (req, res) => {
+router.post('/order', requireAuth, async (req, res) => {
   try {
     const body = req.body || {};
+    const wallet = walletOf(req) || (req.cessionUser && req.cessionUser.address) || '';
+    if (wallet && !sessionWalletMatches(req, wallet)) {
+      return res.status(403).json({ ok: false, error: 'Wallet does not match signed session.' });
+    }
     const result = await caas.order({
       quoteId: body.quoteId,
-      walletAddress: walletOf(req),
+      walletAddress: wallet || req.cessionUser.address,
       bufferMinutes: body.bufferMinutes,
       asset: body.asset,
       amountUsd: body.amountUsd,
@@ -63,11 +73,15 @@ router.get('/orders/:orderId', async (req, res) => {
   }
 });
 
-router.post('/exposure/open', async (req, res) => {
+router.post('/exposure/open', requireAuth, async (req, res) => {
   try {
     const body = req.body || {};
+    const wallet = walletOf(req) || (req.cessionUser && req.cessionUser.address) || '';
+    if (wallet && !sessionWalletMatches(req, wallet)) {
+      return res.status(403).json({ ok: false, error: 'Wallet does not match signed session.' });
+    }
     const result = await leverage.openPosition({
-      wallet: walletOf(req),
+      wallet: wallet || req.cessionUser.address,
       symbol: body.symbol,
       marginUsd: body.marginUsd,
       leverage: body.leverage,
@@ -90,10 +104,14 @@ router.get('/exposure', async (req, res) => {
   }
 });
 
-router.post('/exposure/:id/close', async (req, res) => {
+router.post('/exposure/:id/close', requireAuth, async (req, res) => {
   try {
+    const wallet = walletOf(req) || (req.cessionUser && req.cessionUser.address) || '';
+    if (wallet && !sessionWalletMatches(req, wallet)) {
+      return res.status(403).json({ ok: false, error: 'Wallet does not match signed session.' });
+    }
     const result = await leverage.closePosition({
-      wallet: walletOf(req),
+      wallet: wallet || req.cessionUser.address,
       positionId: req.params.id
     });
     res.status(result.ok ? 200 : 400).json(result);
