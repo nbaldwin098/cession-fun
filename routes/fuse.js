@@ -12,4 +12,19 @@ router.get('/:symbol', (req, res) => {
   res.json({ success: true, coin: row });
 });
 
+router.post('/:symbol/tick', (req, res) => {
+  try {
+    const result = fuse.agentTick(req.params.symbol);
+    if (!result) return res.status(400).json({ success: false, error: 'Agent not live or coin inactive.' });
+    res.json({ success: true, tick: result });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message || 'tick failed' });
+  }
+});
+
+router.post('/agent/live', (req, res) => {
+  const live = Boolean(req.body && req.body.live);
+  res.json({ success: true, fuse: fuse.setAgentLive(live) });
+});
+
 module.exports = router;
