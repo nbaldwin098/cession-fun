@@ -41,6 +41,7 @@ app.use('/api/baas', rateLimit(60, 60000));
 app.use('/api/caas', rateLimit(40, 60000));
 app.use('/api/webhooks', rateLimit(120, 60000));
 app.use('/api/ledger', rateLimit(60, 60000));
+app.use('/api/waitlist', rateLimit(20, 60000));
 app.use(['/api/tokens/create', '/api/tokens/deploy', '/api/tokens/launch'], rateLimit(6, 60000));
 app.use(/^\/api\/tokens\/[^/]+\/(buy|sell|stake)$/, rateLimit(30, 60000));
 app.use(['/api/tokens/collections/create', '/api/tokens/bundles/create'], rateLimit(6, 60000));
@@ -48,9 +49,10 @@ app.use(/^\/api\/tokens\/(collections|bundles)\/[^/]+\/buy$/, rateLimit(20, 6000
 app.use('/api', apiRoutes);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html', 'htm'] }));
 
-['/', '/explore', '/rewards', '/wallet', '/you', '/foryou', '/legal', '/fuse', '/r/:code'].forEach((route) => {
+['/', '/explore', '/rewards', '/wallet', '/you', '/foryou', '/legal', '/faq', '/fuse', '/r/:code'].forEach((route) => {
   app.get(route, (req, res) => {
     if (route === '/legal') return res.sendFile(path.join(__dirname, 'public', 'legal.html'));
+    if (route === '/faq') return res.sendFile(path.join(__dirname, 'public', 'faq.html'));
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
   });
 });
