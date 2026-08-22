@@ -57,8 +57,8 @@
     return Boolean(localStorage.getItem('cession_session'));
   }
   function isReturningUser() {
-    if (savedWallet() && hasSession()) return true;
-    return Boolean(already() && savedWallet() && (savedUser() || hasSession()));
+    if (savedWallet() && (hasSession() || already() || gated())) return true;
+    return Boolean(already() && savedWallet());
   }
 
   function afterUnlock() {
@@ -113,17 +113,14 @@
     }
     if (name === 'wallet') {
       var title = gateMode === 'login' ? 'Connect your<br>wallet' : 'Connect a<br>wallet';
-      var sub = gateMode === 'login'
-        ? 'Same wallet you used before.'
-        : 'Phantom, MetaMask, or Trust. One approval.';
       root.innerHTML =
         '<div class="gate-on"><div class="gate-phone">' +
         '<img class="gate-k" src="brand/cession-c-mark.svg" alt="">' +
         '<h1>' + title + '</h1>' +
-        '<p>' + sub + '</p>' +
-        '<button class="gate-go" type="button" id="gatePh">Connect Phantom</button>' +
-        '<button class="gate-go ghost" type="button" id="gateMm">Connect MetaMask</button>' +
-        '<button class="gate-go ghost" type="button" id="gateTw">Connect Trust Wallet</button>' +
+        '<p>Opens inside your wallet app. Connect there.</p>' +
+        '<button class="gate-go" type="button" id="gatePh">Open in Phantom</button>' +
+        '<button class="gate-go ghost" type="button" id="gateMm">Open in MetaMask</button>' +
+        '<button class="gate-go ghost" type="button" id="gateTw">Open in Trust</button>' +
         '</div></div>';
       function waitWalletThenHome(kind) {
         var tries = 0;
@@ -136,7 +133,7 @@
             goHome();
             return;
           }
-          if (tries > 60) clearInterval(t);
+          if (tries > 90) clearInterval(t);
         }, 400);
         if (kind === 'phantom' && window.CessionUI && CessionUI.connectPhantom) CessionUI.connectPhantom();
         else if (kind === 'metamask' && window.CessionUI && CessionUI.connectMetaMask) CessionUI.connectMetaMask();
@@ -254,17 +251,13 @@
   }
 
   async function boot() {
-    if (savedWallet() && localStorage.getItem('cession_session')) {
+    if (savedWallet()) {
       hideApp(false);
       var g0 = document.getElementById('cessionGate');
       if (g0) g0.classList.remove('open');
       return;
     }
-    if (already() && gated() && savedWallet()) {
-      hideApp(false);
-      return;
-    }
-    if (isReturningUser() && gated()) {
+    if (isReturningUser()) {
       hideApp(false);
       return;
     }
@@ -288,7 +281,7 @@
       var r = await fetch('/api/access/gate', { credentials: 'same-origin', signal: ctrl.signal });
       clearTimeout(t);
       var d = await r.json();
-      if (d.open && (isReturningUser() || (savedWallet() && localStorage.getItem('cession_session')))) {
+      if (d.open && isReturningUser()) {
         goHome();
         return;
       }
