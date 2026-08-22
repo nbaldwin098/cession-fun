@@ -1,4 +1,4 @@
-/* Cession BaaS + CaaS polished surfaces — money-app first */
+/* Cession BaaS + CaaS surfaces */
 
 .cx-baas-hero {
   background: linear-gradient(180deg, #f7f9fc 0%, #ffffff 100%);
@@ -7,7 +7,6 @@
   padding: 20px 18px 18px;
   margin-bottom: 16px;
 }
-
 .cx-baas-balance {
   font-size: 34px;
   font-weight: 700;
@@ -15,178 +14,94 @@
   line-height: 1.1;
   color: var(--cx-ink);
 }
-
-.cx-baas-sub {
-  font-size: 13px;
-  color: var(--cx-muted);
-  margin-top: 4px;
-}
-
-.cx-baas-row {
-  display: flex;
-  gap: 10px;
-  margin-top: 16px;
-}
-
+.cx-baas-sub { font-size: 13px; color: var(--cx-muted); margin-top: 4px; }
+.cx-baas-row { display: flex; gap: 10px; margin-top: 16px; }
 .cx-baas-row button {
-  flex: 1;
-  height: 44px;
-  border-radius: var(--cx-pill);
-  font-weight: 600;
-  font-size: 14px;
-  border: none;
-  cursor: pointer;
+  flex: 1; height: 44px; border-radius: var(--cx-pill);
+  font-weight: 600; font-size: 14px; border: none; cursor: pointer;
 }
-
-.cx-baas-row .primary {
-  background: var(--cx-btn);
-  color: #fff;
-}
-
+.cx-baas-row .primary { background: var(--cx-btn); color: #fff; }
 .cx-baas-row .ghost {
-  background: var(--cx-soft);
-  color: var(--cx-ink);
-  border: 1px solid var(--cx-line-2);
+  background: var(--cx-soft); color: var(--cx-ink); border: 1px solid var(--cx-line-2);
 }
-
-.cx-baas-cards {
-  display: grid;
-  gap: 12px;
-  margin: 16px 0;
-}
-
+.cx-baas-cards { display: grid; gap: 12px; margin: 16px 0; }
 .cx-card-debit {
   background: linear-gradient(135deg, #0b0d10 0%, #1a1f2a 100%);
-  color: #fff;
-  border-radius: 18px;
-  padding: 18px;
-  min-height: 120px;
-  position: relative;
-  overflow: hidden;
+  color: #fff; border-radius: 18px; padding: 18px; min-height: 120px; position: relative;
 }
-
 .cx-card-debit .chip {
-  width: 36px;
-  height: 28px;
+  width: 36px; height: 28px;
   background: linear-gradient(135deg, #d4af37, #f5e6a3);
-  border-radius: 6px;
-  margin-bottom: 18px;
+  border-radius: 6px; margin-bottom: 18px;
 }
-
 .cx-card-debit .number {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 17px;
-  letter-spacing: 0.12em;
-  margin-bottom: 12px;
+  font-size: 17px; letter-spacing: 0.12em; margin-bottom: 12px;
 }
-
-.cx-card-debit .meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  opacity: 0.85;
-}
-
+.cx-card-debit .meta { display: flex; justify-content: space-between; font-size: 12px; opacity: 0.85; }
 .cx-baas-section {
-  margin: 22px 0 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--cx-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  margin: 22px 0 8px; font-size: 13px; font-weight: 600;
+  color: var(--cx-muted); text-transform: uppercase; letter-spacing: 0.04em;
 }
-
 .cx-baas-list {
-  background: var(--cx-white);
-  border: 1px solid var(--cx-line);
-  border-radius: var(--cx-radius);
-  overflow: hidden;
+  background: var(--cx-white); border: 1px solid var(--cx-line);
+  border-radius: var(--cx-radius); overflow: hidden;
 }
-
 .cx-baas-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--cx-line);
-  font-size: 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; border-bottom: 1px solid var(--cx-line); font-size: 14px;
 }
-
 .cx-baas-item:last-child { border-bottom: none; }
-
-.cx-baas-item .left {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
+.cx-baas-item .left { display: flex; flex-direction: column; gap: 2px; }
 .cx-baas-item .title { font-weight: 500; color: var(--cx-ink); }
 .cx-baas-item .sub { font-size: 12px; color: var(--cx-muted); }
 .cx-baas-item .amt { font-weight: 600; font-variant-numeric: tabular-nums; }
 .cx-baas-item .amt.up { color: #0a7a3e; }
 .cx-baas-item .amt.down { color: #b42318; }
-
-.cx-baas-status {
-  font-size: 12px;
-  color: var(--cx-muted);
-  margin-bottom: 10px;
-}
+.cx-baas-status { font-size: 12px; color: var(--cx-muted); margin-bottom: 10px; }
 .cx-baas-ok { color: #0a7a3e; font-weight: 600; }
 .cx-baas-warn { color: #b45309; font-weight: 600; }
 .cx-baas-stat {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--cx-line);
-  font-size: 14px;
+  display: flex; justify-content: space-between; padding: 8px 0;
+  border-bottom: 1px solid var(--cx-line); font-size: 14px;
 }
 .cx-baas-stat .k { color: var(--cx-muted); }
 .cx-baas-stat .v { font-weight: 600; }
 .cx-card-freeze {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.3);
-  color: #fff;
-  border-radius: 999px;
-  padding: 6px 12px;
-  font-size: 12px;
-  cursor: pointer;
+  position: absolute; right: 12px; bottom: 12px;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+  color: #fff; border-radius: 999px; padding: 6px 12px; font-size: 12px; cursor: pointer;
 }
-
-/* Minimal brand header — nav is bottom bar only */
 .cx-top-brand {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--cx-line);
-  background: #fff;
+  display: flex; align-items: center; justify-content: flex-start; gap: 8px;
+  padding: 10px 16px; border-bottom: 1px solid var(--cx-line); background: #fff;
 }
 .cx-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  padding: 4px 0;
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--cx-ink);
+  display: inline-flex; align-items: center; gap: 8px; border: none; background: transparent;
+  cursor: pointer; padding: 4px 0; font-weight: 700; font-size: 16px; color: var(--cx-ink);
 }
 .cx-brand img { display: block; }
 
-.cx-caas-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(11, 13, 16, 0.45);
-  z-index: 9998;
-  display: none;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 16px;
+/* Multi-wallet hub */
+.cx-wallet-list { display: grid; gap: 12px; }
+.cx-wallet-card {
+  border: 1px solid var(--cx-line);
+  border-radius: var(--cx-radius);
+  padding: 14px 16px;
+  background: #fff;
 }
-.cx-caas-modal.open { display: flex; }
+.cx-wallet-card.on {
+  border-color: #7eb6ff;
+  box-shadow: 0 0 0 1px rgba(126, 182, 255, 0.35);
+}
+.cx-wallet-card-top {
+  display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;
+}
+.cx-wallet-card-bal {
+  font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+}
+.cx-wallet-card-bal small { font-size: 13px; font-weight: 500; color: var(--cx-muted); }
+.cx-wallet-card-addr {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; color: var(--cx-muted); word-break: break-all; margin-top: 4px;
+}
