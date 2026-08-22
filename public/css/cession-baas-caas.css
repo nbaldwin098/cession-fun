@@ -1,5 +1,4 @@
 /* Cession BaaS + CaaS surfaces */
-
 .cx-baas-hero {
   background: linear-gradient(180deg, #f7f9fc 0%, #ffffff 100%);
   border: 1px solid var(--cx-line);
@@ -8,11 +7,7 @@
   margin-bottom: 16px;
 }
 .cx-baas-balance {
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  color: var(--cx-ink);
+  font-size: 34px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; color: var(--cx-ink);
 }
 .cx-baas-sub { font-size: 13px; color: var(--cx-muted); margin-top: 4px; }
 .cx-baas-row { display: flex; gap: 10px; margin-top: 16px; }
@@ -30,8 +25,7 @@
   color: #fff; border-radius: 18px; padding: 18px; min-height: 120px; position: relative;
 }
 .cx-card-debit .chip {
-  width: 36px; height: 28px;
-  background: linear-gradient(135deg, #d4af37, #f5e6a3);
+  width: 36px; height: 28px; background: linear-gradient(135deg, #d4af37, #f5e6a3);
   border-radius: 6px; margin-bottom: 18px;
 }
 .cx-card-debit .number {
@@ -73,7 +67,7 @@
   color: #fff; border-radius: 999px; padding: 6px 12px; font-size: 12px; cursor: pointer;
 }
 .cx-top-brand {
-  display: flex; align-items: center; justify-content: flex-start; gap: 8px;
+  display: flex; align-items: center; gap: 8px;
   padding: 10px 16px; border-bottom: 1px solid var(--cx-line); background: #fff;
 }
 .cx-brand {
@@ -81,27 +75,31 @@
   cursor: pointer; padding: 4px 0; font-weight: 700; font-size: 16px; color: var(--cx-ink);
 }
 .cx-brand img { display: block; }
-
-/* Multi-wallet hub */
 .cx-wallet-list { display: grid; gap: 12px; }
 .cx-wallet-card {
-  border: 1px solid var(--cx-line);
-  border-radius: var(--cx-radius);
-  padding: 14px 16px;
-  background: #fff;
+  border: 1px solid var(--cx-line); border-radius: var(--cx-radius);
+  padding: 14px 16px; background: #fff;
 }
 .cx-wallet-card.on {
-  border-color: #7eb6ff;
-  box-shadow: 0 0 0 1px rgba(126, 182, 255, 0.35);
+  border-color: #7eb6ff; box-shadow: 0 0 0 1px rgba(126, 182, 255, 0.35);
 }
 .cx-wallet-card-top {
   display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;
 }
-.cx-wallet-card-bal {
-  font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
-}
+.cx-wallet-card-bal { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
 .cx-wallet-card-bal small { font-size: 13px; font-weight: 500; color: var(--cx-muted); }
 .cx-wallet-card-addr {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px; color: var(--cx-muted); word-break: break-all; margin-top: 4px;
 }
+.cx-asset-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--cx-line); font-size: 14px;
+}
+.cx-asset-row:last-child { border-bottom: none; }
+.cx-asset-row .left { display: flex; flex-direction: column; gap: 2px; }
+.cx-asset-row .title { font-weight: 600; color: var(--cx-ink); }
+.cx-asset-row .sub {
+  font-size: 11px; color: var(--cx-muted); text-transform: uppercase; letter-spacing: 0.04em;
+}
+.cx-asset-row .amt { font-weight: 600; font-variant-numeric: tabular-nums; }
