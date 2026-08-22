@@ -117,10 +117,10 @@
         '<div class="gate-on"><div class="gate-phone">' +
         '<img class="gate-k" src="brand/cession-c-mark.svg" alt="">' +
         '<h1>' + title + '</h1>' +
-        '<p>Opens inside your wallet app. Connect there.</p>' +
-        '<button class="gate-go" type="button" id="gatePh">Open in Phantom</button>' +
-        '<button class="gate-go ghost" type="button" id="gateMm">Open in MetaMask</button>' +
-        '<button class="gate-go ghost" type="button" id="gateTw">Open in Trust</button>' +
+        '<p>Approve in the wallet app — you stay in this browser.</p>' +
+        '<button class="gate-go" type="button" id="gatePh">Connect Phantom</button>' +
+        '<button class="gate-go ghost" type="button" id="gateMm">Connect MetaMask</button>' +
+        '<button class="gate-go ghost" type="button" id="gateTw">Connect Trust</button>' +
         '</div></div>';
       function waitWalletThenHome(kind) {
         var tries = 0;
@@ -266,15 +266,6 @@
     window.addEventListener('orientationchange', setGateViewport);
     if (window.visualViewport) window.visualViewport.addEventListener('resize', setGateViewport);
     land();
-    try {
-      var inside =
-        (window.phantom && window.phantom.solana) ||
-        (window.solana && window.solana.isPhantom) ||
-        (window.ethereum && (window.ethereum.isMetaMask || window.ethereum.isTrust || window.ethereum.isTrustWallet));
-      if (inside && !savedWallet()) {
-        step('wallet');
-      }
-    } catch (e0) {}
     try {
       var ctrl = new AbortController();
       var t = setTimeout(function () { ctrl.abort(); }, 4000);
