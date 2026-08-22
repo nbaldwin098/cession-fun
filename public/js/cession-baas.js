@@ -1,5 +1,6 @@
 /**
  * Banking (BaaS) surface — full customer dashboard.
+ * Never invent money: show API zeros or $0.
  */
 (function () {
   'use strict';
@@ -26,10 +27,10 @@
 
   function esc(s) {
     return String(s == null ? '' : s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      .replace(/&/g, '&')
+      .replace(/</g, '<')
+      .replace(/>/g, '>')
+      .replace(/"/g, '"');
   }
 
   async function api(path, opts) {
@@ -93,7 +94,13 @@
       var cbLife = d.cashback ? d.cashback.lifetime : 0;
       var cbRate = d.cashback ? d.cashback.rateDisplay : '1.5%';
 
+      var zeroBanner =
+        d.demo || d.source === 'none'
+          ? '<div class="cx-baas-sub" style="color:#b45309;margin-bottom:8px">Partner not connected · showing $0 (no invented money)</div>'
+          : '';
+
       hero.innerHTML =
+        zeroBanner +
         '<div class="cx-baas-sub">Checking · available</div>' +
         '<div class="cx-baas-balance">' +
         money(checking) +
@@ -156,7 +163,7 @@
           });
         } else {
           cards.innerHTML =
-            '<p class="cx-muted">No card issued yet. Partner will issue when live.</p>';
+            '<p class="cx-muted">No card issued. Partner issues cards when live — nothing shown until then.</p>';
         }
       }
 
@@ -206,7 +213,7 @@
         give.innerHTML =
           '<p class="cx-muted">Daily micro SOL give-back · ' +
           esc(String(gb.dailyAmountSol || 0.001)) +
-          ' SOL</p>' +
+          ' SOL (entitlement only until treasury is funded)</p>' +
           (gb.claimedToday
             ? '<p class="cx-baas-ok">Claimed for ' + esc(gb.day) + '</p>'
             : '<button type="button" class="cx-launch" id="baasClaimGb">Claim today</button>');
@@ -242,14 +249,14 @@
         powered.textContent =
           (d.disclosure ||
             'Banking services provided by a licensed BaaS partner. Cession does not hold customer funds.') +
-          (d.demo
-            ? ' · DEMO data until partner API keys are connected.'
+          (d.demo || d.source === 'none'
+            ? ' · Showing $0 until partner API keys are connected.'
             : ' · Live partner mode.');
       }
     } catch (e) {
       hero.innerHTML =
         '<div class="cx-baas-sub">Banking</div>' +
-        '<div class="cx-baas-balance">—</div>' +
+        '<div class="cx-baas-balance">$0.00</div>' +
         '<div class="cx-baas-sub">Could not load. Check connection and try again.</div>' +
         '<div class="cx-baas-row"><button type="button" class="primary" id="baasRetry">Retry</button></div>';
       var retry = $('baasRetry');
@@ -281,7 +288,7 @@
       method: 'POST',
       body: { wallet: wallet(), amount: n }
     });
-    alert(d.message || (d.ok ? 'Submitted' : d.error || 'Failed'));
+    alert(d.message || d.error || (d.ok ? 'Submitted' : 'Failed'));
     if (d.ok) load();
   }
 
@@ -302,7 +309,7 @@
       method: 'POST',
       body: { wallet: wallet() }
     });
-    alert(d.message || (d.ok ? 'Claimed' : d.error || 'Failed'));
+    alert(d.message || d.error || (d.ok ? 'Claimed' : 'Failed'));
     load();
   }
 
