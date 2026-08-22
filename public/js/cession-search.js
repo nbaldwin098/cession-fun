@@ -1,34 +1,34 @@
 /**
- * Header search → live market list via Coinbase Exchange public API (no key).
+ * Watchlist + markets — one real price source: Coinbase via /api/market/tickers
  */
 (function () {
   'use strict';
 
-  var PAIRS = [
-    { id: 'BTC-USD', name: 'Bitcoin', sym: 'BTC' },
-    { id: 'ETH-USD', name: 'Ethereum', sym: 'ETH' },
-    { id: 'SOL-USD', name: 'Solana', sym: 'SOL' },
-    { id: 'XRP-USD', name: 'XRP', sym: 'XRP' },
-    { id: 'DOGE-USD', name: 'Dogecoin', sym: 'DOGE' },
-    { id: 'LINK-USD', name: 'Chainlink', sym: 'LINK' },
-    { id: 'AVAX-USD', name: 'Avalanche', sym: 'AVAX' },
-    { id: 'ADA-USD', name: 'Cardano', sym: 'ADA' },
-    { id: 'MATIC-USD', name: 'Polygon', sym: 'MATIC' },
-    { id: 'DOT-USD', name: 'Polkadot', sym: 'DOT' }
-  ];
-
+  var DEFAULT = ['BTC-USD', 'ETH-USD', 'SOL-USD', 'XRP-USD', 'DOGE-USD', 'LINK-USD', 'AVAX-USD', 'ADA-USD'];
+  var KEY = 'cession_watchlist_v1';
   var cache = {};
-  var lastFetch = 0;
+
+  function loadList() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var arr = JSON.parse(raw);
+        if (Array.isArray(arr) && arr.length) return arr;
+      }
+    } catch (e) {}
+    return DEFAULT.slice();
+  }
+
+  function saveList(list) {
+    localStorage.setItem(KEY, JSON.stringify(list));
+  }
 
   function openModal() {
     var m = document.getElementById('searchModal');
     if (m) m.classList.add('open');
-    load();
+    refresh();
     var inp = document.getElementById('searchInput');
-    if (inp) {
-      inp.value = '';
-      setTimeout(function () { inp.focus(); }, 50);
-    }
+    if (inp) setTimeout(function () { inp.focus(); }, 40);
   }
 
   function closeModal() {
@@ -36,65 +36,84 @@
     if (m) m.classList.remove('open');
   }
 
-  async function fetchTicker(id) {
-    try {
-      var r = await fetch('https://api.exchange.coinbase.com/products/' + id + '/ticker', {
-        headers: { Accept: 'application/json' }
-      });
-      if (!r.ok) return null;
-      var d = await r.json();
-      return { price: Number(d.price || 0), time: d.time };
-    } catch (e) {
-      return null;
-    }
-  }
-
-  async function load() {
-    var box = document.getElementById('searchResults');
-    var strip = document.getElementById('exchangeMarketsStrip');
-    if (box) box.innerHTML = '<p class="cx-muted" style="padding:12px">Loading markets…</p>';
-
-    var now = Date.now();
-    if (now - lastFetch > 15000 || !Object.keys(cache).length) {
-      for (var i = 0; i < PAIRS.length; i++) {
-        var t = await fetchTicker(PAIRS[i].id);
-        if (t) cache[PAIRS[i].id] = t;
-      }
-      lastFetch = Date.now();
-    }
-
-    renderList(box, '');
-    renderStrip(strip);
-  }
-
   function fmt(n) {
-    if (!n || !isFinite(n)) return '—';
+    if (n == null || !isFinite(n)) return '—';
     if (n >= 1000) return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
-    if (n >= 1) return n.toFixed(2);
-    return n.toPrecision(4);
+    if (n >= 1) return Number(n).toFixed(2);
+    return Number(n).toPrecision(4);
   }
 
-  function renderList(box, q) {
+  function fmtChg(n) {
+    if (n == null || !isFinite(n)) return '';
+    return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+  }
+
+  async function refresh() {
+    try {
+      var r = await fetch('/api/market/tickers', { headers: { Accept: 'application/json' } });
+      var d = await r.json();
+      if (!d || !d.tickers) return;
+      cache = {};
+      d.tickers.forEach(function (t) {
+        if (t && t.symbol) cache[t.symbol] = t;
+      });
+      render();
+      renderStrip();
+    } catch (e) {}
+  }
+
+  function render() {
+    var box = document.getElementById('searchResults');
     if (!box) return;
-    q = (q || '').toLowerCase().trim();
-    var html = '';
-    PAIRS.forEach(function (p) {
-      if (q && p.name.toLowerCase().indexOf(q) < 0 && p.sym.toLowerCase().indexOf(q) < 0) return;
-      var t = cache[p.id];
+    var q = ((document.getElementById('searchInput') || {}).value || '').toUpperCase().trim();
+    var list = loadList();
+    var html = '<p class="cx-muted" style="padding:8px 4px;font-size:12px">Live · Coinbase Exchange</p>';
+    list.forEach(function (sym) {
+      var t = cache[sym];
+      if (q && sym.indexOf(q) < 0) return;
+      var base = sym.replace('-USD', '');
+      var chg = t && t.change24h != null ? fmtChg(t.change24h) : '';
+      var chgCls = t && t.change24h != null && t.change24h < 0 ? 'down' : 'up';
       html +=
-        '<div class="cx-search-row">' +
-        '<div><strong>' + p.sym + '</strong><span class="cx-muted"> ' + p.name + '</span></div>' +
-        '<div class="cx-search-price">$' + fmt(t && t.price) + '</div></div>';
+        '<div class="cx-search-row"><div><strong>' + base + '</strong><span class="cx-muted"> ' + sym +
+        '</span></div><div class="cx-search-price">$' + fmt(t && t.price) +
+        (chg ? ' <span class="cx-pf-delta ' + chgCls + '" style="font-size:12px">' + chg + '</span>' : '') +
+        '</div></div>';
     });
-    box.innerHTML = html || '<p class="cx-muted" style="padding:12px">No matches</p>';
+    if (q) {
+      Object.keys(cache).forEach(function (sym) {
+        if (list.indexOf(sym) >= 0) return;
+        if (sym.indexOf(q) < 0) return;
+        var t = cache[sym];
+        html +=
+          '<div class="cx-search-row" data-add="' + sym + '"><div><strong>' + sym.replace('-USD', '') +
+          '</strong><span class="cx-muted"> Add</span></div><div class="cx-search-price">$' +
+          fmt(t && t.price) + '</div></div>';
+      });
+    }
+    box.innerHTML = html;
+    box.querySelectorAll('[data-add]').forEach(function (el) {
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', function () {
+        var sym = el.getAttribute('data-add');
+        var list = loadList();
+        if (list.indexOf(sym) < 0) {
+          list.push(sym);
+          saveList(list);
+          render();
+        }
+      });
+    });
   }
 
-  function renderStrip(el) {
+  function renderStrip() {
+    var el = document.getElementById('exchangeMarketsStrip');
     if (!el) return;
-    el.innerHTML = PAIRS.slice(0, 4)
-      .map(function (p) {
-        var t = cache[p.id];
-        return '<div class="cx-mkt-chip"><span>' + p.sym + '</span><strong>$' + fmt(t && t.price) + '</strong></div>';
+    el.innerHTML = loadList()
+      .slice(0, 5)
+      .map(function (sym) {
+        var t = cache[sym];
+        return '<div class="cx-mkt-chip"><span>' + sym.replace('-USD', '') + '</span><strong>$' + fmt(t && t.price) + '</strong></div>';
       })
       .join('');
   }
@@ -103,22 +122,17 @@
     var inp = document.getElementById('searchInput');
     if (inp && !inp._bound) {
       inp._bound = true;
-      inp.addEventListener('input', function () {
-        renderList(document.getElementById('searchResults'), inp.value);
-      });
+      inp.addEventListener('input', render);
     }
     document.addEventListener('click', function (e) {
       var t = e.target;
       if (t && t.getAttribute && t.getAttribute('data-close-sheet') === 'searchModal') closeModal();
     });
-    load();
-    setInterval(function () {
-      if (document.getElementById('exchangeMarketsStrip')) load();
-    }, 60000);
+    refresh();
+    setInterval(refresh, 5000);
   }
 
-  window.CessionSearch = { open: openModal, close: closeModal, load: load };
-
+  window.CessionSearch = { open: openModal, close: closeModal, load: refresh, refresh: refresh };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();
 })();
