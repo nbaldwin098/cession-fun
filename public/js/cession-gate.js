@@ -59,16 +59,11 @@
 
   function afterUnlock() {
     localStorage.setItem('cession_gate_ok', '1');
-
-    // Fully saved session → homepage (Exchange)
     if (isReturningUser()) {
       goHome();
       return;
     }
-
-    // Login path: always crypto wallet next (unless fully saved above)
     if (gateMode === 'login') {
-      // Has username but no wallet → wallet only
       if (savedUser()) {
         step('wallet');
         return;
@@ -76,8 +71,6 @@
       step('wallet');
       return;
     }
-
-    // Sign up path
     if (savedUser()) {
       step('secure');
       return;
@@ -130,7 +123,7 @@
         '<p>' + sub + '</p>' +
         '<button class="gate-go" type="button" id="gatePh">Connect Phantom</button>' +
         '<button class="gate-go ghost" type="button" id="gateMm">Connect MetaMask</button>' +
-        (gateMode === 'login' ? '' : '<button class="gate-go ghost" type="button" id="gateMake">Create a wallet</button>') +
+        '<button class="gate-go ghost" type="button" id="gateTw">Connect Trust Wallet</button>' +
         '</div></div>';
       document.getElementById('gatePh').onclick = function () {
         goHome();
@@ -140,12 +133,11 @@
         goHome();
         if (window.CessionUI && CessionUI.connectMetaMask) CessionUI.connectMetaMask();
       };
-      var make = document.getElementById('gateMake');
-      if (make) {
-        make.onclick = function () {
-          if (window.CessionWalletCreate) CessionWalletCreate.start();
-        };
-      }
+      var tw = document.getElementById('gateTw');
+      if (tw) tw.onclick = function () {
+        goHome();
+        if (window.CessionUI && CessionUI.connectTrust) CessionUI.connectTrust();
+      };
     }
   }
 
@@ -228,18 +220,14 @@
 
     document.getElementById('gateLogin').onclick = async function () {
       gateMode = 'login';
-
-      // Already fully saved on this device → homepage
       if (isReturningUser()) {
         goHome();
         return;
       }
-
       if (codeOpen) {
         await submitCode(input, err);
         return;
       }
-
       try {
         var r = await fetch('/api/access/gate', { credentials: 'same-origin' });
         var d = await r.json();
@@ -248,7 +236,6 @@
           return;
         }
       } catch (e) {}
-
       openCodeField(btn, wrap, input, err, 'Login');
     };
 
