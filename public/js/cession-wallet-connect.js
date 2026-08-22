@@ -44,6 +44,9 @@
     }
     closeModal();
     sync();
+    if (window.CessionSession && CessionSession.maybeEstablish) {
+      setTimeout(function () { CessionSession.maybeEstablish(); }, 300);
+    }
   }
 
   function closeModal() {
