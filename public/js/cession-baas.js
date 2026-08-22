@@ -1,6 +1,5 @@
 /**
  * Banking (BaaS) surface — full customer dashboard.
- * Data from /api/baas/* (demo until partner keys). Navigation-safe.
  */
 (function () {
   'use strict';
@@ -25,33 +24,12 @@
     ).trim();
   }
 
-  function hideAllViews() {
-    document.querySelectorAll('.page-view').forEach(function (el) {
-      el.classList.remove('active');
-      el.style.display = 'none';
-    });
-  }
-
-  function setNav() {
-    document.querySelectorAll('.bottom-nav-slot').forEach(function (t) {
-      t.classList.remove('active');
-    });
-    var b = $('bnavBanking');
-    if (b) b.classList.add('active');
-    document.querySelectorAll('.cx-xtab').forEach(function (t) {
-      t.classList.remove('on');
-    });
-    var tab = $('tabBanking');
-    if (tab) tab.classList.add('on');
-    document.title = 'Banking | Cession';
-  }
-
   function esc(s) {
     return String(s == null ? '' : s)
-      .replace(/&/g, '&')
-      .replace(/</g, '<')
-      .replace(/>/g, '>')
-      .replace(/"/g, '"');
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   async function api(path, opts) {
@@ -107,16 +85,19 @@
 
       var checking = d.accounts && d.accounts.checking ? d.accounts.checking.available : 0;
       var sav = d.accounts && d.accounts.savings ? d.accounts.savings.available : 0;
-      var apy = d.accounts && d.accounts.savings && d.accounts.savings.apyDisplay
-        ? d.accounts.savings.apyDisplay
-        : '—';
+      var apy =
+        d.accounts && d.accounts.savings && d.accounts.savings.apyDisplay
+          ? d.accounts.savings.apyDisplay
+          : '—';
       var cbMonth = d.cashback ? d.cashback.thisMonth : 0;
       var cbLife = d.cashback ? d.cashback.lifetime : 0;
       var cbRate = d.cashback ? d.cashback.rateDisplay : '1.5%';
 
       hero.innerHTML =
         '<div class="cx-baas-sub">Checking · available</div>' +
-        '<div class="cx-baas-balance">' + money(checking) + '</div>' +
+        '<div class="cx-baas-balance">' +
+        money(checking) +
+        '</div>' +
         '<div class="cx-baas-sub" style="margin-top:8px">Savings ' +
         money(sav) +
         ' · ' +
@@ -131,11 +112,18 @@
       var dep = $('baasBtnDeposit');
       var wit = $('baasBtnWithdraw');
       var buy = $('baasBtnBuy');
-      if (dep) dep.onclick = function () { openTransfer('deposit'); };
-      if (wit) wit.onclick = function () { openTransfer('withdraw'); };
-      if (buy) buy.onclick = function () {
-        if (window.CessionCaas && CessionCaas.openBuy) CessionCaas.openBuy();
-      };
+      if (dep)
+        dep.onclick = function () {
+          openTransfer('deposit');
+        };
+      if (wit)
+        wit.onclick = function () {
+          openTransfer('withdraw');
+        };
+      if (buy)
+        buy.onclick = function () {
+          if (window.CessionCaas && CessionCaas.openBuy) CessionCaas.openBuy();
+        };
 
       if (cards) {
         if (d.cards && d.cards.length) {
@@ -167,7 +155,8 @@
             };
           });
         } else {
-          cards.innerHTML = '<p class="cx-muted">No card issued yet. Partner will issue when live.</p>';
+          cards.innerHTML =
+            '<p class="cx-muted">No card issued yet. Partner will issue when live.</p>';
         }
       }
 
@@ -253,7 +242,9 @@
         powered.textContent =
           (d.disclosure ||
             'Banking services provided by a licensed BaaS partner. Cession does not hold customer funds.') +
-          (d.demo ? ' · DEMO data until partner API keys are connected.' : ' · Live partner mode.');
+          (d.demo
+            ? ' · DEMO data until partner API keys are connected.'
+            : ' · Live partner mode.');
       }
     } catch (e) {
       hero.innerHTML =
@@ -275,7 +266,10 @@
 
   async function openTransfer(kind) {
     if (!requireWallet()) return;
-    var amount = prompt(kind === 'deposit' ? 'Deposit amount (USD)' : 'Withdraw amount (USD)', '100');
+    var amount = prompt(
+      kind === 'deposit' ? 'Deposit amount (USD)' : 'Withdraw amount (USD)',
+      '100'
+    );
     if (amount == null) return;
     var n = Number(amount);
     if (!Number.isFinite(n) || n < 1) {
@@ -313,27 +307,59 @@
   }
 
   function go() {
-    hideAllViews();
-    var v = $('viewBanking');
-    if (v) {
+    try {
+      document.querySelectorAll('.page-view').forEach(function (el) {
+        el.classList.remove('active');
+        el.style.setProperty('display', 'none', 'important');
+      });
+      var v = document.getElementById('viewBanking');
+      if (!v) {
+        console.error('[CessionBaas] viewBanking missing');
+        return;
+      }
       v.classList.add('active');
-      v.style.display = 'block';
+      v.style.setProperty('display', 'block', 'important');
+      document.querySelectorAll('.bottom-nav-slot').forEach(function (t) {
+        t.classList.remove('active');
+      });
+      var b = document.getElementById('bnavBanking');
+      if (b) b.classList.add('active');
+      document.title = 'Banking | Cession';
+      load();
+      try {
+        window.scrollTo(0, 0);
+      } catch (e) {}
+    } catch (err) {
+      console.error('[CessionBaas] go failed', err);
     }
-    setNav();
-    load();
   }
 
   window.CessionBaas = { go: go, load: load };
 
-  document.addEventListener('DOMContentLoaded', function () {
-    ['bnavBanking', 'tabBanking'].forEach(function (id) {
-      var el = $(id);
-      if (el) {
-        el.addEventListener('click', function (e) {
+  function bindBankingClicks() {
+    document.addEventListener(
+      'click',
+      function (e) {
+        var t = e.target;
+        if (!t) return;
+        var hit = t.closest
+          ? t.closest('#bnavBanking, #tabBanking, [data-nav="banking"]')
+          : null;
+        if (!hit && (t.id === 'bnavBanking' || t.id === 'tabBanking')) hit = t;
+        if (!hit && t.closest) hit = t.closest('#bnavBanking');
+        if (hit) {
           e.preventDefault();
+          e.stopPropagation();
           go();
-        });
-      }
-    });
-  });
+        }
+      },
+      true
+    );
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindBankingClicks);
+  } else {
+    bindBankingClicks();
+  }
 })();
