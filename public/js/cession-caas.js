@@ -44,6 +44,22 @@
     refreshQuote();
   }
 
+  function openSell() {
+    if (!addr()) {
+      toast('Connect a wallet first');
+      if (window.CessionUI) CessionUI.open('walletModal');
+      return;
+    }
+    if (window.CessionSession && !CessionSession.isAuthed()) {
+      CessionSession.establish().then(function (r) {
+        if (!r.ok) toast(r.error || 'Sign in required to sell');
+        else toast('Signed in — sell uses your wallet when API is live');
+      });
+      return;
+    }
+    toast('Sell settles from your connected wallet when the partner API is live');
+  }
+
   function closeBuy() {
     var m = $('caasBuyModal');
     if (!m) return;
@@ -93,17 +109,20 @@
     }
     var mins = Number(($('caasBuffer') && $('caasBuffer').checked) ? (window.CESSION_BUFFER_MINUTES || 15) : 0);
     try {
+      var headers = (window.CessionSession && CessionSession.authHeaders)
+        ? CessionSession.authHeaders()
+        : { 'Content-Type': 'application/json' };
       var r = await fetch('/api/caas/order', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify({ quoteId: lastQuote && lastQuote.quoteId, walletAddress: a, bufferMinutes: mins })
       });
       var o = await r.json();
-      if (!o.ok) throw new Error('order');
+      if (!o.ok) throw new Error(o.error || 'order');
       toast(o.message || 'Demo order recorded');
       closeBuy();
     } catch (e) {
-      toast('Order failed (demo)');
+      toast((e && e.message) || 'Order failed — sign in with wallet');
     }
   }
 
@@ -152,6 +171,7 @@
 
   window.CessionCaas = {
     openBuy: openBuy,
+    openSell: openSell,
     closeBuy: closeBuy,
     setAsset: setAsset,
     refreshQuote: refreshQuote,
