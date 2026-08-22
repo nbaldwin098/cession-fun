@@ -6,15 +6,10 @@ const hits = new Map();
 const BLOCKED = new Set(['US', 'PR', 'GU', 'VI', 'AS', 'MP', 'UM']);
 
 function clientIp(req) {
-  // req.ip respects Express's `trust proxy` setting (configured in server.js), so this
-  // only honors X-Forwarded-For when it was set by a trusted proxy hop, not by the client.
   return req.ip || req.socket.remoteAddress || '';
 }
 
 function headerCountry(req) {
-  // Only cf-ipcountry/x-vercel-ip-country are injected by the actual edge platform and
-  // can't be spoofed by the client. x-country-code is client-settable, so it is never
-  // treated as authoritative for a compliance/geoblock decision.
   const c = String(
     req.headers['cf-ipcountry'] ||
     req.headers['x-vercel-ip-country'] ||
@@ -40,8 +35,6 @@ async function lookupCountry(ip) {
   }
 }
 
-// Server-derived country is authoritative: a trusted edge header first, then IP geolocation.
-// Client-supplied country fields are never trusted alone for a blocking decision.
 async function countryOf(req) {
   return headerCountry(req) || (await lookupCountry(clientIp(req)));
 }
@@ -99,6 +92,12 @@ router.get('/perps', async (req, res) => {
 });
 
 router.get('/gate', (req, res) => {
+  // Early access: gate is open. Optional ACCESS_CODE still works for unlock cookie.
+  // Set GATE_LOCKED=true on Render only if you want code-only entry again.
+  const locked = String(process.env.GATE_LOCKED || '').trim() === 'true';
+  if (!locked) {
+    return res.json({ success: true, open: true });
+  }
   res.json({ success: true, open: validToken(cookieOf(req)) });
 });
 
