@@ -13,6 +13,8 @@ const support = require('./support');
 const accessRoutes = require('./access');
 const safetyRoutes = require('./safety');
 const fuseRoutes = require('./fuse');
+const baasRoutes = require('./baas');
+const caasRoutes = require('./caas');
 const pulseSignals = require('../services/pulseSignals');
 const bondingCurve = require('../services/bondingCurve');
 
@@ -28,6 +30,8 @@ router.use('/support', support.router);
 router.use('/access', accessRoutes);
 router.use('/pay', safetyRoutes);
 router.use('/fuse', fuseRoutes);
+router.use('/baas', baasRoutes);
+router.use('/caas', caasRoutes);
 
 router.get('/desk/overview', support.deskAuth, (req, res) => {
   support.audit({ action: 'overview' });
