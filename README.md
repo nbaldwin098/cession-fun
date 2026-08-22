@@ -1,10 +1,34 @@
-# Cession — cession.us
+# Cession
 
-Crypto exchange first. Security, support, clear pricing, optional send/trade buffer.
+Non-custodial crypto app. Your wallet. Real prices. Fair launches.
 
-- **Trade fee:** 0.95% (daily customer rebate when live)
-- **Buffer:** optional hold before a send or trade is final so users can cancel
-- **Game:** coin / Fuse / Mayhem layer is secondary entertainment, not the homepage
-- **AI:** site-wide for support and account questions
+**Live:** [cession.fun](https://cession.fun)
 
-Program deploy and live custody rails are separate. Treasury: `9MeQ5XiESSZPUVNzqKQjB9JYEWZScH1shwsbQMfYUTRU`
+## What it is
+- **Exchange** — spot markets, live prices (Binance feed)
+- **Wallet** — connect Phantom, MetaMask, or Trust. We never hold keys
+- **Xchange** — fair-launch bonding curve coins + optional Fuse agent
+- **Banking** — partner rails when live (we don't take deposits)
+- **Copilot** — product help, not financial advice
+
+## What it is not
+- Not a custodian
+- Not a bank
+- Not inventing balances — chain/API or $0
+- Leverage / exposure tools are not for US users
+
+## Stack
+Node + Express on Render. Postgres when configured. Solana mainnet for launches.
+
+## Fees (when trading is live)
+See in-app. Protocol treasury: `9MeQ5XiESSZPUVNzqKQjB9JYEWZScH1shwsbQMfYUTRU`
+
+## Run locally
+```bash
+npm install
+cp .env.example .env
+npm start
+```
+
+## Status
+Invite / early access. Banking and full partner buy/sell wire-up still in progress.
