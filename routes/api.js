@@ -17,6 +17,7 @@ const baasRoutes = require('./baas');
 const caasRoutes = require('./caas');
 const webhookRoutes = require('./webhooks');
 const ledgerRoutes = require('./ledger');
+const walletBalanceRoutes = require('./walletBalances');
 const pulseSignals = require('../services/pulseSignals');
 const bondingCurve = require('../services/bondingCurve');
 
@@ -36,6 +37,7 @@ router.use('/baas', baasRoutes);
 router.use('/caas', caasRoutes);
 router.use('/webhooks', webhookRoutes);
 router.use('/ledger', ledgerRoutes);
+router.use('/wallet-balances', walletBalanceRoutes);
 
 router.get('/desk/overview', support.deskAuth, (req, res) => {
   support.audit({ action: 'overview' });
