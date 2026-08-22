@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/cession-sheets.css">
   <link rel="stylesheet" href="css/cession-baas-caas.css">
   <link rel="stylesheet" href="css/design-chime.css">
+  <link rel="stylesheet" href="css/trade-wallet.css">
   <link rel="stylesheet" href="css/gate.css">
   <link rel="icon" type="image/svg+xml" href="brand/cession-c-mark.svg">
 </head>
@@ -24,46 +25,89 @@
   </header>
   <div class="cx-app">
     <main class="page-view active" id="viewExchange">
-      <div class="cx-pf">
-        <p class="cx-pf-label">Portfolio</p>
-        <div class="cx-pf-value" id="pfValue">$0.00</div>
-        <div class="cx-pf-delta" id="pfDelta">Daily PnL · $0.00</div>
-        <div class="cx-markets-strip" id="exchangeMarketsStrip"></div>
-        <div class="cx-pf-actions">
-          <button type="button" class="buy" onclick="CessionCaas && CessionCaas.openBuy()">Buy</button>
-          <button type="button" class="sell" onclick="CessionCaas && CessionCaas.openSell && CessionCaas.openSell()">Sell</button>
-          <button type="button" class="send" onclick="CessionPay && CessionPay.openSend()">Send</button>
+      <div class="ex-tabs">
+        <button type="button" class="on">Trade</button>
+        <button type="button" onclick="CessionUI && CessionUI.go('wallet')">Assets</button>
+      </div>
+      <div class="ex-pnl-block">
+        <div class="ex-pnl-label">Daily PnL</div>
+        <div class="ex-pnl-value" id="pfValue">$0.00</div>
+        <div class="ex-pnl-pct" id="pfDelta">0.00%</div>
+        <div class="ex-pnl-row">
+          <div class="ex-pnl-cell"><span>Start</span><strong id="exStartBal">$0.00</strong></div>
+          <div class="ex-pnl-cell"><span>Net PnL</span><strong id="exNetPnl">$0.00</strong></div>
+          <div class="ex-pnl-cell"><span>End</span><strong id="exEndBal">$0.00</strong></div>
         </div>
       </div>
-      <div class="cx-card" style="margin-top:12px">
-        <p class="cx-section-label">Order</p>
-        <div class="cx-pay-row" style="margin-bottom:10px">
-          <button type="button" class="cx-ghost on" id="exOrderMarket" onclick="document.getElementById('exOrderMarket').classList.add('on');document.getElementById('exOrderLimit').classList.remove('on');document.getElementById('exLimitFields').style.display='none'">Market</button>
-          <button type="button" class="cx-ghost" id="exOrderLimit" onclick="document.getElementById('exOrderLimit').classList.add('on');document.getElementById('exOrderMarket').classList.remove('on');document.getElementById('exLimitFields').style.display='block'">Limit</button>
+      <div class="ex-section">
+        <div class="ex-section-head">
+          <span>Watchlist</span>
+          <button type="button" onclick="CessionSearch && CessionSearch.open()">Edit</button>
         </div>
-        <label class="cx-label">Pair</label>
-        <select id="exPair" class="cx-input"><option>BTC/USDT</option><option>ETH/USDT</option><option>SOL/USDT</option><option>XRP/USDT</option><option>DOGE/USDT</option></select>
-        <div id="exLimitFields" style="display:none">
-          <label class="cx-label">Limit price (USDT)</label>
-          <input class="cx-input" id="exLimitPrice" type="number" step="any" placeholder="0.00">
-        </div>
-        <label class="cx-label">Amount</label>
-        <input class="cx-input" id="exAmount" type="number" step="any" placeholder="0.00">
-        <label class="cx-label" style="display:flex;align-items:center;gap:8px;margin-top:8px">
-          <input type="checkbox" id="exBufferOpt"> Optional buffer delay
-        </label>
-        <div class="cx-pay-row" style="margin-top:12px">
-          <button type="button" class="cx-launch buy" style="flex:1" onclick="CessionCaas && CessionCaas.openBuy()">Buy</button>
-          <button type="button" class="cx-ghost sell" style="flex:1" onclick="CessionCaas && CessionCaas.openSell && CessionCaas.openSell()">Sell</button>
+        <div id="exchangeMarketsStrip">
+          <div class="ex-watch-row">
+            <div class="ex-watch-icon">BTC</div>
+            <div class="ex-watch-name"><strong>BTC/USDT</strong><span>Bitcoin</span></div>
+            <div class="ex-watch-price"><span data-sym="BTC">$0.00</span><span class="ex-watch-chg" data-chg="BTC">0.00%</span></div>
+          </div>
+          <div class="ex-watch-row">
+            <div class="ex-watch-icon">ETH</div>
+            <div class="ex-watch-name"><strong>ETH/USDT</strong><span>Ethereum</span></div>
+            <div class="ex-watch-price"><span data-sym="ETH">$0.00</span><span class="ex-watch-chg" data-chg="ETH">0.00%</span></div>
+          </div>
+          <div class="ex-watch-row">
+            <div class="ex-watch-icon">SOL</div>
+            <div class="ex-watch-name"><strong>SOL/USDT</strong><span>Solana</span></div>
+            <div class="ex-watch-price"><span data-sym="SOL">$0.00</span><span class="ex-watch-chg" data-chg="SOL">0.00%</span></div>
+          </div>
         </div>
       </div>
-      <div class="cx-card" style="margin-top:12px">
-        <p class="cx-section-label">Open orders</p>
-        <p class="cx-muted" id="exOpenOrders">No open orders</p>
+      <div class="ex-section">
+        <div class="ex-ob-tabs">
+          <button type="button" class="on">Order Book</button>
+          <button type="button">Market</button>
+        </div>
+        <div class="ex-ob-head"><span>Price (USDT)</span><span>Amount</span><span>Total</span></div>
+        <div id="exOrderBookAsks">
+          <div class="ex-ob-row ask"><span>—</span><span>—</span><span>—</span></div>
+          <div class="ex-ob-row ask"><span>—</span><span>—</span><span>—</span></div>
+          <div class="ex-ob-row ask"><span>—</span><span>—</span><span>—</span></div>
+        </div>
+        <div class="ex-ob-mid" id="exMidPrice">$0.00<span>Mark</span></div>
+        <div id="exOrderBookBids">
+          <div class="ex-ob-row bid"><span>—</span><span>—</span><span>—</span></div>
+          <div class="ex-ob-row bid"><span>—</span><span>—</span><span>—</span></div>
+          <div class="ex-ob-row bid"><span>—</span><span>—</span><span>—</span></div>
+        </div>
       </div>
-      <div class="cx-card" style="margin-top:12px">
-        <p class="cx-section-label">Recent trades</p>
-        <p class="cx-muted" id="exRecentTrades">No trades yet</p>
+      <div class="ex-order-tabs">
+        <button type="button" class="on" id="exOrderMarket" onclick="document.getElementById('exOrderMarket').classList.add('on');document.getElementById('exOrderLimit').classList.remove('on');document.getElementById('exOrderStop').classList.remove('on');document.getElementById('exLimitFields').style.display='none'">Market</button>
+        <button type="button" id="exOrderLimit" onclick="document.getElementById('exOrderLimit').classList.add('on');document.getElementById('exOrderMarket').classList.remove('on');document.getElementById('exOrderStop').classList.remove('on');document.getElementById('exLimitFields').style.display='block'">Limit</button>
+        <button type="button" id="exOrderStop" onclick="document.getElementById('exOrderStop').classList.add('on');document.getElementById('exOrderMarket').classList.remove('on');document.getElementById('exOrderLimit').classList.remove('on');document.getElementById('exLimitFields').style.display='block'">Stop Limit</button>
+      </div>
+      <div class="ex-avail"><span>Available</span><strong id="exAvailable">$0.00 USDT</strong></div>
+      <label class="ex-label-dark">Pair</label>
+      <select id="exPair" class="ex-input-dark"><option>BTC/USDT</option><option>ETH/USDT</option><option>SOL/USDT</option><option>XRP/USDT</option><option>DOGE/USDT</option></select>
+      <div id="exLimitFields" style="display:none">
+        <label class="ex-label-dark">Limit price (USDT)</label>
+        <input class="ex-input-dark" id="exLimitPrice" type="number" step="any" placeholder="0.00">
+      </div>
+      <label class="ex-label-dark">Amount</label>
+      <input class="ex-input-dark" id="exAmount" type="number" step="any" placeholder="0.00">
+      <input class="ex-slider" type="range" min="0" max="100" value="0" id="exPct">
+      <label style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:12px;color:#6b7a90">
+        <input type="checkbox" id="exBufferOpt"> Optional buffer delay
+      </label>
+      <div class="ex-buy-sell">
+        <button type="button" class="ex-btn-buy" onclick="CessionCaas && CessionCaas.openBuy()">BUY<span id="exBuyLabel">$0.00 USDT</span></button>
+        <button type="button" class="ex-btn-sell" onclick="CessionCaas && CessionCaas.openSell && CessionCaas.openSell()">SELL<span id="exSellLabel">0.00</span></button>
+      </div>
+      <div class="ex-section">
+        <div class="ex-section-head">
+          <span>Transaction History</span>
+          <button type="button">View All</button>
+        </div>
+        <div id="exRecentTrades"><p class="ex-empty">No trades yet</p></div>
       </div>
     </main>
     <main class="page-view" id="viewBanking">
@@ -112,9 +156,7 @@
           <input class="cx-input" id="xchSymbol" placeholder="TICKER" maxlength="10">
           <label class="cx-label">Supply</label>
           <input class="cx-input" id="xchSupply" type="number" value="1000000000">
-          <label class="cx-label" style="display:flex;align-items:center;gap:8px;margin-top:10px">
-            <input type="checkbox" id="xchFuse"> Optional Fuse
-          </label>
+          <label class="cx-label" style="display:flex;align-items:center;gap:8px;margin-top:10px"><input type="checkbox" id="xchFuse"> Optional Fuse</label>
           <button class="cx-launch" type="button" style="width:100%;margin-top:12px" onclick="CessionXchange && CessionXchange.create && CessionXchange.create()">Create coin</button>
         </div>
       </div>
@@ -130,10 +172,7 @@
           <input class="cx-input" id="xchRecv" type="number" placeholder="0.00" readonly>
           <button class="cx-launch" type="button" style="width:100%;margin-top:12px">Buy</button>
         </div>
-        <div class="cx-card" style="margin-top:12px">
-          <p class="cx-section-label">Recent trades</p>
-          <p class="cx-muted">No trades yet</p>
-        </div>
+        <div class="cx-card" style="margin-top:12px"><p class="cx-section-label">Recent trades</p><p class="cx-muted">No trades yet</p></div>
       </div>
       <div id="xchLaneExposure" style="display:none">
         <div class="cx-card">
@@ -154,36 +193,41 @@
           <p class="cx-pf-label">Total Balance</p>
           <div class="cx-pf-value" id="walletTotalBal">$0.00</div>
           <div class="cx-pf-delta" id="walletDailyDelta">$0.00 (0.00%) Today</div>
-          <button type="button" class="cx-launch cx-send-receive" onclick="CessionUI.open('walletModal')">Send & Receive</button>
+          <button type="button" class="cx-send-receive" onclick="CessionUI.open('walletModal')">Send & Receive</button>
         </div>
         <div class="cx-wallet-section-head">
           <span>Assets</span>
           <button type="button" class="cx-link-btn">View All</button>
         </div>
-        <div class="cx-card cx-asset-card" id="walletAssetsList">
-          <p class="cx-muted" style="padding:8px 0">Connect a wallet. Assets from your wallet appear here.</p>
+        <div class="cx-asset-card" id="walletAssetsList">
+          <div class="cx-asset-row">
+            <div class="cx-asset-left"><div class="cx-asset-icon">ETH</div><div><span class="cx-asset-name">Ethereum</span><span class="cx-asset-sub">ETH</span></div></div>
+            <div class="cx-asset-right"><span class="cx-asset-amt">0.00 ETH</span><span class="cx-asset-usd">$0.00</span></div>
+          </div>
+          <div class="cx-asset-row">
+            <div class="cx-asset-left"><div class="cx-asset-icon">BTC</div><div><span class="cx-asset-name">Bitcoin</span><span class="cx-asset-sub">BTC</span></div></div>
+            <div class="cx-asset-right"><span class="cx-asset-amt">0.00 BTC</span><span class="cx-asset-usd">$0.00</span></div>
+          </div>
+          <div class="cx-asset-row">
+            <div class="cx-asset-left"><div class="cx-asset-icon">USDC</div><div><span class="cx-asset-name">USD Coin</span><span class="cx-asset-sub">USDC</span></div></div>
+            <div class="cx-asset-right"><span class="cx-asset-amt">0.00 USDC</span><span class="cx-asset-usd">$0.00</span></div>
+          </div>
+          <div class="cx-asset-row">
+            <div class="cx-asset-left"><div class="cx-asset-icon">SOL</div><div><span class="cx-asset-name">Solana</span><span class="cx-asset-sub">SOL</span></div></div>
+            <div class="cx-asset-right"><span class="cx-asset-amt">0.00 SOL</span><span class="cx-asset-usd">$0.00</span></div>
+          </div>
         </div>
         <div class="cx-wallet-section-head">
           <span>Tracked Wallets</span>
           <button type="button" class="cx-link-btn" onclick="CessionUI.open('walletModal')">View All</button>
         </div>
-        <div class="cx-card" id="walletHubList">
+        <div class="cx-asset-card" id="walletHubList">
           <div id="walletScreenDisconnected">
-            <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectPhantom()"><span>Phantom</span></button>
-            <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectMetaMask()"><span>MetaMask</span></button>
-            <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectTrust()"><span>Trust Wallet</span></button>
+            <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectPhantom()">Phantom</button>
+            <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectMetaMask()">MetaMask</button>
+            <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectTrust()">Trust Wallet</button>
           </div>
           <div id="walletScreenConnected" style="display:none"></div>
-        </div>
-        <div class="cx-wallet-section-head">
-          <span>Top Markets</span>
-        </div>
-        <div class="cx-card" id="walletTopMarkets">
-          <div class="cx-asset-row"><div class="cx-asset-left"><span class="cx-asset-name">Bitcoin</span><span class="cx-asset-sub">BTC</span></div><div class="cx-asset-right"><span class="cx-asset-amt" data-sym="BTC">—</span></div></div>
-          <div class="cx-asset-row"><div class="cx-asset-left"><span class="cx-asset-name">Ethereum</span><span class="cx-asset-sub">ETH</span></div><div class="cx-asset-right"><span class="cx-asset-amt" data-sym="ETH">—</span></div></div>
-          <div class="cx-asset-row"><div class="cx-asset-left"><span class="cx-asset-name">Solana</span><span class="cx-asset-sub">SOL</span></div><div class="cx-asset-right"><span class="cx-asset-amt" data-sym="SOL">—</span></div></div>
-          <div class="cx-asset-row"><div class="cx-asset-left"><span class="cx-asset-name">XRP</span><span class="cx-asset-sub">XRP</span></div><div class="cx-asset-right"><span class="cx-asset-amt" data-sym="XRP">—</span></div></div>
-          <div class="cx-asset-row"><div class="cx-asset-left"><span class="cx-asset-name">Dogecoin</span><span class="cx-asset-sub">DOGE</span></div><div class="cx-asset-right"><span class="cx-asset-amt" data-sym="DOGE">—</span></div></div>
         </div>
       </div>
     </main>
@@ -237,9 +281,9 @@
   <div class="modal-overlay-generic" id="walletModal"><div class="cx-sheet">
     <div class="cx-sheet-handle"></div>
     <div class="cx-sheet-head"><h2>Connect wallet</h2><button class="cx-sheet-x" type="button" data-close-sheet="walletModal" aria-label="Close">×</button></div>
-    <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectPhantom()"><span>Phantom</span></button>
-    <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectMetaMask()"><span>MetaMask</span></button>
-    <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectTrust()"><span>Trust Wallet</span></button>
+    <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectPhantom()">Phantom</button>
+    <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectMetaMask()">MetaMask</button>
+    <button class="cx-wallet-btn" type="button" onclick="CessionUI.connectTrust()">Trust Wallet</button>
   </div></div>
   <div class="modal-overlay-generic" id="sendModal">
     <div class="cx-sheet" role="dialog">
