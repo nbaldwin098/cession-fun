@@ -1,10 +1,12 @@
 /**
- * Phantom / MetaMask / Trust — native app or extension only.
- * Never open the site as a web page inside the wallet browser for connect.
- * After address is known → always request sign-in for session.
+ * Phantom / MetaMask / Trust — extension or native app.
+ * One connect prompt, one sign-in prompt, then return to app.
  */
 (function () {
   'use strict';
+
+  var signing = false;
+  var lastSaved = '';
 
   function ua() {
     return navigator.userAgent || '';
@@ -14,9 +16,6 @@
   }
   function isIOS() {
     return /iPhone|iPad|iPod/i.test(ua());
-  }
-  function isAndroid() {
-    return /Android/i.test(ua());
   }
 
   function inWalletWebView() {
@@ -50,11 +49,31 @@
     clearTimeout(el._t);
     el._t = setTimeout(function () {
       el.classList.remove('show');
-    }, 2800);
+    }, 2200);
+  }
+
+  function enterApp() {
+    try {
+      localStorage.setItem('cession_onboarded', '1');
+      localStorage.setItem('cession_gate_ok', '1');
+      var g = document.getElementById('cessionGate');
+      if (g) g.classList.remove('open');
+      document.documentElement.classList.remove('gated');
+      document.body.classList.remove('gated');
+      if (location.search && /phantom_connect|phantom_encryption/.test(location.search)) {
+        var clean = location.origin + location.pathname;
+        if (window.history && history.replaceState) history.replaceState({}, '', clean);
+      }
+      if (window.CessionExchange && typeof CessionExchange.go === 'function') {
+        CessionExchange.go();
+      }
+    } catch (e) {}
   }
 
   function saveAddr(a, kind) {
     if (!a) return;
+    var same = a === lastSaved && a === localStorage.getItem('cession_address');
+    lastSaved = a;
     localStorage.setItem('cession_address', a);
     if (kind) localStorage.setItem('cession_wallet_type', kind);
     if (window.walletEngine) {
@@ -71,25 +90,35 @@
     }
     closeModal();
     sync();
-    setTimeout(function () {
-      forceSignIn(kind);
-    }, 400);
+
+    if (localStorage.getItem('cession_session')) {
+      enterApp();
+      return;
+    }
+    if (!same) signInOnce(kind);
   }
 
-  function forceSignIn(kind) {
-    if (window.CessionSession && CessionSession.establish) {
-      CessionSession.establish(kind).then(function (r) {
-        if (r && r.ok) toast('Signed in');
-        else if (r && r.error && r.error !== 'no wallet') {
-          toast('Approve the sign-in request in your wallet');
-          setTimeout(function () {
-            if (!localStorage.getItem('cession_session')) {
-              CessionSession.establish(kind);
-            }
-          }, 1500);
-        }
-      });
+  function signInOnce(kind) {
+    if (signing) return;
+    if (localStorage.getItem('cession_session')) {
+      enterApp();
+      return;
     }
+    if (!window.CessionSession || !CessionSession.establish) {
+      enterApp();
+      return;
+    }
+    signing = true;
+    CessionSession.establish(kind || localStorage.getItem('cession_wallet_type') || 'phantom')
+      .then(function (r) {
+        signing = false;
+        if (r && r.ok) {
+          enterApp();
+        }
+      })
+      .catch(function () {
+        signing = false;
+      });
   }
 
   function closeModal() {
@@ -109,7 +138,6 @@
     }
     document.addEventListener('visibilitychange', onHide);
     window.addEventListener('pagehide', onHide);
-
     try {
       var a = document.createElement('a');
       a.href = scheme;
@@ -124,7 +152,6 @@
         window.location.href = scheme;
       } catch (e2) {}
     }
-
     setTimeout(function () {
       document.removeEventListener('visibilitychange', onHide);
       window.removeEventListener('pagehide', onHide);
@@ -187,14 +214,14 @@
         })
         .catch(function (err) {
           if (err && err.code === 4001) return;
-          toast('Connection rejected — try again');
         });
       return;
     }
-
     if (isMobile()) {
       var appUrl = encodeURIComponent(originUrl());
-      var redirect = encodeURIComponent(fullUrl() + (fullUrl().indexOf('?') >= 0 ? '&' : '?') + 'phantom_connect=1');
+      var redirect = encodeURIComponent(
+        fullUrl() + (fullUrl().indexOf('?') >= 0 ? '&' : '?') + 'phantom_connect=1'
+      );
       var universal =
         'https://phantom.app/ul/v1/connect?app_url=' +
         appUrl +
@@ -207,7 +234,6 @@
         '&redirect_link=' +
         redirect +
         '&cluster=mainnet-beta';
-      toast('Opening Phantom — approve connect, then return');
       openNativeScheme(scheme, null);
       setTimeout(function () {
         if (document.visibilityState === 'visible') {
@@ -221,7 +247,6 @@
       }, 1000);
       return;
     }
-
     window.open('https://phantom.app/download', '_blank', 'noopener');
   }
 
@@ -235,11 +260,9 @@
         })
         .catch(function (err) {
           if (err && err.code === 4001) return;
-          toast('Connection rejected — try again');
         });
       return;
     }
-
     if (inWalletWebView() === 'metamask' && window.ethereum) {
       window.ethereum
         .request({ method: 'eth_requestAccounts' })
@@ -249,18 +272,16 @@
         .catch(function () {});
       return;
     }
-
     if (isMobile()) {
-      toast('Open this site in MetaMask browser, then tap Connect again');
       var path = location.host + location.pathname + location.search;
-      var scheme = 'metamask://dapp/' + path;
-      var store = isIOS()
-        ? 'https://apps.apple.com/app/metamask/id1438144202'
-        : 'https://play.google.com/store/apps/details?id=io.metamask';
-      openNativeScheme(scheme, store);
+      openNativeScheme(
+        'metamask://dapp/' + path,
+        isIOS()
+          ? 'https://apps.apple.com/app/metamask/id1438144202'
+          : 'https://play.google.com/store/apps/details?id=io.metamask'
+      );
       return;
     }
-
     window.open('https://metamask.io/download/', '_blank', 'noopener');
   }
 
@@ -274,7 +295,6 @@
         })
         .catch(function (err) {
           if (err && err.code === 4001) return;
-          toast('Connection rejected — try again');
         });
       return;
     }
@@ -288,17 +308,15 @@
         .catch(function () {});
       return;
     }
-
     if (isMobile()) {
-      toast('Open this site in Trust Wallet browser, then tap Connect again');
-      var scheme = 'trust://open_url?coin_id=501&url=' + encodeURIComponent(fullUrl());
-      var store = isIOS()
-        ? 'https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409'
-        : 'https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp';
-      openNativeScheme(scheme, store);
+      openNativeScheme(
+        'trust://open_url?coin_id=501&url=' + encodeURIComponent(fullUrl()),
+        isIOS()
+          ? 'https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409'
+          : 'https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp'
+      );
       return;
     }
-
     window.open('https://trustwallet.com/download', '_blank', 'noopener');
   }
 
@@ -319,13 +337,18 @@
         }
       }
 
+      if (localStorage.getItem('cession_address') && localStorage.getItem('cession_session')) {
+        enterApp();
+        return;
+      }
+
       var ph = getPhantomProvider();
-      if (ph && (ph.isConnected || ph.publicKey)) {
+      if (ph && (ph.isConnected || ph.publicKey) && !localStorage.getItem('cession_address')) {
         var pk = ph.publicKey;
         if (pk) saveAddr(pk.toString(), 'phantom');
       }
       var mm = getMetaMaskProvider();
-      if (mm) {
+      if (mm && !localStorage.getItem('cession_address')) {
         mm.request({ method: 'eth_accounts' })
           .then(function (a) {
             if (a && a[0]) saveAddr(a[0], 'metamask');
@@ -333,23 +356,12 @@
           .catch(function () {});
       }
       var tr = getTrustProvider();
-      if (tr) {
+      if (tr && !localStorage.getItem('cession_address')) {
         tr.request({ method: 'eth_accounts' })
           .then(function (a) {
             if (a && a[0]) saveAddr(a[0], 'trust');
           })
           .catch(function () {});
-      }
-      var ts = getTrustSolana();
-      if (ts && ts.publicKey) saveAddr(ts.publicKey.toString(), 'trust');
-
-      var inside = inWalletWebView();
-      if (inside && !localStorage.getItem('cession_address')) {
-        if (inside === 'phantom') connectPhantom();
-        else if (inside === 'metamask') connectMetaMask();
-        else if (inside === 'trust') connectTrust();
-      } else if (localStorage.getItem('cession_address') && !localStorage.getItem('cession_session')) {
-        forceSignIn(localStorage.getItem('cession_wallet_type') || inside || 'phantom');
       }
     } catch (e) {}
   }
@@ -368,11 +380,10 @@
     document.addEventListener('visibilitychange', function () {
       if (document.visibilityState === 'visible') resumeIfConnected();
     });
-    window.addEventListener('focus', resumeIfConnected);
   });
   var n = 0;
   var t = setInterval(function () {
     patch();
-    if (++n > 40) clearInterval(t);
+    if (++n > 20) clearInterval(t);
   }, 250);
 })();
