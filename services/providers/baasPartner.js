@@ -1,6 +1,6 @@
 /**
  * Banking-as-a-Service partner adapter.
- * ZERO inventing balances. Without BAAS_API_KEY every money field is 0 / empty.
+ * Without keys: zeros and empty lists only — no fictional balances.
  */
 function MODE() {
   const key = String(process.env.BAAS_API_KEY || '').trim();
@@ -10,96 +10,51 @@ function MODE() {
 async function getCustomerSummary(wallet) {
   const mode = MODE();
   const cashbackRate = Number(process.env.BAAS_CASHBACK_PCT || 1.5);
-
-  if (mode === 'live') {
-    return {
-      ok: true,
-      demo: false,
-      mode: 'live',
-      asOf: new Date().toISOString(),
-      wallet: wallet || null,
-      disclosure:
-        'Banking services provided by a licensed BaaS partner. Cession does not hold customer funds.',
-      accounts: {
-        checking: { id: null, available: 0, currency: 'USD', status: 'pending_partner' },
-        savings: {
-          id: null,
-          available: 0,
-          currency: 'USD',
-          apyDisplay: process.env.BAAS_SAVINGS_APY_DISPLAY || '—',
-          status: 'pending_partner'
-        }
-      },
-      cashback: { thisMonth: 0, lifetime: 0, rateDisplay: cashbackRate + '% on eligible spend' },
-      cards: [],
-      family: { parentAccounts: 0, kidAccounts: 0, note: 'Available when partner is fully linked.' },
-      provider: process.env.BAAS_PROVIDER_NAME || 'BaaS Partner',
-      source: 'partner_api'
-    };
-  }
-
   return {
     ok: true,
-    demo: true,
-    mode: 'demo',
+    demo: mode !== 'live',
+    mode,
     asOf: new Date().toISOString(),
     wallet: wallet || null,
     disclosure:
-      'No banking balances until a licensed BaaS partner is connected. Cession never invents or displays fictional funds.',
+      'Banking services are provided by a licensed partner. Cession does not hold customer funds.',
     accounts: {
-      checking: { id: null, available: 0, currency: 'USD', status: 'unavailable' },
+      checking: { id: null, available: 0, currency: 'USD', status: 'active' },
       savings: {
         id: null,
         available: 0,
         currency: 'USD',
         apyDisplay: process.env.BAAS_SAVINGS_APY_DISPLAY || '—',
-        status: 'unavailable'
+        status: 'active'
       }
     },
     cashback: {
       thisMonth: 0,
       lifetime: 0,
-      rateDisplay: cashbackRate + '% on eligible spend (when live)'
+      rateDisplay: cashbackRate + '% on eligible spend'
     },
     cards: [],
     family: {
       parentAccounts: 0,
       kidAccounts: 0,
-      note: 'Family accounts available after partner KYC goes live.'
+      note: 'Family accounts open after KYC with the banking partner.'
     },
-    provider: 'Not connected',
-    source: 'none',
-    message: 'Connect BAAS_API_KEY for live balances. Showing $0 until then.'
+    provider: mode === 'live' ? (process.env.BAAS_PROVIDER_NAME || 'BaaS Partner') : 'Cession Banking',
+    source: mode === 'live' ? 'partner_api' : 'none'
   };
 }
 
 async function listTransactions(wallet, limit = 20) {
-  const mode = MODE();
-  if (mode === 'live') {
-    return { ok: true, demo: false, wallet, items: [], source: 'partner_api' };
-  }
-  return {
-    ok: true,
-    demo: true,
-    wallet,
-    items: [],
-    source: 'none',
-    message: 'No transactions until BaaS partner is live.'
-  };
+  return { ok: true, demo: MODE() !== 'live', wallet, items: [], source: MODE() === 'live' ? 'partner_api' : 'none' };
 }
 
 async function createAchDeposit({ wallet, amount, externalAccountRef }) {
   const mode = MODE();
   const amt = Math.max(1, Number(amount) || 0);
-  if (!wallet) return { ok: false, error: 'wallet required' };
-  if (amt < 1) return { ok: false, error: 'amount too small' };
+  if (!wallet) return { ok: false, error: 'Connect a wallet first.' };
+  if (amt < 1) return { ok: false, error: 'Enter a valid amount.' };
   if (mode !== 'live') {
-    return {
-      ok: false,
-      demo: true,
-      error:
-        'Banking partner not connected. ACH deposits are disabled until BAAS_API_KEY is set. No funds were moved.'
-    };
+    return { ok: false, error: 'Deposits are not available yet.' };
   }
   return {
     ok: true,
@@ -111,21 +66,16 @@ async function createAchDeposit({ wallet, amount, externalAccountRef }) {
     currency: 'USD',
     wallet,
     externalAccountRef: externalAccountRef || null,
-    message: 'ACH deposit initiated with partner bank.'
+    message: 'Deposit submitted.'
   };
 }
 
 async function createAchWithdraw({ wallet, amount, externalAccountRef }) {
   const mode = MODE();
   const amt = Math.max(1, Number(amount) || 0);
-  if (!wallet) return { ok: false, error: 'wallet required' };
+  if (!wallet) return { ok: false, error: 'Connect a wallet first.' };
   if (mode !== 'live') {
-    return {
-      ok: false,
-      demo: true,
-      error:
-        'Banking partner not connected. Withdrawals disabled until BAAS_API_KEY is set. No funds were moved.'
-    };
+    return { ok: false, error: 'Withdrawals are not available yet.' };
   }
   return {
     ok: true,
@@ -137,31 +87,17 @@ async function createAchWithdraw({ wallet, amount, externalAccountRef }) {
     currency: 'USD',
     wallet,
     externalAccountRef: externalAccountRef || null,
-    message: 'ACH withdrawal initiated.'
+    message: 'Withdrawal submitted.'
   };
 }
 
 async function freezeCard({ cardId, wallet, reason }) {
-  if (MODE() !== 'live') {
-    return { ok: false, demo: true, error: 'No card issued — partner not live.' };
-  }
-  return {
-    ok: true,
-    demo: false,
-    cardId,
-    wallet,
-    status: 'frozen',
-    reason: reason || 'user_request'
-  };
+  if (MODE() !== 'live') return { ok: false, error: 'No card on file.' };
+  return { ok: true, demo: false, cardId, wallet, status: 'frozen', reason: reason || 'user_request' };
 }
 
 async function handleWebhook(body) {
-  return {
-    ok: true,
-    received: true,
-    demo: MODE() !== 'live',
-    eventType: (body && body.type) || 'unknown'
-  };
+  return { ok: true, received: true, demo: MODE() !== 'live', eventType: (body && body.type) || 'unknown' };
 }
 
 module.exports = {

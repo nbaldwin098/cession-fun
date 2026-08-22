@@ -1,6 +1,5 @@
 /**
- * Multi-wallet hub — track wallets, on-chain balances only.
- * Active wallet used by Exchange / Xchange / Banking.
+ * Multi-wallet hub + Assets (Xchange holdings + native coins).
  */
 (function () {
   'use strict';
@@ -53,18 +52,58 @@
     return a.slice(0, 4) + '\u2026' + a.slice(-4);
   }
 
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
   async function fetchBalances(address) {
     try {
       var r = await fetch('/api/wallet-balances/' + encodeURIComponent(address) + '/balances');
       var d = await r.json();
-      if (!d.ok) return { balances: [], error: d.error };
+      if (!d.ok) return { balances: [] };
       return d;
     } catch (e) {
-      return { balances: [], error: 'network' };
+      return { balances: [] };
     }
   }
 
-  function drawMini(canvas, amount) {
+  async function fetchXchangeAssets(address) {
+    try {
+      var r = await fetch('/api/wallets/' + encodeURIComponent(address) + '/trades');
+      var d = await r.json();
+      var trades = (d && d.trades) || [];
+      var map = {};
+      trades.forEach(function (t) {
+        var key = String(t.mint || t.symbol || t.token || 'TOKEN').toUpperCase();
+        if (!map[key]) {
+          map[key] = {
+            symbol: t.symbol || key,
+            mint: t.mint || t.mintAddress || '',
+            amount: 0,
+            source: 'xchange'
+          };
+        }
+        var side = String(t.side || t.type || '').toLowerCase();
+        var qty = Number(t.tokenAmount || t.amount || t.tokens || 0);
+        if (!qty && t.solAmount) qty = Math.abs(Number(t.solAmount));
+        if (side === 'buy' || side === 'purchase') map[key].amount += Math.abs(qty);
+        else if (side === 'sell') map[key].amount -= Math.abs(qty);
+        else map[key].amount += qty;
+      });
+      return Object.keys(map)
+        .map(function (k) { return map[k]; })
+        .filter(function (a) { return Math.abs(a.amount) > 1e-12; })
+        .sort(function (a, b) { return Math.abs(b.amount) - Math.abs(a.amount); });
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function drawMini(canvas) {
     if (!canvas) return;
     var dpr = window.devicePixelRatio || 1;
     var w = canvas.clientWidth || 280;
@@ -74,15 +113,40 @@
     var ctx = canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
-    ctx.strokeStyle = '#9aa7b8';
+    ctx.strokeStyle = '#c5ced9';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(8, h / 2);
     ctx.lineTo(w - 8, h / 2);
     ctx.stroke();
-    ctx.fillStyle = '#6b7a90';
-    ctx.font = '11px Inter, system-ui, sans-serif';
-    ctx.fillText(amount > 0 ? 'On-chain balance \u00b7 history after first activity' : 'No balance yet', 10, 18);
+  }
+
+  function renderAssets(assets) {
+    var box = document.getElementById('walletAssetsList');
+    if (!box) return;
+    if (!assets.length) {
+      box.innerHTML = '<p class="cx-muted" style="padding:12px 16px">No assets yet.</p>';
+      return;
+    }
+    box.innerHTML = assets
+      .map(function (a) {
+        var amt = Number(a.amount) || 0;
+        var label = a.symbol || 'Asset';
+        var tag = a.source === 'xchange' ? 'Xchange' : a.source === 'chain' ? 'Wallet' : '';
+        return (
+          '<div class="cx-asset-row">' +
+          '<div class="left">' +
+          '<span class="title">' +
+          esc(label) +
+          '</span>' +
+          (tag ? '<span class="sub">' + tag + '</span>' : '') +
+          '</div>' +
+          '<div class="amt">' +
+          amt.toLocaleString(undefined, { maximumFractionDigits: 6 }) +
+          '</div></div>'
+        );
+      })
+      .join('');
   }
 
   async function render() {
@@ -107,17 +171,16 @@
 
     var hero = document.getElementById('walletHubHero');
     var cards = document.getElementById('walletHubList');
-    var note = document.getElementById('walletHubNote');
 
     if (!act) {
       if (hero) {
         hero.innerHTML =
           '<div class="cx-baas-sub">Active wallet</div>' +
           '<div class="cx-baas-balance">0</div>' +
-          '<div class="cx-baas-sub">Connect Phantom, MetaMask, or Trust to read on-chain balances</div>';
+          '<div class="cx-baas-sub">Connect Phantom, MetaMask, or Trust</div>';
       }
       if (cards) cards.innerHTML = '';
-      if (note) note.textContent = 'Cession does not hold balances. Everything is read from your wallets or partner APIs.';
+      renderAssets([]);
       return;
     }
 
@@ -126,42 +189,53 @@
         '<div class="cx-baas-sub">Active \u00b7 ' +
         short(act) +
         '</div>' +
-        '<div class="cx-baas-balance" id="walletHubTotal">Reading chain\u2026</div>' +
-        '<div class="cx-baas-sub" id="walletHubSub">On-chain only \u00b7 never invented</div>' +
+        '<div class="cx-baas-balance" id="walletHubTotal">\u2026</div>' +
+        '<div class="cx-baas-sub" id="walletHubSub">Primary balance</div>' +
         '<canvas id="walletHubChart" height="72" style="width:100%;margin-top:12px"></canvas>';
     }
 
-    var totalNative = 0;
+    var native = await fetchBalances(act);
+    var b0 = (native.balances && native.balances[0]) || null;
+    var nativeAmt = b0 ? Number(b0.amount) || 0 : 0;
+    var nativeSym = b0 ? b0.symbol : '';
+
+    var totalEl = document.getElementById('walletHubTotal');
+    if (totalEl) {
+      totalEl.textContent =
+        nativeAmt > 0
+          ? nativeAmt.toLocaleString(undefined, { maximumFractionDigits: 6 }) + (nativeSym ? ' ' + nativeSym : '')
+          : '0' + (nativeSym ? ' ' + nativeSym : '');
+    }
+
+    drawMini(document.getElementById('walletHubChart'));
+
+    var xAssets = await fetchXchangeAssets(act);
+    var assets = xAssets.slice();
+    if (b0) {
+      assets.unshift({
+        symbol: b0.symbol,
+        amount: nativeAmt,
+        mint: '',
+        source: 'chain'
+      });
+    }
+    renderAssets(assets);
+
     var lines = [];
     for (var i = 0; i < list.length; i++) {
       var w = list[i];
-      var bal = await fetchBalances(w.address);
-      var b0 = (bal.balances && bal.balances[0]) || null;
-      var amt = b0 ? Number(b0.amount) || 0 : 0;
-      if (w.address === act) totalNative = amt;
+      var bal = w.address === act ? native : await fetchBalances(w.address);
+      var bx = (bal.balances && bal.balances[0]) || null;
+      var amt = bx ? Number(bx.amount) || 0 : 0;
       lines.push({
         address: w.address,
         type: w.type,
         label: w.label || short(w.address),
         amount: amt,
-        symbol: b0 ? b0.symbol : '\u2014',
-        active: w.address === act,
-        error: bal.error
+        symbol: bx ? bx.symbol : '',
+        active: w.address === act
       });
     }
-
-    var totalEl = document.getElementById('walletHubTotal');
-    if (totalEl) {
-      var actRow = lines.find(function (x) { return x.active; }) || {};
-      totalEl.textContent =
-        totalNative > 0
-          ? totalNative.toLocaleString(undefined, { maximumFractionDigits: 6 }) + ' ' + (actRow.symbol || '')
-          : '0';
-    }
-    var sub = document.getElementById('walletHubSub');
-    if (sub) sub.textContent = 'Native on-chain balance for active wallet';
-
-    drawMini(document.getElementById('walletHubChart'), totalNative);
 
     if (cards) {
       cards.innerHTML = lines
@@ -172,28 +246,28 @@
             '">' +
             '<div class="cx-wallet-card-top">' +
             '<strong>' +
-            row.label +
+            esc(row.label) +
             '</strong>' +
             '<span class="cx-muted">' +
-            (row.type || '') +
+            esc(row.type || '') +
             (row.active ? ' \u00b7 active' : '') +
             '</span></div>' +
             '<div class="cx-wallet-card-bal">' +
-            (row.error ? '\u2014' : row.amount.toLocaleString(undefined, { maximumFractionDigits: 6 })) +
+            row.amount.toLocaleString(undefined, { maximumFractionDigits: 6 }) +
             ' <small>' +
-            (row.symbol || '') +
+            esc(row.symbol || '') +
             '</small></div>' +
             '<div class="cx-wallet-card-addr">' +
-            row.address +
+            esc(row.address) +
             '</div>' +
             '<div class="cx-baas-row" style="margin-top:10px">' +
             (row.active
               ? '<button type="button" class="ghost" disabled>Active</button>'
               : '<button type="button" class="primary" data-set-active="' +
-                row.address +
+                esc(row.address) +
                 '">Use</button>') +
             '<button type="button" class="ghost" data-remove-wallet="' +
-            row.address +
+            esc(row.address) +
             '">Remove</button>' +
             '</div></div>'
           );
@@ -208,7 +282,9 @@
       cards.querySelectorAll('[data-remove-wallet]').forEach(function (btn) {
         btn.onclick = function () {
           var addr = btn.getAttribute('data-remove-wallet');
-          var next = loadTracked().filter(function (w) { return w.address !== addr; });
+          var next = loadTracked().filter(function (w) {
+            return w.address !== addr;
+          });
           saveTracked(next);
           if (active() === addr) {
             localStorage.removeItem(ACTIVE);
@@ -220,11 +296,6 @@
           render();
         };
       });
-    }
-
-    if (note) {
-      note.textContent =
-        'Buy on Exchange / Xchange \u2192 assets land in the active wallet. Sell \u2192 partner payout or card when BaaS is live. Cession never holds funds.';
     }
   }
 
