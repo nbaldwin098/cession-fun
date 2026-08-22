@@ -64,10 +64,6 @@
       return;
     }
     if (gateMode === 'login') {
-      if (savedUser()) {
-        step('wallet');
-        return;
-      }
       step('wallet');
       return;
     }
@@ -125,19 +121,23 @@
         '<button class="gate-go ghost" type="button" id="gateMm">Connect MetaMask</button>' +
         '<button class="gate-go ghost" type="button" id="gateTw">Connect Trust Wallet</button>' +
         '</div></div>';
-      document.getElementById('gatePh').onclick = function () {
-        goHome();
-        if (window.CessionUI && CessionUI.connectPhantom) CessionUI.connectPhantom();
-      };
-      document.getElementById('gateMm').onclick = function () {
-        goHome();
-        if (window.CessionUI && CessionUI.connectMetaMask) CessionUI.connectMetaMask();
-      };
+      function waitWalletThenHome(kind) {
+        var tries = 0;
+        var t = setInterval(function () {
+          tries++;
+          var a = (window.walletEngine && (window.walletEngine.activeAddress || window.walletEngine.address))
+            || localStorage.getItem('cession_address') || '';
+          if (a) { clearInterval(t); goHome(); return; }
+          if (tries > 60) clearInterval(t);
+        }, 500);
+        if (kind === 'phantom' && window.CessionUI && CessionUI.connectPhantom) CessionUI.connectPhantom();
+        else if (kind === 'metamask' && window.CessionUI && CessionUI.connectMetaMask) CessionUI.connectMetaMask();
+        else if (kind === 'trust' && window.CessionUI && CessionUI.connectTrust) CessionUI.connectTrust();
+      }
+      document.getElementById('gatePh').onclick = function () { waitWalletThenHome('phantom'); };
+      document.getElementById('gateMm').onclick = function () { waitWalletThenHome('metamask'); };
       var tw = document.getElementById('gateTw');
-      if (tw) tw.onclick = function () {
-        goHome();
-        if (window.CessionUI && CessionUI.connectTrust) CessionUI.connectTrust();
-      };
+      if (tw) tw.onclick = function () { waitWalletThenHome('trust'); };
     }
   }
 
@@ -254,7 +254,8 @@
       hideApp(false);
       return;
     }
-    if (already() && gated() && savedUser()) {
+    // Require wallet for returning access — username alone is not enough
+    if (already() && gated() && savedUser() && savedWallet()) {
       hideApp(false);
       return;
     }
