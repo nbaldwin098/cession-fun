@@ -1,12 +1,12 @@
 /**
- * Signed wallet session — proves address ownership server-side.
- * Token stored in localStorage; money APIs send Authorization: Bearer.
+ * Signed wallet session — one sign prompt, then done.
  */
 (function () {
   'use strict';
 
   var TOKEN_KEY = 'cession_session';
   var ADDR_KEY = 'cession_address';
+  var busy = false;
 
   function token() {
     return localStorage.getItem(TOKEN_KEY) || '';
@@ -26,7 +26,10 @@
   }
 
   function authHeaders(extra) {
-    var h = Object.assign({ Accept: 'application/json', 'Content-Type': 'application/json' }, extra || {});
+    var h = Object.assign(
+      { Accept: 'application/json', 'Content-Type': 'application/json' },
+      extra || {}
+    );
     var t = token();
     if (t) h.Authorization = 'Bearer ' + t;
     var a = addr();
@@ -38,7 +41,7 @@
     return Boolean(token() && addr());
   }
 
-  function requireWallet(toastMsg) {
+  function requireWallet() {
     if (!addr()) {
       if (window.CessionUI && CessionUI.open) CessionUI.open('walletModal');
       return false;
@@ -46,29 +49,13 @@
     return true;
   }
 
-  function requireSession(toastMsg) {
-    if (!requireWallet(toastMsg || 'Connect a wallet first')) return false;
+  function requireSession() {
+    if (!requireWallet()) return false;
     if (!token()) {
       establish().catch(function () {});
       return false;
     }
     return true;
-  }
-
-  function toast(msg) {
-    var el = document.getElementById('cxCopyToast');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'cxCopyToast';
-      el.className = 'cx-copy-toast';
-      document.body.appendChild(el);
-    }
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(el._t);
-    el._t = setTimeout(function () {
-      el.classList.remove('show');
-    }, 2800);
   }
 
   async function signMessage(message, kind) {
@@ -106,27 +93,28 @@
       }
       var accounts = await eth.request({ method: 'eth_requestAccounts' });
       var from = (accounts && accounts[0]) || addr();
-      var sig2 = await eth.request({
+      return await eth.request({
         method: 'personal_sign',
         params: [message, from]
       });
-      return sig2;
     }
-    throw new Error('No signer available — open the site inside your wallet browser and connect again');
+    throw new Error('No signer available');
   }
 
   async function establish(forceKind) {
     var a = addr();
     if (!a) return { ok: false, error: 'no wallet' };
+    if (token()) return { ok: true };
+    if (busy) return { ok: false, error: 'busy' };
+    busy = true;
     try {
-      toast('Approve sign-in in your wallet…');
       var nr = await fetch('/api/auth/nonce?address=' + encodeURIComponent(a));
       var nd = await nr.json();
       if (!nd.success || !nd.message) throw new Error(nd.error || 'nonce failed');
       var kind = forceKind || localStorage.getItem('cession_wallet_type') || 'phantom';
       var chain = kind === 'metamask' || kind === 'trust' ? 'Ethereum' : 'Solana';
       var signature = await signMessage(nd.message, kind);
-      if (!signature) throw new Error('No signature — approve the request in your wallet');
+      if (!signature) throw new Error('Sign rejected');
       var lr = await fetch('/api/auth/wallet-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -144,11 +132,11 @@
       if (ld.user && ld.user.username) {
         localStorage.setItem('cession_username', ld.user.username);
       }
-      toast('Signed in');
+      busy = false;
       return { ok: true, user: ld.user };
     } catch (e) {
+      busy = false;
       console.warn('[session]', e && e.message);
-      toast((e && e.message) || 'Sign-in cancelled — try Connect again');
       return { ok: false, error: (e && e.message) || 'sign-in failed' };
     }
   }
@@ -189,28 +177,13 @@
     if (window.walletEngine && window.walletEngine.logout) window.walletEngine.logout();
   }
 
-  var _lastTried = '';
   function maybeEstablish() {
-    var a = addr();
-    if (!a || a === _lastTried) return;
-    if (token()) {
-      validate().then(function (ok) {
-        if (!ok) {
-          _lastTried = a;
-          establish();
-        }
-      });
-      return;
-    }
-    _lastTried = a;
+    if (!addr() || token() || busy) return;
     establish();
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    if (addr()) validate();
-    document.addEventListener('visibilitychange', function () {
-      if (document.visibilityState === 'visible' && addr() && !token()) maybeEstablish();
-    });
+    if (addr() && token()) validate();
   });
 
   function patchMoneyGates() {
@@ -218,7 +191,7 @@
       CessionCaas._sessPatched = true;
       var prev = CessionCaas.openBuy;
       CessionCaas.openBuy = function () {
-        if (!requireSession('Connect and sign in to buy')) return;
+        if (!requireSession()) return;
         return prev.apply(CessionCaas, arguments);
       };
       if (CessionCaas.confirmBuy) {
@@ -233,7 +206,7 @@
       CessionXchange._sessPatched = true;
       var prevX = CessionXchange.create;
       CessionXchange.create = function () {
-        if (!requireSession('Connect and sign in to create')) return;
+        if (!requireSession()) return;
         return prevX.apply(CessionXchange, arguments);
       };
     }
@@ -241,7 +214,7 @@
       CessionPay._sessPatched = true;
       var prevS = CessionPay.openSend;
       CessionPay.openSend = function () {
-        if (!requireWallet('Connect a wallet first')) return;
+        if (!requireWallet()) return;
         return prevS.apply(CessionPay, arguments);
       };
       if (CessionPay.confirmSend) {
@@ -257,7 +230,7 @@
   var n = 0;
   var iv = setInterval(function () {
     patchMoneyGates();
-    if (++n > 40) clearInterval(iv);
+    if (++n > 20) clearInterval(iv);
   }, 250);
 
   window.CessionSession = {
