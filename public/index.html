@@ -41,7 +41,7 @@
           <button type="button" class="sell" onclick="CessionCaas && CessionCaas.openBuy()">Sell</button>
           <button type="button" class="send" onclick="CessionPay.openSend()">Send</button>
         </div>
-        <div class="cx-pf-chip">Buffer available · 0.95% trade fee</div>
+        <div class="cx-pf-chip">Buffer available · Clear fees · CaaS powered</div>
       </div>
       <p class="cx-section-label">Protection</p>
       <div class="cx-card">
@@ -63,11 +63,25 @@
       </div>
     </main>
     <main class="page-view" id="viewBanking">
-      <div id="baasHero" class="cx-baas-hero"></div>
-      <div id="baasCards" class="cx-baas-cards"></div>
-      <p class="cx-baas-section">Recent</p>
-      <div id="baasRecent" class="cx-baas-list"></div>
-      <p class="cx-muted" id="baasPowered" style="margin:16px 0;font-size:12px"></p>
+      <div class="cx-baas-status" id="baasWalletStatus">Connect Phantom, MetaMask, or Trust Wallet</div>
+      <div class="cx-baas-hero" id="baasHero">
+        <div class="cx-baas-sub">Available balance</div>
+        <div class="cx-baas-balance">—</div>
+        <div class="cx-baas-sub">Loading banking…</div>
+      </div>
+      <p class="cx-baas-section">Your card</p>
+      <div class="cx-baas-cards" id="baasCards"></div>
+      <p class="cx-baas-section">Savings</p>
+      <div class="cx-card" id="baasSavings"><p class="cx-muted">Loading…</p></div>
+      <p class="cx-baas-section">Recent activity</p>
+      <div class="cx-baas-list" id="baasRecent"></div>
+      <p class="cx-baas-section">Cashback</p>
+      <div class="cx-card" id="baasCashback"><p class="cx-muted">Loading…</p></div>
+      <p class="cx-baas-section">Daily give-back</p>
+      <div class="cx-card" id="baasGiveback"><p class="cx-muted">Loading…</p></div>
+      <p class="cx-baas-section">Family</p>
+      <div class="cx-card" id="baasFamily"><p class="cx-muted">Loading…</p></div>
+      <p class="cx-powered" id="baasPowered">Banking services provided by a licensed BaaS partner. Cession does not hold customer funds.</p>
     </main>
     <main class="page-view" id="viewHome"><div class="cx-feed" id="forYouCoinsGrid"></div></main>
     <main class="page-view" id="viewExplorePulse">
@@ -118,6 +132,7 @@
         <p class="cx-muted" id="connectHint">Approve in your wallet app, then return here.</p>
         <button class="cx-door" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button>
         <button class="cx-door" type="button" onclick="CessionUI.connectMetaMask()">Connect MetaMask</button>
+        <button class="cx-door" type="button" onclick="CessionUI.connectTrust()">Connect Trust Wallet</button>
       </div>
       <div id="walletScreenConnected" style="display:none;">
         <div class="cx-pay-row">
@@ -183,9 +198,10 @@
   <div class="modal-overlay-generic" id="walletModal"><div class="cx-sheet">
     <div class="cx-sheet-handle"></div>
     <div class="cx-sheet-head"><h2>Connect wallet</h2><button class="cx-sheet-x" type="button" data-close-sheet="walletModal" aria-label="Close">×</button></div>
-    <p class="cx-sheet-sub">Phantom or MetaMask. We never hold your keys.</p>
+    <p class="cx-sheet-sub">Phantom, MetaMask, or Trust Wallet only. We never hold keys. No in-app wallets.</p>
     <button class="cx-launch" type="button" onclick="CessionUI.connectPhantom()">Connect Phantom</button>
     <button class="cx-ghost" type="button" onclick="CessionUI.connectMetaMask()" style="margin-top:10px">Connect MetaMask</button>
+    <button class="cx-ghost" type="button" onclick="CessionUI.connectTrust()" style="margin-top:10px">Connect Trust Wallet</button>
   </div></div>
   <div class="modal-overlay-generic" id="settingsModal"><div class="modal-box-pump">
     <input class="form-input-pump" id="presetBuySol" type="number" step="1" value="20">
@@ -227,6 +243,7 @@
   <script src="js/cession-fees.js"></script>
   <script src="js/cession-portfolio.js"></script>
   <script src="js/cession-exchange-boot.js"></script>
+  <script src="js/cession-xchange.js"></script>
   <script src="js/cession-baas.js"></script>
   <script src="js/cession-caas.js"></script>
   <script src="js/cession-media.js"></script>
@@ -241,6 +258,7 @@
   <script src="js/cession-support.js"></script>
   <script src="js/cession-fuse.js"></script>
   <script src="js/wallet.js"></script>
+  <script src="js/cession-wallet-connect.js"></script>
   <script src="js/trading.js"></script>
 </body>
 </html>
