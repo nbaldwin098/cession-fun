@@ -28,6 +28,11 @@
   }
 
   function openBuy() {
+    if (!addr()) {
+      toast('Connect a wallet first');
+      if (window.CessionUI) CessionUI.open('walletModal');
+      return;
+    }
     var m = $('caasBuyModal');
     if (!m) {
       toast('CaaS buy sheet not mounted yet');
